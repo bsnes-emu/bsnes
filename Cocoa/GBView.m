@@ -647,7 +647,7 @@ static const uint8_t workboy_vk_to_key[] = {
     
     if ( [[pboard types] containsObject:NSURLPboardType] ) {
         NSURL *fileURL = [NSURL URLFromPasteboard:pboard];
-        return [_document loadStateFile:fileURL.fileSystemRepresentation];
+        return [_document loadStateFile:fileURL.fileSystemRepresentation noErrorOnNotFound:false];
     }
 
     return false;

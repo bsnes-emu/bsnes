@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <ctype.h>
+#include <errno.h>
 #include <OpenDialog/open_dialog.h>
 #include <SDL.h>
 #include <Core/gb.h>
@@ -63,7 +64,7 @@ static void start_capturing_logs(void)
     GB_set_log_callback(&gb, log_capture_callback);
 }
 
-static const char *end_capturing_logs(bool show_popup, bool should_exit, uint32_t popup_flags)
+static const char *end_capturing_logs(bool show_popup, bool should_exit, uint32_t popup_flags, const char *title)
 {
     GB_set_log_callback(&gb, NULL);
     if (captured_log[0] == 0) {
@@ -72,7 +73,7 @@ static const char *end_capturing_logs(bool show_popup, bool should_exit, uint32_
     }
     else {
         if (show_popup) {
-            SDL_ShowSimpleMessageBox(popup_flags, "Error", captured_log, window);
+            SDL_ShowSimpleMessageBox(popup_flags, title, captured_log, window);
         }
         if (should_exit) {
             exit(1);
@@ -429,7 +430,7 @@ static bool handle_pending_command(void)
     switch (pending_command) {
         case GB_SDL_LOAD_STATE_COMMAND:
         case GB_SDL_SAVE_STATE_COMMAND: {
-            char save_path[strlen(filename) + 4];
+            char save_path[strlen(filename) + 5];
             char save_extension[] = ".s0";
             save_extension[2] += command_parameter;
             replace_extension(filename, strlen(filename), save_path, save_extension);
@@ -437,19 +438,33 @@ static bool handle_pending_command(void)
             start_capturing_logs();
             bool success;
             if (pending_command == GB_SDL_LOAD_STATE_COMMAND) {
-                success = GB_load_state(&gb, save_path) == 0;
+                int result = GB_load_state(&gb, save_path);
+                if (result == ENOENT) {
+                    char save_extension[] = ".sn0";
+                    save_extension[3] += command_parameter;
+                    replace_extension(filename, strlen(filename), save_path, save_extension);
+                    start_capturing_logs();
+                    result = GB_load_state(&gb, save_path);
+                }
+                success = result == 0;
             }
             else {
                 success = GB_save_state(&gb, save_path) == 0;
             }
-            end_capturing_logs(true, false, success? SDL_MESSAGEBOX_INFORMATION : SDL_MESSAGEBOX_ERROR);
+            end_capturing_logs(true,
+                               false,
+                               success? SDL_MESSAGEBOX_INFORMATION : SDL_MESSAGEBOX_ERROR,
+                               success? "Notice" : "Error");
             return false;
         }
     
         case GB_SDL_LOAD_STATE_FROM_FILE_COMMAND:
             start_capturing_logs();
             bool success = GB_load_state(&gb, dropped_state_file) == 0;
-            end_capturing_logs(true, false, success? SDL_MESSAGEBOX_INFORMATION : SDL_MESSAGEBOX_ERROR);
+            end_capturing_logs(true,
+                               false,
+                               success? SDL_MESSAGEBOX_INFORMATION : SDL_MESSAGEBOX_ERROR,
+                               success? "Notice" : "Error");
             SDL_free(dropped_state_file);
             return false;
             
@@ -489,7 +504,7 @@ static void load_boot_rom(GB_gameboy_t *gb, GB_boot_rom_t type)
     if (use_built_in) {
         start_capturing_logs();
         GB_load_boot_rom(gb, resource_path(names[type]));
-        end_capturing_logs(true, false, SDL_MESSAGEBOX_ERROR);
+        end_capturing_logs(true, false, SDL_MESSAGEBOX_ERROR, "Error");
     }
 }
 
@@ -562,7 +577,7 @@ restart:
     else {
         GB_load_rom(&gb, filename);
     }
-    end_capturing_logs(true, error, SDL_MESSAGEBOX_WARNING);
+    end_capturing_logs(true, error, SDL_MESSAGEBOX_WARNING, "Warning");
     
     
     /* Configure battery */

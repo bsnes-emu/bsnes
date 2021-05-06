@@ -1278,26 +1278,33 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     }
 }
 
-- (bool)loadStateFile:(const char *)path
+- (int)loadStateFile:(const char *)path noErrorOnNotFound:(bool)noErrorOnFileNotFound;
 {
-    bool __block success = false;
+    int __block result = false;
     NSString *error =
     [self captureOutputForBlock:^{
-        success = GB_load_state(&gb, path) == 0;
+        result = GB_load_state(&gb, path);
     }];
     
-    if (!success) {
+    if (result == ENOENT && noErrorOnFileNotFound) {
+        return ENOENT;
+    }
+    
+    if (result) {
         NSBeep();
     }
     if (error) {
         [GBWarningPopover popoverWithContents:error onWindow:self.mainWindow];
     }
-    return success;
+    return result;
 }
 
 - (IBAction)loadState:(id)sender
 {
-    [self loadStateFile:[[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag] ]].path.UTF8String];
+    int ret = [self loadStateFile:[[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag]]].path.UTF8String noErrorOnNotFound:true];
+    if (ret == ENOENT) {
+        [self loadStateFile:[[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:[NSString stringWithFormat:@"sn%ld", (long)[sender tag]]].path.UTF8String noErrorOnNotFound:false];
+    }
 }
 
 - (IBAction)clearConsole:(id)sender
