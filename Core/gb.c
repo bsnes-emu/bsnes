@@ -462,13 +462,13 @@ int GB_load_gbs(GB_gameboy_t *gb, const char *path, GB_gbs_info_t *info)
         return errno;
     }
     fseek(f, 0, SEEK_END);
-    size_t file_size = ftell(f);
+    size_t file_size = MIN(ftell(f), sizeof(GB_gbs_header_t) + 0x4000 * 0x100); // Cap with the maximum MBC3 ROM size + GBS header
     fseek(f, 0, SEEK_SET);
     uint8_t *file_data = malloc(file_size);
-    fread(file_data,1,file_size,f);
+    fread(file_data, 1, file_size, f);
     fclose(f);
 
-    int r = GB_load_gbs_from_buffer(gb,file_data,file_size,info);
+    int r = GB_load_gbs_from_buffer(gb, file_data, file_size, info);
     free(file_data);
     return r;
 }
