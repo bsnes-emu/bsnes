@@ -8,5 +8,5 @@ Comment=Game Boy and Game Boy Color emulator
 Keywords=game;boy;gameboy;color;emulator
 Terminal=false
 StartupNotify=false
-Categories=Application;Game;
+Categories=Game;Emulator;
 MimeType=application/x-gameboy-rom;application/x-gameboy-color-rom;application/x-gameboy-isx
