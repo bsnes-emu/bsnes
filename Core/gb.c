@@ -371,12 +371,12 @@ void GB_gbs_switch_track(GB_gameboy_t *gb, uint8_t track)
 
 int GB_load_gbs_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size, GB_gbs_info_t *info)
 {
-    if(size < sizeof(gb->gbs_header)) {
+    if (size < sizeof(gb->gbs_header)) {
         GB_log(gb, "Not a valid GBS file.\n");
         return -1;
     }
 
-    memcpy(&gb->gbs_header,buffer,sizeof(gb->gbs_header));
+    memcpy(&gb->gbs_header, buffer, sizeof(gb->gbs_header));
 
     if (gb->gbs_header.magic != BE32('GBS\x01') ||
         ((LE16(gb->gbs_header.load_address) < GBS_ENTRY + GBS_ENTRY_SIZE ||
