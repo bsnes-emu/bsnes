@@ -819,6 +819,7 @@ void GB_load_boot_rom_from_buffer(GB_gameboy_t *gb, const unsigned char *buffer,
 int GB_load_rom(GB_gameboy_t *gb, const char *path);
 void GB_load_rom_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size);
 int GB_load_isx(GB_gameboy_t *gb, const char *path);
+int GB_load_gbs_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size, GB_gbs_info_t *info);
 int GB_load_gbs(GB_gameboy_t *gb, const char *path, GB_gbs_info_t *info);
 void GB_gbs_switch_track(GB_gameboy_t *gb, uint8_t track);
 
