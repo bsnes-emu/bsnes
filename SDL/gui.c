@@ -921,10 +921,7 @@ static const struct menu_item controls_menu[] = {
 
 static const char *key_name(unsigned index)
 {
-    if (index >= 8) {
-        if (index == 8) {
-            return SDL_GetScancodeName(configuration.keys[8]);
-        }
+    if (index > 8) {
         return SDL_GetScancodeName(configuration.keys_2[index - 9]);
     }
     return SDL_GetScancodeName(configuration.keys[index]);
@@ -1376,13 +1373,8 @@ void run_gui(bool is_running)
 
             case SDL_KEYDOWN:
                 if (gui_state == WAITING_FOR_KEY) {
-                    if (current_selection >= 8) {
-                        if (current_selection == 8) {
-                            configuration.keys[8] = event.key.keysym.scancode;
-                        }
-                        else {
-                            configuration.keys_2[current_selection - 9] = event.key.keysym.scancode;
-                        }
+                    if (current_selection > 8) {
+                        configuration.keys_2[current_selection - 9] = event.key.keysym.scancode;
                     }
                     else {
                         configuration.keys[current_selection] = event.key.keysym.scancode;
