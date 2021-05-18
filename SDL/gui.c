@@ -1375,7 +1375,22 @@ void run_gui(bool is_running)
                 
 
             case SDL_KEYDOWN:
-                if (event_hotkey_code(&event) == SDL_SCANCODE_F && event.key.keysym.mod & MODIFIER) {
+                if (gui_state == WAITING_FOR_KEY) {
+                    if (current_selection >= 8) {
+                        if (current_selection == 8) {
+                            configuration.keys[8] = event.key.keysym.scancode;
+                        }
+                        else {
+                            configuration.keys_2[current_selection - 9] = event.key.keysym.scancode;
+                        }
+                    }
+                    else {
+                        configuration.keys[current_selection] = event.key.keysym.scancode;
+                    }
+                    gui_state = SHOWING_MENU;
+                    should_render = true;
+                }
+                else if (event_hotkey_code(&event) == SDL_SCANCODE_F && event.key.keysym.mod & MODIFIER) {
                     if ((SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP) == false) {
                         SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
                     }
@@ -1384,7 +1399,7 @@ void run_gui(bool is_running)
                     }
                     update_viewport();
                 }
-                if (event_hotkey_code(&event) == SDL_SCANCODE_O) {
+                else if (event_hotkey_code(&event) == SDL_SCANCODE_O) {
                     if (event.key.keysym.mod & MODIFIER) {
                         char *filename = do_open_rom_dialog();
                         if (filename) {
@@ -1475,21 +1490,6 @@ void run_gui(bool is_running)
                     if (current_help_page == sizeof(help) / sizeof(help[0])) {
                         gui_state = SHOWING_MENU;
                     }
-                    should_render = true;
-                }
-                else if (gui_state == WAITING_FOR_KEY) {
-                    if (current_selection >= 8) {
-                        if (current_selection == 8) {
-                            configuration.keys[8] = event.key.keysym.scancode;
-                        }
-                        else {
-                            configuration.keys_2[current_selection - 9] = event.key.keysym.scancode;
-                        }
-                    }
-                    else {
-                        configuration.keys[current_selection] = event.key.keysym.scancode;
-                    }
-                    gui_state = SHOWING_MENU;
                     should_render = true;
                 }
                 break;
