@@ -369,6 +369,11 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
             }
             audioBuffer = realloc(audioBuffer, sizeof(*sample) * audioBufferSize);
         }
+        double volume = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBVolume"];
+        if (volume != 1) {
+            sample->left *= volume;
+            sample->right *= volume;
+        }
         audioBuffer[audioBufferPosition++] = *sample;
     }
     if (audioBufferPosition == audioBufferNeeded) {
@@ -994,6 +999,9 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     }
     else {
         [self.audioClient start];
+        if ([[NSUserDefaults standardUserDefaults] doubleForKey:@"GBVolume"] == 0) {
+            [GBWarningPopover popoverWithContents:@"Warning: Volume is set to to zero in the preferences panel" onWindow:self.mainWindow];
+        }
     }
     [[NSUserDefaults standardUserDefaults] setBool:!self.audioClient.isPlaying forKey:@"Mute"];
 }

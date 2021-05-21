@@ -68,6 +68,8 @@ static uint32_t color_to_int(NSColor *color)
                                                               @"GBCGBModel": @(GB_MODEL_CGB_E),
                                                               @"GBSGBModel": @(GB_MODEL_SGB2),
                                                               @"GBRumbleMode": @(GB_RUMBLE_CARTRIDGE_ONLY),
+                                                              
+                                                              @"GBVolume": @(1.0),
                                                               }];
     
     [JOYController startOnRunLoop:[NSRunLoop currentRunLoop] withOptions:@{

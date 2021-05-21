@@ -92,6 +92,7 @@
                 <outlet property="sgbPopupButton" destination="dza-T7-RkX" id="B0o-Nb-pIH"/>
                 <outlet property="skipButton" destination="d2I-jU-sLb" id="udX-8K-0sK"/>
                 <outlet property="temperatureSlider" destination="NuA-mL-AJZ" id="w11-n7-Bmj"/>
+                <outlet property="volumeSlider" destination="LNs-v1-Eki" id="DU4-An-OrC"/>
             </connections>
             <point key="canvasLocation" x="183" y="354"/>
         </window>
@@ -486,9 +487,26 @@
             <point key="canvasLocation" x="-501" y="667.5"/>
         </customView>
         <customView id="Zn1-Y5-RbR">
-            <rect key="frame" x="0.0" y="0.0" width="292" height="135"/>
+            <rect key="frame" x="0.0" y="0.0" width="292" height="183"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Dzd-uB-B6l">
+                    <rect key="frame" x="18" y="146" width="252" height="17"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Volume:" id="IbP-7k-xsZ">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LNs-v1-Eki">
+                    <rect key="frame" x="40" y="121" width="230" height="19"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="256" doubleValue="256" tickMarkPosition="below" sliderType="linear" id="Xvk-Vj-NHx"/>
+                    <connections>
+                        <action selector="volumeChanged:" target="QvC-M9-y7g" id="4g3-NK-ay4"/>
+                    </connections>
+                </slider>
                 <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="T69-6N-dhT">
                     <rect key="frame" x="30" y="65" width="234" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
@@ -532,11 +550,11 @@
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="256" tickMarkPosition="below" sliderType="linear" id="Rbx-DU-xYf"/>
                     <connections>
-                        <action selector="volumeTemperatureChanged:" target="QvC-M9-y7g" id="HFU-0q-hj1"/>
+                        <action selector="interferenceVolumeChanged:" target="QvC-M9-y7g" id="HFU-0q-hj1"/>
                     </connections>
                 </slider>
             </subviews>
-            <point key="canvasLocation" x="-825" y="547.5"/>
+            <point key="canvasLocation" x="-825" y="446.5"/>
         </customView>
         <customView id="8TU-6J-NCg">
             <rect key="frame" x="0.0" y="0.0" width="292" height="467"/>
@@ -565,7 +583,7 @@
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <clipView key="contentView" focusRingType="none" ambiguous="YES" drawsBackground="NO" id="AMs-PO-nid">
                         <rect key="frame" x="1" y="1" width="227" height="209"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <tableView focusRingType="none" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnReordering="NO" columnResizing="NO" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" typeSelect="NO" id="UDd-IJ-fxX">
                                 <rect key="frame" x="0.0" y="0.0" width="227" height="209"/>
