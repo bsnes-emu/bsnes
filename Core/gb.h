@@ -884,5 +884,10 @@ unsigned GB_get_screen_width(GB_gameboy_t *gb);
 unsigned GB_get_screen_height(GB_gameboy_t *gb);
 double GB_get_usual_frame_rate(GB_gameboy_t *gb);
 unsigned GB_get_player_count(GB_gameboy_t *gb);
+
+/* Handy ROM info APIs */
+// `title` must be at least 17 bytes in size
+void GB_get_rom_title(GB_gameboy_t *gb, char *title);
+uint32_t GB_get_rom_crc32(GB_gameboy_t *gb);
     
 #endif /* GB_h */

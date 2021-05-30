@@ -1,6 +1,7 @@
 #import <Cocoa/Cocoa.h>
 #include <Core/gb.h>
 #import <JoyKit/JoyKit.h>
+#import "GBOSDView.h"
 @class Document;
 
 typedef enum {
@@ -20,6 +21,7 @@ typedef enum {
 @property (nonatomic, getter=isMouseHidingEnabled) BOOL mouseHidingEnabled;
 @property (nonatomic) bool isRewinding;
 @property (nonatomic, strong) NSView *internalView;
+@property (weak) GBOSDView *osdView;
 - (void) createInternalView;
 - (uint32_t *)currentBuffer;
 - (uint32_t *)previousBuffer;

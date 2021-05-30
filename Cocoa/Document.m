@@ -314,6 +314,7 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
         self.mainWindow.contentView.bounds.size.width < GB_get_screen_height(&gb)) {
         [self.mainWindow zoom:nil];
     }
+    self.osdView.usesSGBScale = GB_get_screen_width(&gb) == 256;
 }
 
 - (void) vblank
@@ -344,6 +345,7 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
     }
     if (self.view.isRewinding) {
         rewind = true;
+        [self.osdView displayText:@"Rewinding..."];
     }
 }
 
@@ -621,6 +623,10 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         [(GBMemoryByteArray *)(hex_controller.byteArray) setSelectedBank:0];
         [self hexUpdateBank:self.memoryBankInput ignoreErrors:true];
     }
+    
+    char title[17];
+    GB_get_rom_title(&gb, title);
+    [self.osdView displayText:[NSString stringWithFormat:@"SameBoy v" GB_VERSION "\n%s\n%08X", title, GB_get_rom_crc32(&gb)]];
 }
 
 - (IBAction)togglePause:(id)sender
@@ -780,6 +786,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     
     [self initCommon];
     self.view.gb = &gb;
+    self.view.osdView = _osdView;
     [self.view screenSizeChanged];
     if ([self loadROM]) {
         _mainWindow.alphaValue = 0; // Hack hack ugly hack
@@ -1284,6 +1291,9 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         [GBWarningPopover popoverWithContents:@"Failed to write save state." onWindow:self.mainWindow];
         NSBeep();
     }
+    else {
+        [self.osdView displayText:@"State saved"];
+    }
 }
 
 - (int)loadStateFile:(const char *)path noErrorOnNotFound:(bool)noErrorOnFileNotFound;
@@ -1300,6 +1310,9 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     
     if (result) {
         NSBeep();
+    }
+    else {
+        [self.osdView displayText:@"State loaded"];
     }
     if (error) {
         [GBWarningPopover popoverWithContents:error onWindow:self.mainWindow];

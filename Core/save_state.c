@@ -3,12 +3,10 @@
 #include <errno.h>
 #include <assert.h>
 
-#define str(x) #x
-#define xstr(x) str(x)
 #ifdef GB_BIG_ENDIAN
-#define BESS_NAME "SameBoy v" xstr(VERSION) " (Big Endian)"
+#define BESS_NAME "SameBoy v" GB_VERSION " (Big Endian)"
 #else
-#define BESS_NAME "SameBoy v" xstr(VERSION)
+#define BESS_NAME "SameBoy v" GB_VERSION
 #endif
 
 typedef struct __attribute__((packed)) {

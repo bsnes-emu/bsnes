@@ -3,6 +3,7 @@
 #include "GBImageView.h"
 #include "GBSplitView.h"
 #include "GBVisualizerView.h"
+#include "GBOSDView.h"
 
 @class GBCheatWindowController;
 
@@ -49,6 +50,7 @@
 @property (strong) IBOutlet NSButton *gbsRewindButton;
 @property (strong) IBOutlet NSSegmentedControl *gbsNextPrevButton;
 @property (strong) IBOutlet GBVisualizerView *gbsVisualizer;
+@property (strong) IBOutlet GBOSDView *osdView;
 
 -(uint8_t) readMemory:(uint16_t) addr;
 -(void) writeMemory:(uint16_t) addr value:(uint8_t)value;

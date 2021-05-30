@@ -916,9 +916,9 @@ void retro_get_system_info(struct retro_system_info *info)
     memset(info, 0, sizeof(*info));
     info->library_name     = "SameBoy";
 #ifdef GIT_VERSION
-    info->library_version  = SAMEBOY_CORE_VERSION GIT_VERSION;
+    info->library_version  = GB_VERSION GIT_VERSION;
 #else
-    info->library_version  = SAMEBOY_CORE_VERSION;
+    info->library_version  = GB_VERSION;
 #endif
     info->need_fullpath    = true;
     info->valid_extensions = "gb|gbc";

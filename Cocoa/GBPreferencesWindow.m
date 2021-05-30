@@ -31,7 +31,7 @@
     NSSlider *_interferenceSlider;
     NSSlider *_volumeSlider;
     NSButton *_autoUpdatesCheckbox;
-
+    NSButton *_OSDCheckbox;
 }
 
 + (NSArray *)filterList
@@ -740,5 +740,23 @@
 {
     _autoUpdatesCheckbox = autoUpdatesCheckbox;
     [_autoUpdatesCheckbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBAutoUpdatesEnabled"]];
+}
+
+- (NSButton *)OSDCheckbox
+{
+    return _OSDCheckbox;
+}
+
+- (void)setOSDCheckbox:(NSButton *)OSDCheckbox
+{
+    _OSDCheckbox = OSDCheckbox;
+    [_OSDCheckbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBOSDEnabled"]];
+}
+
+- (IBAction)changeOSDEnabled:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setBool:[(NSButton *)sender state] == NSOnState
+                                            forKey:@"GBOSDEnabled"];
+
 }
 @end

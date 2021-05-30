@@ -1,11 +1,3 @@
-//
-//  GBVisualizerView.m
-//  SameBoySDL
-//
-//  Created by Lior Halphon on 7/4/21.
-//  Copyright © 2021 Lior Halphon. All rights reserved.
-//
-
 #import "GBVisualizerView.h"
 #include <Core/gb.h>
 

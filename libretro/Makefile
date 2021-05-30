@@ -311,7 +311,7 @@ endif
 
 include Makefile.common
 
-CFLAGS += -DSAMEBOY_CORE_VERSION=\"$(VERSION)\"
+CFLAGS += -DGB_VERSION=\"$(VERSION)\"
 
 OBJECTS := $(patsubst $(CORE_DIR)/%.c,$(CORE_DIR)/build/obj/%_libretro.c.o,$(SOURCES_C))
 

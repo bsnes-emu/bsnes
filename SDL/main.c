@@ -652,9 +652,7 @@ int main(int argc, char **argv)
 #ifdef _WIN32
     SetProcessDPIAware();
 #endif
-#define str(x) #x
-#define xstr(x) str(x)
-    fprintf(stderr, "SameBoy v" xstr(VERSION) "\n");
+    fprintf(stderr, "SameBoy v" GB_VERSION "\n");
     
     bool fullscreen = get_arg_flag("--fullscreen", &argc, argv);
     bool nogl = get_arg_flag("--nogl", &argc, argv);
@@ -713,7 +711,7 @@ int main(int argc, char **argv)
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
 
-    window = SDL_CreateWindow("SameBoy v" xstr(VERSION), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+    window = SDL_CreateWindow("SameBoy v" GB_VERSION, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                               160 * configuration.default_scale, 144 * configuration.default_scale, SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
     if (window == NULL) {
         fputs(SDL_GetError(), stderr);

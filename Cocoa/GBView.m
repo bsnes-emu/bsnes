@@ -117,6 +117,7 @@ static const uint8_t workboy_vk_to_key[] = {
     NSEventModifierFlags previousModifiers;
     JOYController *lastController;
     GB_frame_blending_mode_t _frameBlendingMode;
+    bool _turbo;
 }
 
 + (instancetype)alloc
@@ -283,6 +284,12 @@ static const uint8_t workboy_vk_to_key[] = {
             }
         }
     }
+    if (clockMultiplier > 1 || _turbo) {
+        [self.osdView displayText:@"Fast forwarding..."];
+    }
+    else if (clockMultiplier < 1) {
+        [self.osdView displayText:@"Slow motion..."];
+    }
     current_buffer = (current_buffer + 1) % self.numberOfBuffers;
 }
 
@@ -329,6 +336,7 @@ static const uint8_t workboy_vk_to_key[] = {
                         else {
                             GB_set_turbo_mode(_gb, true, self.isRewinding);
                         }
+                        _turbo = true;
                         analogClockMultiplierValid = false;
                         break;
                         
@@ -336,6 +344,7 @@ static const uint8_t workboy_vk_to_key[] = {
                         if (!self.document.partner) {
                             self.isRewinding = true;
                             GB_set_turbo_mode(_gb, false, false);
+                            _turbo = false;
                         }
                         break;
                         
@@ -401,6 +410,7 @@ static const uint8_t workboy_vk_to_key[] = {
                         else {
                             GB_set_turbo_mode(_gb, false, false);
                         }
+                        _turbo = false;
                         analogClockMultiplierValid = false;
                         break;
                         

@@ -25,6 +25,7 @@
                 <outlet property="memoryBankItem" destination="bWC-FW-IYP" id="Lf2-dh-z32"/>
                 <outlet property="memoryView" destination="8hr-8o-3rN" id="fF0-rh-8ND"/>
                 <outlet property="memoryWindow" destination="mRm-dL-mCj" id="VPR-lu-vtI"/>
+                <outlet property="osdView" destination="MX4-l2-7NE" id="Am7-fq-uvu"/>
                 <outlet property="paletteTableView" destination="gfC-d3-dmq" id="fTC-eL-Qg3"/>
                 <outlet property="printerFeedWindow" destination="NdE-0B-WCf" id="yVK-cS-NOJ"/>
                 <outlet property="spritesTableView" destination="TOc-XJ-w9w" id="O4R-4Z-9hU"/>
@@ -64,6 +65,10 @@
                                 </connections>
                             </view>
                         </subviews>
+                    </customView>
+                    <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MX4-l2-7NE" customClass="GBOSDView">
+                        <rect key="frame" x="0.0" y="0.0" width="160" height="144"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                     </customView>
                 </subviews>
             </view>
@@ -978,7 +983,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" heightSizable="YES"/>
                         <clipView key="contentView" id="mzf-yu-RID">
                             <rect key="frame" x="1" y="0.0" width="398" height="274"/>
-                            <autoresizingMask key="autoresizingMask"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" typeSelect="NO" headerView="pvX-uJ-qK5" id="tA3-8T-bxb">
                                     <rect key="frame" x="0.0" y="0.0" width="398" height="249"/>

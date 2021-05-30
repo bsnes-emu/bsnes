@@ -7,8 +7,6 @@
 #import <WebKit/WebKit.h>
 
 #define UPDATE_SERVER "https://sameboy.github.io"
-#define str(x) #x
-#define xstr(x) str(x)
 
 static uint32_t color_to_int(NSColor *color)
 {
@@ -186,7 +184,7 @@ static uint32_t color_to_int(NSColor *color)
         }
         
         NSString *changes = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-        NSRange cutoffRange = [changes rangeOfString:@"<!--(" xstr(VERSION) ")-->"];
+        NSRange cutoffRange = [changes rangeOfString:@"<!--(" GB_VERSION ")-->"];
         if (cutoffRange.location != NSNotFound) {
             changes = [changes substringToIndex:cutoffRange.location];
         }
@@ -252,7 +250,7 @@ static uint32_t color_to_int(NSColor *color)
             if (components.count != 2) return;
             _lastVersion = components[0];
             _updateURL = components[1];
-            if (![@xstr(VERSION) isEqualToString:_lastVersion] &&
+            if (![@GB_VERSION isEqualToString:_lastVersion] &&
                 ![[[NSUserDefaults standardUserDefaults] stringForKey:@"GBSkippedVersion"] isEqualToString:_lastVersion]) {
                 [self updateFound];
             }
