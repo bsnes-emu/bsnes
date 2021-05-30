@@ -141,7 +141,7 @@ static void open_menu(void)
 static void handle_events(GB_gameboy_t *gb)
 {
     SDL_Event event;
-    while (SDL_PollEvent(&event)) { 
+    while (SDL_PollEvent(&event)) {
         switch (event.type) {
             case SDL_QUIT:
                 pending_command = GB_SDL_QUIT_COMMAND;
@@ -191,7 +191,7 @@ static void handle_events(GB_gameboy_t *gb)
                     open_menu();
                 }
             }
-            break;
+                break;
                 
             case SDL_JOYAXISMOTION: {
                 static bool axis_active[2] = {false, false};
@@ -231,22 +231,21 @@ static void handle_events(GB_gameboy_t *gb)
                     }
                 }
             }
-            break;
-
-            case SDL_JOYHATMOTION:
-            {
+                break;
+                
+            case SDL_JOYHATMOTION: {
                 uint8_t value = event.jhat.value;
                 int8_t updown =
-                    value == SDL_HAT_LEFTUP || value == SDL_HAT_UP || value == SDL_HAT_RIGHTUP ? -1 : (value == SDL_HAT_LEFTDOWN || value == SDL_HAT_DOWN || value == SDL_HAT_RIGHTDOWN ? 1 : 0);
+                value == SDL_HAT_LEFTUP || value == SDL_HAT_UP || value == SDL_HAT_RIGHTUP ? -1 : (value == SDL_HAT_LEFTDOWN || value == SDL_HAT_DOWN || value == SDL_HAT_RIGHTDOWN ? 1 : 0);
                 int8_t leftright =
-                    value == SDL_HAT_LEFTUP || value == SDL_HAT_LEFT || value == SDL_HAT_LEFTDOWN ? -1 : (value == SDL_HAT_RIGHTUP || value == SDL_HAT_RIGHT || value == SDL_HAT_RIGHTDOWN ? 1 : 0);
+                value == SDL_HAT_LEFTUP || value == SDL_HAT_LEFT || value == SDL_HAT_LEFTDOWN ? -1 : (value == SDL_HAT_RIGHTUP || value == SDL_HAT_RIGHT || value == SDL_HAT_RIGHTDOWN ? 1 : 0);
                 
                 GB_set_key_state(gb, GB_KEY_LEFT, leftright == -1);
                 GB_set_key_state(gb, GB_KEY_RIGHT, leftright == 1);
                 GB_set_key_state(gb, GB_KEY_UP, updown == -1);
                 GB_set_key_state(gb, GB_KEY_DOWN, updown == 1);
                 break;
-           };
+            };
                 
             case SDL_KEYDOWN:
                 switch (event_hotkey_code(&event)) {
@@ -276,7 +275,7 @@ static void handle_events(GB_gameboy_t *gb)
                         }
                         break;
                     }
-                    
+                        
                     case SDL_SCANCODE_P:
                         if (event.key.keysym.mod & MODIFIER) {
                             paused = !paused;
@@ -292,14 +291,14 @@ static void handle_events(GB_gameboy_t *gb)
 #endif
                             GB_audio_set_paused(GB_audio_is_playing());
                         }
-                    break;
-                    
+                        break;
+                        
                     case SDL_SCANCODE_F:
                         if (event.key.keysym.mod & MODIFIER) {
                             if ((SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP) == false) {
                                 SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
                             }
-                            else { 
+                            else {
                                 SDL_SetWindowFullscreen(window, 0);
                             }
                             update_viewport();
@@ -348,9 +347,14 @@ static void handle_events(GB_gameboy_t *gb)
                 break;
             default:
                 break;
-                }
         }
     }
+}
+
+static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
+{
+    return SDL_MapRGB(pixel_format, r, g, b);
+}
 
 static void vblank(GB_gameboy_t *gb)
 {
@@ -361,6 +365,26 @@ static void vblank(GB_gameboy_t *gb)
     else if (!underclock_down && clock_mutliplier < 1.0) {
         clock_mutliplier += 1.0/16;
         GB_set_clock_multiplier(gb, clock_mutliplier);
+    }
+    
+    if (turbo_down) {
+        show_osd_text("Fast forward...");
+    }
+    else if (underclock_down) {
+        show_osd_text("Slow motion...");
+    }
+    else if (rewind_down) {
+        show_osd_text("Rewinding...");
+    }
+    
+    if (osd_countdown && configuration.osd) {
+        unsigned width = GB_get_screen_width(gb);
+        unsigned height = GB_get_screen_height(gb);
+        draw_text(active_pixel_buffer,
+                  width, height, 8, height - 8 - osd_text_lines * 12, osd_text,
+                  rgb_encode(gb, 255, 255, 255), rgb_encode(gb, 0, 0, 0),
+                  true);
+        osd_countdown--;
     }
     if (configuration.blending_mode) {
         render_texture(active_pixel_buffer, previous_pixel_buffer);
@@ -374,12 +398,6 @@ static void vblank(GB_gameboy_t *gb)
     }
     do_rewind = rewind_down;
     handle_events(gb);
-}
-
-
-static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
-{
-    return SDL_MapRGB(pixel_format, r, g, b);
 }
 
 static void rumble(GB_gameboy_t *gb, double amp)
@@ -455,6 +473,9 @@ static bool handle_pending_command(void)
                                false,
                                success? SDL_MESSAGEBOX_INFORMATION : SDL_MESSAGEBOX_ERROR,
                                success? "Notice" : "Error");
+            if (success) {
+                show_osd_text(pending_command == GB_SDL_LOAD_STATE_COMMAND? "State loaded" : "State saved");
+            }
             return false;
         }
     
@@ -466,6 +487,9 @@ static bool handle_pending_command(void)
                                success? SDL_MESSAGEBOX_INFORMATION : SDL_MESSAGEBOX_ERROR,
                                success? "Notice" : "Error");
             SDL_free(dropped_state_file);
+            if (success) {
+                show_osd_text("State loaded");
+            }
             return false;
             
         case GB_SDL_NO_COMMAND:
@@ -579,6 +603,12 @@ restart:
     }
     end_capturing_logs(true, error, SDL_MESSAGEBOX_WARNING, "Warning");
     
+    static char start_text[64];
+    static char title[17];
+    GB_get_rom_title(&gb, title);
+    sprintf(start_text, "SameBoy v" GB_VERSION "\n%s\n%08X", title, GB_get_rom_crc32(&gb));
+    show_osd_text(start_text);
+
     
     /* Configure battery */
     char battery_save_path[path_length + 5]; /* At the worst case, size is strlen(path) + 4 bytes for .sav + NULL */

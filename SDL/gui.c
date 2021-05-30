@@ -198,11 +198,13 @@ static void draw_char(uint32_t *buffer, unsigned width, unsigned height, unsigne
 }
 
 static signed scroll = 0;
-static void draw_unbordered_text(uint32_t *buffer, unsigned width, unsigned height, unsigned x, signed y, const char *string, uint32_t color)
+static void draw_unbordered_text(uint32_t *buffer, unsigned width, unsigned height, unsigned x, signed y, const char *string, uint32_t color, bool is_osd)
 {
-    y -= scroll;
+    if (!is_osd) {
+        y -= scroll;
+    }
     unsigned orig_x = x;
-    unsigned y_offset = (GB_get_screen_height(&gb) - 144) / 2;
+    unsigned y_offset = is_osd? 0 : (GB_get_screen_height(&gb) - 144) / 2;
     while (*string) {
         if (*string == '\n') {
             x = orig_x;
@@ -215,20 +217,38 @@ static void draw_unbordered_text(uint32_t *buffer, unsigned width, unsigned heig
             break;
         }
         
-        draw_char(&buffer[(signed)(x + width * y)], width, height, *string, color, &buffer[width * y_offset], &buffer[width * (y_offset + 144)]);
+        draw_char(&buffer[(signed)(x + width * y)], width, height, *string, color, &buffer[width * y_offset], &buffer[width * (is_osd? GB_get_screen_height(&gb) : y_offset + 144)]);
         x += GLYPH_WIDTH;
         string++;
     }
 }
 
-static void draw_text(uint32_t *buffer, unsigned width, unsigned height, unsigned x, signed y, const char *string, uint32_t color, uint32_t border)
+void draw_text(uint32_t *buffer, unsigned width, unsigned height, unsigned x, signed y, const char *string, uint32_t color, uint32_t border, bool is_osd)
 {
-    draw_unbordered_text(buffer, width, height, x - 1, y, string, border);
-    draw_unbordered_text(buffer, width, height, x + 1, y, string, border);
-    draw_unbordered_text(buffer, width, height, x, y - 1, string, border);
-    draw_unbordered_text(buffer, width, height, x, y + 1, string, border);
-    draw_unbordered_text(buffer, width, height, x, y, string, color);
+    draw_unbordered_text(buffer, width, height, x - 1, y, string, border, is_osd);
+    draw_unbordered_text(buffer, width, height, x + 1, y, string, border, is_osd);
+    draw_unbordered_text(buffer, width, height, x, y - 1, string, border, is_osd);
+    draw_unbordered_text(buffer, width, height, x, y + 1, string, border, is_osd);
+    draw_unbordered_text(buffer, width, height, x, y, string, color, is_osd);
 }
+
+const char *osd_text = NULL;
+unsigned osd_countdown = 0;
+unsigned osd_text_lines = 1;
+
+void show_osd_text(const char *text)
+{
+    osd_text_lines = 1;
+    osd_text = text;
+    osd_countdown = 30;
+    while (*text++) {
+        if (*text == '\n') {
+            osd_text_lines++;
+            osd_countdown += 30;
+        }
+    }
+}
+
 
 enum decoration {
     DECORATION_NONE,
@@ -239,14 +259,14 @@ enum decoration {
 static void draw_text_centered(uint32_t *buffer, unsigned width, unsigned height, unsigned y, const char *string, uint32_t color, uint32_t border, enum decoration decoration)
 {
     unsigned x = width / 2 - (unsigned) strlen(string) * GLYPH_WIDTH / 2;
-    draw_text(buffer, width, height, x, y, string, color, border);
+    draw_text(buffer, width, height, x, y, string, color, border, false);
     switch (decoration) {
         case DECORATION_SELECTION:
-            draw_text(buffer, width, height, x - GLYPH_WIDTH, y, SELECTION_STRING, color, border);
+            draw_text(buffer, width, height, x - GLYPH_WIDTH, y, SELECTION_STRING, color, border, false);
             break;
         case DECORATION_ARROWS:
-            draw_text(buffer, width, height, x - GLYPH_WIDTH, y, LEFT_ARROW_STRING, color, border);
-            draw_text(buffer, width, height, width - x, y, RIGHT_ARROW_STRING, color, border);
+            draw_text(buffer, width, height, x - GLYPH_WIDTH, y, LEFT_ARROW_STRING, color, border, false);
+            draw_text(buffer, width, height, width - x, y, RIGHT_ARROW_STRING, color, border, false);
             break;
             
         case DECORATION_NONE:
@@ -743,7 +763,7 @@ static void cycle_filter_backwards(unsigned index)
     }
 
 }
-const char *current_filter_name(unsigned index)
+static const char *current_filter_name(unsigned index)
 {
     if (!uses_gl()) return "Requires OpenGL 3.2+";
     unsigned i = 0;
@@ -782,11 +802,22 @@ static void cycle_blending_mode_backwards(unsigned index)
     }
 }
 
-const char *blending_mode_string(unsigned index)
+static const char *blending_mode_string(unsigned index)
 {
     if (!uses_gl()) return "Requires OpenGL 3.2+";
     return (const char *[]){"Disabled", "Simple", "Accurate"}
     [configuration.blending_mode];
+}
+
+static void toggle_osd(unsigned index)
+{
+    osd_countdown = 0;
+    configuration.osd = !configuration.osd;
+}
+
+static const char *current_osd_mode(unsigned index)
+{
+    return configuration.osd? "Enabled" : "Disabled";
 }
 
 static const struct menu_item graphics_menu[] = {
@@ -798,6 +829,8 @@ static const struct menu_item graphics_menu[] = {
     {"Frame Blending:", cycle_blending_mode, blending_mode_string, cycle_blending_mode_backwards},
     {"Mono Palette:", cycle_palette, current_palette, cycle_palette_backwards},
     {"Display Border:", cycle_border_mode, current_border_mode, cycle_border_mode_backwards},
+    {"On-Screen Display:", toggle_osd, current_osd_mode, toggle_osd},
+
     {"Back", return_to_root_menu},
     {NULL,}
 };
@@ -1574,7 +1607,7 @@ void run_gui(bool is_running)
                     }
                     break;
                 case SHOWING_HELP:
-                    draw_text(pixels, width, height, 2 + x_offset, 2 + y_offset, help[current_help_page], gui_palette_native[3], gui_palette_native[0]);
+                    draw_text(pixels, width, height, 2 + x_offset, 2 + y_offset, help[current_help_page], gui_palette_native[3], gui_palette_native[0], false);
                     break;
                 case WAITING_FOR_KEY:
                     draw_text_centered(pixels, width, height, 68 + y_offset, "Press a Key", gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
