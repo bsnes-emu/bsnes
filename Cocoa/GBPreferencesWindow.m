@@ -478,31 +478,46 @@
 
     
     static const unsigned gb_to_joykit[] = {
-    [GBRight]=JOYButtonUsageDPadRight,
-    [GBLeft]=JOYButtonUsageDPadLeft,
-    [GBUp]=JOYButtonUsageDPadUp,
-    [GBDown]=JOYButtonUsageDPadDown,
-    [GBA]=JOYButtonUsageA,
-    [GBB]=JOYButtonUsageB,
-    [GBSelect]=JOYButtonUsageSelect,
-    [GBStart]=JOYButtonUsageStart,
-    [GBTurbo]=JOYButtonUsageL1,
-    [GBRewind]=JOYButtonUsageL2,
-    [GBUnderclock]=JOYButtonUsageR1,
+    [GBRight] = JOYButtonUsageDPadRight,
+    [GBLeft] = JOYButtonUsageDPadLeft,
+    [GBUp] = JOYButtonUsageDPadUp,
+    [GBDown] = JOYButtonUsageDPadDown,
+    [GBA] = JOYButtonUsageA,
+    [GBB] = JOYButtonUsageB,
+    [GBSelect] = JOYButtonUsageSelect,
+    [GBStart] = JOYButtonUsageStart,
+    [GBTurbo] = JOYButtonUsageL1,
+    [GBRewind] = JOYButtonUsageL2,
+    [GBUnderclock] = JOYButtonUsageR1,
     };
     
+    // Todo: JoyKit might need an API to match an axis to a button
     if (joystick_configuration_state == GBUnderclock) {
         for (JOYAxis *axis in controller.axes) {
-            if (axis.value > 0.5) {
+            if (axis.value > 0.5 ||
+                (axis.usage == JOYAxisUsageL1 && button.usage == JOYButtonUsageL1) ||
+                (axis.usage == JOYAxisUsageL2 && button.usage == JOYButtonUsageL2) ||
+                (axis.usage == JOYAxisUsageL3 && button.usage == JOYButtonUsageL3) ||
+                (axis.usage == JOYAxisUsageR1 && button.usage == JOYButtonUsageR1) ||
+                (axis.usage == JOYAxisUsageR2 && button.usage == JOYButtonUsageR2) ||
+                (axis.usage == JOYAxisUsageR3 && button.usage == JOYButtonUsageR3)) {
                 mapping[@"AnalogUnderclock"] = @(axis.uniqueID);
+                break;
             }
         }
     }
     
     if (joystick_configuration_state == GBTurbo) {
         for (JOYAxis *axis in controller.axes) {
-            if (axis.value > 0.5) {
+            if (axis.value > 0.5 ||
+                (axis.usage == JOYAxisUsageL1 && button.usage == JOYButtonUsageL1) ||
+                (axis.usage == JOYAxisUsageL2 && button.usage == JOYButtonUsageL2) ||
+                (axis.usage == JOYAxisUsageL3 && button.usage == JOYButtonUsageL3) ||
+                (axis.usage == JOYAxisUsageR1 && button.usage == JOYButtonUsageR1) ||
+                (axis.usage == JOYAxisUsageR2 && button.usage == JOYButtonUsageR2) ||
+                (axis.usage == JOYAxisUsageR3 && button.usage == JOYButtonUsageR3)) {
                 mapping[@"AnalogTurbo"] = @(axis.uniqueID);
+                break;
             }
         }
     }
