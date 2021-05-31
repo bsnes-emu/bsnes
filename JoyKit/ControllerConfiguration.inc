@@ -71,8 +71,8 @@ hacksByManufacturer = @{
          },
         
          JOYAxisUsageMapping: @{
-             AXIS(4): @(JOYAxisUsageL1),
-             AXIS(5): @(JOYAxisUsageR1),
+             AXIS(4): @(JOYAxisUsageL2),
+             AXIS(5): @(JOYAxisUsageR2),
          },
          
          JOYAxes2DUsageMapping: @{
