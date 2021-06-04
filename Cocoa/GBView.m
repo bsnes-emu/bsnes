@@ -267,6 +267,12 @@ static const uint8_t workboy_vk_to_key[] = {
         if (analogClockMultiplier == 1.0) {
             analogClockMultiplierValid = false;
         }
+        if (analogClockMultiplier < 2.0 && analogClockMultiplier > 1.0) {
+            GB_set_turbo_mode(_gb, false, false);
+            if (self.document.partner) {
+                GB_set_turbo_mode(self.document.partner.gb, false, false);
+            }
+        }
     }
     else {
         if (underclockKeyDown && clockMultiplier > 0.5) {
@@ -284,10 +290,10 @@ static const uint8_t workboy_vk_to_key[] = {
             }
         }
     }
-    if (clockMultiplier > 1 || _turbo) {
+    if (clockMultiplier > 1 || _turbo || (analogClockMultiplierValid && analogClockMultiplier > 1)) {
         [self.osdView displayText:@"Fast forwarding..."];
     }
-    else if (clockMultiplier < 1) {
+    else if (clockMultiplier < 1 || (analogClockMultiplierValid && analogClockMultiplier < 1)) {
         [self.osdView displayText:@"Slow motion..."];
     }
     current_buffer = (current_buffer + 1) % self.numberOfBuffers;
@@ -461,13 +467,13 @@ static const uint8_t workboy_vk_to_key[] = {
     
     if ((axis.usage == JOYAxisUsageR1 && !mapping) ||
         axis.uniqueID == [mapping[@"AnalogUnderclock"] unsignedLongValue]){
-        analogClockMultiplier = MIN(MAX(1 - axis.value + 0.2, 1.0 / 3), 1.0);
+        analogClockMultiplier = MIN(MAX(1 - axis.value + 0.05, 1.0 / 3), 1.0);
         analogClockMultiplierValid = true;
     }
     
     else if ((axis.usage == JOYAxisUsageL1 && !mapping) ||
         axis.uniqueID == [mapping[@"AnalogTurbo"] unsignedLongValue]){
-        analogClockMultiplier = MIN(MAX(axis.value * 3 + 0.8, 1.0), 3.0);
+        analogClockMultiplier = MIN(MAX(axis.value * 3 + 0.95, 1.0), 3.0);
         analogClockMultiplierValid = true;
     }
 }
@@ -544,16 +550,20 @@ static const uint8_t workboy_vk_to_key[] = {
                     else {
                         GB_set_turbo_mode(_gb, false, false);
                     }
+                    _turbo = false;
                 }
                 break;
             }
         
             case JOYButtonUsageL1: {
-                if (self.document.isSlave) {
-                    GB_set_turbo_mode(self.document.partner.gb, button.isPressed, false); break;
-                }
-                else {
-                    GB_set_turbo_mode(_gb, button.isPressed, button.isPressed && self.isRewinding); break;
+                if (!analogClockMultiplierValid || analogClockMultiplier == 1.0 || !button.isPressed) {
+                    if (self.document.isSlave) {
+                        GB_set_turbo_mode(self.document.partner.gb, button.isPressed, false); break;
+                    }
+                    else {
+                        GB_set_turbo_mode(_gb, button.isPressed, button.isPressed && self.isRewinding); break;
+                    }
+                    _turbo = button.isPressed;
                 }
             }
 
