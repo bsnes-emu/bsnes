@@ -260,6 +260,7 @@ static const uint8_t workboy_vk_to_key[] = {
 - (void) flip
 {
     if (analogClockMultiplierValid && [[NSUserDefaults standardUserDefaults] boolForKey:@"GBAnalogControls"]) {
+        clockMultiplier = 1.0;
         GB_set_clock_multiplier(_gb, analogClockMultiplier);
         if (self.document.partner) {
             GB_set_clock_multiplier(self.document.partner.gb, analogClockMultiplier);
@@ -290,10 +291,12 @@ static const uint8_t workboy_vk_to_key[] = {
             }
         }
     }
-    if (clockMultiplier > 1 || _turbo || (analogClockMultiplierValid && analogClockMultiplier > 1)) {
+    if ((!analogClockMultiplierValid && clockMultiplier > 1) ||
+        _turbo || (analogClockMultiplierValid && analogClockMultiplier > 1)) {
         [self.osdView displayText:@"Fast forwarding..."];
     }
-    else if (clockMultiplier < 1 || (analogClockMultiplierValid && analogClockMultiplier < 1)) {
+    else if ((!analogClockMultiplierValid && clockMultiplier < 1) ||
+             (analogClockMultiplierValid && analogClockMultiplier < 1)) {
         [self.osdView displayText:@"Slow motion..."];
     }
     current_buffer = (current_buffer + 1) % self.numberOfBuffers;
@@ -499,7 +502,7 @@ static const uint8_t workboy_vk_to_key[] = {
             continue;
         }
         dispatch_async(dispatch_get_main_queue(), ^{
-            [controller setPlayerLEDs:1 << player];
+            [controller setPlayerLEDs:[controller LEDMaskForPlayer:player]];
         });
         NSDictionary *mapping = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"JoyKitInstanceMapping"][controller.uniqueID];
         if (!mapping) {
@@ -558,13 +561,14 @@ static const uint8_t workboy_vk_to_key[] = {
             case JOYButtonUsageL1: {
                 if (!analogClockMultiplierValid || analogClockMultiplier == 1.0 || !button.isPressed) {
                     if (self.document.isSlave) {
-                        GB_set_turbo_mode(self.document.partner.gb, button.isPressed, false); break;
+                        GB_set_turbo_mode(self.document.partner.gb, button.isPressed, false);
                     }
                     else {
-                        GB_set_turbo_mode(_gb, button.isPressed, button.isPressed && self.isRewinding); break;
+                        GB_set_turbo_mode(_gb, button.isPressed, button.isPressed && self.isRewinding);
                     }
                     _turbo = button.isPressed;
                 }
+                break;
             }
 
             case JOYButtonUsageR1: underclockKeyDown = button.isPressed; break;

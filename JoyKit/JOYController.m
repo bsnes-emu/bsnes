@@ -850,9 +850,25 @@ typedef union {
     [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.dualsenseOutput length:sizeof(_lastVendorSpecificOutput.dualsenseOutput)]];
 }
 
+- (uint8_t)LEDMaskForPlayer:(unsigned)player
+{
+    if (_isDualShock3) {
+        return 2 << player;
+    }
+    if (_isUSBDualSense) {
+        switch (player) {
+            case 0: return 0x04;
+            case 1: return 0x0A;
+            case 2: return 0x15;
+            case 3: return 0x1B;
+            default: return 0;
+        }
+    }
+    return 1 << player;
+}
+
 - (void)setPlayerLEDs:(uint8_t)mask
 {
-    mask &= 0xF;
     if (mask == _playerLEDs) {
         return;
     }
@@ -862,16 +878,16 @@ typedef union {
         _lastVendorSpecificOutput.switchPacket.sequence++;
         _lastVendorSpecificOutput.switchPacket.sequence &= 0xF;
         _lastVendorSpecificOutput.switchPacket.command = 0x30; // LED
-        _lastVendorSpecificOutput.switchPacket.commandData[0] = mask;
+        _lastVendorSpecificOutput.switchPacket.commandData[0] = mask & 0xF;
         [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.switchPacket length:sizeof(_lastVendorSpecificOutput.switchPacket)]];
     }
     else if (_isDualShock3) {
         _lastVendorSpecificOutput.ds3Output.reportID = 1;
-        _lastVendorSpecificOutput.ds3Output.ledsEnabled = mask << 1;
+        _lastVendorSpecificOutput.ds3Output.ledsEnabled = (mask  & 0x1F);
         [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.ds3Output length:sizeof(_lastVendorSpecificOutput.ds3Output)]];
     }
     else if (_isDualSense) {
-        _lastVendorSpecificOutput.dualsenseOutput.playerLEDs = mask;
+        _lastVendorSpecificOutput.dualsenseOutput.playerLEDs = mask & 0x1F;
         [self sendDualSenseOutput];
     }
 }
