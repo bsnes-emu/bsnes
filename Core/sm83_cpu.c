@@ -288,7 +288,10 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     gb->apu.square_sweep_calculate_countdown -= 2;
                 }
                 gb->apu.enable_zombie_calculate_stepping = true;
-                GB_write_memory(gb, addr, 0xFF);
+                /* TODO: this causes audio regressions in the Donkey Kong Land series.
+                   The exact behavior of this quirk should be further investigated, as it seems
+                   more complicated than a single FF pseudo-write. */
+                // GB_write_memory(gb, addr, 0xFF);
             }
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 4;
