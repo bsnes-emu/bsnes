@@ -442,10 +442,9 @@ hacksByName = @{
             @{@"reportID": @(1), @"size":@12, @"offset":@76, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Ry), @"min": @0xFFF, @"max": @0},
             ],
         },
+        
+        JOYIgnoredReports: @[@(0x30)], // Ignore the real 0x30 report as it's broken
     },
-    
-    JOYIgnoredReports: @(0x30), // Ignore the real 0x30 report as it's broken
-    
     @"PLAYSTATION(R)3 Controller": @{ // DualShock 3
         JOYAxisGroups: @{
             @(kHIDUsage_GD_X): @(0),

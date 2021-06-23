@@ -451,8 +451,8 @@ typedef union {
     
     id previous = nil;
     NSSet *ignoredReports = nil;
-    if (hacks[ignoredReports]) {
-        ignoredReports = [NSSet setWithArray:hacks[ignoredReports]];
+    if (hacks[JOYIgnoredReports]) {
+        ignoredReports = [NSSet setWithArray:hacks[JOYIgnoredReports]];
     }
     
     for (id _element in array) {
