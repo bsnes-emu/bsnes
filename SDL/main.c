@@ -17,6 +17,7 @@
 #include <Windows.h>
 #endif
 
+static bool stop_on_start = false;
 GB_gameboy_t gb;
 static bool paused = false;
 static uint32_t pixel_buffer_1[256 * 224], pixel_buffer_2[256 * 224];
@@ -577,6 +578,10 @@ restart:
         GB_set_update_input_hint_callback(&gb, handle_events);
         GB_apu_set_sample_callback(&gb, gb_audio_callback);
     }
+    if (stop_on_start) {
+        stop_on_start = false;
+        GB_debugger_break(&gb);
+    }
 
     bool error = false;
     GB_debugger_clear_symbols(&gb);
@@ -684,11 +689,12 @@ int main(int argc, char **argv)
 #endif
     fprintf(stderr, "SameBoy v" GB_VERSION "\n");
     
-    bool fullscreen = get_arg_flag("--fullscreen", &argc, argv);
+    bool fullscreen = get_arg_flag("--fullscreen", &argc, argv) || get_arg_flag("-f", &argc, argv);
     bool nogl = get_arg_flag("--nogl", &argc, argv);
+    stop_on_start = get_arg_flag("--stop-debugger", &argc, argv) || get_arg_flag("-s", &argc, argv);
 
     if (argc > 2 || (argc == 2 && argv[1][0] == '-')) {
-        fprintf(stderr, "Usage: %s [--fullscreen] [--nogl] [rom]\n", argv[0]);
+        fprintf(stderr, "Usage: %s [--fullscreen|-f] [--nogl] [--stop-debugger|-s] [rom]\n", argv[0]);
         exit(1);
     }
     
@@ -785,6 +791,7 @@ int main(int argc, char **argv)
     update_viewport();
     
     if (filename == NULL) {
+        stop_on_start = false;
         run_gui(false);
     }
     else {
