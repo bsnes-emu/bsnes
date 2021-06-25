@@ -549,7 +549,7 @@ const char *current_default_scale(unsigned index)
 
 const char *current_color_correction_mode(unsigned index)
 {
-    return (const char *[]){"Disabled", "Correct Color Curves", "Emulate Hardware", "Preserve Brightness", "Reduce Contrast"}
+    return (const char *[]){"Disabled", "Correct Color Curves", "Emulate Hardware", "Preserve Brightness", "Reduce Contrast", "Harsh Reality"}
         [configuration.color_correction_mode];
 }
 
@@ -624,7 +624,7 @@ void cycle_default_scale_backwards(unsigned index)
 
 static void cycle_color_correction(unsigned index)
 {
-    if (configuration.color_correction_mode == GB_COLOR_CORRECTION_REDUCE_CONTRAST) {
+    if (configuration.color_correction_mode == GB_COLOR_CORRECTION_LOW_CONTRAST) {
         configuration.color_correction_mode = GB_COLOR_CORRECTION_DISABLED;
     }
     else {
@@ -635,7 +635,7 @@ static void cycle_color_correction(unsigned index)
 static void cycle_color_correction_backwards(unsigned index)
 {
     if (configuration.color_correction_mode == GB_COLOR_CORRECTION_DISABLED) {
-        configuration.color_correction_mode = GB_COLOR_CORRECTION_REDUCE_CONTRAST;
+        configuration.color_correction_mode = GB_COLOR_CORRECTION_LOW_CONTRAST;
     }
     else {
         configuration.color_correction_mode--;

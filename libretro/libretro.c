@@ -232,7 +232,7 @@ static retro_environment_t environ_cb;
 
 /* variables for single cart mode */
 static const struct retro_variable vars_single[] = {
-    { "sameboy_color_correction_mode", "Color correction; emulate hardware|preserve brightness|reduce contrast|off|correct curves" },
+    { "sameboy_color_correction_mode", "Color correction; emulate hardware|preserve brightness|reduce contrast|harsh reality|off|correct curves" },
     { "sameboy_high_pass_filter_mode", "High-pass filter; accurate|remove dc offset|off" },
     { "sameboy_model", "Emulated model (Restart game); Auto|Game Boy|Game Boy Color|Game Boy Advance|Super Game Boy|Super Game Boy 2" },
     { "sameboy_border", "Display border; Super Game Boy only|always|never" },
@@ -249,8 +249,8 @@ static const struct retro_variable vars_dual[] = {
     { "sameboy_audio_output", "Audio output; Game Boy #1|Game Boy #2" },
     { "sameboy_model_1", "Emulated model for Game Boy #1 (Restart game); Auto|Game Boy|Game Boy Color|Game Boy Advance" },
     { "sameboy_model_2", "Emulated model for Game Boy #2 (Restart game); Auto|Game Boy|Game Boy Color|Game Boy Advance" },
-    { "sameboy_color_correction_mode_1", "Color correction for Game Boy #1; emulate hardware|preserve brightness|reduce contrast|off|correct curves" },
-    { "sameboy_color_correction_mode_2", "Color correction for Game Boy #2; emulate hardware|preserve brightness|reduce contrast|off|correct curves" },
+    { "sameboy_color_correction_mode_1", "Color correction for Game Boy #1; emulate hardware|preserve brightness|reduce contrast|harsh reality|off|correct curves" },
+    { "sameboy_color_correction_mode_2", "Color correction for Game Boy #2; emulate hardware|preserve brightness|harsh reality|off|correct curves" },
     { "sameboy_high_pass_filter_mode_1", "High-pass filter for Game Boy #1; accurate|remove dc offset|off" },
     { "sameboy_high_pass_filter_mode_2", "High-pass filter for Game Boy #2; accurate|remove dc offset|off" },
     { "sameboy_rumble_1", "Enable rumble for Game Boy #1; rumble-enabled games|all games|never" },
@@ -580,6 +580,9 @@ static void check_variables()
             else if (strcmp(var.value, "reduce contrast") == 0) {
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_REDUCE_CONTRAST);
             }
+            else if (strcmp(var.value, "harsh reality") == 0) {
+                GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_LOW_CONTRAST);
+            }
         }
         
         var.key = "sameboy_rumble";
@@ -686,6 +689,9 @@ static void check_variables()
             else if (strcmp(var.value, "reduce contrast") == 0) {
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_REDUCE_CONTRAST);
             }
+            else if (strcmp(var.value, "harsh reality") == 0) {
+                GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_LOW_CONTRAST);
+            }
         }
 
         var.key = "sameboy_color_correction_mode_2";
@@ -705,6 +711,9 @@ static void check_variables()
             }
             else if (strcmp(var.value, "reduce contrast") == 0) {
                 GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_REDUCE_CONTRAST);
+            }
+            else if (strcmp(var.value, "harsh reality") == 0) {
+                GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_LOW_CONTRAST);
             }
 
         }

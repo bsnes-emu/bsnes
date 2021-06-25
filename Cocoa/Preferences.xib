@@ -171,6 +171,7 @@
                                 <menuItem title="Emulate hardware" id="XBL-hS-7ke"/>
                                 <menuItem title="Preserve brightness" id="tlx-WB-Bkw"/>
                                 <menuItem title="Reduce contrast" id="wuO-Xv-0mQ"/>
+                                <menuItem title="Harsh reality (low contrast)" id="98I-hs-vP2"/>
                             </items>
                         </menu>
                     </popUpButtonCell>

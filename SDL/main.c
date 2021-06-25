@@ -719,7 +719,7 @@ int main(int argc, char **argv)
         fclose(prefs_file);
         
         /* Sanitize for stability */
-        configuration.color_correction_mode %= GB_COLOR_CORRECTION_REDUCE_CONTRAST +1;
+        configuration.color_correction_mode %= GB_COLOR_CORRECTION_LOW_CONTRAST +1;
         configuration.scaling_mode %= GB_SDL_SCALING_MAX;
         configuration.default_scale %= GB_SDL_DEFAULT_SCALE_MAX + 1;
         configuration.blending_mode %= GB_FRAME_BLENDING_MODE_ACCURATE + 1;
