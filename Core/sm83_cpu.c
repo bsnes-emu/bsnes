@@ -373,7 +373,7 @@ static void leave_stop_mode(GB_gameboy_t *gb)
     for (unsigned i = 0x1FFF; i--;) {
         GB_advance_cycles(gb, 0x10);
     }
-    GB_advance_cycles(gb, gb->cgb_double_speed? 0x10 : 0xF);
+    GB_advance_cycles(gb, gb->cgb_double_speed? 0x10 : 0xC);
     GB_write_memory(gb, 0xFF00 + GB_IO_DIV, 0);
 }
 
