@@ -1,4 +1,4 @@
-/* Copyright (C) 2010-2018 The RetroArch team
+/* Copyright (C) 2010-2020 The RetroArch team
  *
  * ---------------------------------------------------------------------------------------
  * The following license statement only applies to this libretro API header (libretro.h).
@@ -69,7 +69,7 @@ extern "C" {
 #      endif
 #    endif
 #  else
-#      if defined(__GNUC__) && __GNUC__ >= 4 && !defined(__CELLOS_LV2__)
+#      if defined(__GNUC__) && __GNUC__ >= 4
 #        define RETRO_API RETRO_CALLCONV __attribute__((__visibility__("default")))
 #      else
 #        define RETRO_API RETRO_CALLCONV
@@ -278,6 +278,11 @@ enum retro_language
    RETRO_LANGUAGE_ARABIC              = 16,
    RETRO_LANGUAGE_GREEK               = 17,
    RETRO_LANGUAGE_TURKISH             = 18,
+   RETRO_LANGUAGE_SLOVAK              = 19,
+   RETRO_LANGUAGE_PERSIAN             = 20,
+   RETRO_LANGUAGE_HEBREW              = 21,
+   RETRO_LANGUAGE_ASTURIAN            = 22,
+   RETRO_LANGUAGE_FINNISH             = 23,
    RETRO_LANGUAGE_LAST,
 
    /* Ensure sizeof(enum) == sizeof(int) */
@@ -708,6 +713,9 @@ enum retro_mod
                                             * state of rumble motors in controllers.
                                             * A strong and weak motor is supported, and they can be
                                             * controlled indepedently.
+                                            * Should be called from either retro_init() or retro_load_game().
+                                            * Should not be called from retro_set_environment().
+                                            * Returns false if rumble functionality is unavailable.
                                             */
 #define RETRO_ENVIRONMENT_GET_INPUT_DEVICE_CAPABILITIES 24
                                            /* uint64_t * --
@@ -1087,10 +1095,10 @@ enum retro_mod
 
 #define RETRO_ENVIRONMENT_GET_TARGET_REFRESH_RATE (50 | RETRO_ENVIRONMENT_EXPERIMENTAL)
                                             /* float * --
-                                            * Float value that lets us know what target refresh rate 
+                                            * Float value that lets us know what target refresh rate
                                             * is curently in use by the frontend.
                                             *
-                                            * The core can use the returned value to set an ideal 
+                                            * The core can use the returned value to set an ideal
                                             * refresh rate/framerate.
                                             */
 
@@ -1098,7 +1106,7 @@ enum retro_mod
                                             /* bool * --
                                             * Boolean value that indicates whether or not the frontend supports
                                             * input bitmasks being returned by retro_input_state_t. The advantage
-                                            * of this is that retro_input_state_t has to be only called once to 
+                                            * of this is that retro_input_state_t has to be only called once to
                                             * grab all button states instead of multiple times.
                                             *
                                             * If it returns true, you can pass RETRO_DEVICE_ID_JOYPAD_MASK as 'id'
@@ -1117,7 +1125,7 @@ enum retro_mod
                                             * This may be still be done regardless of the core options
                                             * interface version.
                                             *
-                                            * If version is 1 however, core options may instead be set by
+                                            * If version is >= 1 however, core options may instead be set by
                                             * passing an array of retro_core_option_definition structs to
                                             * RETRO_ENVIRONMENT_SET_CORE_OPTIONS, or a 2D array of
                                             * retro_core_option_definition structs to RETRO_ENVIRONMENT_SET_CORE_OPTIONS_INTL.
@@ -1132,8 +1140,8 @@ enum retro_mod
                                             * GET_VARIABLE.
                                             * This allows the frontend to present these variables to
                                             * a user dynamically.
-                                            * This should only be called if RETRO_ENVIRONMENT_GET_ENHANCED_CORE_OPTIONS
-                                            * returns an API version of 1.
+                                            * This should only be called if RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION
+                                            * returns an API version of >= 1.
                                             * This should be called instead of RETRO_ENVIRONMENT_SET_VARIABLES.
                                             * This should be called the first time as early as
                                             * possible (ideally in retro_set_environment).
@@ -1169,8 +1177,6 @@ enum retro_mod
                                             * i.e. it should be feasible to cycle through options
                                             * without a keyboard.
                                             *
-                                            * First entry should be treated as a default.
-                                            *
                                             * Example entry:
                                             * {
                                             *     "foo_option",
@@ -1196,8 +1202,8 @@ enum retro_mod
                                             * GET_VARIABLE.
                                             * This allows the frontend to present these variables to
                                             * a user dynamically.
-                                            * This should only be called if RETRO_ENVIRONMENT_GET_ENHANCED_CORE_OPTIONS
-                                            * returns an API version of 1.
+                                            * This should only be called if RETRO_ENVIRONMENT_GET_CORE_OPTIONS_VERSION
+                                            * returns an API version of >= 1.
                                             * This should be called instead of RETRO_ENVIRONMENT_SET_VARIABLES.
                                             * This should be called the first time as early as
                                             * possible (ideally in retro_set_environment).
@@ -1246,6 +1252,140 @@ enum retro_mod
                                             *
                                             * Note that all core option variables will be set visible by
                                             * default when calling SET_VARIABLES/SET_CORE_OPTIONS.
+                                            */
+
+#define RETRO_ENVIRONMENT_GET_PREFERRED_HW_RENDER 56
+                                           /* unsigned * --
+                                            *
+                                            * Allows an implementation to ask frontend preferred hardware
+                                            * context to use. Core should use this information to deal
+                                            * with what specific context to request with SET_HW_RENDER.
+                                            *
+                                            * 'data' points to an unsigned variable
+                                            */
+
+#define RETRO_ENVIRONMENT_GET_DISK_CONTROL_INTERFACE_VERSION 57
+                                           /* unsigned * --
+                                            * Unsigned value is the API version number of the disk control
+                                            * interface supported by the frontend. If callback return false,
+                                            * API version is assumed to be 0.
+                                            *
+                                            * In legacy code, the disk control interface is defined by passing
+                                            * a struct of type retro_disk_control_callback to
+                                            * RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE.
+                                            * This may be still be done regardless of the disk control
+                                            * interface version.
+                                            *
+                                            * If version is >= 1 however, the disk control interface may
+                                            * instead be defined by passing a struct of type
+                                            * retro_disk_control_ext_callback to
+                                            * RETRO_ENVIRONMENT_SET_DISK_CONTROL_EXT_INTERFACE.
+                                            * This allows the core to provide additional information about
+                                            * disk images to the frontend and/or enables extra
+                                            * disk control functionality by the frontend.
+                                            */
+
+#define RETRO_ENVIRONMENT_SET_DISK_CONTROL_EXT_INTERFACE 58
+                                           /* const struct retro_disk_control_ext_callback * --
+                                            * Sets an interface which frontend can use to eject and insert
+                                            * disk images, and also obtain information about individual
+                                            * disk image files registered by the core.
+                                            * This is used for games which consist of multiple images and
+                                            * must be manually swapped out by the user (e.g. PSX, floppy disk
+                                            * based systems).
+                                            */
+
+#define RETRO_ENVIRONMENT_GET_MESSAGE_INTERFACE_VERSION 59
+                                           /* unsigned * --
+                                            * Unsigned value is the API version number of the message
+                                            * interface supported by the frontend. If callback returns
+                                            * false, API version is assumed to be 0.
+                                            *
+                                            * In legacy code, messages may be displayed in an
+                                            * implementation-specific manner by passing a struct
+                                            * of type retro_message to RETRO_ENVIRONMENT_SET_MESSAGE.
+                                            * This may be still be done regardless of the message
+                                            * interface version.
+                                            *
+                                            * If version is >= 1 however, messages may instead be
+                                            * displayed by passing a struct of type retro_message_ext
+                                            * to RETRO_ENVIRONMENT_SET_MESSAGE_EXT. This allows the
+                                            * core to specify message logging level, priority and
+                                            * destination (OSD, logging interface or both).
+                                            */
+
+#define RETRO_ENVIRONMENT_SET_MESSAGE_EXT 60
+                                           /* const struct retro_message_ext * --
+                                            * Sets a message to be displayed in an implementation-specific
+                                            * manner for a certain amount of 'frames'. Additionally allows
+                                            * the core to specify message logging level, priority and
+                                            * destination (OSD, logging interface or both).
+                                            * Should not be used for trivial messages, which should simply be
+                                            * logged via RETRO_ENVIRONMENT_GET_LOG_INTERFACE (or as a
+                                            * fallback, stderr).
+                                            */
+
+#define RETRO_ENVIRONMENT_GET_INPUT_MAX_USERS 61
+                                           /* unsigned * --
+                                            * Unsigned value is the number of active input devices
+                                            * provided by the frontend. This may change between
+                                            * frames, but will remain constant for the duration
+                                            * of each frame.
+                                            * If callback returns true, a core need not poll any
+                                            * input device with an index greater than or equal to
+                                            * the number of active devices.
+                                            * If callback returns false, the number of active input
+                                            * devices is unknown. In this case, all input devices
+                                            * should be considered active.
+                                            */
+
+#define RETRO_ENVIRONMENT_SET_AUDIO_BUFFER_STATUS_CALLBACK 62
+                                           /* const struct retro_audio_buffer_status_callback * --
+                                            * Lets the core know the occupancy level of the frontend
+                                            * audio buffer. Can be used by a core to attempt frame
+                                            * skipping in order to avoid buffer under-runs.
+                                            * A core may pass NULL to disable buffer status reporting
+                                            * in the frontend.
+                                            */
+
+#define RETRO_ENVIRONMENT_SET_MINIMUM_AUDIO_LATENCY 63
+                                           /* const unsigned * --
+                                            * Sets minimum frontend audio latency in milliseconds.
+                                            * Resultant audio latency may be larger than set value,
+                                            * or smaller if a hardware limit is encountered. A frontend
+                                            * is expected to honour requests up to 512 ms.
+                                            *
+                                            * - If value is less than current frontend
+                                            *   audio latency, callback has no effect
+                                            * - If value is zero, default frontend audio
+                                            *   latency is set
+                                            *
+                                            * May be used by a core to increase audio latency and
+                                            * therefore decrease the probability of buffer under-runs
+                                            * (crackling) when performing 'intensive' operations.
+                                            * A core utilising RETRO_ENVIRONMENT_SET_AUDIO_BUFFER_STATUS_CALLBACK
+                                            * to implement audio-buffer-based frame skipping may achieve
+                                            * optimal results by setting the audio latency to a 'high'
+                                            * (typically 6x or 8x) integer multiple of the expected
+                                            * frame time.
+                                            *
+                                            * WARNING: This can only be called from within retro_run().
+                                            * Calling this can require a full reinitialization of audio
+                                            * drivers in the frontend, so it is important to call it very
+                                            * sparingly, and usually only with the users explicit consent.
+                                            * An eventual driver reinitialize will happen so that audio
+                                            * callbacks happening after this call within the same retro_run()
+                                            * call will target the newly initialized driver.
+                                            */
+
+#define RETRO_ENVIRONMENT_SET_FASTFORWARDING_OVERRIDE 64
+                                           /* const struct retro_fastforwarding_override * --
+                                            * Used by a libretro core to override the current
+                                            * fastforwarding mode of the frontend.
+                                            * If NULL is passed to this function, the frontend
+                                            * will return true if fastforwarding override
+                                            * functionality is supported (no change in
+                                            * fastforwarding state will occur in this case).
                                             */
 
 /* VFS functionality */
@@ -1924,6 +2064,10 @@ enum retro_sensor_action
 {
    RETRO_SENSOR_ACCELEROMETER_ENABLE = 0,
    RETRO_SENSOR_ACCELEROMETER_DISABLE,
+   RETRO_SENSOR_GYROSCOPE_ENABLE,
+   RETRO_SENSOR_GYROSCOPE_DISABLE,
+   RETRO_SENSOR_ILLUMINANCE_ENABLE,
+   RETRO_SENSOR_ILLUMINANCE_DISABLE,
 
    RETRO_SENSOR_DUMMY = INT_MAX
 };
@@ -1932,6 +2076,10 @@ enum retro_sensor_action
 #define RETRO_SENSOR_ACCELEROMETER_X 0
 #define RETRO_SENSOR_ACCELEROMETER_Y 1
 #define RETRO_SENSOR_ACCELEROMETER_Z 2
+#define RETRO_SENSOR_GYROSCOPE_X 3
+#define RETRO_SENSOR_GYROSCOPE_Y 4
+#define RETRO_SENSOR_GYROSCOPE_Z 5
+#define RETRO_SENSOR_ILLUMINANCE 6
 
 typedef bool (RETRO_CALLCONV *retro_set_sensor_state_t)(unsigned port,
       enum retro_sensor_action action, unsigned rate);
@@ -2129,6 +2277,30 @@ struct retro_frame_time_callback
    retro_usec_t reference;
 };
 
+/* Notifies a libretro core of the current occupancy
+ * level of the frontend audio buffer.
+ *
+ * - active: 'true' if audio buffer is currently
+ *           in use. Will be 'false' if audio is
+ *           disabled in the frontend
+ *
+ * - occupancy: Given as a value in the range [0,100],
+ *              corresponding to the occupancy percentage
+ *              of the audio buffer
+ *
+ * - underrun_likely: 'true' if the frontend expects an
+ *                    audio buffer underrun during the
+ *                    next frame (indicates that a core
+ *                    should attempt frame skipping)
+ *
+ * It will be called right before retro_run() every frame. */
+typedef void (RETRO_CALLCONV *retro_audio_buffer_status_callback_t)(
+      bool active, unsigned occupancy, bool underrun_likely);
+struct retro_audio_buffer_status_callback
+{
+   retro_audio_buffer_status_callback_t callback;
+};
+
 /* Pass this to retro_video_refresh_t if rendering to hardware.
  * Passing NULL to retro_video_refresh_t is still a frame dupe as normal.
  * */
@@ -2289,7 +2461,8 @@ struct retro_keyboard_callback
    retro_keyboard_event_t callback;
 };
 
-/* Callbacks for RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE.
+/* Callbacks for RETRO_ENVIRONMENT_SET_DISK_CONTROL_INTERFACE &
+ * RETRO_ENVIRONMENT_SET_DISK_CONTROL_EXT_INTERFACE.
  * Should be set for implementations which can swap out multiple disk
  * images in runtime.
  *
@@ -2347,6 +2520,53 @@ typedef bool (RETRO_CALLCONV *retro_replace_image_index_t)(unsigned index,
  * with replace_image_index. */
 typedef bool (RETRO_CALLCONV *retro_add_image_index_t)(void);
 
+/* Sets initial image to insert in drive when calling
+ * core_load_game().
+ * Since we cannot pass the initial index when loading
+ * content (this would require a major API change), this
+ * is set by the frontend *before* calling the core's
+ * retro_load_game()/retro_load_game_special() implementation.
+ * A core should therefore cache the index/path values and handle
+ * them inside retro_load_game()/retro_load_game_special().
+ * - If 'index' is invalid (index >= get_num_images()), the
+ *   core should ignore the set value and instead use 0
+ * - 'path' is used purely for error checking - i.e. when
+ *   content is loaded, the core should verify that the
+ *   disk specified by 'index' has the specified file path.
+ *   This is to guard against auto selecting the wrong image
+ *   if (for example) the user should modify an existing M3U
+ *   playlist. We have to let the core handle this because
+ *   set_initial_image() must be called before loading content,
+ *   i.e. the frontend cannot access image paths in advance
+ *   and thus cannot perform the error check itself.
+ *   If set path and content path do not match, the core should
+ *   ignore the set 'index' value and instead use 0
+ * Returns 'false' if index or 'path' are invalid, or core
+ * does not support this functionality
+ */
+typedef bool (RETRO_CALLCONV *retro_set_initial_image_t)(unsigned index, const char *path);
+
+/* Fetches the path of the specified disk image file.
+ * Returns 'false' if index is invalid (index >= get_num_images())
+ * or path is otherwise unavailable.
+ */
+typedef bool (RETRO_CALLCONV *retro_get_image_path_t)(unsigned index, char *path, size_t len);
+
+/* Fetches a core-provided 'label' for the specified disk
+ * image file. In the simplest case this may be a file name
+ * (without extension), but for cores with more complex
+ * content requirements information may be provided to
+ * facilitate user disk swapping - for example, a core
+ * running floppy-disk-based content may uniquely label
+ * save disks, data disks, level disks, etc. with names
+ * corresponding to in-game disk change prompts (so the
+ * frontend can provide better user guidance than a 'dumb'
+ * disk index value).
+ * Returns 'false' if index is invalid (index >= get_num_images())
+ * or label is otherwise unavailable.
+ */
+typedef bool (RETRO_CALLCONV *retro_get_image_label_t)(unsigned index, char *label, size_t len);
+
 struct retro_disk_control_callback
 {
    retro_set_eject_state_t set_eject_state;
@@ -2358,6 +2578,27 @@ struct retro_disk_control_callback
 
    retro_replace_image_index_t replace_image_index;
    retro_add_image_index_t add_image_index;
+};
+
+struct retro_disk_control_ext_callback
+{
+   retro_set_eject_state_t set_eject_state;
+   retro_get_eject_state_t get_eject_state;
+
+   retro_get_image_index_t get_image_index;
+   retro_set_image_index_t set_image_index;
+   retro_get_num_images_t  get_num_images;
+
+   retro_replace_image_index_t replace_image_index;
+   retro_add_image_index_t add_image_index;
+
+   /* NOTE: Frontend will only attempt to record/restore
+    * last used disk index if both set_initial_image()
+    * and get_image_path() are implemented */
+   retro_set_initial_image_t set_initial_image; /* Optional - may be NULL */
+
+   retro_get_image_path_t get_image_path;       /* Optional - may be NULL */
+   retro_get_image_label_t get_image_label;     /* Optional - may be NULL */
 };
 
 enum retro_pixel_format
@@ -2390,6 +2631,104 @@ struct retro_message
    unsigned    frames;     /* Duration in frames of message. */
 };
 
+enum retro_message_target
+{
+   RETRO_MESSAGE_TARGET_ALL = 0,
+   RETRO_MESSAGE_TARGET_OSD,
+   RETRO_MESSAGE_TARGET_LOG
+};
+
+enum retro_message_type
+{
+   RETRO_MESSAGE_TYPE_NOTIFICATION = 0,
+   RETRO_MESSAGE_TYPE_NOTIFICATION_ALT,
+   RETRO_MESSAGE_TYPE_STATUS,
+   RETRO_MESSAGE_TYPE_PROGRESS
+};
+
+struct retro_message_ext
+{
+   /* Message string to be displayed/logged */
+   const char *msg;
+   /* Duration (in ms) of message when targeting the OSD */
+   unsigned duration;
+   /* Message priority when targeting the OSD
+    * > When multiple concurrent messages are sent to
+    *   the frontend and the frontend does not have the
+    *   capacity to display them all, messages with the
+    *   *highest* priority value should be shown
+    * > There is no upper limit to a message priority
+    *   value (within the bounds of the unsigned data type)
+    * > In the reference frontend (RetroArch), the same
+    *   priority values are used for frontend-generated
+    *   notifications, which are typically assigned values
+    *   between 0 and 3 depending upon importance */
+   unsigned priority;
+   /* Message logging level (info, warn, error, etc.) */
+   enum retro_log_level level;
+   /* Message destination: OSD, logging interface or both */
+   enum retro_message_target target;
+   /* Message 'type' when targeting the OSD
+    * > RETRO_MESSAGE_TYPE_NOTIFICATION: Specifies that a
+    *   message should be handled in identical fashion to
+    *   a standard frontend-generated notification
+    * > RETRO_MESSAGE_TYPE_NOTIFICATION_ALT: Specifies that
+    *   message is a notification that requires user attention
+    *   or action, but that it should be displayed in a manner
+    *   that differs from standard frontend-generated notifications.
+    *   This would typically correspond to messages that should be
+    *   displayed immediately (independently from any internal
+    *   frontend message queue), and/or which should be visually
+    *   distinguishable from frontend-generated notifications.
+    *   For example, a core may wish to inform the user of
+    *   information related to a disk-change event. It is
+    *   expected that the frontend itself may provide a
+    *   notification in this case; if the core sends a
+    *   message of type RETRO_MESSAGE_TYPE_NOTIFICATION, an
+    *   uncomfortable 'double-notification' may occur. A message
+    *   of RETRO_MESSAGE_TYPE_NOTIFICATION_ALT should therefore
+    *   be presented such that visual conflict with regular
+    *   notifications does not occur
+    * > RETRO_MESSAGE_TYPE_STATUS: Indicates that message
+    *   is not a standard notification. This typically
+    *   corresponds to 'status' indicators, such as a core's
+    *   internal FPS, which are intended to be displayed
+    *   either permanently while a core is running, or in
+    *   a manner that does not suggest user attention or action
+    *   is required. 'Status' type messages should therefore be
+    *   displayed in a different on-screen location and in a manner
+    *   easily distinguishable from both standard frontend-generated
+    *   notifications and messages of type RETRO_MESSAGE_TYPE_NOTIFICATION_ALT
+    * > RETRO_MESSAGE_TYPE_PROGRESS: Indicates that message reports
+    *   the progress of an internal core task. For example, in cases
+    *   where a core itself handles the loading of content from a file,
+    *   this may correspond to the percentage of the file that has been
+    *   read. Alternatively, an audio/video playback core may use a
+    *   message of type RETRO_MESSAGE_TYPE_PROGRESS to display the current
+    *   playback position as a percentage of the runtime. 'Progress' type
+    *   messages should therefore be displayed as a literal progress bar,
+    *   where:
+    *   - 'retro_message_ext.msg' is the progress bar title/label
+    *   - 'retro_message_ext.progress' determines the length of
+    *     the progress bar
+    * NOTE: Message type is a *hint*, and may be ignored
+    * by the frontend. If a frontend lacks support for
+    * displaying messages via alternate means than standard
+    * frontend-generated notifications, it will treat *all*
+    * messages as having the type RETRO_MESSAGE_TYPE_NOTIFICATION */
+   enum retro_message_type type;
+   /* Task progress when targeting the OSD and message is
+    * of type RETRO_MESSAGE_TYPE_PROGRESS
+    * > -1:    Unmetered/indeterminate
+    * > 0-100: Current progress percentage
+    * NOTE: Since message type is a hint, a frontend may ignore
+    * progress values. Where relevant, a core should therefore
+    * include progress percentage within the message string,
+    * such that the message intent remains clear when displayed
+    * as a standard frontend-generated notification */
+   int8_t progress;
+};
+
 /* Describes how the libretro implementation maps a libretro input bind
  * to its internal input system through a human readable string.
  * This string can be used to better let a user configure input. */
@@ -2410,7 +2749,7 @@ struct retro_input_descriptor
 struct retro_system_info
 {
    /* All pointers are owned by libretro implementation, and pointers must
-    * remain valid until retro_deinit() is called. */
+    * remain valid until it is unloaded. */
 
    const char *library_name;      /* Descriptive name of library. Should not
                                    * contain any version numbers, etc. */
@@ -2504,8 +2843,20 @@ struct retro_core_option_display
 };
 
 /* Maximum number of values permitted for a core option
- * NOTE: This may be increased on a core-by-core basis
- * if required (doing so has no effect on the frontend) */
+ * > Note: We have to set a maximum value due the limitations
+ *   of the C language - i.e. it is not possible to create an
+ *   array of structs each containing a variable sized array,
+ *   so the retro_core_option_definition values array must
+ *   have a fixed size. The size limit of 128 is a balancing
+ *   act - it needs to be large enough to support all 'sane'
+ *   core options, but setting it too large may impact low memory
+ *   platforms. In practise, if a core option has more than
+ *   128 values then the implementation is likely flawed.
+ *   To quote the above API reference:
+ *      "The number of possible options should be very limited
+ *       i.e. it should be feasible to cycle through options
+ *       without a keyboard."
+ */
 #define RETRO_NUM_CORE_OPTION_VALUES_MAX 128
 
 struct retro_core_option_value
@@ -2595,6 +2946,47 @@ struct retro_framebuffer
    unsigned memory_flags;           /* Flags telling core how the memory has been mapped.
                                        RETRO_MEMORY_TYPE_* flags.
                                        Set by frontend in GET_CURRENT_SOFTWARE_FRAMEBUFFER. */
+};
+
+/* Used by a libretro core to override the current
+ * fastforwarding mode of the frontend */
+struct retro_fastforwarding_override
+{
+   /* Specifies the runtime speed multiplier that
+    * will be applied when 'fastforward' is true.
+    * For example, a value of 5.0 when running 60 FPS
+    * content will cap the fast-forward rate at 300 FPS.
+    * Note that the target multiplier may not be achieved
+    * if the host hardware has insufficient processing
+    * power.
+    * Setting a value of 0.0 (or greater than 0.0 but
+    * less than 1.0) will result in an uncapped
+    * fast-forward rate (limited only by hardware
+    * capacity).
+    * If the value is negative, it will be ignored
+    * (i.e. the frontend will use a runtime speed
+    * multiplier of its own choosing) */
+   float ratio;
+
+   /* If true, fastforwarding mode will be enabled.
+    * If false, fastforwarding mode will be disabled. */
+   bool fastforward;
+
+   /* If true, and if supported by the frontend, an
+    * on-screen notification will be displayed while
+    * 'fastforward' is true.
+    * If false, and if supported by the frontend, any
+    * on-screen fast-forward notifications will be
+    * suppressed */
+   bool notification;
+
+   /* If true, the core will have sole control over
+    * when fastforwarding mode is enabled/disabled;
+    * the frontend will not be able to change the
+    * state set by 'fastforward' until either
+    * 'inhibit_toggle' is set to false, or the core
+    * is unloaded */
+   bool inhibit_toggle;
 };
 
 /* Callbacks */
