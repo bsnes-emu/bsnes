@@ -86,10 +86,10 @@ struct retro_core_option_definition option_defs_us[] = {
       "Video - GB Mono Palette",
       "Selects the color palette that should be used when playing Game Boy games.",
       {
-         { "greyscale", "Greyscale"              },
-         { "lime",      "Lime (Game Boy)"        },
-         { "olive",     "Olive (Game Boy Pocket" },
-         { "teal",      "Teal (Game Boy Light)"  },
+         { "greyscale", "Greyscale"               },
+         { "lime",      "Lime (Game Boy)"         },
+         { "olive",     "Olive (Game Boy Pocket)" },
+         { "teal",      "Teal (Game Boy Light)"   },
          { NULL, NULL },
       },
       "greyscale"
@@ -280,10 +280,10 @@ struct retro_core_option_definition option_defs_us[] = {
       "Video - GB Mono Palette for Game Boy #1",
       "Selects the color palette that should be used when playing Game Boy games on Game Boy #1.",
       {
-         { "greyscale", "Greyscale"              },
-         { "lime",      "Lime (Game Boy)"        },
-         { "olive",     "Olive (Game Boy Pocket" },
-         { "teal",      "Teal (Game Boy Light)"  },
+         { "greyscale", "Greyscale"               },
+         { "lime",      "Lime (Game Boy)"         },
+         { "olive",     "Olive (Game Boy Pocket)" },
+         { "teal",      "Teal (Game Boy Light)"   },
          { NULL, NULL },
       },
       "greyscale"
@@ -293,10 +293,10 @@ struct retro_core_option_definition option_defs_us[] = {
       "Video - GB Mono Palette for Game Boy #2",
       "Selects the color palette that should be used when playing Game Boy games on Game Boy #2.",
       {
-         { "greyscale", "Greyscale"              },
-         { "lime",      "Lime (Game Boy)"        },
-         { "olive",     "Olive (Game Boy Pocket" },
-         { "teal",      "Teal (Game Boy Light)"  },
+         { "greyscale", "Greyscale"               },
+         { "lime",      "Lime (Game Boy)"         },
+         { "olive",     "Olive (Game Boy Pocket)" },
+         { "teal",      "Teal (Game Boy Light)"   },
          { NULL, NULL },
       },
       "greyscale"
