@@ -57,6 +57,7 @@ Links
 -----
 
   - [Official git repository](https://github.com/bsnes-emu/bsnes)
+  - [Official Discord](https://discord.gg/B27hf27ZVf)
 
 Nightly Builds
 --------------
