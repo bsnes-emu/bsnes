@@ -145,7 +145,6 @@ static void increase_tima(GB_gameboy_t *gb)
 static void GB_set_internal_div_counter(GB_gameboy_t *gb, uint16_t value)
 {
     /* TIMA increases when a specific high-bit becomes a low-bit. */
-    value &= INTERNAL_DIV_CYCLES - 1;
     uint16_t triggers = gb->div_counter & ~value;
     if ((gb->io_registers[GB_IO_TAC] & 4) && (triggers & GB_TAC_TRIGGER_BITS[gb->io_registers[GB_IO_TAC] & 3])) {
         increase_tima(gb);
@@ -356,7 +355,24 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
         advance_serial(gb, cycles); // TODO: Verify what happens in STOP mode
     }
 
+    if (gb->speed_switch_halt_countdown) {
+        gb->speed_switch_halt_countdown -= cycles;
+        if (gb->speed_switch_halt_countdown <= 0) {
+            gb->speed_switch_halt_countdown = 0;
+            gb->halted = false;
+        }
+    }
+    
     gb->debugger_ticks += cycles;
+    
+    if (gb->speed_switch_freeze) {
+        if (gb->speed_switch_freeze >= cycles) {
+            gb->speed_switch_freeze -= cycles;
+            return;
+        }
+        cycles -= gb->speed_switch_freeze;
+        gb->speed_switch_freeze = 0;
+    }
 
     if (!gb->cgb_double_speed) {
         cycles <<= 1;

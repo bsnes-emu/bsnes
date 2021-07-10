@@ -357,6 +357,9 @@ static void nop(GB_gameboy_t *gb, uint8_t opcode)
 static void enter_stop_mode(GB_gameboy_t *gb)
 {
     GB_write_memory(gb, 0xFF00 + GB_IO_DIV, 0);
+    if (!gb->ime) { // TODO: I don't trust this if,
+        gb->div_cycles = -4; // Emulate the CPU-side DIV-reset signal being held
+    }
     gb->stopped = true;
     gb->oam_ppu_blocked = !gb->oam_read_blocked;
     gb->vram_ppu_blocked = !gb->vram_read_blocked;
@@ -369,53 +372,56 @@ static void leave_stop_mode(GB_gameboy_t *gb)
     gb->oam_ppu_blocked = false;
     gb->vram_ppu_blocked = false;
     gb->cgb_palettes_ppu_blocked = false;
-    /* The CPU takes more time to wake up then the other components */
-    for (unsigned i = 0x1FFF; i--;) {
-        GB_advance_cycles(gb, 0x10);
-    }
-    GB_advance_cycles(gb, gb->cgb_double_speed? 0x10 : 0xC);
-    GB_write_memory(gb, 0xFF00 + GB_IO_DIV, 0);
 }
 
 static void stop(GB_gameboy_t *gb, uint8_t opcode)
 {
-    if (gb->io_registers[GB_IO_KEY1] & 0x1) {
+    flush_pending_cycles(gb);
+    bool exit_by_joyp = ((gb->io_registers[GB_IO_JOYP] & 0xF) != 0xF);
+    bool speed_switch = (gb->io_registers[GB_IO_KEY1] & 0x1) && !exit_by_joyp;
+    bool immediate_exit = speed_switch || exit_by_joyp;
+    bool interrupt_pending = (gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F);
+    // When entering with IF&IE, the 2nd byte of STOP is actually executed
+    if (!exit_by_joyp) {
+        enter_stop_mode(gb);
+    }
+    
+    if (!interrupt_pending) {
+        /* Todo: is PC being actually read? */
+        cycle_read_inc_oam_bug(gb, gb->pc++);
+    }
+    
+    /* Todo: speed switching takes a fractional number of M-cycles. It make
+             every active component (APU, PPU) unaligned with the CPU. */
+    if (speed_switch) {
         flush_pending_cycles(gb);
-        bool needs_alignment = false;
         
-        GB_advance_cycles(gb, 0x4);
-        /* Make sure we keep the CPU ticks aligned correctly when returning from double speed mode */
-        
-        if (gb->double_speed_alignment & 7) {
-            GB_advance_cycles(gb, 0x4);
-            needs_alignment = true;
+        if (gb->io_registers[GB_IO_LCDC] & 0x80) {
             GB_log(gb, "ROM triggered PPU odd mode, which is currently not supported. Reverting to even-mode.\n");
+            if (gb->double_speed_alignment & 7) {
+                gb->speed_switch_freeze = 6;
+            }
+            else {
+                gb->speed_switch_freeze = 4;
+            }
         }
-
+        
         gb->cgb_double_speed ^= true;
         gb->io_registers[GB_IO_KEY1] = 0;
         
-        enter_stop_mode(gb);
-        leave_stop_mode(gb);
-        
-        if (!needs_alignment) {
-            GB_advance_cycles(gb, 0x4);
-        }
-        
+        gb->speed_switch_halt_countdown = 0x20008;
     }
-    else {
-        GB_timing_sync(gb);
-        if ((gb->io_registers[GB_IO_JOYP] & 0xF) != 0xF) {
-            /* TODO: HW Bug? When STOP is executed while a button is down, the CPU enters halt
-               mode instead. Fine details not confirmed yet. */
+    
+    if (immediate_exit) {
+        leave_stop_mode(gb);
+        if (!interrupt_pending) {
             gb->halted = true;
+            gb->just_halted = true;
         }
         else {
-            enter_stop_mode(gb);
+            gb->speed_switch_halt_countdown = 0;
         }
     }
-    /* Todo: is PC being actually read? */
-    gb->pc++;
 }
 
 /* Operand naming conventions for functions:
@@ -1603,11 +1609,13 @@ void GB_cpu_run(GB_gameboy_t *gb)
     /* Wake up from HALT mode without calling interrupt code. */
     if (gb->halted && !effective_ime && interrupt_queue) {
         gb->halted = false;
+        gb->speed_switch_halt_countdown = 0;
     }
     
     /* Call interrupt */
     else if (effective_ime && interrupt_queue) {
         gb->halted = false;
+        gb->speed_switch_halt_countdown = 0;
         uint16_t call_addr = gb->pc;
         
         gb->last_opcode_read = cycle_read_inc_oam_bug(gb, gb->pc++);

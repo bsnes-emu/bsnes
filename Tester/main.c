@@ -27,7 +27,7 @@ static FILE *log_file;
 static void replace_extension(const char *src, size_t length, char *dest, const char *ext);
 static bool push_start_a, start_is_not_first, a_is_bad, b_is_confirm, push_faster, push_slower,
             do_not_stop, push_a_twice, start_is_bad, allow_weird_sp_values, large_stack, push_right,
-            semi_random, limit_start, pointer_control;
+            semi_random, limit_start, pointer_control, unsafe_speed_switch;
 static unsigned int test_length = 60 * 40;
 GB_gameboy_t gb;
 
@@ -60,6 +60,9 @@ static char *async_input_callback(GB_gameboy_t *gb)
 
 static void handle_buttons(GB_gameboy_t *gb)
 {
+    if (!gb->cgb_double_speed && unsafe_speed_switch) {
+        return;
+    }
     /* Do not press any buttons during the last two seconds, this might cause a
      screenshot to be taken while the LCD is off if the press makes the game
      load graphics. */
@@ -129,7 +132,7 @@ static void vblank(GB_gameboy_t *gb)
                    gb->registers[GB_REGISTER_SP], gb->backtrace_size);
             frames = test_length - 1;
         }
-        if (gb->halted && !gb->interrupt_enable) {
+        if (gb->halted && !gb->interrupt_enable && gb->speed_switch_halt_countdown == 0) {
             GB_log(gb, "The game is deadlocked.\n");
             frames = test_length - 1;
         }
@@ -265,9 +268,7 @@ static void replace_extension(const char *src, size_t length, char *dest, const 
 
 int main(int argc, char **argv)
 {
-#define str(x) #x
-#define xstr(x) str(x)
-    fprintf(stderr, "SameBoy Tester v" xstr(VERSION) "\n");
+    fprintf(stderr, "SameBoy Tester v" GB_VERSION "\n");
 
     if (argc == 1) {
         fprintf(stderr, "Usage: %s [--dmg] [--start] [--length seconds] [--sav] [--boot path to boot ROM]"
@@ -406,7 +407,8 @@ int main(int argc, char **argv)
                        strcmp((const char *)(gb.rom + 0x134), "ONI 5") == 0;
         b_is_confirm = strcmp((const char *)(gb.rom + 0x134), "ELITE SOCCER") == 0 ||
                        strcmp((const char *)(gb.rom + 0x134), "SOCCER") == 0 ||
-                       strcmp((const char *)(gb.rom + 0x134), "GEX GECKO") == 0;
+                       strcmp((const char *)(gb.rom + 0x134), "GEX GECKO") == 0 ||
+                       strcmp((const char *)(gb.rom + 0x134), "BABE") == 0;
         push_faster = strcmp((const char *)(gb.rom + 0x134), "MOGURA DE PON!") == 0 ||
                       strcmp((const char *)(gb.rom + 0x134), "HUGO2 1/2") == 0 ||
                       strcmp((const char *)(gb.rom + 0x134), "HUGO") == 0;
@@ -444,6 +446,11 @@ int main(int argc, char **argv)
         /* Yes, you should totally use a cursor point & click interface for the language select menu. */
         pointer_control = memcmp((const char *)(gb.rom + 0x134), "LEGO ATEAM BLPP", strlen("LEGO ATEAM BLPP")) == 0;
         push_faster |= pointer_control;
+        
+        /* Games that perform an unsafe speed switch, don't input until in double speed */
+        unsafe_speed_switch = strcmp((const char *)(gb.rom + 0x134), "GBVideo") == 0 || // lulz this is my fault
+                              strcmp((const char *)(gb.rom + 0x134), "POKEMONGOLD 2") == 0; // Pokemon Adventure
+
         
         /* Run emulation */
         running = true;

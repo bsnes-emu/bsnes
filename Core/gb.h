@@ -297,7 +297,6 @@ typedef enum {
 #define SGB_NTSC_FREQUENCY (21477272 / 5)
 #define SGB_PAL_FREQUENCY (21281370 / 5)
 #define DIV_CYCLES (0x100)
-#define INTERNAL_DIV_CYCLES (0x40000)
 
 #if !defined(MIN)
 #define MIN(A, B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __a : __b; })
@@ -532,6 +531,8 @@ struct GB_gameboy_internal_s {
         uint16_t serial_length;
         uint8_t double_speed_alignment;
         uint8_t serial_count;
+        int32_t speed_switch_halt_countdown;
+        uint8_t speed_switch_freeze; // Solely for realigning the PPU, should be removed when the odd modes are implemented
     );
 
     /* APU */
