@@ -691,7 +691,11 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
                                    window_frame.size.height);
     [self.mainWindow setFrame:window_frame display:YES];
     self.vramStatusLabel.cell.backgroundStyle = NSBackgroundStyleRaised;
-    
+        
+    NSUInteger height_diff = self.vramWindow.frame.size.height - self.vramWindow.contentView.frame.size.height;
+    CGRect vram_window_rect = self.vramWindow.frame;
+    vram_window_rect.size.height = 384 + height_diff + 48;
+    [self.vramWindow setFrame:vram_window_rect display:YES animate:NO];
     
     
     self.consoleWindow.title = [NSString stringWithFormat:@"Debug Console – %@", [self.fileURL.path lastPathComponent]];
