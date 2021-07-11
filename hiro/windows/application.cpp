@@ -3,6 +3,7 @@
 namespace hiro {
 
 static auto Application_keyboardProc(HWND, UINT, WPARAM, LPARAM) -> bool;
+static auto Application_processDeferred() -> void;
 static auto Application_processDialogMessage(MSG&) -> void;
 static auto CALLBACK Window_windowProc(HWND, UINT, WPARAM, LPARAM) -> LRESULT;
 
@@ -44,6 +45,14 @@ auto pApplication::processEvents() -> void {
       Application_processDialogMessage(msg);
     }
   }
+  Application_processDeferred();
+}
+
+auto Application_processDeferred() -> void {
+  for (auto menu : pApplication::state().staleMenus) {
+    menu->_updateDeferred();
+  }
+  pApplication::state().staleMenus.reset();
 }
 
 auto Application_processDialogMessage(MSG& msg) -> void {
