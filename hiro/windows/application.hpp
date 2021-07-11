@@ -17,6 +17,7 @@ struct pApplication {
     int modalCount = 0;           //number of modal loops
     Timer modalTimer;             //to run Application during modal events
     pToolTip* toolTip = nullptr;  //active toolTip
+    vector<pMenuBar*> staleMenus; //menubars to update
   };
   static auto state() -> State&;
 };
