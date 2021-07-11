@@ -532,6 +532,7 @@ struct GB_gameboy_internal_s {
         uint8_t double_speed_alignment;
         uint8_t serial_count;
         int32_t speed_switch_halt_countdown;
+        uint8_t speed_switch_countdown; // To compensate for the lack of pipeline emulation
         uint8_t speed_switch_freeze; // Solely for realigning the PPU, should be removed when the odd modes are implemented
     );
 
@@ -718,6 +719,7 @@ struct GB_gameboy_internal_s {
 
         /* Ticks command */
         uint64_t debugger_ticks;
+        uint64_t absolute_debugger_ticks;
                
         /* Undo */
         uint8_t *undo_state;

@@ -374,6 +374,7 @@ static void leave_stop_mode(GB_gameboy_t *gb)
     gb->cgb_palettes_ppu_blocked = false;
 }
 
+/* TODO: Speed switch timing needs far more tests. Double to single is wrong to avoid odd mode. */
 static void stop(GB_gameboy_t *gb, uint8_t opcode)
 {
     flush_pending_cycles(gb);
@@ -387,29 +388,39 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
     }
     
     if (!interrupt_pending) {
-        /* Todo: is PC being actually read? */
         cycle_read_inc_oam_bug(gb, gb->pc++);
     }
     
-    /* Todo: speed switching takes a fractional number of M-cycles. It make
-             every active component (APU, PPU) unaligned with the CPU. */
+    /* Todo: speed switching takes 2 extra T-cycles (so 2 PPU ticks in single->double and 1 PPU tick in double->single) */
     if (speed_switch) {
         flush_pending_cycles(gb);
         
-        if (gb->io_registers[GB_IO_LCDC] & 0x80) {
-            GB_log(gb, "ROM triggered PPU odd mode, which is currently not supported. Reverting to even-mode.\n");
+        if (gb->io_registers[GB_IO_LCDC] & 0x80 && gb->cgb_double_speed) {
+            GB_log(gb, "ROM triggered a PPU odd mode, which is currently not supported. Reverting to even-mode.\n");
             if (gb->double_speed_alignment & 7) {
-                gb->speed_switch_freeze = 6;
-            }
-            else {
-                gb->speed_switch_freeze = 4;
+                gb->speed_switch_freeze = 2;
             }
         }
+        if (gb->apu.global_enable && gb->cgb_double_speed) {
+            GB_log(gb, "ROM triggered an APU odd mode, which is currently not tested.\n");
+        }
         
-        gb->cgb_double_speed ^= true;
+        if (gb->cgb_double_speed) {
+            gb->cgb_double_speed = false;
+        }
+        else {
+            gb->speed_switch_countdown = 6;
+            gb->speed_switch_freeze = 1;
+        }
+        
+        if (interrupt_pending) {
+        }
+        else {
+            gb->speed_switch_halt_countdown = 0x20008;
+            gb->speed_switch_freeze = 5;
+        }
+        
         gb->io_registers[GB_IO_KEY1] = 0;
-        
-        gb->speed_switch_halt_countdown = 0x20008;
     }
     
     if (immediate_exit) {

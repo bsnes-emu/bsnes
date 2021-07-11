@@ -1606,8 +1606,12 @@ static bool ticks(GB_gameboy_t *gb, char *arguments, char *modifiers, const debu
         return true;
     }
 
-    GB_log(gb, "Ticks: %llu. (Resetting)\n", (unsigned long long)gb->debugger_ticks);
+    GB_log(gb, "T-cycles: %llu\n", (unsigned long long)gb->debugger_ticks);
+    GB_log(gb, "M-cycles: %llu\n", (unsigned long long)gb->debugger_ticks / 4);
+    GB_log(gb, "Absolute 8MHz ticks: %llu\n", (unsigned long long)gb->absolute_debugger_ticks);
+    GB_log(gb, "Tick count reset.\n");
     gb->debugger_ticks = 0;
+    gb->absolute_debugger_ticks = 0;
 
     return true;
 }

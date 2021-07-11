@@ -346,6 +346,22 @@ static void GB_rtc_run(GB_gameboy_t *gb, uint8_t cycles)
 
 void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
 {
+    if (gb->speed_switch_countdown) {
+        if (gb->speed_switch_countdown == cycles) {
+            gb->cgb_double_speed ^= true;
+            gb->speed_switch_countdown = 0;
+        }
+        else if (gb->speed_switch_countdown > cycles) {
+            gb->speed_switch_countdown -= cycles;
+        }
+        else {
+            uint8_t old_cycles = gb->speed_switch_countdown;
+            cycles -= old_cycles;
+            gb->speed_switch_countdown = 0;
+            GB_advance_cycles(gb, old_cycles);
+            gb->cgb_double_speed ^= true;
+        }
+    }
     gb->apu.pcm_mask[0] = gb->apu.pcm_mask[1] = 0xFF; // Sort of hacky, but too many cross-component interactions to do it right
     // Affected by speed boost
     gb->dma_cycles += cycles;
@@ -377,6 +393,8 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     if (!gb->cgb_double_speed) {
         cycles <<= 1;
     }
+    
+    gb->absolute_debugger_ticks += cycles;
     
     // Not affected by speed boost
     if (gb->io_registers[GB_IO_LCDC] & 0x80) {
