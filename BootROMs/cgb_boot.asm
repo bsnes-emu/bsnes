@@ -271,7 +271,7 @@ TitleChecksums:
     db $A2 ; STAR WARS-NOA
     db $49 ;
     db $4E ; WAVERACE
-    db $43 | $80 ;
+    db $43 ;
     db $68 ; LOLO2
     db $E0 ; YOSHI'S COOKIE
     db $8B ; MYSTIC QUEST
@@ -330,7 +330,7 @@ ChecksumsEnd:
 
 PalettePerChecksum:
 palette_index: MACRO ; palette, flags
-    db ((\1) * 3) | (\2) ; | $80 means game requires DMG boot tilemap
+    db ((\1)) | (\2) ; | $80 means game requires DMG boot tilemap
 ENDM
     palette_index 0, 0  ; Default Palette
     palette_index 4, 0  ; ALLEY WAY
@@ -374,7 +374,7 @@ ENDM
     palette_index 45, 0 ; STAR WARS-NOA
     palette_index 36, 0 ;
     palette_index 38, 0 ; WAVERACE
-    palette_index 26, 0 ;
+    palette_index 26, $80 ;
     palette_index 42, 0 ; LOLO2
     palette_index 30, 0 ; YOSHI'S COOKIE
     palette_index 41, 0 ; MYSTIC QUEST
@@ -918,8 +918,9 @@ EmulateDMG:
     call GetPaletteIndex
     bit 7, a
     call nz, LoadDMGTilemap
-    and $7F
     ld b, a
+    add b
+    add b
     ldh a, [InputPalette]
     and a
     jr z, .nothingDown
