@@ -475,7 +475,7 @@ ENDM
     palette_comb 17, 4, 13
     raw_palette_comb 28 * 4 - 1, 0 * 4, 14 * 4
     raw_palette_comb 28 * 4 - 1, 4 * 4, 15 * 4
-    palette_comb 19, 22, 9
+    raw_palette_comb 19 * 4, 23 * 4 - 1, 9 * 4
     palette_comb 16, 28, 10
     palette_comb 4, 23, 28
     palette_comb 17, 22, 2
@@ -918,9 +918,11 @@ EmulateDMG:
     call GetPaletteIndex
     bit 7, a
     call nz, LoadDMGTilemap
+    res 7, a
     ld b, a
     add b
     add b
+    ld b, a
     ldh a, [InputPalette]
     and a
     jr z, .nothingDown
@@ -979,7 +981,7 @@ GetPaletteIndex:
 
     ; We might have a match, Do duplicate/4th letter check
     ld a, l
-    sub FirstChecksumWithDuplicate - TitleChecksums
+    sub FirstChecksumWithDuplicate - TitleChecksums + 1
     jr c, .match ; Does not have a duplicate, must be a match!
     ; Has a duplicate; check 4th letter
     push hl
