@@ -6,7 +6,7 @@
 #include <assert.h>
 #include <signal.h>
 #include <stdarg.h>
-
+#include <stdlib.h>
 #ifndef WIIU
 #define AUDIO_FREQUENCY 384000
 #else
@@ -22,7 +22,7 @@
 
 #include <Core/gb.h>
 #include "libretro.h"
-#include "libretro_core_options.h"
+#include "libretro_core_options.inc"
 
 #ifdef _WIN32
 static const char slash = '\\';
@@ -608,7 +608,7 @@ static void check_variables()
             if (strcmp(var.value, "Game Boy") == 0) {
                 new_model = MODEL_DMG_B;
             }
-            else if (strcmp(var.value, "Game Boy Color CPU C") == 0) {
+            else if (strcmp(var.value, "Game Boy Color C") == 0) {
                 new_model = MODEL_CGB_C;
             }
             else if (strcmp(var.value, "Game Boy Color") == 0) {
@@ -687,69 +687,7 @@ static void check_variables()
         var.key = "sameboy_light_temperature";
         var.value = NULL;
         if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-            if (strcmp(var.value, "1000K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 1.0);
-            }
-            else if (strcmp(var.value, "1550K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.9);
-            }
-            else if (strcmp(var.value, "2100K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.8);
-            }
-            else if (strcmp(var.value, "2650K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.7);
-            }
-            else if (strcmp(var.value, "3200K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.6);
-            }
-            else if (strcmp(var.value, "3750K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.5);
-            }
-            else if (strcmp(var.value, "4300K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.4);
-            }
-            else if (strcmp(var.value, "4850K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.3);
-            }
-            else if (strcmp(var.value, "5400K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.2);
-            }
-            else if (strcmp(var.value, "5950K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.1);
-            }
-            else if (strcmp(var.value, "6500K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0);
-            }
-            else if (strcmp(var.value, "7050K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.1);
-            }
-            else if (strcmp(var.value, "7600K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.2);
-            }
-            else if (strcmp(var.value, "8150K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.3);
-            }
-            else if (strcmp(var.value, "8700K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.4);
-            }
-            else if (strcmp(var.value, "9250K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.5);
-            }
-            else if (strcmp(var.value, "9800K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.6);
-            }
-            else if (strcmp(var.value, "10350K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.7);
-            }
-            else if (strcmp(var.value, "10900K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.8);
-            }
-            else if (strcmp(var.value, "11450K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.9);
-            }
-            else if (strcmp(var.value, "12000K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -1.0);
-            }
+            GB_set_light_temperature(&gameboy[0], atof(var.value));
         }
 
         var.key = "sameboy_border";
@@ -784,69 +722,7 @@ static void check_variables()
         var.key = "sameboy_audio_interference";
         var.value = NULL;
         if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-            if (strcmp(var.value, "0") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.00);
-            }
-            else if (strcmp(var.value, "5") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.05);
-            }
-            else if (strcmp(var.value, "10") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.10);
-            }
-            else if (strcmp(var.value, "15") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.15);
-            }
-            else if (strcmp(var.value, "20") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.20);
-            }
-            else if (strcmp(var.value, "25") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.25);
-            }
-            else if (strcmp(var.value, "30") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.30);
-            }
-            else if (strcmp(var.value, "35") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.35);
-            }
-            else if (strcmp(var.value, "40") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.40);
-            }
-            else if (strcmp(var.value, "45") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.45);
-            }
-            else if (strcmp(var.value, "50") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.50);
-            }
-            else if (strcmp(var.value, "55") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.55);
-            }
-            else if (strcmp(var.value, "60") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.60);
-            }
-            else if (strcmp(var.value, "65") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.65);
-            }
-            else if (strcmp(var.value, "70") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.70);
-            }
-            else if (strcmp(var.value, "75") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.75);
-            }
-            else if (strcmp(var.value, "80") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.80);
-            }
-            else if (strcmp(var.value, "85") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.85);
-            }
-            else if (strcmp(var.value, "90") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.90);
-            }
-            else if (strcmp(var.value, "95") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.95);
-            }
-            else if (strcmp(var.value, "100") == 0) {
-                GB_set_interference_volume(&gameboy[0], 1.00);
-            }
+            GB_set_interference_volume(&gameboy[0], atoi(var.value) / 100.0);
         }
 
         var.key = "sameboy_rumble";
@@ -919,7 +795,7 @@ static void check_variables()
             if (strcmp(var.value, "Game Boy") == 0) {
                 new_model = MODEL_DMG_B;
             }
-            else if (strcmp(var.value, "Game Boy Color CPU C") == 0) {
+            else if (strcmp(var.value, "Game Boy Color C") == 0) {
                 new_model = MODEL_CGB_C;
             }
             else if (strcmp(var.value, "Game Boy Color") == 0) {
@@ -951,7 +827,7 @@ static void check_variables()
             if (strcmp(var.value, "Game Boy") == 0) {
                 new_model = MODEL_DMG_B;
             }
-            else if (strcmp(var.value, "Game Boy Color CPU C") == 0) {
+            else if (strcmp(var.value, "Game Boy Color C") == 0) {
                 new_model = MODEL_CGB_C;
             }
             else if (strcmp(var.value, "Game Boy Color") == 0) {
@@ -1059,137 +935,13 @@ static void check_variables()
         var.key = "sameboy_light_temperature_1";
         var.value = NULL;
         if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-            if (strcmp(var.value, "1000K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 1.0);
-            }
-            else if (strcmp(var.value, "1550K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.9);
-            }
-            else if (strcmp(var.value, "2100K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.8);
-            }
-            else if (strcmp(var.value, "2650K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.7);
-            }
-            else if (strcmp(var.value, "3200K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.6);
-            }
-            else if (strcmp(var.value, "3750K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.5);
-            }
-            else if (strcmp(var.value, "4300K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.4);
-            }
-            else if (strcmp(var.value, "4850K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.3);
-            }
-            else if (strcmp(var.value, "5400K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.2);
-            }
-            else if (strcmp(var.value, "5950K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0.1);
-            }
-            else if (strcmp(var.value, "6500K") == 0) {
-                GB_set_light_temperature(&gameboy[0], 0);
-            }
-            else if (strcmp(var.value, "7050K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.1);
-            }
-            else if (strcmp(var.value, "7600K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.2);
-            }
-            else if (strcmp(var.value, "8150K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.3);
-            }
-            else if (strcmp(var.value, "8700K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.4);
-            }
-            else if (strcmp(var.value, "9250K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.5);
-            }
-            else if (strcmp(var.value, "9800K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.6);
-            }
-            else if (strcmp(var.value, "10350K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.7);
-            }
-            else if (strcmp(var.value, "10900K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.8);
-            }
-            else if (strcmp(var.value, "11450K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -0.9);
-            }
-            else if (strcmp(var.value, "12000K") == 0) {
-                GB_set_light_temperature(&gameboy[0], -1.0);
-            }
+            GB_set_light_temperature(&gameboy[0], atof(var.value));
         }
 
         var.key = "sameboy_light_temperature_2";
         var.value = NULL;
         if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-            if (strcmp(var.value, "1000K") == 0) {
-                GB_set_light_temperature(&gameboy[1], 1.0);
-            }
-            else if (strcmp(var.value, "1550K") == 0) {
-                GB_set_light_temperature(&gameboy[1], 0.9);
-            }
-            else if (strcmp(var.value, "2100K") == 0) {
-                GB_set_light_temperature(&gameboy[1], 0.8);
-            }
-            else if (strcmp(var.value, "2650K") == 0) {
-                GB_set_light_temperature(&gameboy[1], 0.7);
-            }
-            else if (strcmp(var.value, "3200K") == 0) {
-                GB_set_light_temperature(&gameboy[1], 0.6);
-            }
-            else if (strcmp(var.value, "3750K") == 0) {
-                GB_set_light_temperature(&gameboy[1], 0.5);
-            }
-            else if (strcmp(var.value, "4300K") == 0) {
-                GB_set_light_temperature(&gameboy[1], 0.4);
-            }
-            else if (strcmp(var.value, "4850K") == 0) {
-                GB_set_light_temperature(&gameboy[1], 0.3);
-            }
-            else if (strcmp(var.value, "5400K") == 0) {
-                GB_set_light_temperature(&gameboy[1], 0.2);
-            }
-            else if (strcmp(var.value, "5950K") == 0) {
-                GB_set_light_temperature(&gameboy[1], 0.1);
-            }
-            else if (strcmp(var.value, "6500K") == 0) {
-                GB_set_light_temperature(&gameboy[1], 0);
-            }
-            else if (strcmp(var.value, "7050K") == 0) {
-                GB_set_light_temperature(&gameboy[1], -0.1);
-            }
-            else if (strcmp(var.value, "7600K") == 0) {
-                GB_set_light_temperature(&gameboy[1], -0.2);
-            }
-            else if (strcmp(var.value, "8150K") == 0) {
-                GB_set_light_temperature(&gameboy[1], -0.3);
-            }
-            else if (strcmp(var.value, "8700K") == 0) {
-                GB_set_light_temperature(&gameboy[1], -0.4);
-            }
-            else if (strcmp(var.value, "9250K") == 0) {
-                GB_set_light_temperature(&gameboy[1], -0.5);
-            }
-            else if (strcmp(var.value, "9800K") == 0) {
-                GB_set_light_temperature(&gameboy[1], -0.6);
-            }
-            else if (strcmp(var.value, "10350K") == 0) {
-                GB_set_light_temperature(&gameboy[1], -0.7);
-            }
-            else if (strcmp(var.value, "10900K") == 0) {
-                GB_set_light_temperature(&gameboy[1], -0.8);
-            }
-            else if (strcmp(var.value, "11450K") == 0) {
-                GB_set_light_temperature(&gameboy[1], -0.9);
-            }
-            else if (strcmp(var.value, "12000K") == 0) {
-                GB_set_light_temperature(&gameboy[1], -1.0);
-            }
+            GB_set_light_temperature(&gameboy[1], atof(var.value));
         }
 
         var.key = "sameboy_high_pass_filter_mode_1";
@@ -1223,137 +975,13 @@ static void check_variables()
         var.key = "sameboy_audio_interference_1";
         var.value = NULL;
         if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-            if (strcmp(var.value, "0") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.00);
-            }
-            else if (strcmp(var.value, "5") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.05);
-            }
-            else if (strcmp(var.value, "10") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.10);
-            }
-            else if (strcmp(var.value, "15") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.15);
-            }
-            else if (strcmp(var.value, "20") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.20);
-            }
-            else if (strcmp(var.value, "25") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.25);
-            }
-            else if (strcmp(var.value, "30") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.30);
-            }
-            else if (strcmp(var.value, "35") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.35);
-            }
-            else if (strcmp(var.value, "40") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.40);
-            }
-            else if (strcmp(var.value, "45") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.45);
-            }
-            else if (strcmp(var.value, "50") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.50);
-            }
-            else if (strcmp(var.value, "55") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.55);
-            }
-            else if (strcmp(var.value, "60") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.60);
-            }
-            else if (strcmp(var.value, "65") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.65);
-            }
-            else if (strcmp(var.value, "70") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.70);
-            }
-            else if (strcmp(var.value, "75") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.75);
-            }
-            else if (strcmp(var.value, "80") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.80);
-            }
-            else if (strcmp(var.value, "85") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.85);
-            }
-            else if (strcmp(var.value, "90") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.90);
-            }
-            else if (strcmp(var.value, "95") == 0) {
-                GB_set_interference_volume(&gameboy[0], 0.95);
-            }
-            else if (strcmp(var.value, "100") == 0) {
-                GB_set_interference_volume(&gameboy[0], 1.00);
-            }
+            GB_set_interference_volume(&gameboy[0], atoi(var.value) / 100.0);
         }
 
         var.key = "sameboy_audio_interference_2";
         var.value = NULL;
         if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-            if (strcmp(var.value, "0") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.00);
-            }
-            else if (strcmp(var.value, "5") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.05);
-            }
-            else if (strcmp(var.value, "10") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.10);
-            }
-            else if (strcmp(var.value, "15") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.15);
-            }
-            else if (strcmp(var.value, "20") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.20);
-            }
-            else if (strcmp(var.value, "25") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.25);
-            }
-            else if (strcmp(var.value, "30") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.30);
-            }
-            else if (strcmp(var.value, "35") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.35);
-            }
-            else if (strcmp(var.value, "40") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.40);
-            }
-            else if (strcmp(var.value, "45") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.45);
-            }
-            else if (strcmp(var.value, "50") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.50);
-            }
-            else if (strcmp(var.value, "55") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.55);
-            }
-            else if (strcmp(var.value, "60") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.60);
-            }
-            else if (strcmp(var.value, "65") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.65);
-            }
-            else if (strcmp(var.value, "70") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.70);
-            }
-            else if (strcmp(var.value, "75") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.75);
-            }
-            else if (strcmp(var.value, "80") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.80);
-            }
-            else if (strcmp(var.value, "85") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.85);
-            }
-            else if (strcmp(var.value, "90") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.90);
-            }
-            else if (strcmp(var.value, "95") == 0) {
-                GB_set_interference_volume(&gameboy[1], 0.95);
-            }
-            else if (strcmp(var.value, "100") == 0) {
-                GB_set_interference_volume(&gameboy[1], 1.00);
-            }
+            GB_set_interference_volume(&gameboy[1], atoi(var.value) / 100.0);
         }
 
         var.key = "sameboy_rumble_1";
