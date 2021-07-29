@@ -26,6 +26,16 @@ typedef enum {
     JOYButtonUsageDPadRight,
     JOYButtonUsageDPadUp,
     JOYButtonUsageDPadDown,
+    
+    JOYButtonUsageSlider,
+    JOYButtonUsageDial,
+    JOYButtonUsageWheel,
+    
+    JOYButtonUsageRudder,
+    JOYButtonUsageThrottle,
+    JOYButtonUsageAccelerator,
+    JOYButtonUsageBrake,
+    
     JOYButtonUsageNonGenericMax,
     
     JOYButtonUsageGeneric0 = 0x10000,

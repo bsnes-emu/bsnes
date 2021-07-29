@@ -4,7 +4,6 @@
 #import "JOYAxes2D.h"
 #import "JOYHat.h"
 
-static NSString const *JOYAxesEmulateButtonsKey = @"JOYAxesEmulateButtons";
 static NSString const *JOYAxes2DEmulateButtonsKey = @"JOYAxes2DEmulateButtons";
 static NSString const *JOYHatsEmulateButtonsKey = @"JOYHatsEmulateButtons";
 

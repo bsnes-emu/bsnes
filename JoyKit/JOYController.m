@@ -7,6 +7,9 @@
 #import "JOYEmulatedButton.h"
 #include <IOKit/hid/IOHIDLib.h>
 
+#include <AppKit/AppKit.h>
+extern NSTextField *globalDebugField;
+
 #define PWM_RESOLUTION 16
 
 static NSString const *JOYAxisGroups = @"JOYAxisGroups";
@@ -27,6 +30,7 @@ static NSString const *JOYActivationReport = @"JOYActivationReport";
 static NSString const *JOYIgnoredReports = @"JOYIgnoredReports";
 static NSString const *JOYIsDualShock3 = @"JOYIsDualShock3";
 static NSString const *JOYIsSony = @"JOYIsSony";
+static NSString const *JOYEmulateAxisButtons = @"JOYEmulateAxisButtons";
 
 static NSMutableDictionary<id, JOYController *> *controllers; // Physical controllers
 static NSMutableArray<JOYController *> *exposedControllers; // Logical controllers
@@ -36,7 +40,6 @@ static NSDictionary *hacksByManufacturer = nil;
 
 static NSMutableSet<id<JOYListener>> *listeners = nil;
 
-static bool axesEmulateButtons = false;
 static bool axes2DEmulateButtons = false;
 static bool hatsEmulateButtons = false;
 
@@ -234,29 +237,40 @@ typedef union {
         return;
     }
     
-    if (element.usagePage == kHIDPage_Button) {
+    NSDictionary *axisGroups = @{
+        @(kHIDUsage_GD_X): @(0),
+        @(kHIDUsage_GD_Y): @(0),
+        @(kHIDUsage_GD_Z): @(1),
+        @(kHIDUsage_GD_Rx): @(2),
+        @(kHIDUsage_GD_Ry): @(2),
+        @(kHIDUsage_GD_Rz): @(1),
+    };
+    
+    axisGroups = _hacks[JOYAxisGroups] ?: axisGroups;
+    
+    if (element.usagePage == kHIDPage_Button ||
+        (element.usagePage == kHIDPage_Consumer && (element.usage == kHIDUsage_Csmr_ACHome ||
+                                                    element.usage == kHIDUsage_Csmr_ACBack))) {
     button: {
         JOYButton *button = [[JOYButton alloc] initWithElement: element];
         [_buttons setObject:button forKey:element];
-        NSNumber *replacementUsage = _hacks[JOYButtonUsageMapping][@(button.usage)];
+        NSNumber *replacementUsage = element.usagePage == kHIDPage_Button? _hacks[JOYButtonUsageMapping][@(button.usage)] : nil;
         if (replacementUsage) {
             button.usage = [replacementUsage unsignedIntValue];
         }
         return;
     }
     }
+    else if (element.usagePage == kHIDPage_Simulation) {
+        switch (element.usage) {
+            case kHIDUsage_Sim_Accelerator:
+            case kHIDUsage_Sim_Brake:
+            case kHIDUsage_Sim_Rudder:
+            case kHIDUsage_Sim_Throttle:
+            goto single;
+        }
+    }
     else if (element.usagePage == kHIDPage_GenericDesktop) {
-        NSDictionary *axisGroups = @{
-            @(kHIDUsage_GD_X): @(0),
-            @(kHIDUsage_GD_Y): @(0),
-            @(kHIDUsage_GD_Z): @(1),
-            @(kHIDUsage_GD_Rx): @(2),
-            @(kHIDUsage_GD_Ry): @(2),
-            @(kHIDUsage_GD_Rz): @(1),
-        };
-        
-        axisGroups = _hacks[JOYAxisGroups] ?: axisGroups;
-
         switch (element.usage) {
             case kHIDUsage_GD_X:
             case kHIDUsage_GD_Y:
@@ -318,30 +332,26 @@ typedef union {
                  }*/
                 break;
             }
-            single:
             case kHIDUsage_GD_Slider:
             case kHIDUsage_GD_Dial:
-            case kHIDUsage_GD_Wheel: {
+            case kHIDUsage_GD_Wheel:
+            { single: {
                 JOYAxis *axis = [[JOYAxis alloc] initWithElement: element];
                 [_axes setObject:axis forKey:element];
                 
-                NSNumber *replacementUsage = _hacks[JOYAxisUsageMapping][@(axis.usage)];
+                NSNumber *replacementUsage = element.usagePage == kHIDPage_GenericDesktop? _hacks[JOYAxisUsageMapping][@(axis.usage)] : nil;
                 if (replacementUsage) {
                     axis.usage = [replacementUsage unsignedIntValue];
                 }
                 
-                if (axesEmulateButtons && axis.usage >= JOYAxisUsageL1 && axis.usage <= JOYAxisUsageR3) {
+                if ([_hacks[JOYEmulateAxisButtons] boolValue]) {
                     _axisEmulatedButtons[@(axis.uniqueID)] =
-                    [[JOYEmulatedButton alloc] initWithUsage:axis.usage - JOYAxisUsageL1 + JOYButtonUsageL1 uniqueID:axis.uniqueID];
+                    [[JOYEmulatedButton alloc] initWithUsage:axis.equivalentButtonUsage uniqueID:axis.uniqueID];
                 }
                 
-                if (axesEmulateButtons && axis.usage >= JOYAxisUsageGeneric0) {
-                    _axisEmulatedButtons[@(axis.uniqueID)] =
-                    [[JOYEmulatedButton alloc] initWithUsage:axis.usage - JOYAxisUsageGeneric0 + JOYButtonUsageGeneric0 uniqueID:axis.uniqueID];
-                }
                 
                 break;
-            }
+            }}
             case kHIDUsage_GD_DPadUp:
             case kHIDUsage_GD_DPadDown:
             case kHIDUsage_GD_DPadRight:
@@ -1030,7 +1040,6 @@ typedef union {
 
 + (void)startOnRunLoop:(NSRunLoop *)runloop withOptions: (NSDictionary *)options
 {
-    axesEmulateButtons = [options[JOYAxesEmulateButtonsKey] boolValue];
     axes2DEmulateButtons = [options[JOYAxes2DEmulateButtonsKey] boolValue];
     hatsEmulateButtons = [options[JOYHatsEmulateButtonsKey] boolValue];
     

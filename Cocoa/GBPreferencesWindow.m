@@ -491,16 +491,12 @@
     [GBUnderclock] = JOYButtonUsageR1,
     };
     
-    // Todo: JoyKit might need an API to match an axis to a button
     if (joystick_configuration_state == GBUnderclock) {
+        mapping[@"AnalogUnderclock"] = nil;
+        double max = 0;
         for (JOYAxis *axis in controller.axes) {
-            if (axis.value > 0.5 ||
-                (axis.usage == JOYAxisUsageL1 && button.usage == JOYButtonUsageL1) ||
-                (axis.usage == JOYAxisUsageL2 && button.usage == JOYButtonUsageL2) ||
-                (axis.usage == JOYAxisUsageL3 && button.usage == JOYButtonUsageL3) ||
-                (axis.usage == JOYAxisUsageR1 && button.usage == JOYButtonUsageR1) ||
-                (axis.usage == JOYAxisUsageR2 && button.usage == JOYButtonUsageR2) ||
-                (axis.usage == JOYAxisUsageR3 && button.usage == JOYButtonUsageR3)) {
+            if ((axis.value > 0.5 || (axis.equivalentButtonUsage == button.usage)) && axis.value >= max) {
+                max = axis.value;
                 mapping[@"AnalogUnderclock"] = @(axis.uniqueID);
                 break;
             }
@@ -508,16 +504,12 @@
     }
     
     if (joystick_configuration_state == GBTurbo) {
+        mapping[@"AnalogTurbo"] = nil;
+        double max = 0;
         for (JOYAxis *axis in controller.axes) {
-            if (axis.value > 0.5 ||
-                (axis.usage == JOYAxisUsageL1 && button.usage == JOYButtonUsageL1) ||
-                (axis.usage == JOYAxisUsageL2 && button.usage == JOYButtonUsageL2) ||
-                (axis.usage == JOYAxisUsageL3 && button.usage == JOYButtonUsageL3) ||
-                (axis.usage == JOYAxisUsageR1 && button.usage == JOYButtonUsageR1) ||
-                (axis.usage == JOYAxisUsageR2 && button.usage == JOYButtonUsageR2) ||
-                (axis.usage == JOYAxisUsageR3 && button.usage == JOYButtonUsageR3)) {
+            if ((axis.value > 0.5 || (axis.equivalentButtonUsage == button.usage)) && axis.value >= max) {
+                max = axis.value;
                 mapping[@"AnalogTurbo"] = @(axis.uniqueID);
-                break;
             }
         }
     }

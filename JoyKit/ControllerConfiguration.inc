@@ -4,8 +4,6 @@
 
 hacksByManufacturer = @{
     @(0x045E): @{ // Microsoft
-        /* Generally untested, but Microsoft goes by the book when it comes to HID report descriptors, so
-           it should work out of the box. The hack is only here for automatic mapping */
             
         JOYAxisGroups: @{
               @(kHIDUsage_GD_X): @(0),
@@ -13,7 +11,7 @@ hacksByManufacturer = @{
               @(kHIDUsage_GD_Z): @(2),
               @(kHIDUsage_GD_Rx): @(1),
               @(kHIDUsage_GD_Ry): @(1),
-              @(kHIDUsage_GD_Rz): @(3),
+              @(kHIDUsage_GD_Rz): @(2),
         },
         
         JOYButtonUsageMapping: @{
@@ -37,8 +35,10 @@ hacksByManufacturer = @{
          
          JOYAxes2DUsageMapping: @{
              AXES2D(1): @(JOYAxes2DUsageLeftStick),
-             AXES2D(4): @(JOYAxes2DUsageRightStick),
+             AXES2D(3): @(JOYAxes2DUsageRightStick),
          },
+         
+         JOYEmulateAxisButtons: @YES,
     },
     
     @(0x054C): @{ // Sony
