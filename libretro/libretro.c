@@ -136,7 +136,7 @@ static void GB_update_keys_status(GB_gameboy_t *gb, unsigned port)
     else {
         unsigned j;
 
-        for (j = 0; j < (RETRO_DEVICE_ID_JOYPAD_R3+1); j++) {
+        for (j = 0; j < (RETRO_DEVICE_ID_JOYPAD_R3 + 1); j++) {
             if (input_state_cb(port, RETRO_DEVICE_JOYPAD, 0, j)) {
                 joypad_bits |= (1 << j);
             }
@@ -244,65 +244,56 @@ static void set_variable_visibility(void)
     size_t num_options = 0;
 
     // Show/hide options depending on the number of emulated devices
-    if (emulated_devices == 1)
-    {
+    if (emulated_devices == 1) { 
         option_display_singlecart.visible = true;
         option_display_dualcart.visible = false;
     }
-    else if (emulated_devices == 2)
-    {
+    else if (emulated_devices == 2) { 
         option_display_singlecart.visible = false;
         option_display_dualcart.visible = true;
     }
 
     // Determine number of options
-    for (;;)
-    {
-        if (!option_defs_us[num_options].key)
-            break;
+    while (true) {
+        if (!option_defs_us[num_options].key) break;
         num_options++;
     }
 
     // Copy parameters from option_defs_us array
-    for (i = 0; i < num_options; i++)
-    {
+    for (i = 0; i < num_options; i++) { 
         const char *key  = option_defs_us[i].key;
-        {
-            if ((strcmp(key, "sameboy_model")                   == 0) ||
-                (strcmp(key, "sameboy_rtc")                     == 0) ||
-                (strcmp(key, "sameboy_scaling_filter")          == 0) ||
-                (strcmp(key, "sameboy_mono_palette")            == 0) ||
-                (strcmp(key, "sameboy_color_correction_mode")   == 0) ||
-                (strcmp(key, "sameboy_light_temperature")       == 0) ||
-                (strcmp(key, "sameboy_border")                  == 0) ||
-                (strcmp(key, "sameboy_high_pass_filter_mode")   == 0) ||
-                (strcmp(key, "sameboy_audio_interference")      == 0) ||
-                (strcmp(key, "sameboy_rumble")                  == 0))
-            {
-                option_display_singlecart.key = key;
-                environ_cb(RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY, &option_display_singlecart);
-            }
-            else if ((strcmp(key, "sameboy_link")               == 0) ||
-                (strcmp(key, "sameboy_screen_layout")           == 0) ||
-                (strcmp(key, "sameboy_audio_output")            == 0) ||
-                (strcmp(key, "sameboy_model_1")                 == 0) ||
-                (strcmp(key, "sameboy_model_2")                 == 0) ||
-                (strcmp(key, "sameboy_mono_palette_1")          == 0) ||
-                (strcmp(key, "sameboy_mono_palette_2")          == 0) ||
-                (strcmp(key, "sameboy_color_correction_mode_1") == 0) ||
-                (strcmp(key, "sameboy_color_correction_mode_2") == 0) ||
-                (strcmp(key, "sameboy_light_temperature_1")     == 0) ||
-                (strcmp(key, "sameboy_light_temperature_2")     == 0) ||
-                (strcmp(key, "sameboy_high_pass_filter_mode_1") == 0) ||
-                (strcmp(key, "sameboy_high_pass_filter_mode_2") == 0) ||
-                (strcmp(key, "sameboy_audio_interference_1")    == 0) ||
-                (strcmp(key, "sameboy_audio_interference_2")    == 0) ||
-                (strcmp(key, "sameboy_rumble_1")                == 0) ||
-                (strcmp(key, "sameboy_rumble_2")                == 0))
-            {
-                option_display_dualcart.key = key;
-                environ_cb(RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY, &option_display_dualcart);
-            }
+        if ((strcmp(key, "sameboy_model")                   == 0) ||
+            (strcmp(key, "sameboy_rtc")                     == 0) ||
+            (strcmp(key, "sameboy_scaling_filter")          == 0) ||
+            (strcmp(key, "sameboy_mono_palette")            == 0) ||
+            (strcmp(key, "sameboy_color_correction_mode")   == 0) ||
+            (strcmp(key, "sameboy_light_temperature")       == 0) ||
+            (strcmp(key, "sameboy_border")                  == 0) ||
+            (strcmp(key, "sameboy_high_pass_filter_mode")   == 0) ||
+            (strcmp(key, "sameboy_audio_interference")      == 0) ||
+            (strcmp(key, "sameboy_rumble")                  == 0)) {
+            option_display_singlecart.key = key;
+            environ_cb(RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY, &option_display_singlecart);
+        }
+        else if ((strcmp(key, "sameboy_link")               == 0) ||
+                 (strcmp(key, "sameboy_screen_layout")           == 0) ||
+                 (strcmp(key, "sameboy_audio_output")            == 0) ||
+                 (strcmp(key, "sameboy_model_1")                 == 0) ||
+                 (strcmp(key, "sameboy_model_2")                 == 0) ||
+                 (strcmp(key, "sameboy_mono_palette_1")          == 0) ||
+                 (strcmp(key, "sameboy_mono_palette_2")          == 0) ||
+                 (strcmp(key, "sameboy_color_correction_mode_1") == 0) ||
+                 (strcmp(key, "sameboy_color_correction_mode_2") == 0) ||
+                 (strcmp(key, "sameboy_light_temperature_1")     == 0) ||
+                 (strcmp(key, "sameboy_light_temperature_2")     == 0) ||
+                 (strcmp(key, "sameboy_high_pass_filter_mode_1") == 0) ||
+                 (strcmp(key, "sameboy_high_pass_filter_mode_2") == 0) ||
+                 (strcmp(key, "sameboy_audio_interference_1")    == 0) ||
+                 (strcmp(key, "sameboy_audio_interference_2")    == 0) ||
+                 (strcmp(key, "sameboy_rumble_1")                == 0) ||
+                 (strcmp(key, "sameboy_rumble_2")                == 0)) {
+            option_display_dualcart.key = key;
+            environ_cb(RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY, &option_display_dualcart);
         }
     }
 }
@@ -426,7 +417,7 @@ static void set_link_cable_state(bool state)
 
 static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
 {
-    const char *model_name = (char *[]){
+    const char *model_name = (char *[]) {
         [GB_BOOT_ROM_DMG0] = "dmg0",
         [GB_BOOT_ROM_DMG] = "dmg",
         [GB_BOOT_ROM_MGB] = "mgb",
@@ -437,8 +428,7 @@ static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
         [GB_BOOT_ROM_AGB] = "agb",
     }[type];
 
-    const uint8_t *boot_code = (const unsigned char *[])
-    {
+    const uint8_t *boot_code = (const unsigned char *[]) {
         [GB_BOOT_ROM_DMG0] = dmg_boot, // dmg0 not implemented yet
         [GB_BOOT_ROM_DMG] = dmg_boot,
         [GB_BOOT_ROM_MGB] = dmg_boot, // mgb not implemented yet
@@ -449,7 +439,7 @@ static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
         [GB_BOOT_ROM_AGB] = agb_boot,
     }[type];
 
-    unsigned boot_length = (unsigned []){
+    unsigned boot_length = (unsigned []) {
         [GB_BOOT_ROM_DMG0] = dmg_boot_length, // dmg0 not implemented yet
         [GB_BOOT_ROM_DMG] = dmg_boot_length,
         [GB_BOOT_ROM_MGB] = dmg_boot_length, // mgb not implemented yet
@@ -604,7 +594,6 @@ static void init_for_current_model(unsigned id)
         environ_cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
         environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, descriptors_2p);
     }
-
 }
 
 static void check_variables()
