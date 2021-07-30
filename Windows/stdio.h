@@ -11,7 +11,7 @@ int access(const char *filename, int mode);
 static inline int vasprintf(char **str, const char *fmt, va_list args)
 {
     size_t size = _vscprintf(fmt, args) + 1;
-    *str = malloc(size);
+    *str = (char*)malloc(size);
     int ret = vsprintf(*str, fmt, args);
     if (ret != size - 1) {
         free(*str);
@@ -24,7 +24,7 @@ static inline int vasprintf(char **str, const char *fmt, va_list args)
 #endif
 
 /* This code is public domain -- Will Hartung 4/9/09 */
-static inline size_t getline(char **lineptr, size_t *n, FILE *stream) 
+static inline size_t getline(char **lineptr, size_t *n, FILE *stream)
 {
     char *bufptr = NULL;
     char *p = bufptr;
@@ -48,7 +48,7 @@ static inline size_t getline(char **lineptr, size_t *n, FILE *stream)
         return -1;
     }
     if (bufptr == NULL) {
-        bufptr = malloc(128);
+        bufptr = (char*)malloc(128);
         if (bufptr == NULL) {
             return -1;
         }
@@ -58,7 +58,7 @@ static inline size_t getline(char **lineptr, size_t *n, FILE *stream)
     while (c != EOF) {
         if ((p - bufptr) > (size - 1)) {
             size = size + 128;
-            bufptr = realloc(bufptr, size);
+            bufptr = (char*)realloc(bufptr, size);
             if (bufptr == NULL) {
                 return -1;
             }
