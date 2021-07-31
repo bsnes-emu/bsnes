@@ -12,6 +12,6 @@ typedef enum {
 
 @interface GBMemoryByteArray : HFByteArray
 - (instancetype) initWithDocument:(Document *)document;
-@property uint16_t selectedBank;
-@property GB_memory_mode_t mode;
+@property (nonatomic) uint16_t selectedBank;
+@property (nonatomic) GB_memory_mode_t mode;
 @end

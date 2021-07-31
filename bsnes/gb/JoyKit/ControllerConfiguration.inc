@@ -4,8 +4,6 @@
 
 hacksByManufacturer = @{
     @(0x045E): @{ // Microsoft
-        /* Generally untested, but Microsoft goes by the book when it comes to HID report descriptors, so
-           it should work out of the box. The hack is only here for automatic mapping */
             
         JOYAxisGroups: @{
               @(kHIDUsage_GD_X): @(0),
@@ -13,7 +11,7 @@ hacksByManufacturer = @{
               @(kHIDUsage_GD_Z): @(2),
               @(kHIDUsage_GD_Rx): @(1),
               @(kHIDUsage_GD_Ry): @(1),
-              @(kHIDUsage_GD_Rz): @(3),
+              @(kHIDUsage_GD_Rz): @(2),
         },
         
         JOYButtonUsageMapping: @{
@@ -37,8 +35,10 @@ hacksByManufacturer = @{
          
          JOYAxes2DUsageMapping: @{
              AXES2D(1): @(JOYAxes2DUsageLeftStick),
-             AXES2D(4): @(JOYAxes2DUsageRightStick),
+             AXES2D(3): @(JOYAxes2DUsageRightStick),
          },
+         
+         JOYEmulateAxisButtons: @YES,
     },
     
     @(0x054C): @{ // Sony
@@ -71,14 +71,49 @@ hacksByManufacturer = @{
          },
         
          JOYAxisUsageMapping: @{
-             AXIS(4): @(JOYAxisUsageL1),
-             AXIS(5): @(JOYAxisUsageR1),
+             AXIS(4): @(JOYAxisUsageL2),
+             AXIS(5): @(JOYAxisUsageR2),
          },
          
          JOYAxes2DUsageMapping: @{
              AXES2D(1): @(JOYAxes2DUsageLeftStick),
              AXES2D(4): @(JOYAxes2DUsageRightStick),
          },
+         
+         // When DualSense mode is activated on BT, The report ID is 0x31 and there's an extra byte
+         JOYCustomReports: @{
+            @(0x31): @[
+            /* 1D and 2D axes */
+            @{@"reportID": @(0x31), @"size":@8, @"offset":@0x08, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_X), @"min": @0, @"max": @255},
+            @{@"reportID": @(0x31), @"size":@8, @"offset":@0x10, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Y), @"min": @0, @"max": @255},
+            @{@"reportID": @(0x31), @"size":@8, @"offset":@0x18, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Z), @"min": @0, @"max": @255},
+            @{@"reportID": @(0x31), @"size":@8, @"offset":@0x20, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Rz), @"min": @0, @"max": @255},
+            @{@"reportID": @(0x31), @"size":@8, @"offset":@0x28, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Rx), @"min": @0, @"max": @255},
+            @{@"reportID": @(0x31), @"size":@8, @"offset":@0x30, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Ry), @"min": @0, @"max": @255},
+            
+            /* Hat Switch*/
+            @{@"reportID": @(0x31), @"size":@4, @"offset":@0x40, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Hatswitch), @"min": @0, @"max": @7},
+            
+            /* Buttons */
+            @{@"reportID": @(0x31), @"size":@1, @"offset":@0x44, @"usagePage":@(kHIDPage_Button), @"usage":@1},
+            @{@"reportID": @(0x31), @"size":@1, @"offset":@0x45, @"usagePage":@(kHIDPage_Button), @"usage":@2},
+            @{@"reportID": @(0x31), @"size":@1, @"offset":@0x46, @"usagePage":@(kHIDPage_Button), @"usage":@3},
+            @{@"reportID": @(0x31), @"size":@1, @"offset":@0x47, @"usagePage":@(kHIDPage_Button), @"usage":@4},
+            @{@"reportID": @(0x31), @"size":@1, @"offset":@0x48, @"usagePage":@(kHIDPage_Button), @"usage":@5},
+            @{@"reportID": @(0x31), @"size":@1, @"offset":@0x49, @"usagePage":@(kHIDPage_Button), @"usage":@6},
+            @{@"reportID": @(0x31), @"size":@1, @"offset":@0x4a, @"usagePage":@(kHIDPage_Button), @"usage":@7},
+            @{@"reportID": @(0x31), @"size":@1, @"offset":@0x4b, @"usagePage":@(kHIDPage_Button), @"usage":@8},
+            @{@"reportID": @(0x31), @"size":@1, @"offset":@0x4c, @"usagePage":@(kHIDPage_Button), @"usage":@9},
+            @{@"reportID": @(0x31), @"size":@1, @"offset":@0x4d, @"usagePage":@(kHIDPage_Button), @"usage":@10},
+            @{@"reportID": @(0x31), @"size":@1, @"offset":@0x4e, @"usagePage":@(kHIDPage_Button), @"usage":@11},
+            @{@"reportID": @(0x31), @"size":@1, @"offset":@0x4f, @"usagePage":@(kHIDPage_Button), @"usage":@12},
+            @{@"reportID": @(0x31), @"size":@1, @"offset":@0x50, @"usagePage":@(kHIDPage_Button), @"usage":@13},
+            @{@"reportID": @(0x31), @"size":@1, @"offset":@0x51, @"usagePage":@(kHIDPage_Button), @"usage":@14},
+            @{@"reportID": @(0x31), @"size":@1, @"offset":@0x52, @"usagePage":@(kHIDPage_Button), @"usage":@15},
+            ],
+        },
+         
+         JOYIsSony: @YES,
     }
 };
 
@@ -407,10 +442,9 @@ hacksByName = @{
             @{@"reportID": @(1), @"size":@12, @"offset":@76, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Ry), @"min": @0xFFF, @"max": @0},
             ],
         },
+        
+        JOYIgnoredReports: @[@(0x30)], // Ignore the real 0x30 report as it's broken
     },
-    
-    JOYIgnoredReports: @(0x30), // Ignore the real 0x30 report as it's broken
-    
     @"PLAYSTATION(R)3 Controller": @{ // DualShock 3
         JOYAxisGroups: @{
             @(kHIDUsage_GD_X): @(0),

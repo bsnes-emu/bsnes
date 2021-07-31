@@ -27,4 +27,17 @@ void GB_save_state_to_buffer(GB_gameboy_t *gb, uint8_t *buffer);
 
 int GB_load_state(GB_gameboy_t *gb, const char *path);
 int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t length);
+bool GB_is_stave_state(const char *path);
+#ifdef GB_INTERNAL
+static inline uint32_t state_magic(void)
+{
+    if (sizeof(bool) == 1) return 'SAME';
+    return 'S4ME';
+}
+
+/* For internal in-memory save states (rewind, debugger) that do not need BESS */
+size_t GB_get_save_state_size_no_bess(GB_gameboy_t *gb);
+void GB_save_state_to_buffer_no_bess(GB_gameboy_t *gb, uint8_t *buffer);
+#endif
+
 #endif /* save_state_h */

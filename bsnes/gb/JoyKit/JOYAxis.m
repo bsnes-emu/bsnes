@@ -19,6 +19,8 @@
             @"Analog R1",
             @"Analog R2",
             @"Analog R3",
+            @"Slider",
+            @"Dial",
             @"Wheel",
             @"Rudder",
             @"Throttle",
@@ -57,10 +59,23 @@
 
     
     if (element.usagePage == kHIDPage_GenericDesktop) {
-        uint16_t usage = element.usage;
-        _usage = JOYAxisUsageGeneric0 + usage - kHIDUsage_GD_X + 1;
+        switch (element.usage) {
+            case kHIDUsage_GD_Slider: _usage = JOYAxisUsageSlider; break;
+            case kHIDUsage_GD_Dial: _usage = JOYAxisUsageDial; break;
+            case kHIDUsage_GD_Wheel: _usage = JOYAxisUsageWheel; break;
+            default:
+                _usage = JOYAxisUsageGeneric0 + element.usage - kHIDUsage_GD_X + 1;
+                break;
+        }
     }
-    
+    else if (element.usagePage == kHIDPage_Simulation) {
+        switch (element.usage) {
+            case kHIDUsage_Sim_Accelerator: _usage = JOYAxisUsageAccelerator; break;
+            case kHIDUsage_Sim_Brake: _usage = JOYAxisUsageBrake; break;
+            case kHIDUsage_Sim_Rudder: _usage = JOYAxisUsageRudder; break;
+            case kHIDUsage_Sim_Throttle: _usage = JOYAxisUsageThrottle; break;
+        }
+    }
     _min = 1.0;
     
     return self;
@@ -86,5 +101,29 @@
     }
     return old != _state;
 }
+
+- (JOYButtonUsage)equivalentButtonUsage
+{
+    if (self.usage >= JOYAxisUsageGeneric0) {
+        return self.usage - JOYAxisUsageGeneric0 + JOYButtonUsageGeneric0;
+    }
+    switch (self.usage) {
+        case JOYAxisUsageL1: return JOYButtonUsageL1;
+        case JOYAxisUsageL2: return JOYButtonUsageL2;
+        case JOYAxisUsageL3: return JOYButtonUsageL3;
+        case JOYAxisUsageR1: return JOYButtonUsageR1;
+        case JOYAxisUsageR2: return JOYButtonUsageR2;
+        case JOYAxisUsageR3: return JOYButtonUsageR3;
+        case JOYAxisUsageSlider: return JOYButtonUsageSlider;
+        case JOYAxisUsageDial: return JOYButtonUsageDial;
+        case JOYAxisUsageWheel: return JOYButtonUsageWheel;
+        case JOYAxisUsageRudder: return JOYButtonUsageRudder;
+        case JOYAxisUsageThrottle: return JOYButtonUsageThrottle;
+        case JOYAxisUsageAccelerator: return JOYButtonUsageAccelerator;
+        case JOYAxisUsageBrake: return JOYButtonUsageBrake;
+        default: return JOYButtonUsageNone;
+    }
+}
+
 
 @end

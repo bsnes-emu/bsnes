@@ -3,15 +3,14 @@
 #import "Document.h"
 
 @interface GBCheatWindowController : NSObject <NSTableViewDelegate, NSTableViewDataSource, NSTextFieldDelegate>
-@property (weak) IBOutlet NSTableView *cheatsTable;
-@property (weak) IBOutlet NSTextField *addressField;
-@property (weak) IBOutlet NSTextField *valueField;
-@property (weak) IBOutlet NSTextField *oldValueField;
-@property (weak) IBOutlet NSButton *oldValueCheckbox;
-@property (weak) IBOutlet NSTextField *descriptionField;
-@property (weak) IBOutlet NSTextField *importCodeField;
-@property (weak) IBOutlet NSTextField *importDescriptionField;
-@property (weak) IBOutlet Document *document;
+@property (nonatomic, weak) IBOutlet NSTableView *cheatsTable;
+@property (nonatomic, weak) IBOutlet NSTextField *addressField;
+@property (nonatomic, weak) IBOutlet NSTextField *valueField;
+@property (nonatomic, weak) IBOutlet NSTextField *oldValueField;
+@property (nonatomic, weak) IBOutlet NSButton *oldValueCheckbox;
+@property (nonatomic, weak) IBOutlet NSTextField *descriptionField;
+@property (nonatomic, weak) IBOutlet NSTextField *importCodeField;
+@property (nonatomic, weak) IBOutlet NSTextField *importDescriptionField;
+@property (nonatomic, weak) IBOutlet Document *document;
 - (void)cheatsUpdated;
 @end
-

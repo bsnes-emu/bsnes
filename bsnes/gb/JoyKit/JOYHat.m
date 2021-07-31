@@ -1,5 +1,6 @@
 #import "JOYHat.h"
 #import "JOYElement.h"
+#import <AppKit/AppKit.h>
 
 @implementation JOYHat
 {
@@ -27,6 +28,7 @@
     if (!self) return self;
     
     _element = element;
+    _state = -1;
     
     return self;
 }

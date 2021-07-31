@@ -25,6 +25,7 @@
                 <outlet property="memoryBankItem" destination="bWC-FW-IYP" id="Lf2-dh-z32"/>
                 <outlet property="memoryView" destination="8hr-8o-3rN" id="fF0-rh-8ND"/>
                 <outlet property="memoryWindow" destination="mRm-dL-mCj" id="VPR-lu-vtI"/>
+                <outlet property="osdView" destination="MX4-l2-7NE" id="Am7-fq-uvu"/>
                 <outlet property="paletteTableView" destination="gfC-d3-dmq" id="fTC-eL-Qg3"/>
                 <outlet property="printerFeedWindow" destination="NdE-0B-WCf" id="yVK-cS-NOJ"/>
                 <outlet property="spritesTableView" destination="TOc-XJ-w9w" id="O4R-4Z-9hU"/>
@@ -59,8 +60,15 @@
                             <view fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="uqf-pe-VAF" customClass="GBView">
                                 <rect key="frame" x="0.0" y="0.0" width="160" height="144"/>
                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                <connections>
+                                    <outlet property="document" destination="-2" id="Fvh-rD-z4r"/>
+                                </connections>
                             </view>
                         </subviews>
+                    </customView>
+                    <customView fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MX4-l2-7NE" customClass="GBOSDView">
+                        <rect key="frame" x="0.0" y="0.0" width="160" height="144"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                     </customView>
                 </subviews>
             </view>
@@ -115,7 +123,7 @@
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <clipView key="contentView" ambiguous="YES" drawsBackground="NO" copiesOnScroll="NO" id="EQe-Ad-L7S">
                                             <rect key="frame" x="0.0" y="0.0" width="591" height="376"/>
-                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <textView ambiguous="YES" editable="NO" drawsBackground="NO" importsGraphics="NO" richText="NO" verticallyResizable="YES" baseWritingDirection="leftToRight" findStyle="bar" allowsNonContiguousLayout="YES" id="doS-dM-hnl">
                                                     <rect key="frame" x="0.0" y="0.0" width="591" height="376"/>
@@ -152,7 +160,7 @@
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                         <clipView key="contentView" ambiguous="YES" drawsBackground="NO" copiesOnScroll="NO" id="YHx-TM-zIC">
                                             <rect key="frame" x="0.0" y="0.0" width="329" height="47"/>
-                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <textView ambiguous="YES" drawsBackground="NO" importsGraphics="NO" richText="NO" verticallyResizable="YES" allowsCharacterPickerTouchBarItem="NO" allowsUndo="YES" allowsNonContiguousLayout="YES" textCompletion="NO" spellingCorrection="YES" id="w0g-eK-jM4">
                                                     <rect key="frame" x="0.0" y="0.0" width="329" height="47"/>
@@ -186,7 +194,7 @@
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                         <clipView key="contentView" ambiguous="YES" drawsBackground="NO" copiesOnScroll="NO" id="Cs9-3x-ATg">
                                             <rect key="frame" x="0.0" y="0.0" width="329" height="328"/>
-                                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                            <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <textView ambiguous="YES" editable="NO" drawsBackground="NO" importsGraphics="NO" richText="NO" verticallyResizable="YES" baseWritingDirection="leftToRight" findStyle="bar" allowsNonContiguousLayout="YES" spellingCorrection="YES" id="JgV-7E-iwp">
                                                     <rect key="frame" x="0.0" y="0.0" width="329" height="328"/>

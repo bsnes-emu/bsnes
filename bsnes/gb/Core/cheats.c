@@ -69,7 +69,7 @@ void GB_add_cheat(GB_gameboy_t *gb, const char *description, uint16_t address, u
     cheat->enabled = enabled;
     strncpy(cheat->description, description, sizeof(cheat->description));
     cheat->description[sizeof(cheat->description) - 1] = 0;
-    gb->cheats = realloc(gb->cheats, (++gb->cheat_count) * sizeof(*cheat));
+    gb->cheats = realloc(gb->cheats, (++gb->cheat_count) * sizeof(gb->cheats[0]));
     gb->cheats[gb->cheat_count - 1] = cheat;
     
     GB_cheat_hash_t **hash = &gb->cheat_hash[hash_addr(address)];
@@ -100,7 +100,7 @@ void GB_remove_cheat(GB_gameboy_t *gb, const GB_cheat_t *cheat)
                 gb->cheats = NULL;
             }
             else {
-                gb->cheats = realloc(gb->cheats, gb->cheat_count * sizeof(*cheat));
+                gb->cheats = realloc(gb->cheats, gb->cheat_count * sizeof(gb->cheats[0]));
             }
             break;
         }
@@ -109,7 +109,7 @@ void GB_remove_cheat(GB_gameboy_t *gb, const GB_cheat_t *cheat)
     GB_cheat_hash_t **hash = &gb->cheat_hash[hash_addr(cheat->address)];
     for (unsigned i = 0; i < (*hash)->size; i++) {
         if ((*hash)->cheats[i] == cheat) {
-            (*hash)->cheats[i] = (*hash)->cheats[(*hash)->size--];
+            (*hash)->cheats[i] = (*hash)->cheats[--(*hash)->size];
             if ((*hash)->size == 0) {
                 free(*hash);
                 *hash = NULL;
@@ -200,7 +200,7 @@ void GB_update_cheat(GB_gameboy_t *gb, const GB_cheat_t *_cheat, const char *des
         GB_cheat_hash_t **hash = &gb->cheat_hash[hash_addr(cheat->address)];
         for (unsigned i = 0; i < (*hash)->size; i++) {
             if ((*hash)->cheats[i] == cheat) {
-                (*hash)->cheats[i] = (*hash)->cheats[(*hash)->size--];
+                (*hash)->cheats[i] = (*hash)->cheats[--(*hash)->size];
                 if ((*hash)->size == 0) {
                     free(*hash);
                     *hash = NULL;
@@ -222,7 +222,7 @@ void GB_update_cheat(GB_gameboy_t *gb, const GB_cheat_t *_cheat, const char *des
         }
         else {
             (*hash)->size++;
-            *hash = malloc(sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
+            *hash = realloc(*hash, sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
             (*hash)->cheats[(*hash)->size - 1] = cheat;
         }
     }

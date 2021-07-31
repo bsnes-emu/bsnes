@@ -7,8 +7,6 @@
   #define M_PI 3.14159265358979323846
 #endif
 
-#define INTRO_ANIMATION_LENGTH 200
-
 enum {
     PAL01    = 0x00,
     PAL23    = 0x01,
@@ -49,14 +47,14 @@ static inline void pal_command(GB_gameboy_t *gb, unsigned first, unsigned second
 {
     gb->sgb->effective_palettes[0] = gb->sgb->effective_palettes[4] =
         gb->sgb->effective_palettes[8] = gb->sgb->effective_palettes[12] =
-        gb->sgb->command[1] | (gb->sgb->command[2] << 8);
+        *(uint16_t *)&gb->sgb->command[1];
     
     for (unsigned i = 0; i < 3; i++) {
-        gb->sgb->effective_palettes[first * 4 + i + 1] = gb->sgb->command[3 + i * 2] | (gb->sgb->command[4 + i * 2] << 8);
+        gb->sgb->effective_palettes[first * 4 + i + 1] = *(uint16_t *)&gb->sgb->command[3 + i * 2];
     }
     
     for (unsigned i = 0; i < 3; i++) {
-        gb->sgb->effective_palettes[second * 4 + i + 1] = gb->sgb->command[9 + i * 2] | (gb->sgb->command[10 + i * 2] << 8);
+        gb->sgb->effective_palettes[second * 4 + i + 1] = *(uint16_t *)&gb->sgb->command[9 + i * 2];
     }
 }
 
@@ -172,10 +170,10 @@ static void command_ready(GB_gameboy_t *gb)
                 gb->sgb->disable_commands = true;
                 for (unsigned i = 0; i < sizeof(palette_assignments) / sizeof(palette_assignments[0]); i++) {
                     if (memcmp(palette_assignments[i].name, &gb->sgb->received_header[0x30], sizeof(palette_assignments[i].name)) == 0) {
-                        gb->sgb->effective_palettes[0] = built_in_palettes[palette_assignments[i].palette_index * 4 - 4];
-                        gb->sgb->effective_palettes[1] = built_in_palettes[palette_assignments[i].palette_index * 4 + 1 - 4];
-                        gb->sgb->effective_palettes[2] = built_in_palettes[palette_assignments[i].palette_index * 4 + 2 - 4];
-                        gb->sgb->effective_palettes[3] = built_in_palettes[palette_assignments[i].palette_index * 4 + 3 - 4];
+                        gb->sgb->effective_palettes[0] = LE16(built_in_palettes[palette_assignments[i].palette_index * 4 - 4]);
+                        gb->sgb->effective_palettes[1] = LE16(built_in_palettes[palette_assignments[i].palette_index * 4 + 1 - 4]);
+                        gb->sgb->effective_palettes[2] = LE16(built_in_palettes[palette_assignments[i].palette_index * 4 + 2 - 4]);
+                        gb->sgb->effective_palettes[3] = LE16(built_in_palettes[palette_assignments[i].palette_index * 4 + 3 - 4]);
                         break;
                     }
                 }
@@ -269,7 +267,7 @@ static void command_ready(GB_gameboy_t *gb)
 #endif
             uint8_t x = command->x;
             uint8_t y = command->y;
-            if (x >= 20 || y >= 18 || (count + 3) / 4 > sizeof(gb->sgb->command) - sizeof(*command) - 1) {
+            if (x >= 20 || y >= 18) {
                 /* TODO: Verify with the SFC BIOS */
                 break;
             }
@@ -283,7 +281,7 @@ static void command_ready(GB_gameboy_t *gb)
                         x++;
                         y = 0;
                         if (x == 20) {
-                            x = 0;
+                            break;
                         }
                     }
                 }
@@ -293,7 +291,7 @@ static void command_ready(GB_gameboy_t *gb)
                         y++;
                         x = 0;
                         if (y == 18) {
-                            y = 0;
+                            break;
                         }
                     }
                 }
@@ -556,8 +554,8 @@ static void render_boot_animation (GB_gameboy_t *gb)
     else if (gb->sgb->intro_animation < 80) {
         fade_blue = 80 - gb->sgb->intro_animation;
     }
-    else if (gb->sgb->intro_animation > INTRO_ANIMATION_LENGTH - 32) {
-        fade_red = fade_blue = gb->sgb->intro_animation - INTRO_ANIMATION_LENGTH + 32;
+    else if (gb->sgb->intro_animation > GB_SGB_INTRO_ANIMATION_LENGTH - 32) {
+        fade_red = fade_blue = gb->sgb->intro_animation - GB_SGB_INTRO_ANIMATION_LENGTH + 32;
     }
     uint32_t colors[] = {
         convert_rgb15(gb, 0),
@@ -607,74 +605,75 @@ void GB_sgb_render(GB_gameboy_t *gb)
         render_jingle(gb, gb->apu_output.sample_rate / GB_get_usual_frame_rate(gb));
     }
     
-    if (gb->sgb->intro_animation < INTRO_ANIMATION_LENGTH) gb->sgb->intro_animation++;
+    if (gb->sgb->intro_animation < GB_SGB_INTRO_ANIMATION_LENGTH) gb->sgb->intro_animation++;
     
     if (gb->sgb->vram_transfer_countdown) {
         if (--gb->sgb->vram_transfer_countdown == 0) {
-            if (gb->sgb->transfer_dest == TRANSFER_LOW_TILES || gb->sgb->transfer_dest == TRANSFER_HIGH_TILES) {
-                uint8_t *base = &gb->sgb->pending_border.tiles[gb->sgb->transfer_dest == TRANSFER_HIGH_TILES ? 0x80 * 8 * 8 : 0];
-                for (unsigned tile = 0; tile < 0x80; tile++) {
-                    unsigned tile_x = (tile % 10) * 16;
-                    unsigned tile_y = (tile / 10) * 8;
-                    for (unsigned y = 0; y < 0x8; y++) {
-                        for (unsigned x = 0; x < 0x8; x++) {
-                            base[tile * 8 * 8 + y * 8 + x] = gb->sgb->screen_buffer[(tile_x + x) + (tile_y + y) * 160] +
-                                                             gb->sgb->screen_buffer[(tile_x + x + 8) + (tile_y + y) * 160] * 4;
-                        }
-                    }
-                }
-                
+            unsigned size = 0;
+            uint16_t *data = NULL;
+            
+            switch (gb->sgb->transfer_dest) {
+                case TRANSFER_LOW_TILES:
+                    size = 0x100;
+                    data = (uint16_t *)gb->sgb->pending_border.tiles;
+                    break;
+                case TRANSFER_HIGH_TILES:
+                    size = 0x100;
+                    data = (uint16_t *)gb->sgb->pending_border.tiles + 0x800;
+                    break;
+                case TRANSFER_PALETTES:
+                    size = 0x100;
+                    data = gb->sgb->ram_palettes;
+                    break;
+                case TRANSFER_BORDER_DATA:
+                    size = 0x88;
+                    data = gb->sgb->pending_border.raw_data;
+                    break;
+                case TRANSFER_ATTRIBUTES:
+                    size = 0xFE;
+                    data = (uint16_t *)gb->sgb->attribute_files;
+                    break;
+                default:
+                    return; // Corrupt state?
             }
-            else {
-                unsigned size = 0;
-                uint16_t *data = NULL;
-                
-                switch (gb->sgb->transfer_dest) {
-                    case TRANSFER_PALETTES:
-                        size = 0x100;
-                        data = gb->sgb->ram_palettes;
-                        break;
-                    case TRANSFER_BORDER_DATA:
-                        size = 0x88;
-                        data = gb->sgb->pending_border.raw_data;
-                        break;
-                    case TRANSFER_ATTRIBUTES:
-                        size = 0xFE;
-                        data = (uint16_t *)gb->sgb->attribute_files;
-                        break;
-                    default:
-                        return; // Corrupt state?
-                }
-                
-                for (unsigned tile = 0; tile < size; tile++) {
-                    unsigned tile_x = (tile % 20) * 8;
-                    unsigned tile_y = (tile / 20) * 8;
-                    for (unsigned y = 0; y < 0x8; y++) {
-                        static const uint16_t pixel_to_bits[4] = {0x0000, 0x0080, 0x8000, 0x8080};
-                        *data = 0;
-                        for (unsigned x = 0; x < 8; x++) {
-                            *data |= pixel_to_bits[gb->sgb->screen_buffer[(tile_x + x) + (tile_y + y) * 160] & 3] >> x;
-                        }
-#ifdef GB_BIG_ENDIAN
-                        if (gb->sgb->transfer_dest == TRANSFER_ATTRIBUTES) {
-                            *data = __builtin_bswap16(*data);
-                        }
-#endif
-                        data++;
+            
+            for (unsigned tile = 0; tile < size; tile++) {
+                unsigned tile_x = (tile % 20) * 8;
+                unsigned tile_y = (tile / 20) * 8;
+                for (unsigned y = 0; y < 0x8; y++) {
+                    static const uint16_t pixel_to_bits[4] = {0x0000, 0x0080, 0x8000, 0x8080};
+                    *data = 0;
+                    for (unsigned x = 0; x < 8; x++) {
+                        *data |= pixel_to_bits[gb->sgb->screen_buffer[(tile_x + x) + (tile_y + y) * 160] & 3] >> x;
                     }
+#ifdef GB_BIG_ENDIAN
+                    *data = __builtin_bswap16(*data);
+#endif
+                    data++;
                 }
-                if (gb->sgb->transfer_dest == TRANSFER_BORDER_DATA) {
-                    gb->sgb->border_animation = 64;
-                }
+            }
+            if (gb->sgb->transfer_dest == TRANSFER_BORDER_DATA) {
+                gb->sgb->border_animation = 64;
             }
         }
     }
     
-    if (!gb->screen || !gb->rgb_encode_callback || gb->disable_rendering) return;
+    if (!gb->screen || !gb->rgb_encode_callback || gb->disable_rendering) {
+        if (gb->sgb->border_animation > 32) {
+            gb->sgb->border_animation--;
+        }
+        else if (gb->sgb->border_animation != 0) {
+            gb->sgb->border_animation--;
+        }
+        if (gb->sgb->border_animation == 32) {
+            memcpy(&gb->sgb->border, &gb->sgb->pending_border, sizeof(gb->sgb->border));
+        }
+        return;
+    }
 
     uint32_t colors[4 * 4];
     for (unsigned i = 0; i < 4 * 4; i++) {
-        colors[i] = convert_rgb15(gb, gb->sgb->effective_palettes[i]);
+        colors[i] = convert_rgb15(gb, LE16(gb->sgb->effective_palettes[i]));
     }
     
     if (gb->sgb->mask_mode != MASK_FREEZE) {
@@ -683,7 +682,7 @@ void GB_sgb_render(GB_gameboy_t *gb)
                sizeof(gb->sgb->effective_screen_buffer));
     }
     
-    if (gb->sgb->intro_animation < INTRO_ANIMATION_LENGTH) {
+    if (gb->sgb->intro_animation < GB_SGB_INTRO_ANIMATION_LENGTH) {
         render_boot_animation(gb);
     }
     else {
@@ -735,21 +734,21 @@ void GB_sgb_render(GB_gameboy_t *gb)
     }
     
     uint32_t border_colors[16 * 4];
-    if (gb->sgb->border_animation == 0 || gb->sgb->intro_animation < INTRO_ANIMATION_LENGTH) {
+    if (gb->sgb->border_animation == 0 || gb->sgb->intro_animation < GB_SGB_INTRO_ANIMATION_LENGTH) {
         for (unsigned i = 0; i < 16 * 4; i++) {
-            border_colors[i] = convert_rgb15(gb, gb->sgb->border.palette[i]);
+            border_colors[i] = convert_rgb15(gb, LE16(gb->sgb->border.palette[i]));
         }
     }
     else if (gb->sgb->border_animation > 32) {
         gb->sgb->border_animation--;
         for (unsigned i = 0; i < 16 * 4; i++) {
-            border_colors[i] = convert_rgb15_with_fade(gb, gb->sgb->border.palette[i], 64 - gb->sgb->border_animation);
+            border_colors[i] = convert_rgb15_with_fade(gb, LE16(gb->sgb->border.palette[i]), 64 - gb->sgb->border_animation);
         }
     }
     else {
         gb->sgb->border_animation--;
         for (unsigned i = 0; i < 16 * 4; i++) {
-            border_colors[i] = convert_rgb15_with_fade(gb, gb->sgb->border.palette[i], gb->sgb->border_animation);
+            border_colors[i] = convert_rgb15_with_fade(gb, LE16(gb->sgb->border.palette[i]), gb->sgb->border_animation);
         }
     }
     
@@ -767,13 +766,19 @@ void GB_sgb_render(GB_gameboy_t *gb)
             else if (gb->border_mode == GB_BORDER_NEVER) {
                 continue;
             }
-            uint16_t tile = gb->sgb->border.map[tile_x + tile_y * 32];
-            uint8_t flip_x = (tile & 0x4000)? 0x7 : 0;
-            uint8_t flip_y = (tile & 0x8000)? 0x7 : 0;
+            uint16_t tile = LE16(gb->sgb->border.map[tile_x + tile_y * 32]);
+            uint8_t flip_x = (tile & 0x4000)? 0:7;
+            uint8_t flip_y = (tile & 0x8000)? 7:0;
             uint8_t palette = (tile >> 10) & 3;
             for (unsigned y = 0; y < 8; y++) {
+                unsigned base = (tile & 0xFF) * 32 + (y ^ flip_y) * 2;
                 for (unsigned x = 0; x < 8; x++) {
-                    uint8_t color = gb->sgb->border.tiles[(tile & 0xFF) * 64 + (x ^ flip_x) + (y ^ flip_y) * 8] & 0xF;
+                    uint8_t bit = 1 << (x ^ flip_x);
+                    uint8_t color = ((gb->sgb->border.tiles[base] & bit)      ? 1: 0) |
+                                    ((gb->sgb->border.tiles[base + 1] & bit)  ? 2: 0) |
+                                    ((gb->sgb->border.tiles[base + 16] & bit) ? 4: 0) |
+                                    ((gb->sgb->border.tiles[base + 17] & bit) ? 8: 0);
+                    
                     uint32_t *output = gb->screen;
                     if (gb->border_mode == GB_BORDER_NEVER) {
                         output += (tile_x - 6) * 8 + x + ((tile_y - 5) * 8 + y) * 160;
@@ -798,22 +803,19 @@ void GB_sgb_load_default_data(GB_gameboy_t *gb)
 {
     
 #include "graphics/sgb_border.inc"
-    
+        
+#ifdef GB_BIG_ENDIAN
+    for (unsigned i = 0; i < sizeof(tilemap) / 2; i++) {
+        gb->sgb->border.map[i] = LE16(tilemap[i]);
+    }
+    for (unsigned i = 0; i < sizeof(palette) / 2; i++) {
+        gb->sgb->border.palette[i] = LE16(palette[i]);
+    }
+#else
     memcpy(gb->sgb->border.map, tilemap, sizeof(tilemap));
     memcpy(gb->sgb->border.palette, palette, sizeof(palette));
-    
-    /* Expand tileset */
-    for (unsigned tile = 0; tile < sizeof(tiles) / 32; tile++) {
-        for (unsigned y = 0; y < 8; y++) {
-            for (unsigned x = 0; x < 8; x++) {
-                gb->sgb->border.tiles[tile * 8 * 8 + y * 8 + x] =
-                    (tiles[tile * 32 + y * 2 +  0] & (1 << (7 ^ x)) ? 1 : 0) |
-                    (tiles[tile * 32 + y * 2 +  1] & (1 << (7 ^ x)) ? 2 : 0) |
-                    (tiles[tile * 32 + y * 2 + 16] & (1 << (7 ^ x)) ? 4 : 0) |
-                    (tiles[tile * 32 + y * 2 + 17] & (1 << (7 ^ x)) ? 8 : 0);
-            }
-        }
-    }
+#endif
+    memcpy(gb->sgb->border.tiles, tiles, sizeof(tiles));
     
     if (gb->model != GB_MODEL_SGB2) {
         /* Delete the "2" */
@@ -825,10 +827,10 @@ void GB_sgb_load_default_data(GB_gameboy_t *gb)
         /* Re-center */
         memmove(&gb->sgb->border.map[25 * 32 + 1], &gb->sgb->border.map[25 * 32], (32 * 3 - 1) * sizeof(gb->sgb->border.map[0]));
     }
-    gb->sgb->effective_palettes[0] = built_in_palettes[0];
-    gb->sgb->effective_palettes[1] = built_in_palettes[1];
-    gb->sgb->effective_palettes[2] = built_in_palettes[2];
-    gb->sgb->effective_palettes[3] = built_in_palettes[3];
+    gb->sgb->effective_palettes[0] = LE16(built_in_palettes[0]);
+    gb->sgb->effective_palettes[1] = LE16(built_in_palettes[1]);
+    gb->sgb->effective_palettes[2] = LE16(built_in_palettes[2]);
+    gb->sgb->effective_palettes[3] = LE16(built_in_palettes[3]);
 }
 
 static double fm_synth(double phase)
@@ -874,7 +876,7 @@ static void render_jingle(GB_gameboy_t *gb, size_t count)
         return;
     }
     
-    if (gb->sgb->intro_animation >= INTRO_ANIMATION_LENGTH) return;
+    if (gb->sgb->intro_animation >= GB_SGB_INTRO_ANIMATION_LENGTH) return;
     
     signed jingle_stage = (gb->sgb->intro_animation - 64) / 3;
     double sweep_cutoff_ratio = 2000.0 * pow(2, gb->sgb->intro_animation / 20.0) / gb->apu_output.sample_rate;
@@ -892,7 +894,7 @@ static void render_jingle(GB_gameboy_t *gb, size_t count)
             gb->sgb_intro_jingle_phases[f] += frequencies[f] / gb->apu_output.sample_rate;
         }
         if (gb->sgb->intro_animation > 100) {
-            sample *= pow((INTRO_ANIMATION_LENGTH - gb->sgb->intro_animation) / (INTRO_ANIMATION_LENGTH - 100.0), 3);
+            sample *= pow((GB_SGB_INTRO_ANIMATION_LENGTH - gb->sgb->intro_animation) / (GB_SGB_INTRO_ANIMATION_LENGTH - 100.0), 3);
         }
         
         if (gb->sgb->intro_animation < 120) {

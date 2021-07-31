@@ -30,6 +30,14 @@ else
 DEFAULT := sdl
 endif
 
+ifneq ($(shell which xdg-open)$(FREEDESKTOP),)
+# Running on an FreeDesktop environment, configure for (optional) installation
+DESTDIR ?= 
+PREFIX ?= /usr/local
+DATA_DIR ?= $(PREFIX)/share/sameboy/
+FREEDESKTOP ?= true
+endif
+
 default: $(DEFAULT)
 
 ifeq ($(MAKECMDGOALS),)
@@ -98,8 +106,8 @@ OPEN_DIALOG = OpenDialog/cocoa.m
 endif
 
 # These must come before the -Wno- flags
-WARNINGS += -Werror -Wall -Wno-unknown-warning -Wno-unknown-warning-option
-WARNINGS += -Wno-nonnull -Wno-unused-result -Wno-strict-aliasing -Wno-multichar -Wno-int-in-bool-context
+WARNINGS += -Werror -Wall -Wno-unknown-warning -Wno-unknown-warning-option -Wno-missing-braces
+WARNINGS += -Wno-nonnull -Wno-unused-result -Wno-strict-aliasing -Wno-multichar -Wno-int-in-bool-context -Wno-format-truncation
 
 # Only add this flag if the compiler supports it
 ifeq ($(shell $(CC) -x c -c $(NULL) -o $(NULL) -Werror -Wpartial-availability 2> $(NULL); echo $$?),0)
@@ -113,7 +121,10 @@ endif
 
 CFLAGS += $(WARNINGS)
 
-CFLAGS += -std=gnu11 -D_GNU_SOURCE -DVERSION="$(VERSION)" -I. -D_USE_MATH_DEFINES
+CFLAGS += -std=gnu11 -D_GNU_SOURCE -DGB_VERSION='"$(VERSION)"' -I. -D_USE_MATH_DEFINES
+ifneq (,$(UPDATE_SUPPORT))
+CFLAGS += -DUPDATE_SUPPORT
+endif
 
 ifeq (,$(PKG_CONFIG))
 SDL_CFLAGS := $(shell sdl2-config --cflags)
@@ -130,7 +141,7 @@ GL_LDFLAGS := $(shell $(PKG_CONFIG) --libs gl || echo -lGL)
 endif
 ifeq ($(PLATFORM),windows32)
 CFLAGS += -IWindows -Drandom=rand --target=i386-pc-windows
-LDFLAGS += -lmsvcrt -lcomdlg32 -luser32 -lshell32 -lSDL2main -Wl,/MANIFESTFILE:NUL --target=i386-pc-windows
+LDFLAGS += -lmsvcrt -lcomdlg32 -luser32 -lshell32 -lole32 -lSDL2main -Wl,/MANIFESTFILE:NUL --target=i386-pc-windows
 SDL_LDFLAGS := -lSDL2
 GL_LDFLAGS := -lopengl32
 else
@@ -420,6 +431,49 @@ $(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameBoyLogo.pb12
 # Libretro Core (uses its own build system)
 libretro:
 	CFLAGS="$(WARNINGS)" $(MAKE) -C libretro
+
+# install for Linux/FreeDesktop/etc.
+# Does not install mimetype icons because FreeDesktop is cursed abomination with no right to exist.
+# If you somehow find a reasonable way to make associate an icon with an extension in this dumpster
+# fire of a desktop environment, open an issue or a pull request
+ifneq ($(FREEDESKTOP),)
+ICON_NAMES := apps/sameboy mimetypes/x-gameboy-rom mimetypes/x-gameboy-color-rom
+ICON_SIZES := 16x16 32x32 64x64 128x128 256x256 512x512
+ICONS := $(foreach name,$(ICON_NAMES), $(foreach size,$(ICON_SIZES),$(DESTDIR)$(PREFIX)/share/icons/hicolor/$(size)/$(name).png))
+install: sdl $(DESTDIR)$(PREFIX)/share/mime/packages/sameboy.xml $(ICONS) FreeDesktop/sameboy.desktop
+	-@$(MKDIR) -p $(dir $(DESTDIR)$(PREFIX))
+	mkdir -p $(DESTDIR)$(DATA_DIR)/ $(DESTDIR)$(PREFIX)/bin/
+	cp -rf $(BIN)/SDL/* $(DESTDIR)$(DATA_DIR)/
+	mv $(DESTDIR)$(DATA_DIR)/sameboy $(DESTDIR)$(PREFIX)/bin/sameboy
+ifeq ($(DESTDIR),)
+	-update-mime-database -n $(PREFIX)/share/mime
+	-xdg-desktop-menu install --novendor --mode system FreeDesktop/sameboy.desktop
+	-xdg-icon-resource forceupdate --mode system
+	-xdg-desktop-menu forceupdate --mode system
+ifneq ($(SUDO_USER),)
+	-su $(SUDO_USER) -c "xdg-desktop-menu forceupdate --mode system"
+endif
+else
+	-@$(MKDIR) -p $(DESTDIR)$(PREFIX)/share/applications/
+	cp FreeDesktop/sameboy.desktop $(DESTDIR)$(PREFIX)/share/applications/sameboy.desktop
+endif
+
+$(DESTDIR)$(PREFIX)/share/icons/hicolor/%/apps/sameboy.png: FreeDesktop/AppIcon/%.png
+	-@$(MKDIR) -p $(dir $@)
+	cp -f $^ $@
+    
+$(DESTDIR)$(PREFIX)/share/icons/hicolor/%/mimetypes/x-gameboy-rom.png: FreeDesktop/Cartridge/%.png
+	-@$(MKDIR) -p $(dir $@)
+	cp -f $^ $@
+    
+$(DESTDIR)$(PREFIX)/share/icons/hicolor/%/mimetypes/x-gameboy-color-rom.png: FreeDesktop/ColorCartridge/%.png
+	-@$(MKDIR) -p $(dir $@)
+	cp -f $^ $@
+        
+$(DESTDIR)$(PREFIX)/share/mime/packages/sameboy.xml: FreeDesktop/sameboy.xml
+	-@$(MKDIR) -p $(dir $@)
+	cp -f $^ $@
+endif
 
 # Clean
 clean:

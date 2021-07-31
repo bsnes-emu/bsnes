@@ -271,7 +271,7 @@ TitleChecksums:
     db $A2 ; STAR WARS-NOA
     db $49 ;
     db $4E ; WAVERACE
-    db $43 | $80 ;
+    db $43 ;
     db $68 ; LOLO2
     db $E0 ; YOSHI'S COOKIE
     db $8B ; MYSTIC QUEST
@@ -330,7 +330,7 @@ ChecksumsEnd:
 
 PalettePerChecksum:
 palette_index: MACRO ; palette, flags
-    db ((\1) * 3) | (\2) ; | $80 means game requires DMG boot tilemap
+    db ((\1)) | (\2) ; | $80 means game requires DMG boot tilemap
 ENDM
     palette_index 0, 0  ; Default Palette
     palette_index 4, 0  ; ALLEY WAY
@@ -374,7 +374,7 @@ ENDM
     palette_index 45, 0 ; STAR WARS-NOA
     palette_index 36, 0 ;
     palette_index 38, 0 ; WAVERACE
-    palette_index 26, 0 ;
+    palette_index 26, $80 ;
     palette_index 42, 0 ; LOLO2
     palette_index 30, 0 ; YOSHI'S COOKIE
     palette_index 41, 0 ; MYSTIC QUEST
@@ -475,7 +475,7 @@ ENDM
     palette_comb 17, 4, 13
     raw_palette_comb 28 * 4 - 1, 0 * 4, 14 * 4
     raw_palette_comb 28 * 4 - 1, 4 * 4, 15 * 4
-    palette_comb 19, 22, 9
+    raw_palette_comb 19 * 4, 23 * 4 - 1, 9 * 4
     palette_comb 16, 28, 10
     palette_comb 4, 23, 28
     palette_comb 17, 22, 2
@@ -918,7 +918,10 @@ EmulateDMG:
     call GetPaletteIndex
     bit 7, a
     call nz, LoadDMGTilemap
-    and $7F
+    res 7, a
+    ld b, a
+    add b
+    add b
     ld b, a
     ldh a, [InputPalette]
     and a
@@ -978,7 +981,7 @@ GetPaletteIndex:
 
     ; We might have a match, Do duplicate/4th letter check
     ld a, l
-    sub FirstChecksumWithDuplicate - TitleChecksums
+    sub FirstChecksumWithDuplicate - TitleChecksums + 1
     jr c, .match ; Does not have a duplicate, must be a match!
     ; Has a duplicate; check 4th letter
     push hl

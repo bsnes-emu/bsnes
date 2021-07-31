@@ -46,6 +46,13 @@ enum GB_CHANNELS {
     GB_N_CHANNELS
 };
 
+typedef struct
+{
+    bool locked:1;
+    bool clock:1; // Represents FOSY on channel 4
+    unsigned padding:6;
+} GB_envelope_clock_t;
+
 typedef void (*GB_sample_callback_t)(GB_gameboy_t *gb, GB_sample_t *sample);
 
 typedef struct
@@ -64,10 +71,10 @@ typedef struct
 
     uint8_t square_sweep_countdown; // In 128Hz
     uint8_t square_sweep_calculate_countdown; // In 2 MHz
-    uint16_t new_sweep_sample_length;
+    uint16_t sweep_length_addend;
     uint16_t shadow_sweep_sample_length;
-    bool sweep_enabled;
-    bool sweep_decreasing;
+    bool unshifted_sweep;
+    bool enable_zombie_calculate_stepping;
 
     struct {
         uint16_t pulse_length; // Reloaded from NRX1 (xorred), in 256Hz DIV ticks
@@ -105,8 +112,9 @@ typedef struct
         uint16_t lfsr;
         bool narrow;
 
-        uint16_t sample_countdown; // in APU ticks (Reloaded from sample_length)
-        uint16_t sample_length; // From NR43, in APU ticks
+        uint8_t counter_countdown; // Counts from 0-7 to 0 to tick counter (Scaled from 512KHz to 2MHz)
+        uint8_t __padding;
+        uint16_t counter; // A bit from this 14-bit register ticks LFSR
         bool length_enabled; // NR44
 
         uint8_t alignment; // If (NR43 & 7) != 0, samples are aligned to 512KHz clock instead of
@@ -120,6 +128,14 @@ typedef struct
     uint8_t skip_div_event;
     bool current_lfsr_sample;
     uint8_t pcm_mask[2]; // For CGB-0 to CGB-C PCM read glitch
+    uint8_t channel_1_restart_hold;
+    int8_t channel_4_delta;
+    bool channel_4_countdown_reloaded;
+    uint8_t channel_4_dmg_delayed_start;
+    uint16_t channel1_completed_addend;
+    
+    GB_envelope_clock_t square_envelope_clock[2];
+    GB_envelope_clock_t noise_envelope_clock;
 } GB_apu_t;
 
 typedef enum {
@@ -149,17 +165,22 @@ typedef struct {
     GB_sample_callback_t sample_callback;
     
     bool rate_set_in_clocks;
+    double interference_volume;
+    double interference_highpass;
 } GB_apu_output_t;
 
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned sample_rate);
 void GB_set_sample_rate_by_clocks(GB_gameboy_t *gb, double cycles_per_sample); /* Cycles are in 8MHz units */
 void GB_set_highpass_filter_mode(GB_gameboy_t *gb, GB_highpass_mode_t mode);
+void GB_set_interference_volume(GB_gameboy_t *gb, double volume);
 void GB_apu_set_sample_callback(GB_gameboy_t *gb, GB_sample_callback_t callback);
+
 #ifdef GB_INTERNAL
 bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, unsigned index);
 void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);
 uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg);
 void GB_apu_div_event(GB_gameboy_t *gb);
+void GB_apu_div_secondary_event(GB_gameboy_t *gb);
 void GB_apu_init(GB_gameboy_t *gb);
 void GB_apu_run(GB_gameboy_t *gb);
 void GB_apu_update_cycles_per_sample(GB_gameboy_t *gb);
