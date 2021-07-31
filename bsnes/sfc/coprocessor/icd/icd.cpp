@@ -44,6 +44,9 @@ namespace SameBoy {
 
   static auto vblank(GB_gameboy_t*) -> void {
   }
+
+  static auto log(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes) -> void {
+  }
 }
 
 auto ICD::synchronizeCPU() -> void {
@@ -99,6 +102,7 @@ auto ICD::load() -> bool {
   GB_set_rgb_encode_callback(&sameboy, &SameBoy::rgb_encode);
   GB_apu_set_sample_callback(&sameboy, &SameBoy::sample);
   GB_set_vblank_callback(&sameboy, &SameBoy::vblank);
+  GB_set_log_callback(&sameboy, &SameBoy::log);
   GB_set_pixels_output(&sameboy, &bitmap[0]);
   if(auto loaded = platform->load(ID::GameBoy, "Game Boy", "gb")) {
     information.pathID = loaded.pathID;
