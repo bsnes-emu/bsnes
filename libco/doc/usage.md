@@ -54,7 +54,9 @@ Handle to cothread.
 
 Handle must be of type `void*`.
 
-A value of `null` (0) indicates an uninitialized or invalid handle, whereas a non-zero value indicates a valid handle.
+A value of null (0) indicates an uninitialized or invalid handle, whereas a
+non-zero value indicates a valid handle. A valid handle is backed by execution
+state to which the execution can be co_switch()ed to.
 
 ## co_active
 ```c
@@ -62,7 +64,12 @@ cothread_t co_active();
 ```
 Return handle to current cothread.
 
-Always returns a valid handle, even when called from the main program thread.
+Note that the handle is valid even if the function is called from a non-cothread
+context. To achieve this, we save the execution state in an internal buffer,
+instead of using the user-provided memory. Since this handle is valid, it can
+be used to co_switch to this context from another cothread. In multi-threaded
+applications, make sure to not switch non-cothread context across CPU cores,
+to prevent any possible conflicts with the OS scheduler.
 
 ## co_derive
 ```c
@@ -118,6 +125,19 @@ Delete specified cothread.
 Passing handle of active cothread to this function is not allowed.
 
 Passing handle of primary cothread is not allowed.
+
+## co_serializable
+
+```c
+int co_serializable(void);
+```
+
+Returns non-zero if the implementation keeps the entire coroutine state in the
+buffer passed to `co_derive()`. That is, if `co_serializable()` returns
+non-zero, and if your cothread does not modify the heap or any process-wide
+state, then you can "snapshot" the cothread's state by taking a copy of the
+buffer originally passed to `co_derive()`, and "restore" a previous state
+by copying the snapshot back into the buffer it came from.
 
 ## co_switch
 ```c
