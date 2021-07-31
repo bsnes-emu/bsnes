@@ -6,6 +6,7 @@
 #include <string.h>
 
 #define GTK_FILE_CHOOSER_ACTION_OPEN 0
+#define GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER 2
 #define GTK_RESPONSE_ACCEPT -3
 #define GTK_RESPONSE_CANCEL -6
 
@@ -102,6 +103,74 @@ char *do_open_rom_dialog(void)
 
     gtk_widget_destroy(dialog);
 
+    while (gtk_events_pending()) {
+        gtk_main_iteration();
+    }
+    return ret;
+    
+lazy_error:
+    fprintf(stderr, "Failed to display GTK dialog\n");
+    return NULL;
+}
+
+char *do_open_folder_dialog(void)
+{
+    static void *handle = NULL;
+    
+    TRY_DLOPEN("libgtk-3.so");
+    TRY_DLOPEN("libgtk-3.so.0");
+    TRY_DLOPEN("libgtk-2.so");
+    TRY_DLOPEN("libgtk-2.so.0");
+    
+    if (!handle) {
+        goto lazy_error;
+    }
+    
+    
+    LAZY(gtk_init_check);
+    LAZY(gtk_file_chooser_dialog_new);
+    LAZY(gtk_dialog_run);
+    LAZY(g_free);
+    LAZY(gtk_widget_destroy);
+    LAZY(gtk_file_chooser_get_filename);
+    LAZY(g_log_set_default_handler);
+    LAZY(gtk_file_filter_new);
+    LAZY(gtk_file_filter_add_pattern);
+    LAZY(gtk_file_filter_set_name);
+    LAZY(gtk_file_chooser_add_filter);
+    LAZY(gtk_events_pending);
+    LAZY(gtk_main_iteration);
+    
+    /* Shut up GTK */
+    g_log_set_default_handler(nop, NULL);
+    
+    gtk_init_check(0, 0);
+    
+    
+    void *dialog = gtk_file_chooser_dialog_new("Select Boot ROMs Folder",
+                                               0,
+                                               GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+                                               "_Cancel", GTK_RESPONSE_CANCEL,
+                                               "_Open", GTK_RESPONSE_ACCEPT,
+                                               NULL );
+    
+    
+    int res = gtk_dialog_run (dialog);
+    char *ret = NULL;
+    
+    if (res == GTK_RESPONSE_ACCEPT) {
+        char *filename;
+        filename = gtk_file_chooser_get_filename(dialog);
+        ret = strdup(filename);
+        g_free(filename);
+    }
+    
+    while (gtk_events_pending()) {
+        gtk_main_iteration();
+    }
+    
+    gtk_widget_destroy(dialog);
+    
     while (gtk_events_pending()) {
         gtk_main_iteration();
     }

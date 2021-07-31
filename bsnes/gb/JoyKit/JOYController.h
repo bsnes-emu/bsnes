@@ -4,7 +4,6 @@
 #import "JOYAxes2D.h"
 #import "JOYHat.h"
 
-static NSString const *JOYAxesEmulateButtonsKey = @"JOYAxesEmulateButtons";
 static NSString const *JOYAxes2DEmulateButtonsKey = @"JOYAxes2DEmulateButtons";
 static NSString const *JOYHatsEmulateButtonsKey = @"JOYHatsEmulateButtons";
 
@@ -35,6 +34,7 @@ static NSString const *JOYHatsEmulateButtonsKey = @"JOYHatsEmulateButtons";
 - (NSArray<JOYHat *> *) hats;
 - (void)setRumbleAmplitude:(double)amp;
 - (void)setPlayerLEDs:(uint8_t)mask;
+- (uint8_t)LEDMaskForPlayer:(unsigned)player;
 @property (readonly, getter=isConnected) bool connected;
 @end
 

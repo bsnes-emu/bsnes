@@ -46,7 +46,7 @@ SameBoy requires the following tools and libraries to build:
  * make
  * macOS Cocoa port: macOS SDK and Xcode (For command line tools and ibtool)
  * SDL port: libsdl2
- * [rgbds](https://github.com/bentley/rgbds/releases/), for boot ROM compilation
+ * [rgbds](https://github.com/gbdev/rgbds/releases/), for boot ROM compilation
 
 On Windows, SameBoy also requires:
  * Visual Studio (For headers, etc.)
@@ -55,6 +55,8 @@ On Windows, SameBoy also requires:
 
 To compile, simply run `make`. The targets are `cocoa` (Default for macOS), `sdl` (Default for everything else), `libretro`, `bootroms` and `tester`. You may also specify `CONF=debug` (default), `CONF=release`, `CONF=native_release` or `CONF=fat_release`  to control optimization, symbols and multi-architectures. `native_release` is faster than `release`, but is optimized to the host's CPU and therefore is not portable. `fat_release` is exclusive to macOS and builds x86-64 and ARM64 fat binaries; this requires using a recent enough `clang` and macOS SDK using `xcode-select`, or setting them explicitly with `CC=` and `SYSROOT=`, respectively. All other configurations will build to your host architecture. You may set `BOOTROMS_DIR=...` to a directory containing precompiled boot ROM files, otherwise the build system will compile and use SameBoy's own boot ROMs.
 
-By default, the SDL port will look for resource files with a path relative to executable. If you are packaging SameBoy, you may wish to override this by setting the `DATA_DIR` variable during compilation to the target path of the directory containing all files (apart from the executable, that's not necessary) from the `build/bin/SDL` directory in the source tree. Make sure the variable ends with a `/` character.
+The SDL port will look for resource files with a path relative to executable and inside the directory specified by the `DATA_DIR` variable. If you are packaging SameBoy, you may wish to override this by setting the `DATA_DIR` variable during compilation to the target path of the directory containing all files (apart from the executable, that's not necessary) from the `build/bin/SDL` directory in the source tree. Make sure the variable ends with a `/` character. On FreeDesktop environments, `DATA_DIR` will default to `/usr/local/share/sameboy/`. `PREFIX` and `DESTDIR` follow their standard usage and default to an empty string an `/usr/local`, respectively
 
-SameBoy was compiled and tested on macOS, Ubuntu and 64-bit Windows 7.
+Linux, BSD, and other FreeDesktop users can run `sudo make install` to install SameBoy as both a GUI app and a command line tool.
+
+SameBoy is compiled and tested on macOS, Ubuntu and 64-bit Windows 10.

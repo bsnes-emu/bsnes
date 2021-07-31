@@ -18,6 +18,7 @@ SDL_Texture *texture = NULL;
 SDL_PixelFormat *pixel_format = NULL;
 enum pending_command pending_command;
 unsigned command_parameter;
+char *dropped_state_file = NULL;
 
 #ifdef __APPLE__
 #define MODIFIER_NAME " " CMD_STRING
@@ -110,6 +111,7 @@ configuration_t configuration =
     .volume = 100,
     .rumble_mode = GB_RUMBLE_ALL_GAMES,
     .default_scale = 2,
+    .color_temperature = 10,
 };
 
 
@@ -176,8 +178,7 @@ static void rescale_window(void)
     SDL_SetWindowSize(window, GB_get_screen_width(&gb) * configuration.default_scale, GB_get_screen_height(&gb) * configuration.default_scale);
 }
 
-/* Does NOT check for bounds! */
-static void draw_char(uint32_t *buffer, unsigned width, unsigned height, unsigned char ch, uint32_t color)
+static void draw_char(uint32_t *buffer, unsigned width, unsigned height, unsigned char ch, uint32_t color, uint32_t *mask_top, uint32_t *mask_bottom)
 {
     if (ch < ' ' || ch > font_max) {
         ch = '?';
@@ -187,7 +188,7 @@ static void draw_char(uint32_t *buffer, unsigned width, unsigned height, unsigne
     
     for (unsigned y = GLYPH_HEIGHT; y--;) {
         for (unsigned x = GLYPH_WIDTH; x--;) {
-            if (*(data++)) {
+            if (*(data++) && buffer >= mask_top && buffer < mask_bottom) {
                 (*buffer) = color;
             }
             buffer++;
@@ -196,12 +197,14 @@ static void draw_char(uint32_t *buffer, unsigned width, unsigned height, unsigne
     }
 }
 
-static unsigned scroll = 0;
-static void draw_unbordered_text(uint32_t *buffer, unsigned width, unsigned height, unsigned x, unsigned y, const char *string, uint32_t color)
+static signed scroll = 0;
+static void draw_unbordered_text(uint32_t *buffer, unsigned width, unsigned height, unsigned x, signed y, const char *string, uint32_t color, bool is_osd)
 {
-    y -= scroll;
+    if (!is_osd) {
+        y -= scroll;
+    }
     unsigned orig_x = x;
-    unsigned y_offset = (GB_get_screen_height(&gb) - 144) / 2;
+    unsigned y_offset = is_osd? 0 : (GB_get_screen_height(&gb) - 144) / 2;
     while (*string) {
         if (*string == '\n') {
             x = orig_x;
@@ -210,24 +213,42 @@ static void draw_unbordered_text(uint32_t *buffer, unsigned width, unsigned heig
             continue;
         }
         
-        if (x > width - GLYPH_WIDTH || y == 0 || y - y_offset > 144 - GLYPH_HEIGHT) {
+        if (x > width - GLYPH_WIDTH) {
             break;
         }
         
-        draw_char(&buffer[x + width * y], width, height, *string, color);
+        draw_char(&buffer[(signed)(x + width * y)], width, height, *string, color, &buffer[width * y_offset], &buffer[width * (is_osd? GB_get_screen_height(&gb) : y_offset + 144)]);
         x += GLYPH_WIDTH;
         string++;
     }
 }
 
-static void draw_text(uint32_t *buffer, unsigned width, unsigned height, unsigned x, unsigned y, const char *string, uint32_t color, uint32_t border)
+void draw_text(uint32_t *buffer, unsigned width, unsigned height, unsigned x, signed y, const char *string, uint32_t color, uint32_t border, bool is_osd)
 {
-    draw_unbordered_text(buffer, width, height, x - 1, y, string, border);
-    draw_unbordered_text(buffer, width, height, x + 1, y, string, border);
-    draw_unbordered_text(buffer, width, height, x, y - 1, string, border);
-    draw_unbordered_text(buffer, width, height, x, y + 1, string, border);
-    draw_unbordered_text(buffer, width, height, x, y, string, color);
+    draw_unbordered_text(buffer, width, height, x - 1, y, string, border, is_osd);
+    draw_unbordered_text(buffer, width, height, x + 1, y, string, border, is_osd);
+    draw_unbordered_text(buffer, width, height, x, y - 1, string, border, is_osd);
+    draw_unbordered_text(buffer, width, height, x, y + 1, string, border, is_osd);
+    draw_unbordered_text(buffer, width, height, x, y, string, color, is_osd);
 }
+
+const char *osd_text = NULL;
+unsigned osd_countdown = 0;
+unsigned osd_text_lines = 1;
+
+void show_osd_text(const char *text)
+{
+    osd_text_lines = 1;
+    osd_text = text;
+    osd_countdown = 30;
+    while (*text++) {
+        if (*text == '\n') {
+            osd_text_lines++;
+            osd_countdown += 30;
+        }
+    }
+}
+
 
 enum decoration {
     DECORATION_NONE,
@@ -238,14 +259,14 @@ enum decoration {
 static void draw_text_centered(uint32_t *buffer, unsigned width, unsigned height, unsigned y, const char *string, uint32_t color, uint32_t border, enum decoration decoration)
 {
     unsigned x = width / 2 - (unsigned) strlen(string) * GLYPH_WIDTH / 2;
-    draw_text(buffer, width, height, x, y, string, color, border);
+    draw_text(buffer, width, height, x, y, string, color, border, false);
     switch (decoration) {
         case DECORATION_SELECTION:
-            draw_text(buffer, width, height, x - GLYPH_WIDTH, y, SELECTION_STRING, color, border);
+            draw_text(buffer, width, height, x - GLYPH_WIDTH, y, SELECTION_STRING, color, border, false);
             break;
         case DECORATION_ARROWS:
-            draw_text(buffer, width, height, x - GLYPH_WIDTH, y, LEFT_ARROW_STRING, color, border);
-            draw_text(buffer, width, height, width - x, y, RIGHT_ARROW_STRING, color, border);
+            draw_text(buffer, width, height, x - GLYPH_WIDTH, y, LEFT_ARROW_STRING, color, border, false);
+            draw_text(buffer, width, height, width - x, y, RIGHT_ARROW_STRING, color, border, false);
             break;
             
         case DECORATION_NONE:
@@ -261,6 +282,10 @@ struct menu_item {
 };
 static const struct menu_item *current_menu = NULL;
 static const struct menu_item *root_menu = NULL;
+static unsigned menu_height;
+static unsigned scrollbar_size;
+static bool mouse_scroling = false;
+
 static unsigned current_selection = 0;
 
 static enum {
@@ -302,6 +327,23 @@ static void open_rom(unsigned index)
     }
 }
 
+static void recalculate_menu_height(void)
+{
+    menu_height = 24;
+    scrollbar_size = 0;
+    if (gui_state == SHOWING_MENU) {
+        for (const struct menu_item *item = current_menu; item->string; item++) {
+            menu_height += 12;
+            if (item->backwards_handler) {
+                menu_height += 12;
+            }
+        }
+    }
+    if (menu_height > 144) {
+        scrollbar_size = 144 * 140 / menu_height;
+    }
+}
+
 static const struct menu_item paused_menu[] = {
     {"Resume", NULL},
     {"Open ROM", open_rom},
@@ -322,6 +364,7 @@ static void return_to_root_menu(unsigned index)
     current_menu = root_menu;
     current_selection = 0;
     scroll = 0;
+    recalculate_menu_height();
 }
 
 static void cycle_model(unsigned index)
@@ -420,10 +463,66 @@ const char *current_rewind_string(unsigned index)
     return "Custom";
 }
 
+const char *current_bootrom_string(unsigned index)
+{
+    if (!configuration.bootrom_path[0]) {
+        return "Built-in Boot ROMs";
+    }
+    size_t length = strlen(configuration.bootrom_path);
+    static char ret[24] = {0,};
+    if (length <= 23) {
+        strcpy(ret, configuration.bootrom_path);
+    }
+    else {
+        memcpy(ret, configuration.bootrom_path, 11);
+        memcpy(ret + 12, configuration.bootrom_path + length - 11, 11);
+    }
+    for (unsigned i = 0; i < 24; i++) {
+        if (ret[i] < 0) {
+            ret[i] = MOJIBAKE_STRING[0];
+        }
+    }
+    if (length > 23) {
+        ret[11] = ELLIPSIS_STRING[0];
+    }
+    return ret;
+}
+
+static void toggle_bootrom(unsigned index)
+{
+    if (configuration.bootrom_path[0]) {
+        configuration.bootrom_path[0] = 0;
+    }
+    else {
+        char *folder = do_open_folder_dialog();
+        if (!folder) return;
+        if (strlen(folder) < sizeof(configuration.bootrom_path) - 1) {
+            strcpy(configuration.bootrom_path, folder);
+        }
+        free(folder);
+    }
+}
+
+static void toggle_rtc_mode(unsigned index)
+{
+    configuration.rtc_mode = !configuration.rtc_mode;
+}
+
+const char *current_rtc_mode_string(unsigned index)
+{
+    switch (configuration.rtc_mode) {
+        case GB_RTC_MODE_SYNC_TO_HOST: return "Sync to System Clock";
+        case GB_RTC_MODE_ACCURATE: return "Accurate";
+    }
+    return "";
+}
+
 static const struct menu_item emulation_menu[] = {
     {"Emulated Model:", cycle_model, current_model_string, cycle_model_backwards},
     {"SGB Revision:", cycle_sgb_revision, current_sgb_revision_string, cycle_sgb_revision_backwards},
+    {"Boot ROMs Folder:", toggle_bootrom, current_bootrom_string, toggle_bootrom},
     {"Rewind Length:", cycle_rewind, current_rewind_string, cycle_rewind_backwards},
+    {"Real Time Clock:", toggle_rtc_mode, current_rtc_mode_string, toggle_rtc_mode},
     {"Back", return_to_root_menu},
     {NULL,}
 };
@@ -433,6 +532,7 @@ static void enter_emulation_menu(unsigned index)
     current_menu = emulation_menu;
     current_selection = 0;
     scroll = 0;
+    recalculate_menu_height();
 }
 
 const char *current_scaling_mode(unsigned index)
@@ -449,9 +549,18 @@ const char *current_default_scale(unsigned index)
 
 const char *current_color_correction_mode(unsigned index)
 {
-    return (const char *[]){"Disabled", "Correct Color Curves", "Emulate Hardware", "Preserve Brightness", "Reduce Contrast"}
+    return (const char *[]){"Disabled", "Correct Color Curves", "Emulate Hardware", "Preserve Brightness", "Reduce Contrast", "Harsh Reality"}
         [configuration.color_correction_mode];
 }
+
+const char *current_color_temperature(unsigned index)
+{
+    static char ret[22];
+    strcpy(ret, SLIDER_STRING);
+    ret[configuration.color_temperature] = SELECTED_SLIDER_STRING[configuration.color_temperature];
+    return ret;
+}
+
 
 const char *current_palette(unsigned index)
 {
@@ -515,7 +624,7 @@ void cycle_default_scale_backwards(unsigned index)
 
 static void cycle_color_correction(unsigned index)
 {
-    if (configuration.color_correction_mode == GB_COLOR_CORRECTION_REDUCE_CONTRAST) {
+    if (configuration.color_correction_mode == GB_COLOR_CORRECTION_LOW_CONTRAST) {
         configuration.color_correction_mode = GB_COLOR_CORRECTION_DISABLED;
     }
     else {
@@ -526,10 +635,24 @@ static void cycle_color_correction(unsigned index)
 static void cycle_color_correction_backwards(unsigned index)
 {
     if (configuration.color_correction_mode == GB_COLOR_CORRECTION_DISABLED) {
-        configuration.color_correction_mode = GB_COLOR_CORRECTION_REDUCE_CONTRAST;
+        configuration.color_correction_mode = GB_COLOR_CORRECTION_LOW_CONTRAST;
     }
     else {
         configuration.color_correction_mode--;
+    }
+}
+
+static void decrease_color_temperature(unsigned index)
+{
+    if (configuration.color_temperature < 20) {
+        configuration.color_temperature++;
+    }
+}
+
+static void increase_color_temperature(unsigned index)
+{
+    if (configuration.color_temperature > 0) {
+        configuration.color_temperature--;
     }
 }
 
@@ -573,6 +696,7 @@ static void cycle_border_mode_backwards(unsigned index)
     }
 }
 
+extern bool uses_gl(void);
 struct shader_name {
     const char *file_name;
     const char *display_name;
@@ -596,6 +720,7 @@ struct shader_name {
 
 static void cycle_filter(unsigned index)
 {
+    if (!uses_gl()) return;
     unsigned i = 0;
     for (; i < sizeof(shaders) / sizeof(shaders[0]); i++) {
         if (strcmp(shaders[i].file_name, configuration.filter) == 0) {
@@ -618,6 +743,7 @@ static void cycle_filter(unsigned index)
 
 static void cycle_filter_backwards(unsigned index)
 {
+    if (!uses_gl()) return;
     unsigned i = 0;
     for (; i < sizeof(shaders) / sizeof(shaders[0]); i++) {
         if (strcmp(shaders[i].file_name, configuration.filter) == 0) {
@@ -637,8 +763,9 @@ static void cycle_filter_backwards(unsigned index)
     }
 
 }
-const char *current_filter_name(unsigned index)
+static const char *current_filter_name(unsigned index)
 {
+    if (!uses_gl()) return "Requires OpenGL 3.2+";
     unsigned i = 0;
     for (; i < sizeof(shaders) / sizeof(shaders[0]); i++) {
         if (strcmp(shaders[i].file_name, configuration.filter) == 0) {
@@ -655,6 +782,7 @@ const char *current_filter_name(unsigned index)
 
 static void cycle_blending_mode(unsigned index)
 {
+        if (!uses_gl()) return;
     if (configuration.blending_mode == GB_FRAME_BLENDING_MODE_ACCURATE) {
         configuration.blending_mode = GB_FRAME_BLENDING_MODE_DISABLED;
     }
@@ -665,6 +793,7 @@ static void cycle_blending_mode(unsigned index)
 
 static void cycle_blending_mode_backwards(unsigned index)
 {
+    if (!uses_gl()) return;
     if (configuration.blending_mode == GB_FRAME_BLENDING_MODE_DISABLED) {
         configuration.blending_mode = GB_FRAME_BLENDING_MODE_ACCURATE;
     }
@@ -673,10 +802,22 @@ static void cycle_blending_mode_backwards(unsigned index)
     }
 }
 
-const char *blending_mode_string(unsigned index)
+static const char *blending_mode_string(unsigned index)
 {
+    if (!uses_gl()) return "Requires OpenGL 3.2+";
     return (const char *[]){"Disabled", "Simple", "Accurate"}
     [configuration.blending_mode];
+}
+
+static void toggle_osd(unsigned index)
+{
+    osd_countdown = 0;
+    configuration.osd = !configuration.osd;
+}
+
+static const char *current_osd_mode(unsigned index)
+{
+    return configuration.osd? "Enabled" : "Disabled";
 }
 
 static const struct menu_item graphics_menu[] = {
@@ -684,9 +825,12 @@ static const struct menu_item graphics_menu[] = {
     {"Default Window Scale:", cycle_default_scale, current_default_scale, cycle_default_scale_backwards},
     {"Scaling Filter:", cycle_filter, current_filter_name, cycle_filter_backwards},
     {"Color Correction:", cycle_color_correction, current_color_correction_mode, cycle_color_correction_backwards},
+    {"Ambient Light Temp.:", decrease_color_temperature, current_color_temperature, increase_color_temperature},
     {"Frame Blending:", cycle_blending_mode, blending_mode_string, cycle_blending_mode_backwards},
     {"Mono Palette:", cycle_palette, current_palette, cycle_palette_backwards},
     {"Display Border:", cycle_border_mode, current_border_mode, cycle_border_mode_backwards},
+    {"On-Screen Display:", toggle_osd, current_osd_mode, toggle_osd},
+
     {"Back", return_to_root_menu},
     {NULL,}
 };
@@ -696,6 +840,7 @@ static void enter_graphics_menu(unsigned index)
     current_menu = graphics_menu;
     current_selection = 0;
     scroll = 0;
+    recalculate_menu_height();
 }
 
 const char *highpass_filter_string(unsigned index)
@@ -745,9 +890,33 @@ void decrease_volume(unsigned index)
     }
 }
 
+const char *interference_volume_string(unsigned index)
+{
+    static char ret[5];
+    sprintf(ret, "%d%%", configuration.interference_volume);
+    return ret;
+}
+
+void increase_interference_volume(unsigned index)
+{
+    configuration.interference_volume += 5;
+    if (configuration.interference_volume > 100) {
+        configuration.interference_volume = 100;
+    }
+}
+
+void decrease_interference_volume(unsigned index)
+{
+    configuration.interference_volume -= 5;
+    if (configuration.interference_volume > 100) {
+        configuration.interference_volume = 0;
+    }
+}
+
 static const struct menu_item audio_menu[] = {
     {"Highpass Filter:", cycle_highpass_filter, highpass_filter_string, cycle_highpass_filter_backwards},
     {"Volume:", increase_volume, volume_string, decrease_volume},
+    {"Interference Volume:", increase_interference_volume, interference_volume_string, decrease_interference_volume},
     {"Back", return_to_root_menu},
     {NULL,}
 };
@@ -757,6 +926,7 @@ static void enter_audio_menu(unsigned index)
     current_menu = audio_menu;
     current_selection = 0;
     scroll = 0;
+    recalculate_menu_height();
 }
 
 static void modify_key(unsigned index)
@@ -784,10 +954,7 @@ static const struct menu_item controls_menu[] = {
 
 static const char *key_name(unsigned index)
 {
-    if (index >= 8) {
-        if (index == 8) {
-            return SDL_GetScancodeName(configuration.keys[8]);
-        }
+    if (index > 8) {
         return SDL_GetScancodeName(configuration.keys_2[index - 9]);
     }
     return SDL_GetScancodeName(configuration.keys[index]);
@@ -798,6 +965,7 @@ static void enter_controls_menu(unsigned index)
     current_menu = controls_menu;
     current_selection = 0;
     scroll = 0;
+    recalculate_menu_height();
 }
 
 static unsigned joypad_index = 0;
@@ -815,7 +983,7 @@ const char *current_joypad_name(unsigned index)
     // SDL returns a name with repeated and trailing spaces
     while (*orig_name && i < sizeof(name) - 2) {
         if (orig_name[0] != ' ' || orig_name[1] != ' ') {
-            name[i++] = *orig_name;
+            name[i++] = *orig_name > 0? *orig_name : MOJIBAKE_STRING[0];
         }
         orig_name++;
     }
@@ -933,6 +1101,7 @@ static void enter_joypad_menu(unsigned index)
     current_menu = joypad_menu;
     current_selection = 0;
     scroll = 0;
+    recalculate_menu_height();
 }
 
 joypad_button_t get_joypad_button(uint8_t physical_button)
@@ -1017,6 +1186,7 @@ void run_gui(bool is_running)
     gui_state = is_running? SHOWING_MENU : SHOWING_DROP_MESSAGE;
     bool should_render = true;
     current_menu = root_menu = is_running? paused_menu : nonpaused_menu;
+    recalculate_menu_height();
     current_selection = 0;
     scroll = 0;
     do {
@@ -1168,9 +1338,21 @@ void run_gui(bool is_running)
                 break;
             }
             case SDL_DROPFILE: {
-                set_filename(event.drop.file, SDL_free);
-                pending_command = GB_SDL_NEW_FILE_COMMAND;
-                return;
+                if (GB_is_stave_state(event.drop.file)) {
+                    if (GB_is_inited(&gb)) {
+                        dropped_state_file = event.drop.file;
+                        pending_command = GB_SDL_LOAD_STATE_FROM_FILE_COMMAND;
+                    }
+                    else {
+                        SDL_free(event.drop.file);
+                    }
+                    break;
+                }
+                else {
+                    set_filename(event.drop.file, SDL_free);
+                    pending_command = GB_SDL_NEW_FILE_COMMAND;
+                    return;
+                }
             }
             case SDL_JOYBUTTONDOWN:
             {
@@ -1204,9 +1386,36 @@ void run_gui(bool is_running)
                 }
                 break;
             }
+                
+            case SDL_MOUSEWHEEL: {
+                if (menu_height > 144) {
+                    scroll -= event.wheel.y;
+                    if (scroll < 0) {
+                        scroll = 0;
+                    }
+                    if (scroll >= menu_height - 144) {
+                        scroll = menu_height - 144;
+                    }
+
+                    mouse_scroling = true;
+                    should_render = true;
+                }
+                break;
+            }
+                
 
             case SDL_KEYDOWN:
-                if (event.key.keysym.scancode == SDL_SCANCODE_F && event.key.keysym.mod & MODIFIER) {
+                if (gui_state == WAITING_FOR_KEY) {
+                    if (current_selection > 8) {
+                        configuration.keys_2[current_selection - 9] = event.key.keysym.scancode;
+                    }
+                    else {
+                        configuration.keys[current_selection] = event.key.keysym.scancode;
+                    }
+                    gui_state = SHOWING_MENU;
+                    should_render = true;
+                }
+                else if (event_hotkey_code(&event) == SDL_SCANCODE_F && event.key.keysym.mod & MODIFIER) {
                     if ((SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP) == false) {
                         SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
                     }
@@ -1215,7 +1424,7 @@ void run_gui(bool is_running)
                     }
                     update_viewport();
                 }
-                if (event.key.keysym.scancode == SDL_SCANCODE_O) {
+                else if (event_hotkey_code(&event) == SDL_SCANCODE_O) {
                     if (event.key.keysym.mod & MODIFIER) {
                         char *filename = do_open_rom_dialog();
                         if (filename) {
@@ -1241,7 +1450,11 @@ void run_gui(bool is_running)
                     }
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
-                    if (is_running) {
+                    if (gui_state == SHOWING_MENU && current_menu != root_menu) {
+                        return_to_root_menu(0);
+                        should_render = true;
+                    }
+                    else if (is_running) {
                         return;
                     }
                     else {
@@ -1252,18 +1465,22 @@ void run_gui(bool is_running)
                             gui_state = SHOWING_DROP_MESSAGE;
                         }
                         current_selection = 0;
+                        mouse_scroling = false;
                         scroll = 0;
                         current_menu = root_menu;
+                        recalculate_menu_height();
                         should_render = true;
                     }
                 }
                 else if (gui_state == SHOWING_MENU) {
                     if (event.key.keysym.scancode == SDL_SCANCODE_DOWN && current_menu[current_selection + 1].string) {
                         current_selection++;
+                        mouse_scroling = false;
                         should_render = true;
                     }
                     else if (event.key.keysym.scancode == SDL_SCANCODE_UP && current_selection) {
                         current_selection--;
+                        mouse_scroling = false;
                         should_render = true;
                     }
                     else if (event.key.keysym.scancode == SDL_SCANCODE_RETURN  && !current_menu[current_selection].backwards_handler) {
@@ -1300,21 +1517,6 @@ void run_gui(bool is_running)
                     }
                     should_render = true;
                 }
-                else if (gui_state == WAITING_FOR_KEY) {
-                    if (current_selection >= 8) {
-                        if (current_selection == 8) {
-                            configuration.keys[8] = event.key.keysym.scancode;
-                        }
-                        else {
-                            configuration.keys_2[current_selection - 9] = event.key.keysym.scancode;
-                        }
-                    }
-                    else {
-                        configuration.keys[current_selection] = event.key.keysym.scancode;
-                    }
-                    gui_state = SHOWING_MENU;
-                    should_render = true;
-                }
                 break;
         }
         
@@ -1340,13 +1542,21 @@ void run_gui(bool is_running)
                     draw_text_centered(pixels, width, height, 8 + y_offset, "SameBoy", gui_palette_native[3], gui_palette_native[0], false);
                     unsigned i = 0, y = 24;
                     for (const struct menu_item *item = current_menu; item->string; item++, i++) {
-                        if (i == current_selection) {
-                            if (y < scroll) {
-                                scroll = y - 4;
-                                goto rerender;
+                        if (i == current_selection && !mouse_scroling) {
+                            if (i == 0) {
+                                if (y < scroll) {
+                                    scroll = (y - 4) / 12 * 12;
+                                    goto rerender;
+                                }
+                            }
+                            else {
+                                if (y < scroll + 24) {
+                                    scroll = (y - 24) / 12 * 12;
+                                    goto rerender;
+                                }
                             }
                         }
-                        if (i == current_selection && i == 0 && scroll != 0) {
+                        if (i == current_selection && i == 0 && scroll != 0 && !mouse_scroling) {
                             scroll = 0;
                             goto rerender;
                         }
@@ -1363,22 +1573,41 @@ void run_gui(bool is_running)
                                                i == current_selection && !item->value_getter ? DECORATION_SELECTION : DECORATION_NONE);
                             y += 12;
                             if (item->value_getter) {
-                                draw_text_centered(pixels, width, height, y + y_offset, item->value_getter(i), gui_palette_native[3], gui_palette_native[0],
+                                draw_text_centered(pixels, width, height, y + y_offset - 1, item->value_getter(i), gui_palette_native[3], gui_palette_native[0],
                                                    i == current_selection ? DECORATION_ARROWS : DECORATION_NONE);
                                 y += 12;
                             }
                         }
-                        if (i == current_selection) {
+                        if (i == current_selection && !mouse_scroling) {
                             if (y > scroll + 144) {
-                                scroll = y - 144;
+                                scroll = (y - 144) / 12 * 12;
+                                if (scroll > menu_height - 144) {
+                                    scroll = menu_height - 144;
+                                }
                                 goto rerender;
                             }
                         }
 
                     }
+                    if (scrollbar_size) {
+                        unsigned scrollbar_offset = (140 - scrollbar_size) * scroll / (menu_height - 144);
+                        if (scrollbar_offset + scrollbar_size > 140) {
+                            scrollbar_offset = 140 - scrollbar_size;
+                        }
+                        for (unsigned y = 0; y < 140; y++) {
+                            uint32_t *pixel = pixels + x_offset + 156 + width * (y + y_offset + 2);
+                            if (y >= scrollbar_offset && y < scrollbar_offset + scrollbar_size) {
+                                pixel[0] = pixel[1]= gui_palette_native[2];
+                            }
+                            else {
+                                pixel[0] = pixel[1]= gui_palette_native[1];
+                            }
+                            
+                        }
+                    }
                     break;
                 case SHOWING_HELP:
-                    draw_text(pixels, width, height, 2 + x_offset, 2 + y_offset, help[current_help_page], gui_palette_native[3], gui_palette_native[0]);
+                    draw_text(pixels, width, height, 2 + x_offset, 2 + y_offset, help[current_help_page], gui_palette_native[3], gui_palette_native[0], false);
                     break;
                 case WAITING_FOR_KEY:
                     draw_text_centered(pixels, width, height, 68 + y_offset, "Press a Key", gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);

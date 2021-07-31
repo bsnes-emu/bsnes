@@ -123,7 +123,7 @@ static const vector_float2 rect[] =
     command_queue = [device newCommandQueue];
 }
 
-- (void)mtkView:(nonnull MTKView *)view drawableSizeWillChange:(CGSize)size
+- (void)mtkView:(MTKView *)view drawableSizeWillChange:(CGSize)size
 {
     output_resolution = (vector_float2){size.width, size.height};
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -131,7 +131,7 @@ static const vector_float2 rect[] =
     });
 }
 
-- (void)drawInMTKView:(nonnull MTKView *)view
+- (void)drawInMTKView:(MTKView *)view
 {
     if (!(view.window.occlusionState & NSWindowOcclusionStateVisible)) return;
     if (!self.gb) return;

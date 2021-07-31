@@ -1,13 +1,11 @@
 #include <SDL.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include "utils.h"
 
-const char *resource_folder(void)
+static const char *resource_folder(void)
 {
-#ifdef DATA_DIR
-    return DATA_DIR;
-#else
     static const char *ret = NULL;
     if (!ret) {
         ret = SDL_GetBasePath();
@@ -16,13 +14,19 @@ const char *resource_folder(void)
         }
     }
     return ret;
-#endif
 }
 
 char *resource_path(const char *filename)
 {
     static char path[1024];
+   
     snprintf(path, sizeof(path), "%s%s", resource_folder(), filename);
+#ifdef DATA_DIR
+    if (access(path, F_OK) == 0) {
+        return path;
+    }
+    snprintf(path, sizeof(path), "%s%s", DATA_DIR, filename);
+#endif
     return path;
 }
 

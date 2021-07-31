@@ -2,5 +2,5 @@
 #include <Core/gb.h>
 
 @interface GBTerminalTextFieldCell : NSTextFieldCell
-@property GB_gameboy_t *gb;
+@property (nonatomic) GB_gameboy_t *gb;
 @end

@@ -51,6 +51,7 @@ typedef enum {
     GB_COLOR_CORRECTION_EMULATE_HARDWARE,
     GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS,
     GB_COLOR_CORRECTION_REDUCE_CONTRAST,
+    GB_COLOR_CORRECTION_LOW_CONTRAST,
 } GB_color_correction_mode_t;
 
 void GB_draw_tileset(GB_gameboy_t *gb, uint32_t *dest, GB_palette_type_t palette_type, uint8_t palette_index);
@@ -58,5 +59,6 @@ void GB_draw_tilemap(GB_gameboy_t *gb, uint32_t *dest, GB_palette_type_t palette
 uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest, uint8_t *sprite_height);
 uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border);
 void GB_set_color_correction_mode(GB_gameboy_t *gb, GB_color_correction_mode_t mode);
+void GB_set_light_temperature(GB_gameboy_t *gb, double temperature);
 bool GB_is_odd_frame(GB_gameboy_t *gb);
 #endif /* display_h */

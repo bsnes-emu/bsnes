@@ -3,17 +3,17 @@
 @protocol GBImageViewDelegate;
 
 @interface GBImageViewGridConfiguration : NSObject
-@property NSColor *color;
-@property NSUInteger size;
+@property (nonatomic, strong) NSColor *color;
+@property (nonatomic) NSUInteger size;
 - (instancetype) initWithColor: (NSColor *) color size: (NSUInteger) size;
 @end
 
 @interface GBImageView : NSImageView
-@property (nonatomic) NSArray *horizontalGrids;
-@property (nonatomic) NSArray *verticalGrids;
+@property (nonatomic, strong) NSArray<GBImageViewGridConfiguration *> *horizontalGrids;
+@property (nonatomic, strong) NSArray<GBImageViewGridConfiguration *> *verticalGrids;
 @property (nonatomic) bool displayScrollRect;
 @property NSRect scrollRect;
-@property (weak) IBOutlet id<GBImageViewDelegate> delegate;
+@property (nonatomic, weak) IBOutlet id<GBImageViewDelegate> delegate;
 @end
 
 @protocol GBImageViewDelegate <NSObject>

@@ -1,10 +1,11 @@
 #include <windows.h>
+#include <shlobj.h>
 #include "open_dialog.h"
 
 char *do_open_rom_dialog(void)
 {
     OPENFILENAMEW dialog;
-    wchar_t filename[MAX_PATH] = {0};
+    static wchar_t filename[MAX_PATH] = {0};
     
     memset(&dialog, 0, sizeof(dialog));
     dialog.lStructSize = sizeof(dialog);
@@ -23,5 +24,34 @@ char *do_open_rom_dialog(void)
         return ret;
     }
     
+    return NULL;
+}
+
+char *do_open_folder_dialog(void)
+{
+    
+    BROWSEINFOW dialog;
+    memset(&dialog, 0, sizeof(dialog));
+    
+    dialog.ulFlags = BIF_USENEWUI;
+    dialog.lpszTitle = L"Select Boot ROMs Folder";
+    
+    OleInitialize(NULL);
+    
+    LPITEMIDLIST list = SHBrowseForFolderW(&dialog);
+    static wchar_t filename[MAX_PATH] = {0};
+
+    if (list) {
+        if (!SHGetPathFromIDListW(list, filename)) {
+            OleUninitialize();
+            return NULL;
+        }
+        char *ret = malloc(MAX_PATH * 4);
+        WideCharToMultiByte(CP_UTF8, 0, filename, sizeof(filename), ret, MAX_PATH * 4, NULL, NULL);
+        CoTaskMemFree(list);
+        OleUninitialize();
+        return ret;
+    }
+    OleUninitialize();
     return NULL;
 }

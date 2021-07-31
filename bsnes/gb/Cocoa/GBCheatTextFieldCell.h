@@ -1,5 +1,5 @@
 #import <Cocoa/Cocoa.h>
 
 @interface GBCheatTextFieldCell : NSTextFieldCell
-@property bool usesAddressFormat;
+@property (nonatomic) bool usesAddressFormat;
 @end
