@@ -87,25 +87,25 @@
 
 #if defined (__OpenBSD__)
   #if !defined(LIBCO_MALLOC) || !defined(LIBCO_FREE)
-	#include <unistd.h>
-	#include <sys/mman.h>
+    #include <unistd.h>
+    #include <sys/mman.h>
 
-	static void* malloc_obsd(size_t size) {
-	  long pagesize = sysconf(_SC_PAGESIZE);
-	  char* memory = (char*)mmap(NULL, size + pagesize, PROT_READ|PROT_WRITE, MAP_STACK|MAP_PRIVATE|MAP_ANON, -1, 0);
-	  if (memory == MAP_FAILED) return NULL;
-	  *(size_t*)memory = size + pagesize;
-	  memory += pagesize;
-	  return (void*)memory;
-	}
+    static void* malloc_obsd(size_t size) {
+      long pagesize = sysconf(_SC_PAGESIZE);
+      char* memory = (char*)mmap(NULL, size + pagesize, PROT_READ|PROT_WRITE, MAP_STACK|MAP_PRIVATE|MAP_ANON, -1, 0);
+      if (memory == MAP_FAILED) return NULL;
+      *(size_t*)memory = size + pagesize;
+      memory += pagesize;
+      return (void*)memory;
+    }
 
-	static void free_obsd(void *ptr) {
-	  char* memory = (char*)ptr - sysconf(_SC_PAGESIZE);
-	  munmap(memory, *(size_t*)memory);
-	}
+    static void free_obsd(void *ptr) {
+      char* memory = (char*)ptr - sysconf(_SC_PAGESIZE);
+      munmap(memory, *(size_t*)memory);
+    }
 
-	#define LIBCO_MALLOC malloc_obsd
-	#define LIBCO_FREE   free_obsd
+    #define LIBCO_MALLOC malloc_obsd
+    #define LIBCO_FREE   free_obsd
   #endif
 #endif
 
