@@ -183,7 +183,7 @@ auto Presentation::create() -> void {
     .setName("SameBoy")
     .setLogo(Resource::SameBoy)
     .setDescription("Super Game Boy emulator")
-    .setVersion("0.13.6")
+    .setVersion("0.14.4")
     .setCopyright("Lior Halphon")
     .setLicense("MIT")
     .setWebsite("https://sameboy.github.io")
