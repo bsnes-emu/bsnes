@@ -902,7 +902,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 {
     GB_set_rendering_disabled(&gb, true);
     _view = nil;
-    for (NSView *view in _mainWindow.contentView.subviews) {
+    for (NSView *view in [_mainWindow.contentView.subviews copy]) {
         [view removeFromSuperview];
     }
     [[NSBundle mainBundle] loadNibNamed:@"GBS" owner:self topLevelObjects:nil];
