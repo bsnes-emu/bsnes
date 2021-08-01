@@ -98,7 +98,7 @@ namespace nall {
   constexpr auto platform() -> Platform { return Platform::Linux; }
   constexpr auto api() -> API { return API::Posix; }
   constexpr auto display() -> DisplayServer { return DisplayServer::Xorg; }
-#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined (__DragonFly__)
   #define PLATFORM_BSD
   #define API_POSIX
   #define DISPLAY_XORG
