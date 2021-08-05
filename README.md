@@ -68,6 +68,25 @@ Nightly Builds
   - ![Build status](https://api.cirrus-ci.com/github/bsnes-emu/bsnes.svg?task=linux-x86_64-binaries)
   - ![Build status](https://api.cirrus-ci.com/github/bsnes-emu/bsnes.svg?task=freebsd-x86_64-binaries)
 
+Compiling instructions (for Windows x64):
+--------------
+1. You'll need both MinGW and .git installed in your system. If you already have, you can skip these steps:
+  I. Download MingGW x64 (http://mingw-w64.org/doku.php). Install and make sure that the following paths are in your enviroment table (you can check searching for "enviroment path" in your windows search and opening "Edit enviroment path").
+  ![image](https://user-images.githubusercontent.com/12163923/128277297-4e16f476-e9e1-4fb7-a083-21ec81c2b0be.png)
+  ![image](https://user-images.githubusercontent.com/12163923/128277634-024c5773-8aaf-4d31-b535-d86df2426502.png)
+
+
+  II. Download and install git (https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
+  
+2. Open a command prompt in your directory of choice and clone bsnes/higan/ares with the command:
+git clone https://github.com/bsnes-emu/bsnes.git
+
+3. Go to ´bsnes´ folder with: ´cd bsnes´.
+
+4. Now you just need to put the command: ´mingw32-make´. The compilation will start.
+
+5. The brand new compiled file will be at directory ´out´ in this same directory. Enjoy!
+
 Preview
 -------
 
