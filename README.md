@@ -74,8 +74,6 @@ Compiling instructions (for Windows x64):
   I. Download MingGW x64 (http://mingw-w64.org/doku.php). Install and make sure that the following paths are in your enviroment table (you can check searching for "enviroment path" in your windows search and opening "Edit enviroment path").
   ![image](https://user-images.githubusercontent.com/12163923/128277297-4e16f476-e9e1-4fb7-a083-21ec81c2b0be.png)
   ![image](https://user-images.githubusercontent.com/12163923/128277634-024c5773-8aaf-4d31-b535-d86df2426502.png)
-
-
   II. Download and install git (https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
   
 2. Open a command prompt in your directory of choice and clone bsnes/higan/ares with the command:
