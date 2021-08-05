@@ -3,9 +3,16 @@ bsnes
 
 ![bsnes logo](bsnes/target-bsnes/resource/logo.png)
 
-bsnes is a multi-platform Super Nintendo (Super Famicom) emulator, originally
+**bsnes** is a multi-platform Super Nintendo (Super Famicom) emulator, originally
 developed by [Near](https://near.sh), which focuses on performance,
-features, and ease of use.
+features and ease of use.
+
+Community
+---------
+
+  - [Official git repository](https://github.com/bsnes-emu/bsnes)
+  - [Discussion Forum](https://helmet.kafuka.org/bboard/forum.php?id=6)
+  - [Discord Chat](https://discord.gg/xdsQRXfuCh)
 
 Unique Features
 ---------------
@@ -68,8 +75,8 @@ Nightly Builds
   - ![Build status](https://api.cirrus-ci.com/github/bsnes-emu/bsnes.svg?task=linux-x86_64-binaries)
   - ![Build status](https://api.cirrus-ci.com/github/bsnes-emu/bsnes.svg?task=freebsd-x86_64-binaries)
 
-Compiling instructions (for Windows x64):
---------------
+Compiling instructions (for Windows x64)
+----------------------------------------
 
 If you want to compile by yourself, it's also very easy to. Just follow these steps:
 
