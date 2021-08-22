@@ -1,21 +1,18 @@
-bsnes
-=====
+# bsnes
 
 ![bsnes logo](bsnes/target-bsnes/resource/logo.png)
 
-**bsnes** is a multi-platform Super Nintendo (Super Famicom) emulator, originally
+bsnes is a multi-platform Super Nintendo (Super Famicom) emulator, originally
 developed by [Near](https://near.sh), which focuses on performance,
-features and ease of use.
+features, and ease of use.
 
-Community
----------
+## Community
 
   - [Official git repository](https://github.com/bsnes-emu/bsnes)
   - [Discussion Forum](https://helmet.kafuka.org/bboard/forum.php?id=6)
-  - [Discord Chat](https://discord.gg/xdsQRXfuCh)
+  - [![Discord](https://img.shields.io/badge/chat-on%20discord-7289da.svg?logo=discord)](https://discord.gg/B27hf27ZVf)
 
-Unique Features
----------------
+## Unique Features
 
   - True Super Game Boy emulation (using the SameBoy core by Lior Halphon)
   - HD mode 7 graphics with optional supersampling (by DerKoun)
@@ -31,8 +28,7 @@ Unique Features
   - Optional higan game folder support (standard game ROM files are also fully supported!)
   - Advanced mapping system allowing multiple bindings to every emulated input
 
-Standard Features
------------------
+## Standard Features
 
   - MSU1 support
   - BPS and IPS soft-patching support
@@ -60,14 +56,12 @@ Standard Features
   - Multi-monitor support
   - Turbo support for controller inputs
 
-Links
------
+## Links
 
   - [Official git repository](https://github.com/bsnes-emu/bsnes)
   - [Official Discord](https://discord.gg/B27hf27ZVf)
 
-Nightly Builds
---------------
+## Nightly Builds
 
   - [Download](https://cirrus-ci.com/github/bsnes-emu/bsnes/master)
   - ![Build status](https://api.cirrus-ci.com/github/bsnes-emu/bsnes.svg?task=windows-x86_64-binaries)
@@ -75,30 +69,31 @@ Nightly Builds
   - ![Build status](https://api.cirrus-ci.com/github/bsnes-emu/bsnes.svg?task=linux-x86_64-binaries)
   - ![Build status](https://api.cirrus-ci.com/github/bsnes-emu/bsnes.svg?task=freebsd-x86_64-binaries)
 
-Compiling instructions (for Windows x64)
-----------------------------------------
+## Compiling instructions
 
 If you want to compile by yourself, it's also very easy to. Just follow these steps:
 
-1. You'll need both MinGW and .git installed in your system. If you already have, you can skip these steps:
+### Prerequisites
 
-  I. Download MingGW x64 (http://mingw-w64.org/doku.php). Install and make sure that the following paths are in your enviroment table (you can check searching for "enviroment path" in your windows search and opening "Edit enviroment path").
-  ![image](https://user-images.githubusercontent.com/12163923/128291920-11b92486-c765-4064-abc1-630164b9f1d8.png)
-  ![image](https://user-images.githubusercontent.com/12163923/128292012-590136b4-5e90-4518-ac58-1b07b6839533.png)
-  
-  II. Download and install git (https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
-  
-2. Open a command prompt in your directory of choice and clone bsnes/higan/ares with the command:
-`git clone https://github.com/bsnes-emu/bsnes.git`
+ * Updated C/C++ compilation suite already installed and with enviroment paths ready for your operational system 
+For Windows, we can suggest [MinGW] (http://mingw-w64.org/).
+Another good suggestion [MSYS2](https://www.msys2.org/). It also has versions for MacOS and Linux (and even come in some distributions).
+ * (optional) [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git).
 
-3. Go to `bsnes` folder with: `cd bsnes`.
+### Generating the executable
 
-4. Now you just need to put the command: `mingw32-make`. The compilation will start.
+1. Open a command prompt in your directory of choice and clone the most recent version of the code in a directory of your choice.
+  * you can get it ready manually just extracting the source code (that you can download just clicking in the "Code" button and choosing "download zip") in your directory of choice
+  * if you have Git installed, you can do it with the command prompt/terminal:
+  `git clone https://github.com/bsnes-emu/bsnes.git`
 
-5. The brand new compiled file will be at directory `./bsnes/out`. Enjoy!
+2. Go to `bsnes` folder with: `cd bsnes`.
 
-Preview
--------
+3. Now you just need to put the command: `make` (for most of C/C++ compilation suites) or `mingw32-make`(if you're using Windows MinGW). The compilation will start.
+
+4. The brand new compiled file will be at directory `./bsnes/out`. Enjoy!
+
+## Preview
 
 ![bsnes user interface](.assets/user-interface.png)
 ![bsnes running Bahamut Lagoon](.assets/bahamut-lagoon.png)
