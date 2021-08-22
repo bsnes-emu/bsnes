@@ -1,5 +1,7 @@
 # bsnes
 
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://github.com/bsnes-emu/bsnes/blob/master/LICENSE.txt)
+
 ![bsnes logo](bsnes/target-bsnes/resource/logo.png)
 
 bsnes is a multi-platform Super Nintendo (Super Famicom) emulator, originally
