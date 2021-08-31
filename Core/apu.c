@@ -735,6 +735,7 @@ void GB_apu_init(GB_gameboy_t *gb)
         gb->apu.wave_channel.wave_form[(reg - GB_IO_WAV_START) * 2 + 1] = gb->io_registers[reg] & 0xF;
     }
     gb->apu.lf_div = 1;
+    gb->apu.wave_channel.shift = 4;
     /* APU glitch: When turning the APU on while DIV's bit 4 (or 5 in double speed mode) is on,
        the first DIV/APU event is skipped. */
     if (gb->div_counter & (gb->cgb_double_speed? 0x2000 : 0x1000)) {
