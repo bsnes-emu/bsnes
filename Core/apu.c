@@ -1175,8 +1175,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                             reads from it. */
                 if (!GB_is_cgb(gb) &&
                     gb->apu.is_active[GB_WAVE] &&
-                    gb->apu.wave_channel.sample_countdown == 0 &&
-                    gb->apu.wave_channel.enable) {
+                    gb->apu.wave_channel.sample_countdown == 0) {
                     unsigned offset = ((gb->apu.wave_channel.current_sample_index + 1) >> 1) & 0xF;
 
                     /* This glitch varies between models and even specific instances:
