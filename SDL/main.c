@@ -682,10 +682,21 @@ static bool get_arg_flag(const char *flag, int *argc, char **argv)
     return false;
 }
 
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+static void enable_smooth_scrolling(void)
+{
+    CFPreferencesSetAppValue(CFSTR("AppleMomentumScrollSupported"), kCFBooleanTrue, kCFPreferencesCurrentApplication);
+}
+#endif
+
 int main(int argc, char **argv)
 {
 #ifdef _WIN32
     SetProcessDPIAware();
+#endif
+#ifdef __APPLE__
+    enable_smooth_scrolling();
 #endif
     fprintf(stderr, "SameBoy v" GB_VERSION "\n");
     
