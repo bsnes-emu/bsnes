@@ -252,18 +252,18 @@ auto Audio::optimalDriver() -> string {
   return "DirectSound 7.0";
   #elif defined(AUDIO_WAVEOUT)
   return "waveOut";
-  #elif defined(AUDIO_ALSA)
-  return "ALSA";
-  #elif defined(AUDIO_OSS)
-  return "OSS";
-  #elif defined(AUDIO_OPENAL)
-  return "OpenAL";
   #elif defined(AUDIO_PULSEAUDIO)
   return "PulseAudio";
   #elif defined(AUDIO_PULSEAUDIOSIMPLE)
   return "PulseAudio Simple";
+  #elif defined(AUDIO_OPENAL)
+  return "OpenAL";
   #elif defined(AUDIO_AO)
   return "libao";
+  #elif defined(AUDIO_ALSA)
+  return "ALSA";
+  #elif defined(AUDIO_OSS)
+  return "OSS";
   #else
   return "None";
   #endif
