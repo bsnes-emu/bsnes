@@ -48,6 +48,7 @@ void set_filename(const char *new_filename, typeof(free) *new_free_function)
 
 static char *completer(const char *substring, uintptr_t *context)
 {
+    if (!GB_is_inited(&gb)) return NULL;
     char *temp = strdup(substring);
     char *ret = GB_debugger_complete_substring(&gb, temp, context);
     free(temp);
@@ -656,9 +657,8 @@ restart:
         GB_set_update_input_hint_callback(&gb, handle_events);
         GB_apu_set_sample_callback(&gb, gb_audio_callback);
         
-        if ((console_supported = CON_start(completer))) {
+        if (console_supported) {
             CON_set_async_prompt("> ");
-            CON_set_repeat_empty(true);
             GB_set_log_callback(&gb, log_callback);
             GB_set_input_callback(&gb, input_callback);
             GB_set_async_input_callback(&gb, asyc_input_callback);
@@ -784,13 +784,13 @@ int main(int argc, char **argv)
 #ifdef __APPLE__
     enable_smooth_scrolling();
 #endif
-    fprintf(stderr, "SameBoy v" GB_VERSION "\n");
-    
+
     bool fullscreen = get_arg_flag("--fullscreen", &argc, argv) || get_arg_flag("-f", &argc, argv);
     bool nogl = get_arg_flag("--nogl", &argc, argv);
     stop_on_start = get_arg_flag("--stop-debugger", &argc, argv) || get_arg_flag("-s", &argc, argv);
 
     if (argc > 2 || (argc == 2 && argv[1][0] == '-')) {
+        fprintf(stderr, "SameBoy v" GB_VERSION "\n");
         fprintf(stderr, "Usage: %s [--fullscreen|-f] [--nogl] [--stop-debugger|-s] [rom]\n", argv[0]);
         exit(1);
     }
@@ -802,6 +802,13 @@ int main(int argc, char **argv)
     signal(SIGINT, debugger_interrupt);
 
     SDL_Init(SDL_INIT_EVERYTHING);
+    if ((console_supported = CON_start(completer))) {
+        CON_set_repeat_empty(true);
+        CON_printf("SameBoy v" GB_VERSION "\n");
+    }
+    else {
+        fprintf(stderr, "SameBoy v" GB_VERSION "\n");
+    }
     
     strcpy(prefs_path, resource_path("prefs.bin"));
     if (access(prefs_path, R_OK | W_OK) != 0) {
