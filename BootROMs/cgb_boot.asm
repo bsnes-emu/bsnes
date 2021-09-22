@@ -25,6 +25,7 @@ Start:
 
 ; Init waveform
     ld c, $10
+    ld hl, $FF30
 .waveformLoop
     ldi [hl], a
     cpl
@@ -44,7 +45,6 @@ Start:
     ldh [$25], a
     ld a, $77
     ldh [$24], a
-    ld hl, $FF30
 
 ; Init BG palette
     ld a, $fc
