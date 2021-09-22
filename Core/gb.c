@@ -412,6 +412,7 @@ int GB_load_gbs_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size
     if (gb->mbc_ram) {
         free(gb->mbc_ram);
         gb->mbc_ram = NULL;
+        gb->mbc_ram_size = 0;
     }
     
     if (gb->cartridge_type->has_ram) {
