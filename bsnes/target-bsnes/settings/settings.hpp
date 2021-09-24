@@ -382,13 +382,16 @@ public:
   HorizontalLayout coprocessorLayout{this, Size{~0, 0}};
     CheckLabel coprocessorDelayedSyncOption{&coprocessorLayout, Size{0, 0}};
     CheckLabel coprocessorPreferHLEOption{&coprocessorLayout, Size{0, 0}};
-  Canvas coprocessorSpacer{this, Size{~0, 1}};
   //
   Label gameLabel{this, Size{~0, 0}, 2};
-  CheckLabel hotfixes{this, Size{0, 0}};
+    CheckLabel hotfixes{this, Size{0, 0}};
+  Canvas hotfixesSpacer{this, Size{~0, 1}};
   //
-  Widget spacer{this, Size{~0, ~0}};
-  Label note{this, Size{~0, 0}};
+  Label ppuModeLabel{this, Size{~0, 0}, 0};
+  Label ppuModeRequirements{this, Size{~0, 0}};
+  HorizontalLayout modeLayout{this, Size{~0, 0}};
+    Button accuracyMode{&modeLayout, Size{0, 0}};
+    Button compatibilityMode{&modeLayout, Size{0, 0}};
 };
 
 struct CompatibilitySettings : VerticalLayout {
