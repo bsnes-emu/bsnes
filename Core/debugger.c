@@ -1550,7 +1550,7 @@ static bool mbc(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
         if (cartridge->has_ram) {
             GB_log(gb, "Current mapped RAM bank: %x\n", gb->mbc_ram_bank);
             if (gb->cartridge_type->mbc_type != GB_HUC1) {
-                GB_log(gb, "RAM is curently %s\n", gb->mbc_ram_enable? "enabled" : "disabled");
+                GB_log(gb, "RAM is currently %s\n", gb->mbc_ram_enable? "enabled" : "disabled");
             }
         }
         if (cartridge->mbc_type == GB_MBC1 && gb->mbc1_wiring == GB_STANDARD_MBC1_WIRING) {
