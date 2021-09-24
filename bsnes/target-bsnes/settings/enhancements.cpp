@@ -25,7 +25,7 @@ auto EnhancementSettings::create() -> void {
   if(settings.emulator.runAhead.frames == 4) runAhead4.setChecked();
   runAheadSpacer.setColor({192, 192, 192});
 
-  overclockingLabel.setText("Overclocking").setFont(Font().setBold());
+  overclockingLabel.setText("Overclocking (this will break games, cause bugs and reduce performance!)").setFont(Font().setBold());
   overclockingLayout.setSize({3, 3});
   overclockingLayout.column(0).setAlignment(1.0);
   overclockingLayout.column(1).setAlignment(0.5);
@@ -124,7 +124,6 @@ auto EnhancementSettings::create() -> void {
   ).onToggle([&] {
     settings.emulator.hack.coprocessor.preferHLE = coprocessorPreferHLEOption.checked();
   });
-  coprocessorSpacer.setColor({192, 192, 192});
 
   gameLabel.setText("Game Enhancements").setFont(Font().setBold());
   hotfixes.setText("Hotfixes").setToolTip({
@@ -133,6 +132,54 @@ auto EnhancementSettings::create() -> void {
   }).setChecked(settings.emulator.hack.hotfixes).onToggle([&] {
     settings.emulator.hack.hotfixes = hotfixes.checked();
   });
+  hotfixesSpacer.setColor({192, 192, 192});
 
-  note.setText("Note: some settings do not take effect until after reloading games.");
+  ppuModeLabel.setText("Mode Presets:").setFont(Font().setBold());
+  ppuModeRequirements.setText(
+    "Accuracy Mode: Maximum hardware accuracy, but PPUs timings aren't 100% correct yet.\n"
+    "Compatibility Mode: Most compatible way to play games paired with good performance. [Recommended]"
+  );
+  accuracyMode.setText("Accuracy Mode").onActivate([&] {
+    runAhead0.setChecked(); settings.emulator.runAhead.frames = 0;
+    cpuClock.setPosition(0).doChange();
+    sa1Clock.setPosition(0).doChange();
+    sfxClock.setPosition(0).doChange();
+    fastPPU.setChecked(false).doToggle();
+    fastDSP.setChecked(false).doToggle();
+    cubicInterpolation.setChecked(false).doToggle();
+    coprocessorDelayedSyncOption.setChecked(false).doToggle();
+    coprocessorPreferHLEOption.setChecked(false).doToggle();
+    hotfixes.setChecked(false).doToggle();
+
+    if(!emulator->loaded()) return;
+    MessageDialog().setAlignment(settingsWindow).setTitle("Success").setText({
+      "Accuracy Mode applied.\n"
+      "Reload the game in order for all changes to take effect."
+    }).information();
+  });
+
+  compatibilityMode.setText("Compatibility Mode").onActivate([&] {
+    runAhead0.setChecked(); settings.emulator.runAhead.frames = 0;
+    cpuClock.setPosition(0).doChange();
+    sa1Clock.setPosition(0).doChange();
+    sfxClock.setPosition(0).doChange();
+    fastPPU.setChecked(true).doToggle();
+    deinterlace.setChecked(true).doToggle();
+    noSpriteLimit.setChecked(false).doToggle();
+    mode7Scale.item(0).setSelected(); emulator->configure("Hacks/PPU/Mode7/Scale", settings.emulator.hack.ppu.mode7.scale = 1);
+    mode7Perspective.setChecked(true).doToggle();
+    mode7Supersample.setChecked(false).doToggle();
+    mode7Mosaic.setChecked(true).doToggle();
+    fastDSP.setChecked(false).doToggle();
+    cubicInterpolation.setChecked(false).doToggle();
+    coprocessorDelayedSyncOption.setChecked(false).doToggle();
+    coprocessorPreferHLEOption.setChecked(false).doToggle();
+    hotfixes.setChecked(true).doToggle();
+
+    if(!emulator->loaded()) return;
+    MessageDialog().setAlignment(settingsWindow).setTitle("Success").setText({
+      "Compatibility Mode applied.\n"
+      "Reload the game in order for all changes to take effect."
+    }).information();
+  });
 }
