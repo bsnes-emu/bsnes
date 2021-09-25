@@ -1754,7 +1754,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
             window_rect.size.height = 512 + height_diff + 48;
             break;
         case 3:
-            window_rect.size.height = 20 * 16 + height_diff + 24;
+            window_rect.size.height = 20 * 16 + height_diff + 34;
             break;
             
         default:
