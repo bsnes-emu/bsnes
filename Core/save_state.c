@@ -9,6 +9,15 @@
 #define BESS_NAME "SameBoy v" GB_VERSION
 #endif
 
+_Static_assert((GB_SECTION_OFFSET(core_state) & 7) == 0, "Section core_state is not aligned");
+_Static_assert((GB_SECTION_OFFSET(dma) & 7) == 0, "Section dma is not aligned");
+_Static_assert((GB_SECTION_OFFSET(mbc) & 7) == 0, "Section mbc is not aligned");
+_Static_assert((GB_SECTION_OFFSET(hram) & 7) == 0, "Section hram is not aligned");
+_Static_assert((GB_SECTION_OFFSET(timing) & 7) == 0, "Section timing is not aligned");
+_Static_assert((GB_SECTION_OFFSET(apu) & 7) == 0, "Section apu is not aligned");
+_Static_assert((GB_SECTION_OFFSET(rtc) & 7) == 0, "Section rtc is not aligned");
+_Static_assert((GB_SECTION_OFFSET(video) & 7) == 0, "Section video is not aligned");
+
 typedef struct __attribute__((packed)) {
     uint32_t magic;
     uint32_t size;
