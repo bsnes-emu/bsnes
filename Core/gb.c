@@ -1603,7 +1603,10 @@ void GB_reset(GB_gameboy_t *gb)
 {
     uint32_t mbc_ram_size = gb->mbc_ram_size;
     GB_model_t model = gb->model;
+    uint8_t rtc_section[GB_SECTION_SIZE(rtc)];
+    memcpy(rtc_section, GB_GET_SECTION(gb, rtc), sizeof(rtc_section));
     memset(gb, 0, (size_t)GB_GET_SECTION((GB_gameboy_t *) 0, unsaved));
+    memcpy(GB_GET_SECTION(gb, rtc), rtc_section, sizeof(rtc_section));
     gb->model = model;
     gb->version = GB_STRUCT_VERSION;
     
