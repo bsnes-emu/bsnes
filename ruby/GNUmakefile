@@ -35,11 +35,6 @@ ifeq ($(ruby),)
     $(eval $(call pkg_check,libpulse,audio.pulseaudiosimple))
     ruby += input.xlib
     $(eval $(call pkg_check,sdl2,input.sdl))
-  else ifeq ($(platform),haiku)
-    ruby += video.glx video.glx2
-    ruby += audio.oss
-    $(eval $(call pkg_check,openal,audio.openal))
-    $(eval $(call pkg_check,sdl2,input.sdl))
   endif
 endif
 
