@@ -15,18 +15,18 @@ mv .github/actions/dmg{,-mode}-acid2.bmp
 set +e
 
 FAILED_TESTS=`
-shasum .github/actions/*.bmp | grep -q -E -v \(\
-44ce0c7d49254df0637849c9155080ac7dc3ef3d\ \ .github/actions/cgb-acid2.bmp\|\
+shasum .github/actions/*.bmp | grep -E -v \(\
+5283564df0cf5bb78a7a90aff026c1a4692fd39e\ \ .github/actions/cgb-acid2.bmp\|\
 dbcc438dcea13b5d1b80c5cd06bda2592cc5d9e0\ \ .github/actions/cgb_sound.bmp\|\
 0caadf9634e40247ae9c15ff71992e8f77bbf89e\ \ .github/actions/dmg-acid2.bmp\|\
-c50daed36c57a8170ff362042694786676350997\ \ .github/actions/dmg-mode-acid2.bmp\|\
+a732077f98f43d9231453b1764d9f797a836924d\ \ .github/actions/dmg-mode-acid2.bmp\|\
 c9e944b7e01078bdeba1819bc2fa9372b111f52d\ \ .github/actions/dmg_sound-2.bmp\|\
 f0172cc91867d3343fbd113a2bb98100074be0de\ \ .github/actions/oam_bug-2.bmp\
 \)`
 
 if [ -n "$FAILED_TESTS" ] ; then
     echo "Failed the following tests:"
-    echo $FAILED_TESTS | tr " " "\n" | grep -q -o -E "[^/]+\.bmp" | sed s/.bmp// | sort
+    echo $FAILED_TESTS | tr " " "\n" | grep -o -E "[^/]+\.bmp" | sed s/.bmp// | sort
     exit 1
 fi
 
