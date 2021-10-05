@@ -284,7 +284,7 @@ int GB_load_rom(GB_gameboy_t *gb, const char *path)
         gb->rom_size |= gb->rom_size >> 1;
         gb->rom_size++;
     }
-    if (gb->rom_size == 0) {
+    if (gb->rom_size < 0x8000) {
         gb->rom_size = 0x8000;
     }
     fseek(f, 0, SEEK_SET);
@@ -396,7 +396,7 @@ int GB_load_gbs_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size
         gb->rom_size++;
     }
     
-    if (gb->rom_size == 0) {
+    if (gb->rom_size < 0x8000) {
         gb->rom_size = 0x8000;
     }
 
