@@ -1,10 +1,10 @@
 set -e
 
 ./build/bin/tester/sameboy_tester --jobs 5 \
-      --length 40 .github/actions/cgb_sound.gb \
+      --length 45 .github/actions/cgb_sound.gb \
       --length 10  .github/actions/cgb-acid2.gbc \
       --length 10  .github/actions/dmg-acid2.gb \
---dmg --length 40 .github/actions/dmg_sound-2.gb \
+--dmg --length 45 .github/actions/dmg_sound-2.gb \
 --dmg --length 20 .github/actions/oam_bug-2.gb
 
 mv .github/actions/dmg{,-mode}-acid2.bmp
