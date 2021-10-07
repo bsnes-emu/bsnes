@@ -1170,7 +1170,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR34:
             gb->apu.wave_channel.sample_length &= 0xFF;
             gb->apu.wave_channel.sample_length |= (value & 7) << 8;
-            if ((value & 0x80) && gb->apu.wave_channel.enable) {
+            if (value & 0x80) {
                 /* DMG bug: wave RAM gets corrupted if the channel is retriggerred 1 cycle before the APU
                             reads from it. */
                 if (!GB_is_cgb(gb) &&
@@ -1199,7 +1199,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                                8);
                     }
                 }
-                if (!gb->apu.is_active[GB_WAVE]) {
+                if (!gb->apu.is_active[GB_WAVE] && gb->apu.wave_channel.enable) {
                     gb->apu.is_active[GB_WAVE] = true;
                     update_sample(gb, GB_WAVE,
                                   gb->apu.wave_channel.current_sample >> gb->apu.wave_channel.shift,
