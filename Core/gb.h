@@ -581,7 +581,7 @@ struct GB_gameboy_internal_s {
         uint8_t current_line;
         uint16_t ly_for_comparison;
         GB_fifo_t bg_fifo, oam_fifo;
-        uint8_t fetcher_x;
+        GB_PADDING(uint8_t, fetcher_x);
         uint8_t fetcher_y;
         uint16_t cycles_for_line;
         uint8_t current_tile;

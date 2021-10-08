@@ -348,7 +348,6 @@ static void sanitize_state(GB_gameboy_t *gb)
     gb->oam_fifo.read_end &= 0xF;
     gb->oam_fifo.write_end &= 0xF;
     gb->object_low_line_address &= gb->vram_size & ~1;
-    gb->fetcher_x &= 0x1f;
     if (gb->lcd_x > gb->position_in_line) {
         gb->lcd_x = gb->position_in_line;
     }

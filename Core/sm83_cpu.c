@@ -35,7 +35,8 @@ static const GB_conflict_t cgb_conflict_map[0x80] = {
     [GB_IO_OBP0] = GB_CONFLICT_PALETTE_CGB,
     [GB_IO_OBP1] = GB_CONFLICT_PALETTE_CGB,
     [GB_IO_NR10] = GB_CONFLICT_NR10,
-    
+    [GB_IO_SCX] = GB_CONFLICT_WRITE_CPU, // TODO: Similar to BGP, there's some time travelling involved
+
     /* Todo: most values not verified, and probably differ between revisions */
 };
 
