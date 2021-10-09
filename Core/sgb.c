@@ -375,7 +375,7 @@ static void command_ready(GB_gameboy_t *gb)
             }
             break;
         case PAL_TRN:
-            gb->sgb->vram_transfer_countdown = 2;
+            gb->sgb->vram_transfer_countdown = 3;
             gb->sgb->transfer_dest = TRANSFER_PALETTES;
             break;
         case DATA_SND:
@@ -390,15 +390,15 @@ static void command_ready(GB_gameboy_t *gb)
             gb->sgb->current_player &= (gb->sgb->player_count - 1);
             break;
         case CHR_TRN:
-            gb->sgb->vram_transfer_countdown = 2;
+            gb->sgb->vram_transfer_countdown = 3;
             gb->sgb->transfer_dest = (gb->sgb->command[1] & 1)? TRANSFER_HIGH_TILES : TRANSFER_LOW_TILES;
             break;
         case PCT_TRN:
-            gb->sgb->vram_transfer_countdown = 2;
+            gb->sgb->vram_transfer_countdown = 3;
             gb->sgb->transfer_dest = TRANSFER_BORDER_DATA;
             break;
         case ATTR_TRN:
-            gb->sgb->vram_transfer_countdown = 2;
+            gb->sgb->vram_transfer_countdown = 3;
             gb->sgb->transfer_dest = TRANSFER_ATTRIBUTES;
             break;
         case ATTR_SET:
