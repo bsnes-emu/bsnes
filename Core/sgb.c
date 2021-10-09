@@ -532,7 +532,6 @@ static uint32_t convert_rgb15_with_fade(GB_gameboy_t *gb, uint16_t color, uint8_
     return GB_convert_rgb15(gb, color, false);
 }
 
-#include <stdio.h>
 static void render_boot_animation (GB_gameboy_t *gb)
 {
 #include "graphics/sgb_animation_logo.inc"
@@ -765,6 +764,7 @@ void GB_sgb_render(GB_gameboy_t *gb)
                 continue;
             }
             uint16_t tile = LE16(gb->sgb->border.map[tile_x + tile_y * 32]);
+            if (tile & 0x300) continue; // Unused tile
             uint8_t flip_x = (tile & 0x4000)? 0:7;
             uint8_t flip_y = (tile & 0x8000)? 7:0;
             uint8_t palette = (tile >> 10) & 3;
