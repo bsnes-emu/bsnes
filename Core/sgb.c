@@ -648,7 +648,7 @@ void GB_sgb_render(GB_gameboy_t *gb)
                 }
             }
             if (gb->sgb->transfer_dest == TRANSFER_BORDER_DATA) {
-                gb->sgb->border_animation = 64;
+                gb->sgb->border_animation = 80;
             }
         }
     }
@@ -729,7 +729,10 @@ void GB_sgb_render(GB_gameboy_t *gb)
     }
     
     uint32_t border_colors[16 * 4];
-    if (gb->sgb->border_animation == 0 || gb->sgb->intro_animation < GB_SGB_INTRO_ANIMATION_LENGTH) {
+    if (gb->sgb->border_animation == 0 || gb->sgb->border_animation > 64 || gb->sgb->intro_animation < GB_SGB_INTRO_ANIMATION_LENGTH) {
+        if (gb->sgb->border_animation != 0) {
+            gb->sgb->border_animation--;
+        }
         for (unsigned i = 0; i < 16 * 4; i++) {
             border_colors[i] = convert_rgb15(gb, LE16(gb->sgb->border.palette[i]));
         }
