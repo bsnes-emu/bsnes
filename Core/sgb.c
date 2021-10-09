@@ -434,9 +434,6 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
         return;
     }
     if (gb->sgb->disable_commands) return;
-    if (gb->sgb->command_write_index >= sizeof(gb->sgb->command) * 8) {
-        return;
-    }
     
     uint16_t command_size = (gb->sgb->command[0] & 7 ?: 1) * SGB_PACKET_SIZE * 8;
     if ((gb->sgb->command[0] & 0xF1) == 0xF1) {
@@ -468,10 +465,12 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
                 gb->sgb->ready_for_stop = false;
             }
             else {
-                gb->sgb->command_write_index++;
-                gb->sgb->ready_for_pulse = false;
-                if (((gb->sgb->command_write_index) & (SGB_PACKET_SIZE * 8 - 1)) == 0) {
-                    gb->sgb->ready_for_stop = true;
+                if (gb->sgb->command_write_index < sizeof(gb->sgb->command) * 8) {
+                    gb->sgb->command_write_index++;
+                    gb->sgb->ready_for_pulse = false;
+                    if (((gb->sgb->command_write_index) & (SGB_PACKET_SIZE * 8 - 1)) == 0) {
+                        gb->sgb->ready_for_stop = true;
+                    }
                 }
             }
             break;
@@ -485,11 +484,13 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
                 memset(gb->sgb->command, 0, sizeof(gb->sgb->command));
             }
             else {
-                gb->sgb->command[gb->sgb->command_write_index / 8] |= 1 << (gb->sgb->command_write_index & 7);
-                gb->sgb->command_write_index++;
-                gb->sgb->ready_for_pulse = false;
-                if (((gb->sgb->command_write_index) & (SGB_PACKET_SIZE * 8 - 1)) == 0) {
-                    gb->sgb->ready_for_stop = true;
+                if (gb->sgb->command_write_index < sizeof(gb->sgb->command) * 8) {
+                    gb->sgb->command[gb->sgb->command_write_index / 8] |= 1 << (gb->sgb->command_write_index & 7);
+                    gb->sgb->command_write_index++;
+                    gb->sgb->ready_for_pulse = false;
+                    if (((gb->sgb->command_write_index) & (SGB_PACKET_SIZE * 8 - 1)) == 0) {
+                        gb->sgb->ready_for_stop = true;
+                    }
                 }
             }
             break;
