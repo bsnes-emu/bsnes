@@ -1344,6 +1344,8 @@ static void ld_hl_sp_r8(GB_gameboy_t *gb, uint8_t opcode)
 static void ld_sp_hl(GB_gameboy_t *gb, uint8_t opcode)
 {
     gb->registers[GB_REGISTER_SP] = gb->registers[GB_REGISTER_HL];
+    flush_pending_cycles(gb);
+    GB_trigger_oam_bug(gb, gb->hl);
     cycle_no_access(gb);
 }
 
