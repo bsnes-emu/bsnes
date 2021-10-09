@@ -170,10 +170,10 @@ static void vblank(GB_gameboy_t *gb)
                 fwrite(&tga_header, 1, sizeof(tga_header), f);
             }
             else {
-                (*(uint32_t *)&bmp_header[0x2]) = sizeof(bmp_header) + sizeof(bitmap[0]) * GB_get_screen_width(gb) * GB_get_screen_height(gb);
+                (*(uint32_t *)&bmp_header[0x2]) = sizeof(bmp_header) + sizeof(bitmap[0]) * GB_get_screen_width(gb) * GB_get_screen_height(gb) + 2;
                 (*(uint32_t *)&bmp_header[0x12]) = GB_get_screen_width(gb);
                 (*(int32_t *)&bmp_header[0x16]) = -GB_get_screen_height(gb);
-                (*(uint32_t *)&bmp_header[0x22]) = sizeof(bitmap[0]) * GB_get_screen_width(gb) * GB_get_screen_height(gb);
+                (*(uint32_t *)&bmp_header[0x22]) = sizeof(bitmap[0]) * GB_get_screen_width(gb) * GB_get_screen_height(gb) + 2;
                 fwrite(&bmp_header, 1, sizeof(bmp_header), f);
             }
             fwrite(&bitmap, 1, sizeof(bitmap[0]) * GB_get_screen_width(gb) * GB_get_screen_height(gb), f);
