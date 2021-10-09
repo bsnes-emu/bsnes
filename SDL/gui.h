@@ -49,8 +49,8 @@ extern unsigned command_parameter;
 extern char *dropped_state_file;
 
 typedef enum {
-    JOYPAD_BUTTON_LEFT,
     JOYPAD_BUTTON_RIGHT,
+    JOYPAD_BUTTON_LEFT,
     JOYPAD_BUTTON_UP,
     JOYPAD_BUTTON_DOWN,
     JOYPAD_BUTTON_A,
