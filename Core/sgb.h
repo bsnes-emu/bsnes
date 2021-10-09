@@ -61,7 +61,7 @@ struct GB_sgb_s {
     uint8_t received_header[0x54];
     
     /* Multiplayer (cont) */
-    bool mlt_lock;
+    GB_PADDING(bool, mlt_lock);
     
     bool v14_3; // True on save states created on 0.14.3 or newer; Remove when breaking save state compatibility!
 };

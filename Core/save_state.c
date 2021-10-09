@@ -355,6 +355,12 @@ static void sanitize_state(GB_gameboy_t *gb)
     if (gb->object_priority == GB_OBJECT_PRIORITY_UNDEFINED) {
         gb->object_priority = gb->cgb_mode? GB_OBJECT_PRIORITY_INDEX : GB_OBJECT_PRIORITY_X;
     }
+    if (gb->sgb) {
+        if (gb->sgb->player_count != 1 && gb->sgb->player_count != 2 && gb->sgb->player_count != 4) {
+            gb->sgb->player_count = 1;
+        }
+        gb->sgb->current_player &= gb->sgb->player_count - 1;
+    }
     if (gb->sgb && !gb->sgb->v14_3) {
 #ifdef GB_BIG_ENDIAN
         for (unsigned i = 0; i < sizeof(gb->sgb->border.raw_data) / 2; i++) {
@@ -719,7 +725,7 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file, bool appe
             bess_sgb.attribute_files = (BESS_buffer_t){LE32(sizeof(gb->sgb->attribute_files)),
                                                        LE32(sgb_offset + offsetof(GB_sgb_t, attribute_files))};
             
-            bess_sgb.multiplayer_state = (gb->sgb->player_count << 4) | (gb->sgb->current_player & (gb->sgb->player_count - 1));
+            bess_sgb.multiplayer_state = (gb->sgb->player_count << 4) | gb->sgb->current_player;
             if (file->write(file, &bess_sgb, sizeof(bess_sgb)) != sizeof(bess_sgb)) {
                 goto error;
             }
