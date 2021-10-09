@@ -402,9 +402,9 @@ static void command_ready(GB_gameboy_t *gb)
             gb->sgb->transfer_dest = TRANSFER_ATTRIBUTES;
             break;
         case ATTR_SET:
-            load_attribute_file(gb, gb->sgb->command[0] & 0x3F);
+            load_attribute_file(gb, gb->sgb->command[1] & 0x3F);
             
-            if (gb->sgb->command[0] & 0x40) {
+            if (gb->sgb->command[1] & 0x40) {
                 gb->sgb->mask_mode = MASK_DISABLED;
             }
             break;

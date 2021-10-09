@@ -2243,7 +2243,6 @@ bool GB_debugger_execute_command(GB_gameboy_t *gb, char *input)
     }
 }
 
-/* Returns true if debugger waits for more commands */
 char *GB_debugger_complete_substring(GB_gameboy_t *gb, char *input, uintptr_t *context)
 {   
     char *command_string = input;
