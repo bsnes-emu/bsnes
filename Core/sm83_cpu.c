@@ -450,7 +450,7 @@ static void ld_drr_a(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t register_id;
     register_id = (opcode >> 4) + 1;
-    cycle_write(gb, gb->registers[register_id], gb->registers[GB_REGISTER_AF] >> 8);
+    cycle_write(gb, gb->registers[register_id], gb->af >> 8);
 }
 
 static void inc_rr(GB_gameboy_t *gb, uint8_t opcode)
@@ -465,14 +465,14 @@ static void inc_hr(GB_gameboy_t *gb, uint8_t opcode)
     uint8_t register_id;
     register_id = ((opcode >> 4) + 1) & 0x03;
     gb->registers[register_id] += 0x100;
-    gb->registers[GB_REGISTER_AF] &= ~(GB_SUBTRACT_FLAG | GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
+    gb->af &= ~(GB_SUBTRACT_FLAG | GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
 
     if ((gb->registers[register_id] & 0x0F00) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
 
     if ((gb->registers[register_id] & 0xFF00) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 static void dec_hr(GB_gameboy_t *gb, uint8_t opcode)
@@ -480,15 +480,15 @@ static void dec_hr(GB_gameboy_t *gb, uint8_t opcode)
     uint8_t register_id;
     register_id = ((opcode >> 4) + 1) & 0x03;
     gb->registers[register_id] -= 0x100;
-    gb->registers[GB_REGISTER_AF] &= ~(GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
-    gb->registers[GB_REGISTER_AF] |= GB_SUBTRACT_FLAG;
+    gb->af &= ~(GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
+    gb->af |= GB_SUBTRACT_FLAG;
 
     if ((gb->registers[register_id] & 0x0F00) == 0xF00) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
 
     if ((gb->registers[register_id] & 0xFF00) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
@@ -502,25 +502,25 @@ static void ld_hr_d8(GB_gameboy_t *gb, uint8_t opcode)
 
 static void rlca(GB_gameboy_t *gb, uint8_t opcode)
 {
-    bool carry = (gb->registers[GB_REGISTER_AF] & 0x8000) != 0;
+    bool carry = (gb->af & 0x8000) != 0;
 
-    gb->registers[GB_REGISTER_AF] = (gb->registers[GB_REGISTER_AF] & 0xFF00) << 1;
+    gb->af = (gb->af & 0xFF00) << 1;
     if (carry) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG | 0x0100;
+        gb->af |= GB_CARRY_FLAG | 0x0100;
     }
 }
 
 static void rla(GB_gameboy_t *gb, uint8_t opcode)
 {
-    bool bit7 = (gb->registers[GB_REGISTER_AF] & 0x8000) != 0;
-    bool carry = (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) != 0;
+    bool bit7 = (gb->af & 0x8000) != 0;
+    bool carry = (gb->af & GB_CARRY_FLAG) != 0;
 
-    gb->registers[GB_REGISTER_AF] = (gb->registers[GB_REGISTER_AF] & 0xFF00) << 1;
+    gb->af = (gb->af & 0xFF00) << 1;
     if (carry) {
-        gb->registers[GB_REGISTER_AF] |= 0x0100;
+        gb->af |= 0x0100;
     }
     if (bit7) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
 }
 
@@ -530,28 +530,28 @@ static void ld_da16_sp(GB_gameboy_t *gb, uint8_t opcode)
     uint16_t addr;
     addr = cycle_read(gb, gb->pc++);
     addr |= cycle_read(gb, gb->pc++) << 8;
-    cycle_write(gb, addr, gb->registers[GB_REGISTER_SP] & 0xFF);
-    cycle_write(gb, addr + 1, gb->registers[GB_REGISTER_SP] >> 8);
+    cycle_write(gb, addr, gb->sp & 0xFF);
+    cycle_write(gb, addr + 1, gb->sp >> 8);
 }
 
 static void add_hl_rr(GB_gameboy_t *gb, uint8_t opcode)
 {
-    uint16_t hl = gb->registers[GB_REGISTER_HL];
+    uint16_t hl = gb->hl;
     uint16_t rr;
     uint8_t register_id;
     cycle_no_access(gb);
     register_id = (opcode >> 4) + 1;
     rr = gb->registers[register_id];
-    gb->registers[GB_REGISTER_HL] = hl + rr;
-    gb->registers[GB_REGISTER_AF] &= ~(GB_SUBTRACT_FLAG | GB_CARRY_FLAG | GB_HALF_CARRY_FLAG);
+    gb->hl = hl + rr;
+    gb->af &= ~(GB_SUBTRACT_FLAG | GB_CARRY_FLAG | GB_HALF_CARRY_FLAG);
 
     /* The meaning of the Half Carry flag is really hard to track -_- */
     if (((hl & 0xFFF) + (rr & 0xFFF)) & 0x1000) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
 
     if ( ((unsigned) hl + (unsigned) rr) & 0x10000) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
 }
 
@@ -559,8 +559,8 @@ static void ld_a_drr(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t register_id;
     register_id = (opcode >> 4) + 1;
-    gb->registers[GB_REGISTER_AF] &= 0xFF;
-    gb->registers[GB_REGISTER_AF] |= cycle_read(gb, gb->registers[register_id]) << 8;
+    gb->af &= 0xFF;
+    gb->af |= cycle_read(gb, gb->registers[register_id]) << 8;
 }
 
 static void dec_rr(GB_gameboy_t *gb, uint8_t opcode)
@@ -579,14 +579,14 @@ static void inc_lr(GB_gameboy_t *gb, uint8_t opcode)
     value = (gb->registers[register_id] & 0xFF) + 1;
     gb->registers[register_id] = (gb->registers[register_id] & 0xFF00) | value;
 
-    gb->registers[GB_REGISTER_AF] &= ~(GB_SUBTRACT_FLAG | GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
+    gb->af &= ~(GB_SUBTRACT_FLAG | GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
 
     if ((gb->registers[register_id] & 0x0F) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
 
     if ((gb->registers[register_id] & 0xFF) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 static void dec_lr(GB_gameboy_t *gb, uint8_t opcode)
@@ -598,15 +598,15 @@ static void dec_lr(GB_gameboy_t *gb, uint8_t opcode)
     value = (gb->registers[register_id] & 0xFF) - 1;
     gb->registers[register_id] = (gb->registers[register_id] & 0xFF00) | value;
 
-    gb->registers[GB_REGISTER_AF] &= ~(GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
-    gb->registers[GB_REGISTER_AF] |= GB_SUBTRACT_FLAG;
+    gb->af &= ~(GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
+    gb->af |= GB_SUBTRACT_FLAG;
 
     if ((gb->registers[register_id] & 0x0F) == 0xF) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
 
     if ((gb->registers[register_id] & 0xFF) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
@@ -620,25 +620,25 @@ static void ld_lr_d8(GB_gameboy_t *gb, uint8_t opcode)
 
 static void rrca(GB_gameboy_t *gb, uint8_t opcode)
 {
-    bool carry = (gb->registers[GB_REGISTER_AF] & 0x100) != 0;
+    bool carry = (gb->af & 0x100) != 0;
 
-    gb->registers[GB_REGISTER_AF] = (gb->registers[GB_REGISTER_AF] >> 1) & 0xFF00;
+    gb->af = (gb->af >> 1) & 0xFF00;
     if (carry) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG | 0x8000;
+        gb->af |= GB_CARRY_FLAG | 0x8000;
     }
 }
 
 static void rra(GB_gameboy_t *gb, uint8_t opcode)
 {
-    bool bit1 = (gb->registers[GB_REGISTER_AF] & 0x0100) != 0;
-    bool carry = (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) != 0;
+    bool bit1 = (gb->af & 0x0100) != 0;
+    bool carry = (gb->af & GB_CARRY_FLAG) != 0;
 
-    gb->registers[GB_REGISTER_AF] = (gb->registers[GB_REGISTER_AF] >> 1) & 0xFF00;
+    gb->af = (gb->af >> 1) & 0xFF00;
     if (carry) {
-        gb->registers[GB_REGISTER_AF] |= 0x8000;
+        gb->af |= 0x8000;
     }
     if (bit1) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
 }
 
@@ -653,13 +653,13 @@ static bool condition_code(GB_gameboy_t *gb, uint8_t opcode)
 {
     switch ((opcode >> 3) & 0x3) {
         case 0:
-            return !(gb->registers[GB_REGISTER_AF] & GB_ZERO_FLAG);
+            return !(gb->af & GB_ZERO_FLAG);
         case 1:
-            return (gb->registers[GB_REGISTER_AF] & GB_ZERO_FLAG);
+            return (gb->af & GB_ZERO_FLAG);
         case 2:
-            return !(gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG);
+            return !(gb->af & GB_CARRY_FLAG);
         case 3:
-            return (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG);
+            return (gb->af & GB_CARRY_FLAG);
     }
 
     return false;
@@ -676,118 +676,118 @@ static void jr_cc_r8(GB_gameboy_t *gb, uint8_t opcode)
 
 static void daa(GB_gameboy_t *gb, uint8_t opcode)
 {
-    int16_t result = gb->registers[GB_REGISTER_AF] >> 8;
+    int16_t result = gb->af >> 8;
 
-    gb->registers[GB_REGISTER_AF] &= ~(0xFF00 | GB_ZERO_FLAG);
+    gb->af &= ~(0xFF00 | GB_ZERO_FLAG);
 
-    if (gb->registers[GB_REGISTER_AF] & GB_SUBTRACT_FLAG) {
-        if (gb->registers[GB_REGISTER_AF] & GB_HALF_CARRY_FLAG) {
+    if (gb->af & GB_SUBTRACT_FLAG) {
+        if (gb->af & GB_HALF_CARRY_FLAG) {
             result = (result - 0x06) & 0xFF;
         }
 
-        if (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) {
+        if (gb->af & GB_CARRY_FLAG) {
             result -= 0x60;
         }
     }
     else {
-        if ((gb->registers[GB_REGISTER_AF] & GB_HALF_CARRY_FLAG) || (result & 0x0F) > 0x09) {
+        if ((gb->af & GB_HALF_CARRY_FLAG) || (result & 0x0F) > 0x09) {
             result += 0x06;
         }
 
-        if ((gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) || result > 0x9F) {
+        if ((gb->af & GB_CARRY_FLAG) || result > 0x9F) {
             result += 0x60;
         }
     }
 
     if ((result & 0xFF) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 
     if ((result & 0x100) == 0x100) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
 
-    gb->registers[GB_REGISTER_AF] &= ~GB_HALF_CARRY_FLAG;
-    gb->registers[GB_REGISTER_AF] |= result << 8;
+    gb->af &= ~GB_HALF_CARRY_FLAG;
+    gb->af |= result << 8;
 }
 
 static void cpl(GB_gameboy_t *gb, uint8_t opcode)
 {
-    gb->registers[GB_REGISTER_AF] ^= 0xFF00;
-    gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG | GB_SUBTRACT_FLAG;
+    gb->af ^= 0xFF00;
+    gb->af |= GB_HALF_CARRY_FLAG | GB_SUBTRACT_FLAG;
 }
 
 static void scf(GB_gameboy_t *gb, uint8_t opcode)
 {
-    gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
-    gb->registers[GB_REGISTER_AF] &= ~(GB_HALF_CARRY_FLAG | GB_SUBTRACT_FLAG);
+    gb->af |= GB_CARRY_FLAG;
+    gb->af &= ~(GB_HALF_CARRY_FLAG | GB_SUBTRACT_FLAG);
 }
 
 static void ccf(GB_gameboy_t *gb, uint8_t opcode)
 {
-    gb->registers[GB_REGISTER_AF] ^= GB_CARRY_FLAG;
-    gb->registers[GB_REGISTER_AF] &= ~(GB_HALF_CARRY_FLAG | GB_SUBTRACT_FLAG);
+    gb->af ^= GB_CARRY_FLAG;
+    gb->af &= ~(GB_HALF_CARRY_FLAG | GB_SUBTRACT_FLAG);
 }
 
 static void ld_dhli_a(GB_gameboy_t *gb, uint8_t opcode)
 {
-    cycle_write(gb, gb->registers[GB_REGISTER_HL]++, gb->registers[GB_REGISTER_AF] >> 8);
+    cycle_write(gb, gb->hl++, gb->af >> 8);
 }
 
 static void ld_dhld_a(GB_gameboy_t *gb, uint8_t opcode)
 {
-    cycle_write(gb, gb->registers[GB_REGISTER_HL]--, gb->registers[GB_REGISTER_AF] >> 8);
+    cycle_write(gb, gb->hl--, gb->af >> 8);
 }
 
 static void ld_a_dhli(GB_gameboy_t *gb, uint8_t opcode)
 {
-    gb->registers[GB_REGISTER_AF] &= 0xFF;
-    gb->registers[GB_REGISTER_AF] |= cycle_read(gb, gb->registers[GB_REGISTER_HL]++) << 8;
+    gb->af &= 0xFF;
+    gb->af |= cycle_read(gb, gb->hl++) << 8;
 }
 
 static void ld_a_dhld(GB_gameboy_t *gb, uint8_t opcode)
 {
-    gb->registers[GB_REGISTER_AF] &= 0xFF;
-    gb->registers[GB_REGISTER_AF] |= cycle_read(gb, gb->registers[GB_REGISTER_HL]--) << 8;
+    gb->af &= 0xFF;
+    gb->af |= cycle_read(gb, gb->hl--) << 8;
 }
 
 static void inc_dhl(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value;
-    value = cycle_read(gb, gb->registers[GB_REGISTER_HL]) + 1;
-    cycle_write(gb, gb->registers[GB_REGISTER_HL], value);
+    value = cycle_read(gb, gb->hl) + 1;
+    cycle_write(gb, gb->hl, value);
 
-    gb->registers[GB_REGISTER_AF] &= ~(GB_SUBTRACT_FLAG | GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
+    gb->af &= ~(GB_SUBTRACT_FLAG | GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
     if ((value & 0x0F) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
 
     if ((value & 0xFF) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
 static void dec_dhl(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value;
-    value = cycle_read(gb, gb->registers[GB_REGISTER_HL]) - 1;
-    cycle_write(gb, gb->registers[GB_REGISTER_HL], value);
+    value = cycle_read(gb, gb->hl) - 1;
+    cycle_write(gb, gb->hl, value);
 
-    gb->registers[GB_REGISTER_AF] &= ~( GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
-    gb->registers[GB_REGISTER_AF] |= GB_SUBTRACT_FLAG;
+    gb->af &= ~( GB_ZERO_FLAG | GB_HALF_CARRY_FLAG);
+    gb->af |= GB_SUBTRACT_FLAG;
     if ((value & 0x0F) == 0x0F) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
 
     if ((value & 0xFF) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
 static void ld_dhl_d8(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t data = cycle_read(gb, gb->pc++);
-    cycle_write(gb, gb->registers[GB_REGISTER_HL], data);
+    cycle_write(gb, gb->hl, data);
 }
 
 static uint8_t get_src_value(GB_gameboy_t *gb, uint8_t opcode)
@@ -798,9 +798,9 @@ static uint8_t get_src_value(GB_gameboy_t *gb, uint8_t opcode)
     src_low = opcode & 1;
     if (src_register_id == GB_REGISTER_AF) {
         if (src_low) {
-            return gb->registers[GB_REGISTER_AF] >> 8;
+            return gb->af >> 8;
         }
-        return cycle_read(gb, gb->registers[GB_REGISTER_HL]);
+        return cycle_read(gb, gb->hl);
     }
     if (src_low) {
         return gb->registers[src_register_id] & 0xFF;
@@ -817,11 +817,11 @@ static void set_src_value(GB_gameboy_t *gb, uint8_t opcode, uint8_t value)
 
     if (src_register_id == GB_REGISTER_AF) {
         if (src_low) {
-            gb->registers[GB_REGISTER_AF] &= 0xFF;
-            gb->registers[GB_REGISTER_AF] |= value << 8;
+            gb->af &= 0xFF;
+            gb->af |= value << 8;
         }
         else {
-            cycle_write(gb, gb->registers[GB_REGISTER_HL], value);
+            cycle_write(gb, gb->hl, value);
         }
     }
     else {
@@ -850,13 +850,13 @@ static void ld_##x##_##y(GB_gameboy_t *gb, uint8_t opcode) \
 #define LD_X_DHL(x) \
 static void ld_##x##_##dhl(GB_gameboy_t *gb, uint8_t opcode) \
 { \
-gb->x = cycle_read(gb, gb->registers[GB_REGISTER_HL]); \
+gb->x = cycle_read(gb, gb->hl); \
 }
 
 #define LD_DHL_Y(y) \
 static void ld_##dhl##_##y(GB_gameboy_t *gb, uint8_t opcode) \
 { \
-cycle_write(gb, gb->registers[GB_REGISTER_HL], gb->y); \
+cycle_write(gb, gb->hl, gb->y); \
 }
 
 LD_X_Y(b,c) LD_X_Y(b,d) LD_X_Y(b,e) LD_X_Y(b,h) LD_X_Y(b,l)             LD_X_DHL(b) LD_X_Y(b,a)
@@ -880,16 +880,16 @@ static void add_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     value = get_src_value(gb, opcode);
-    a = gb->registers[GB_REGISTER_AF] >> 8;
-    gb->registers[GB_REGISTER_AF] = (a + value) << 8;
+    a = gb->af >> 8;
+    gb->af = (a + value) << 8;
     if ((uint8_t)(a + value) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
     if ((a & 0xF) + (value & 0xF) > 0x0F) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
     if (((unsigned) a) + ((unsigned) value) > 0xFF) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
 }
 
@@ -897,18 +897,18 @@ static void adc_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a, carry;
     value = get_src_value(gb, opcode);
-    a = gb->registers[GB_REGISTER_AF] >> 8;
-    carry = (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) != 0;
-    gb->registers[GB_REGISTER_AF] = (a + value + carry) << 8;
+    a = gb->af >> 8;
+    carry = (gb->af & GB_CARRY_FLAG) != 0;
+    gb->af = (a + value + carry) << 8;
 
     if ((uint8_t)(a + value + carry) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
     if ((a & 0xF) + (value & 0xF) + carry > 0x0F) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
     if (((unsigned) a) + ((unsigned) value) + carry > 0xFF) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
 }
 
@@ -916,16 +916,16 @@ static void sub_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     value = get_src_value(gb, opcode);
-    a = gb->registers[GB_REGISTER_AF] >> 8;
-    gb->registers[GB_REGISTER_AF] = ((a - value) << 8) | GB_SUBTRACT_FLAG;
+    a = gb->af >> 8;
+    gb->af = ((a - value) << 8) | GB_SUBTRACT_FLAG;
     if (a == value) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
     if ((a & 0xF) < (value & 0xF)) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
     if (a < value) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
 }
 
@@ -933,18 +933,18 @@ static void sbc_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a, carry;
     value = get_src_value(gb, opcode);
-    a = gb->registers[GB_REGISTER_AF] >> 8;
-    carry = (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) != 0;
-    gb->registers[GB_REGISTER_AF] = ((a - value - carry) << 8) | GB_SUBTRACT_FLAG;
+    a = gb->af >> 8;
+    carry = (gb->af & GB_CARRY_FLAG) != 0;
+    gb->af = ((a - value - carry) << 8) | GB_SUBTRACT_FLAG;
 
     if ((uint8_t) (a - value - carry) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
     if ((a & 0xF) < (value & 0xF) + carry) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
     if (((unsigned) a) - ((unsigned) value) - carry > 0xFF) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
 }
 
@@ -952,10 +952,10 @@ static void and_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     value = get_src_value(gb, opcode);
-    a = gb->registers[GB_REGISTER_AF] >> 8;
-    gb->registers[GB_REGISTER_AF] = ((a & value) << 8) | GB_HALF_CARRY_FLAG;
+    a = gb->af >> 8;
+    gb->af = ((a & value) << 8) | GB_HALF_CARRY_FLAG;
     if ((a & value) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
@@ -963,10 +963,10 @@ static void xor_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     value = get_src_value(gb, opcode);
-    a = gb->registers[GB_REGISTER_AF] >> 8;
-    gb->registers[GB_REGISTER_AF] = (a ^ value) << 8;
+    a = gb->af >> 8;
+    gb->af = (a ^ value) << 8;
     if ((a ^ value) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
@@ -974,10 +974,10 @@ static void or_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     value = get_src_value(gb, opcode);
-    a = gb->registers[GB_REGISTER_AF] >> 8;
-    gb->registers[GB_REGISTER_AF] = (a | value) << 8;
+    a = gb->af >> 8;
+    gb->af = (a | value) << 8;
     if ((a | value) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
@@ -985,17 +985,17 @@ static void cp_a_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     value = get_src_value(gb, opcode);
-    a = gb->registers[GB_REGISTER_AF] >> 8;
-    gb->registers[GB_REGISTER_AF] &= 0xFF00;
-    gb->registers[GB_REGISTER_AF] |= GB_SUBTRACT_FLAG;
+    a = gb->af >> 8;
+    gb->af &= 0xFF00;
+    gb->af |= GB_SUBTRACT_FLAG;
     if (a == value) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
     if ((a & 0xF) < (value & 0xF)) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
     if (a < value) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
 }
 
@@ -1024,9 +1024,9 @@ static void pop_rr(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t register_id;
     register_id = ((opcode >> 4) + 1) & 3;
-    gb->registers[register_id] = cycle_read(gb, gb->registers[GB_REGISTER_SP]++);
-    gb->registers[register_id] |= cycle_read(gb, gb->registers[GB_REGISTER_SP]++) << 8;
-    gb->registers[GB_REGISTER_AF] &= 0xFFF0; // Make sure we don't set impossible flags on F! See Blargg's PUSH AF test.
+    gb->registers[register_id] = cycle_read(gb, gb->sp++);
+    gb->registers[register_id] |= cycle_read(gb, gb->sp++) << 8;
+    gb->af &= 0xFFF0; // Make sure we don't set impossible flags on F! See Blargg's PUSH AF test.
 }
 
 static void jp_cc_a16(GB_gameboy_t *gb, uint8_t opcode)
@@ -1055,8 +1055,8 @@ static void call_cc_a16(GB_gameboy_t *gb, uint8_t opcode)
     addr |= (cycle_read(gb, gb->pc++) << 8);
     if (condition_code(gb, opcode)) {
         cycle_oam_bug(gb, GB_REGISTER_SP);
-        cycle_write(gb, --gb->registers[GB_REGISTER_SP], (gb->pc) >> 8);
-        cycle_write(gb, --gb->registers[GB_REGISTER_SP], (gb->pc) & 0xFF);
+        cycle_write(gb, --gb->sp, (gb->pc) >> 8);
+        cycle_write(gb, --gb->sp, (gb->pc) & 0xFF);
         gb->pc = addr;
 
         GB_debugger_call_hook(gb, call_addr);
@@ -1068,24 +1068,24 @@ static void push_rr(GB_gameboy_t *gb, uint8_t opcode)
     uint8_t register_id;
     cycle_oam_bug(gb, GB_REGISTER_SP);
     register_id = ((opcode >> 4) + 1) & 3;
-    cycle_write(gb, --gb->registers[GB_REGISTER_SP], (gb->registers[register_id]) >> 8);
-    cycle_write(gb, --gb->registers[GB_REGISTER_SP], (gb->registers[register_id]) & 0xFF);
+    cycle_write(gb, --gb->sp, (gb->registers[register_id]) >> 8);
+    cycle_write(gb, --gb->sp, (gb->registers[register_id]) & 0xFF);
 }
 
 static void add_a_d8(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     value = cycle_read(gb, gb->pc++);
-    a = gb->registers[GB_REGISTER_AF] >> 8;
-    gb->registers[GB_REGISTER_AF] = (a + value) << 8;
+    a = gb->af >> 8;
+    gb->af = (a + value) << 8;
     if ((uint8_t) (a + value) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
     if ((a & 0xF) + (value & 0xF) > 0x0F) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
     if (((unsigned) a) + ((unsigned) value) > 0xFF) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
 }
 
@@ -1093,18 +1093,18 @@ static void adc_a_d8(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a, carry;
     value = cycle_read(gb, gb->pc++);
-    a = gb->registers[GB_REGISTER_AF] >> 8;
-    carry = (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) != 0;
-    gb->registers[GB_REGISTER_AF] = (a + value + carry) << 8;
+    a = gb->af >> 8;
+    carry = (gb->af & GB_CARRY_FLAG) != 0;
+    gb->af = (a + value + carry) << 8;
 
-    if (gb->registers[GB_REGISTER_AF] == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+    if (gb->af == 0) {
+        gb->af |= GB_ZERO_FLAG;
     }
     if ((a & 0xF) + (value & 0xF) + carry > 0x0F) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
     if (((unsigned) a) + ((unsigned) value) + carry > 0xFF) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
 }
 
@@ -1112,16 +1112,16 @@ static void sub_a_d8(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     value = cycle_read(gb, gb->pc++);
-    a = gb->registers[GB_REGISTER_AF] >> 8;
-    gb->registers[GB_REGISTER_AF] = ((a - value) << 8) | GB_SUBTRACT_FLAG;
+    a = gb->af >> 8;
+    gb->af = ((a - value) << 8) | GB_SUBTRACT_FLAG;
     if (a == value) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
     if ((a & 0xF) < (value & 0xF)) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
     if (a < value) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
 }
 
@@ -1129,18 +1129,18 @@ static void sbc_a_d8(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a, carry;
     value = cycle_read(gb, gb->pc++);
-    a = gb->registers[GB_REGISTER_AF] >> 8;
-    carry = (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) != 0;
-    gb->registers[GB_REGISTER_AF] = ((a - value - carry) << 8) | GB_SUBTRACT_FLAG;
+    a = gb->af >> 8;
+    carry = (gb->af & GB_CARRY_FLAG) != 0;
+    gb->af = ((a - value - carry) << 8) | GB_SUBTRACT_FLAG;
 
     if ((uint8_t) (a - value - carry) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
     if ((a & 0xF) < (value & 0xF) + carry) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
     if (((unsigned) a) - ((unsigned) value) - carry > 0xFF) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
 }
 
@@ -1148,10 +1148,10 @@ static void and_a_d8(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     value = cycle_read(gb, gb->pc++);
-    a = gb->registers[GB_REGISTER_AF] >> 8;
-    gb->registers[GB_REGISTER_AF] = ((a & value) << 8) | GB_HALF_CARRY_FLAG;
+    a = gb->af >> 8;
+    gb->af = ((a & value) << 8) | GB_HALF_CARRY_FLAG;
     if ((a & value) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
@@ -1159,10 +1159,10 @@ static void xor_a_d8(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     value = cycle_read(gb, gb->pc++);
-    a = gb->registers[GB_REGISTER_AF] >> 8;
-    gb->registers[GB_REGISTER_AF] = (a ^ value) << 8;
+    a = gb->af >> 8;
+    gb->af = (a ^ value) << 8;
     if ((a ^ value) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
@@ -1170,10 +1170,10 @@ static void or_a_d8(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     value = cycle_read(gb, gb->pc++);
-    a = gb->registers[GB_REGISTER_AF] >> 8;
-    gb->registers[GB_REGISTER_AF] = (a | value) << 8;
+    a = gb->af >> 8;
+    gb->af = (a | value) << 8;
     if ((a | value) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
@@ -1181,17 +1181,17 @@ static void cp_a_d8(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value, a;
     value = cycle_read(gb, gb->pc++);
-    a = gb->registers[GB_REGISTER_AF] >> 8;
-    gb->registers[GB_REGISTER_AF] &= 0xFF00;
-    gb->registers[GB_REGISTER_AF] |= GB_SUBTRACT_FLAG;
+    a = gb->af >> 8;
+    gb->af &= 0xFF00;
+    gb->af |= GB_SUBTRACT_FLAG;
     if (a == value) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
     if ((a & 0xF) < (value & 0xF)) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
     if (a < value) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
 }
 
@@ -1199,8 +1199,8 @@ static void rst(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint16_t call_addr = gb->pc - 1;
     cycle_oam_bug(gb, GB_REGISTER_SP);
-    cycle_write(gb, --gb->registers[GB_REGISTER_SP], (gb->pc) >> 8);
-    cycle_write(gb, --gb->registers[GB_REGISTER_SP], (gb->pc) & 0xFF);
+    cycle_write(gb, --gb->sp, (gb->pc) >> 8);
+    cycle_write(gb, --gb->sp, (gb->pc) & 0xFF);
     gb->pc = opcode ^ 0xC7;
     GB_debugger_call_hook(gb, call_addr);
 }
@@ -1208,8 +1208,8 @@ static void rst(GB_gameboy_t *gb, uint8_t opcode)
 static void ret(GB_gameboy_t *gb, uint8_t opcode)
 {
     GB_debugger_ret_hook(gb);
-    gb->pc = cycle_read(gb, gb->registers[GB_REGISTER_SP]++);
-    gb->pc |= cycle_read(gb, gb->registers[GB_REGISTER_SP]++) << 8;
+    gb->pc = cycle_read(gb, gb->sp++);
+    gb->pc |= cycle_read(gb, gb->sp++) << 8;
     cycle_no_access(gb);
 }
 
@@ -1236,8 +1236,8 @@ static void call_a16(GB_gameboy_t *gb, uint8_t opcode)
     uint16_t addr = cycle_read(gb, gb->pc++);
     addr |= (cycle_read(gb, gb->pc++) << 8);
     cycle_oam_bug(gb, GB_REGISTER_SP);
-    cycle_write(gb, --gb->registers[GB_REGISTER_SP], (gb->pc) >> 8);
-    cycle_write(gb, --gb->registers[GB_REGISTER_SP], (gb->pc) & 0xFF);
+    cycle_write(gb, --gb->sp, (gb->pc) >> 8);
+    cycle_write(gb, --gb->sp, (gb->pc) & 0xFF);
     gb->pc = addr;
     GB_debugger_call_hook(gb, call_addr);
 }
@@ -1245,51 +1245,51 @@ static void call_a16(GB_gameboy_t *gb, uint8_t opcode)
 static void ld_da8_a(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t temp = cycle_read(gb, gb->pc++);
-    cycle_write(gb, 0xFF00 + temp, gb->registers[GB_REGISTER_AF] >> 8);
+    cycle_write(gb, 0xFF00 + temp, gb->af >> 8);
 }
 
 static void ld_a_da8(GB_gameboy_t *gb, uint8_t opcode)
 {
-    gb->registers[GB_REGISTER_AF] &= 0xFF;
+    gb->af &= 0xFF;
     uint8_t temp = cycle_read(gb, gb->pc++);
-    gb->registers[GB_REGISTER_AF] |= cycle_read(gb, 0xFF00 + temp) << 8;
+    gb->af |= cycle_read(gb, 0xFF00 + temp) << 8;
 }
 
 static void ld_dc_a(GB_gameboy_t *gb, uint8_t opcode)
 {
-    cycle_write(gb, 0xFF00 + (gb->registers[GB_REGISTER_BC] & 0xFF), gb->registers[GB_REGISTER_AF] >> 8);
+    cycle_write(gb, 0xFF00 + (gb->bc & 0xFF), gb->af >> 8);
 }
 
 static void ld_a_dc(GB_gameboy_t *gb, uint8_t opcode)
 {
-    gb->registers[GB_REGISTER_AF] &= 0xFF;
-    gb->registers[GB_REGISTER_AF] |= cycle_read(gb, 0xFF00 + (gb->registers[GB_REGISTER_BC] & 0xFF)) << 8;
+    gb->af &= 0xFF;
+    gb->af |= cycle_read(gb, 0xFF00 + (gb->bc & 0xFF)) << 8;
 }
 
 static void add_sp_r8(GB_gameboy_t *gb, uint8_t opcode)
 {
     int16_t offset;
-    uint16_t sp = gb->registers[GB_REGISTER_SP];
+    uint16_t sp = gb->sp;
     offset = (int8_t) cycle_read(gb, gb->pc++);
     cycle_no_access(gb);
     cycle_no_access(gb);
-    gb->registers[GB_REGISTER_SP] += offset;
+    gb->sp += offset;
 
-    gb->registers[GB_REGISTER_AF] &= 0xFF00;
+    gb->af &= 0xFF00;
 
     /* A new instruction, a new meaning for Half Carry! */
     if ((sp & 0xF) + (offset & 0xF) > 0xF) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
 
     if ((sp & 0xFF) + (offset & 0xFF) > 0xFF)  {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
 }
 
 static void jp_hl(GB_gameboy_t *gb, uint8_t opcode)
 {
-    gb->pc = gb->registers[GB_REGISTER_HL];
+    gb->pc = gb->hl;
 }
 
 static void ld_da16_a(GB_gameboy_t *gb, uint8_t opcode)
@@ -1297,16 +1297,16 @@ static void ld_da16_a(GB_gameboy_t *gb, uint8_t opcode)
     uint16_t addr;
     addr = cycle_read(gb, gb->pc++);
     addr |= cycle_read(gb, gb->pc++) << 8;
-    cycle_write(gb, addr, gb->registers[GB_REGISTER_AF] >> 8);
+    cycle_write(gb, addr, gb->af >> 8);
 }
 
 static void ld_a_da16(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint16_t addr;
-    gb->registers[GB_REGISTER_AF] &= 0xFF;
+    gb->af &= 0xFF;
     addr = cycle_read(gb, gb->pc++);
     addr |= cycle_read(gb, gb->pc++) << 8;
-    gb->registers[GB_REGISTER_AF] |= cycle_read(gb, addr) << 8;
+    gb->af |= cycle_read(gb, addr) << 8;
 }
 
 static void di(GB_gameboy_t *gb, uint8_t opcode)
@@ -1327,25 +1327,24 @@ static void ei(GB_gameboy_t *gb, uint8_t opcode)
 static void ld_hl_sp_r8(GB_gameboy_t *gb, uint8_t opcode)
 {
     int16_t offset;
-    gb->registers[GB_REGISTER_AF] &= 0xFF00;
+    gb->af &= 0xFF00;
     offset = (int8_t) cycle_read(gb, gb->pc++);
     cycle_no_access(gb);
-    gb->registers[GB_REGISTER_HL] = gb->registers[GB_REGISTER_SP] + offset;
+    gb->hl = gb->sp + offset;
 
-    if ((gb->registers[GB_REGISTER_SP] & 0xF) + (offset & 0xF) > 0xF) {
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+    if ((gb->sp & 0xF) + (offset & 0xF) > 0xF) {
+        gb->af |= GB_HALF_CARRY_FLAG;
     }
 
-    if ((gb->registers[GB_REGISTER_SP] & 0xFF)  + (offset & 0xFF) > 0xFF) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+    if ((gb->sp & 0xFF)  + (offset & 0xFF) > 0xFF) {
+        gb->af |= GB_CARRY_FLAG;
     }
 }
 
 static void ld_sp_hl(GB_gameboy_t *gb, uint8_t opcode)
 {
-    gb->registers[GB_REGISTER_SP] = gb->registers[GB_REGISTER_HL];
-    flush_pending_cycles(gb);
-    GB_trigger_oam_bug(gb, gb->hl);
+    gb->sp = gb->hl;
+    cycle_oam_bug(gb, GB_REGISTER_HL);
     cycle_no_access(gb);
 }
 
@@ -1355,13 +1354,13 @@ static void rlc_r(GB_gameboy_t *gb, uint8_t opcode)
     uint8_t value;
     value = get_src_value(gb, opcode);
     carry = (value & 0x80) != 0;
-    gb->registers[GB_REGISTER_AF] &= 0xFF00;
+    gb->af &= 0xFF00;
     set_src_value(gb, opcode, (value << 1) | carry);
     if (carry) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
     if (!(value << 1)) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
@@ -1371,14 +1370,14 @@ static void rrc_r(GB_gameboy_t *gb, uint8_t opcode)
     uint8_t value;
     value = get_src_value(gb, opcode);
     carry = (value & 0x01) != 0;
-    gb->registers[GB_REGISTER_AF] &= 0xFF00;
+    gb->af &= 0xFF00;
     value = (value >> 1) | (carry << 7);
     set_src_value(gb, opcode, value);
     if (carry) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
     if (value == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
@@ -1388,17 +1387,17 @@ static void rl_r(GB_gameboy_t *gb, uint8_t opcode)
     uint8_t value;
     bool bit7;
     value = get_src_value(gb, opcode);
-    carry = (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) != 0;
+    carry = (gb->af & GB_CARRY_FLAG) != 0;
     bit7 = (value & 0x80) != 0;
 
-    gb->registers[GB_REGISTER_AF] &= 0xFF00;
+    gb->af &= 0xFF00;
     value = (value << 1) | carry;
     set_src_value(gb, opcode, value);
     if (bit7) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
     if (value == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
@@ -1409,17 +1408,17 @@ static void rr_r(GB_gameboy_t *gb, uint8_t opcode)
     bool bit1;
 
     value = get_src_value(gb, opcode);
-    carry = (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG) != 0;
+    carry = (gb->af & GB_CARRY_FLAG) != 0;
     bit1 = (value & 0x1) != 0;
 
-    gb->registers[GB_REGISTER_AF] &= 0xFF00;
+    gb->af &= 0xFF00;
     value = (value >> 1) | (carry << 7);
     set_src_value(gb, opcode, value);
     if (bit1) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
     if (value == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
@@ -1429,13 +1428,13 @@ static void sla_r(GB_gameboy_t *gb, uint8_t opcode)
     bool carry;
     value = get_src_value(gb, opcode);
     carry = (value & 0x80) != 0;
-    gb->registers[GB_REGISTER_AF] &= 0xFF00;
+    gb->af &= 0xFF00;
     set_src_value(gb, opcode, (value << 1));
     if (carry) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
     if ((value & 0x7F) == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
@@ -1445,14 +1444,14 @@ static void sra_r(GB_gameboy_t *gb, uint8_t opcode)
     uint8_t value;
     value = get_src_value(gb, opcode);
     bit7 = value & 0x80;
-    gb->registers[GB_REGISTER_AF] &= 0xFF00;
+    gb->af &= 0xFF00;
     if (value & 1) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
     value = (value >> 1) | bit7;
     set_src_value(gb, opcode, value);
     if (value == 0) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
@@ -1460,13 +1459,13 @@ static void srl_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value;
     value = get_src_value(gb, opcode);
-    gb->registers[GB_REGISTER_AF] &= 0xFF00;
+    gb->af &= 0xFF00;
     set_src_value(gb, opcode, (value >> 1));
     if (value & 1) {
-        gb->registers[GB_REGISTER_AF] |= GB_CARRY_FLAG;
+        gb->af |= GB_CARRY_FLAG;
     }
     if (!(value >> 1)) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
@@ -1474,10 +1473,10 @@ static void swap_r(GB_gameboy_t *gb, uint8_t opcode)
 {
     uint8_t value;
     value = get_src_value(gb, opcode);
-    gb->registers[GB_REGISTER_AF] &= 0xFF00;
+    gb->af &= 0xFF00;
     set_src_value(gb, opcode, (value >> 4) | (value << 4));
     if (!value) {
-        gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+        gb->af |= GB_ZERO_FLAG;
     }
 }
 
@@ -1488,10 +1487,10 @@ static void bit_r(GB_gameboy_t *gb, uint8_t opcode)
     value = get_src_value(gb, opcode);
     bit = 1 << ((opcode >> 3) & 7);
     if ((opcode & 0xC0) == 0x40) { /* Bit */
-        gb->registers[GB_REGISTER_AF] &= 0xFF00 | GB_CARRY_FLAG;
-        gb->registers[GB_REGISTER_AF] |= GB_HALF_CARRY_FLAG;
+        gb->af &= 0xFF00 | GB_CARRY_FLAG;
+        gb->af |= GB_HALF_CARRY_FLAG;
         if (!(bit & value)) {
-            gb->registers[GB_REGISTER_AF] |= GB_ZERO_FLAG;
+            gb->af |= GB_ZERO_FLAG;
         }
     }
     else if ((opcode & 0xC0) == 0x80) { /* res */
@@ -1624,18 +1623,18 @@ void GB_cpu_run(GB_gameboy_t *gb)
         gb->last_opcode_read = cycle_read(gb, gb->pc++);
         cycle_oam_bug_pc(gb);
         gb->pc--;
-        GB_trigger_oam_bug(gb, gb->registers[GB_REGISTER_SP]); /* Todo: test T-cycle timing */
+        GB_trigger_oam_bug(gb, gb->sp); /* Todo: test T-cycle timing */
         cycle_no_access(gb);
         
-        cycle_write(gb, --gb->registers[GB_REGISTER_SP], (gb->pc) >> 8);
+        cycle_write(gb, --gb->sp, (gb->pc) >> 8);
         interrupt_queue = gb->interrupt_enable;
         
-        if (gb->registers[GB_REGISTER_SP] == GB_IO_IF + 0xFF00 + 1) {
-            gb->registers[GB_REGISTER_SP]--;
+        if (gb->sp == GB_IO_IF + 0xFF00 + 1) {
+            gb->sp--;
             interrupt_queue &= cycle_write_if(gb, (gb->pc) & 0xFF);
         }
         else {
-            cycle_write(gb, --gb->registers[GB_REGISTER_SP], (gb->pc) & 0xFF);
+            cycle_write(gb, --gb->sp, (gb->pc) & 0xFF);
             interrupt_queue &= (gb->io_registers[GB_IO_IF]) & 0x1F;
         }
         

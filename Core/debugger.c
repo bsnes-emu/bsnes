@@ -428,23 +428,23 @@ static lvalue_t debugger_evaluate_lvalue(GB_gameboy_t *gb, const char *string,
     if (string[0] != '$' && (string[0] < '0' || string[0] > '9')) {
         if (length == 1) {
             switch (string[0]) {
-                case 'a': return (lvalue_t){LVALUE_REG_H, .register_address = &gb->registers[GB_REGISTER_AF]};
-                case 'f': return (lvalue_t){LVALUE_REG_L, .register_address = &gb->registers[GB_REGISTER_AF]};
-                case 'b': return (lvalue_t){LVALUE_REG_H, .register_address = &gb->registers[GB_REGISTER_BC]};
-                case 'c': return (lvalue_t){LVALUE_REG_L, .register_address = &gb->registers[GB_REGISTER_BC]};
-                case 'd': return (lvalue_t){LVALUE_REG_H, .register_address = &gb->registers[GB_REGISTER_DE]};
-                case 'e': return (lvalue_t){LVALUE_REG_L, .register_address = &gb->registers[GB_REGISTER_DE]};
-                case 'h': return (lvalue_t){LVALUE_REG_H, .register_address = &gb->registers[GB_REGISTER_HL]};
-                case 'l': return (lvalue_t){LVALUE_REG_L, .register_address = &gb->registers[GB_REGISTER_HL]};
+                case 'a': return (lvalue_t){LVALUE_REG_H, .register_address = &gb->af};
+                case 'f': return (lvalue_t){LVALUE_REG_L, .register_address = &gb->af};
+                case 'b': return (lvalue_t){LVALUE_REG_H, .register_address = &gb->bc};
+                case 'c': return (lvalue_t){LVALUE_REG_L, .register_address = &gb->bc};
+                case 'd': return (lvalue_t){LVALUE_REG_H, .register_address = &gb->de};
+                case 'e': return (lvalue_t){LVALUE_REG_L, .register_address = &gb->de};
+                case 'h': return (lvalue_t){LVALUE_REG_H, .register_address = &gb->hl};
+                case 'l': return (lvalue_t){LVALUE_REG_L, .register_address = &gb->hl};
             }
         }
         else if (length == 2) {
             switch (string[0]) {
-                case 'a': if (string[1] == 'f') return (lvalue_t){LVALUE_REG16, .register_address = &gb->registers[GB_REGISTER_AF]};
-                case 'b': if (string[1] == 'c') return (lvalue_t){LVALUE_REG16, .register_address = &gb->registers[GB_REGISTER_BC]};
-                case 'd': if (string[1] == 'e') return (lvalue_t){LVALUE_REG16, .register_address = &gb->registers[GB_REGISTER_DE]};
-                case 'h': if (string[1] == 'l') return (lvalue_t){LVALUE_REG16, .register_address = &gb->registers[GB_REGISTER_HL]};
-                case 's': if (string[1] == 'p') return (lvalue_t){LVALUE_REG16, .register_address = &gb->registers[GB_REGISTER_SP]};
+                case 'a': if (string[1] == 'f') return (lvalue_t){LVALUE_REG16, .register_address = &gb->af};
+                case 'b': if (string[1] == 'c') return (lvalue_t){LVALUE_REG16, .register_address = &gb->bc};
+                case 'd': if (string[1] == 'e') return (lvalue_t){LVALUE_REG16, .register_address = &gb->de};
+                case 'h': if (string[1] == 'l') return (lvalue_t){LVALUE_REG16, .register_address = &gb->hl};
+                case 's': if (string[1] == 'p') return (lvalue_t){LVALUE_REG16, .register_address = &gb->sp};
                 case 'p': if (string[1] == 'c') return (lvalue_t){LVALUE_REG16, .register_address = &gb->pc};
             }
         }
@@ -606,23 +606,23 @@ value_t debugger_evaluate(GB_gameboy_t *gb, const char *string,
     if (string[0] != '$' && (string[0] < '0' || string[0] > '9')) {
         if (length == 1) {
             switch (string[0]) {
-                case 'a': ret = VALUE_16(gb->registers[GB_REGISTER_AF] >> 8); goto exit;
-                case 'f': ret = VALUE_16(gb->registers[GB_REGISTER_AF] & 0xFF); goto exit;
-                case 'b': ret = VALUE_16(gb->registers[GB_REGISTER_BC] >> 8); goto exit;
-                case 'c': ret = VALUE_16(gb->registers[GB_REGISTER_BC] & 0xFF); goto exit;
-                case 'd': ret = VALUE_16(gb->registers[GB_REGISTER_DE] >> 8); goto exit;
-                case 'e': ret = VALUE_16(gb->registers[GB_REGISTER_DE] & 0xFF); goto exit;
-                case 'h': ret = VALUE_16(gb->registers[GB_REGISTER_HL] >> 8); goto exit;
-                case 'l': ret = VALUE_16(gb->registers[GB_REGISTER_HL] & 0xFF); goto exit;
+                case 'a': ret = VALUE_16(gb->af >> 8); goto exit;
+                case 'f': ret = VALUE_16(gb->af & 0xFF); goto exit;
+                case 'b': ret = VALUE_16(gb->bc >> 8); goto exit;
+                case 'c': ret = VALUE_16(gb->bc & 0xFF); goto exit;
+                case 'd': ret = VALUE_16(gb->de >> 8); goto exit;
+                case 'e': ret = VALUE_16(gb->de & 0xFF); goto exit;
+                case 'h': ret = VALUE_16(gb->hl >> 8); goto exit;
+                case 'l': ret = VALUE_16(gb->hl & 0xFF); goto exit;
             }
         }
         else if (length == 2) {
             switch (string[0]) {
-                case 'a': if (string[1] == 'f') {ret = VALUE_16(gb->registers[GB_REGISTER_AF]); goto exit;}
-                case 'b': if (string[1] == 'c') {ret = VALUE_16(gb->registers[GB_REGISTER_BC]); goto exit;}
-                case 'd': if (string[1] == 'e') {ret = VALUE_16(gb->registers[GB_REGISTER_DE]); goto exit;}
-                case 'h': if (string[1] == 'l') {ret = VALUE_16(gb->registers[GB_REGISTER_HL]); goto exit;}
-                case 's': if (string[1] == 'p') {ret = VALUE_16(gb->registers[GB_REGISTER_SP]); goto exit;}
+                case 'a': if (string[1] == 'f') {ret = VALUE_16(gb->af); goto exit;}
+                case 'b': if (string[1] == 'c') {ret = VALUE_16(gb->bc); goto exit;}
+                case 'd': if (string[1] == 'e') {ret = VALUE_16(gb->de); goto exit;}
+                case 'h': if (string[1] == 'l') {ret = VALUE_16(gb->hl); goto exit;}
+                case 's': if (string[1] == 'p') {ret = VALUE_16(gb->sp); goto exit;}
                 case 'p': if (string[1] == 'c') {ret = (value_t){true, bank_for_addr(gb, gb->pc), gb->pc};  goto exit;}
             }
         }
@@ -811,15 +811,15 @@ static bool registers(GB_gameboy_t *gb, char *arguments, char *modifiers, const 
     }
 
 
-    GB_log(gb, "AF  = $%04x (%c%c%c%c)\n", gb->registers[GB_REGISTER_AF], /* AF can't really be an address */
+    GB_log(gb, "AF  = $%04x (%c%c%c%c)\n", gb->af, /* AF can't really be an address */
            (gb->f & GB_CARRY_FLAG)?      'C' : '-',
            (gb->f & GB_HALF_CARRY_FLAG)? 'H' : '-',
            (gb->f & GB_SUBTRACT_FLAG)?   'N' : '-',
            (gb->f & GB_ZERO_FLAG)?       'Z' : '-');
-    GB_log(gb, "BC  = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_BC], false));
-    GB_log(gb, "DE  = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_DE], false));
-    GB_log(gb, "HL  = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_HL], false));
-    GB_log(gb, "SP  = %s\n", value_to_string(gb, gb->registers[GB_REGISTER_SP], false));
+    GB_log(gb, "BC  = %s\n", value_to_string(gb, gb->bc, false));
+    GB_log(gb, "DE  = %s\n", value_to_string(gb, gb->de, false));
+    GB_log(gb, "HL  = %s\n", value_to_string(gb, gb->hl, false));
+    GB_log(gb, "SP  = %s\n", value_to_string(gb, gb->sp, false));
     GB_log(gb, "PC  = %s\n", value_to_string(gb, gb->pc, false));
     GB_log(gb, "IME = %s\n", gb->ime? "Enabled" : "Disabled");
     return true;
@@ -2039,7 +2039,7 @@ void GB_debugger_call_hook(GB_gameboy_t *gb, uint16_t call_addr)
             gb->debug_stopped = true;
         }
         else {
-            gb->sp_for_call_depth[gb->debug_call_depth] = gb->registers[GB_REGISTER_SP];
+            gb->sp_for_call_depth[gb->debug_call_depth] = gb->sp;
             gb->addr_for_call_depth[gb->debug_call_depth] = gb->pc;
         }
     }
@@ -2047,7 +2047,7 @@ void GB_debugger_call_hook(GB_gameboy_t *gb, uint16_t call_addr)
     if (gb->backtrace_size < sizeof(gb->backtrace_sps) / sizeof(gb->backtrace_sps[0])) {
 
         while (gb->backtrace_size) {
-            if (gb->backtrace_sps[gb->backtrace_size - 1] < gb->registers[GB_REGISTER_SP]) {
+            if (gb->backtrace_sps[gb->backtrace_size - 1] < gb->sp) {
                 gb->backtrace_size--;
             }
             else {
@@ -2055,7 +2055,7 @@ void GB_debugger_call_hook(GB_gameboy_t *gb, uint16_t call_addr)
             }
         }
 
-        gb->backtrace_sps[gb->backtrace_size] = gb->registers[GB_REGISTER_SP];
+        gb->backtrace_sps[gb->backtrace_size] = gb->sp;
         gb->backtrace_returns[gb->backtrace_size].bank = bank_for_addr(gb, call_addr);
         gb->backtrace_returns[gb->backtrace_size].addr = call_addr;
         gb->backtrace_size++;
@@ -2076,9 +2076,9 @@ void GB_debugger_ret_hook(GB_gameboy_t *gb)
             gb->debug_stopped = true;
         }
         else {
-            if (gb->registers[GB_REGISTER_SP] != gb->sp_for_call_depth[gb->debug_call_depth]) {
+            if (gb->sp != gb->sp_for_call_depth[gb->debug_call_depth]) {
                 GB_log(gb, "Stack leak detected for function %s!\n", value_to_string(gb, gb->addr_for_call_depth[gb->debug_call_depth], true));
-                GB_log(gb, "SP is $%04x, should be $%04x.\n", gb->registers[GB_REGISTER_SP],
+                GB_log(gb, "SP is $%04x, should be $%04x.\n", gb->sp,
                                                             gb->sp_for_call_depth[gb->debug_call_depth]);
                 gb->debug_stopped = true;
             }
@@ -2086,7 +2086,7 @@ void GB_debugger_ret_hook(GB_gameboy_t *gb)
     }
 
     while (gb->backtrace_size) {
-        if (gb->backtrace_sps[gb->backtrace_size - 1] <= gb->registers[GB_REGISTER_SP]) {
+        if (gb->backtrace_sps[gb->backtrace_size - 1] <= gb->sp) {
             gb->backtrace_size--;
         }
         else {
@@ -2564,13 +2564,13 @@ static bool condition_code(GB_gameboy_t *gb, uint8_t opcode)
 {
     switch ((opcode >> 3) & 0x3) {
         case 0:
-            return !(gb->registers[GB_REGISTER_AF] & GB_ZERO_FLAG);
+            return !(gb->af & GB_ZERO_FLAG);
         case 1:
-            return (gb->registers[GB_REGISTER_AF] & GB_ZERO_FLAG);
+            return (gb->af & GB_ZERO_FLAG);
         case 2:
-            return !(gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG);
+            return !(gb->af & GB_CARRY_FLAG);
         case 3:
-            return (gb->registers[GB_REGISTER_AF] & GB_CARRY_FLAG);
+            return (gb->af & GB_CARRY_FLAG);
     }
 
     return false;
@@ -2587,8 +2587,8 @@ static uint16_t jr_cc_r8(GB_gameboy_t *gb, uint8_t opcode)
 
 static uint16_t ret(GB_gameboy_t *gb, uint8_t opcode)
 {
-    return GB_read_memory(gb, gb->registers[GB_REGISTER_SP]) |
-           (GB_read_memory(gb, gb->registers[GB_REGISTER_SP] + 1) << 8);
+    return GB_read_memory(gb, gb->sp) |
+           (GB_read_memory(gb, gb->sp + 1) << 8);
 }
 
 
@@ -2670,7 +2670,7 @@ static jump_to_return_t test_jump_to_breakpoints(GB_gameboy_t *gb, uint16_t *add
     if (!gb->has_jump_to_breakpoints) return JUMP_TO_NONE;
 
     if (!is_in_trivial_memory(gb->pc) || !is_in_trivial_memory(gb->pc + 2) ||
-        !is_in_trivial_memory(gb->registers[GB_REGISTER_SP]) || !is_in_trivial_memory(gb->registers[GB_REGISTER_SP] + 1)) {
+        !is_in_trivial_memory(gb->sp) || !is_in_trivial_memory(gb->sp + 1)) {
         return JUMP_TO_NONTRIVIAL;
     }
 
