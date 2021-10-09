@@ -140,10 +140,22 @@ static void vblank(GB_gameboy_t *gb)
 
     if (frames >= test_length && !gb->disable_rendering) {
         bool is_screen_blank = true;
-        for (unsigned i = GB_get_screen_width(gb) * GB_get_screen_height(gb); i--;) {
-            if (bitmap[i] != bitmap[0]) {
-                is_screen_blank = false;
-                break;
+        if (!gb->sgb) {
+            for (unsigned i = 160 * 144; i--;) {
+                if (bitmap[i] != bitmap[0]) {
+                    is_screen_blank = false;
+                    break;
+                }
+            }
+        }
+        else {
+            if (gb->sgb->mask_mode == 0) {
+                for (unsigned i = 160 * 144; i--;) {
+                    if (gb->sgb->screen_buffer[i] != gb->sgb->screen_buffer[0]) {
+                        is_screen_blank = false;
+                        break;
+                    }
+                }
             }
         }
         
