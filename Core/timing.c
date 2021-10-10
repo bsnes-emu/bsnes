@@ -434,7 +434,7 @@ void GB_emulate_timer_glitch(GB_gameboy_t *gb, uint8_t old_tac, uint8_t new_tac)
     /* The bit used for overflow testing must have been 1 */
     if (gb->div_counter & old_clocks) {
         /* And now either the timer must be disabled, or the new bit used for overflow testing be 0. */
-        if (!(new_tac & 4) || gb->div_counter & new_clocks) {
+        if (!(new_tac & 4) || !(gb->div_counter & new_clocks)) {
             increase_tima(gb);
         }
     }
