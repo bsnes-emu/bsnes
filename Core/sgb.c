@@ -648,7 +648,7 @@ void GB_sgb_render(GB_gameboy_t *gb)
                 }
             }
             if (gb->sgb->transfer_dest == TRANSFER_BORDER_DATA) {
-                gb->sgb->border_animation = 88;
+                gb->sgb->border_animation = 105; // Measured on an SGB2, but might be off by ±2
             }
         }
     }
