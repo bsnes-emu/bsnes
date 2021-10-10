@@ -1345,7 +1345,6 @@ static void ld_sp_hl(GB_gameboy_t *gb, uint8_t opcode)
 {
     gb->sp = gb->hl;
     cycle_oam_bug(gb, GB_REGISTER_HL);
-    cycle_no_access(gb);
 }
 
 static void rlc_r(GB_gameboy_t *gb, uint8_t opcode)
