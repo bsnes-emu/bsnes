@@ -593,12 +593,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         current_model = (enum model)[sender tag];
     }
     
-    if (!modelsChanging && [sender tag] == MODEL_NONE) {
-        GB_reset(&gb);
-    }
-    else {
-        GB_switch_model_and_reset(&gb, [self internalModel]);
-    }
+    GB_switch_model_and_reset(&gb, [self internalModel]);
     
     if (old_width != GB_get_screen_width(&gb)) {
         [self.view screenSizeChanged];
