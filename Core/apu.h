@@ -99,9 +99,9 @@ typedef struct
 
         uint16_t sample_countdown; // in APU ticks (Reloaded from sample_length, xorred $7FF)
         uint8_t current_sample_index;
-        uint8_t current_sample; // Current sample before shifting.
+        uint8_t current_sample_byte; // Current sample byte.
 
-        int8_t wave_form[32];
+        GB_PADDING(int8_t, wave_form)[32];
         bool wave_form_just_read;
     } wave_channel;
 

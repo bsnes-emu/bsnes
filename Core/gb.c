@@ -1536,18 +1536,13 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_SGB_PAL_NO_SFC: /* Unverified */
         case GB_MODEL_SGB2:
         case GB_MODEL_SGB2_NO_SFC: {
-            uint8_t temp;
             for (unsigned i = 0; i < GB_IO_WAV_END - GB_IO_WAV_START; i++) {
                 if (i & 1) {
-                    temp = GB_random() & GB_random() & GB_random();
+                    gb->io_registers[GB_IO_WAV_START + i] = GB_random() & GB_random() & GB_random();
                 }
                 else {
-                    temp = GB_random() | GB_random() | GB_random();
+                    gb->io_registers[GB_IO_WAV_START + i] = GB_random() | GB_random() | GB_random();
                 }
-                gb->apu.wave_channel.wave_form[i * 2]     = temp >> 4;
-                gb->apu.wave_channel.wave_form[i * 2 + 1] = temp & 0xF;
-                gb->io_registers[GB_IO_WAV_START + i] = temp;
-
             }
             break;
         }
