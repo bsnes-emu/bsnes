@@ -184,7 +184,6 @@ void GB_apu_div_secondary_event(GB_gameboy_t *gb);
 void GB_apu_init(GB_gameboy_t *gb);
 void GB_apu_run(GB_gameboy_t *gb);
 void GB_apu_update_cycles_per_sample(GB_gameboy_t *gb);
-void GB_borrow_sgb_border(GB_gameboy_t *gb);
 #endif
 
 #endif /* apu_h */
