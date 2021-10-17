@@ -1159,10 +1159,10 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 if (gb->apu.is_active[GB_WAVE]) {
                     // Todo: I assume this happens on pre-CGB models; test this with an audible test
                     if (gb->apu.wave_channel.sample_countdown == 0 && gb->model < GB_MODEL_AGB) {
-                        gb->apu.wave_channel.current_sample_byte = gb->io_registers[GB_IO_WAV_START + 5]; // what the actual fuck? Why specifically this wave address   ?
+                        gb->apu.wave_channel.current_sample_byte = gb->io_registers[GB_IO_WAV_START + (gb->pc & 0xF)];
                     }
                     else if (gb->apu.wave_channel.wave_form_just_read && gb->model <= GB_MODEL_CGB_C) {
-                        gb->apu.wave_channel.current_sample_byte = gb->io_registers[GB_IO_WAV_START + 0xA]; // what the actual fuck? Why specifically this wave address?
+                        gb->apu.wave_channel.current_sample_byte = gb->io_registers[GB_IO_WAV_START + (GB_IO_NR30 & 0xF)             ];
                     }
                 }
                 gb->apu.is_active[GB_WAVE] = false;
