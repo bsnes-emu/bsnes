@@ -122,6 +122,7 @@ typedef struct
 
     } noise_channel;
 
+    /* Todo: merge these into their structs when breaking save state compatibility */
 #define GB_SKIP_DIV_EVENT_INACTIVE 0
 #define GB_SKIP_DIV_EVENT_SKIPPED 1
 #define GB_SKIP_DIV_EVENT_SKIP 2
@@ -136,6 +137,8 @@ typedef struct
     
     GB_envelope_clock_t square_envelope_clock[2];
     GB_envelope_clock_t noise_envelope_clock;
+    bool channel_3_pulsed;
+    bool channel_3_delayed_bugged_read;
 } GB_apu_t;
 
 typedef enum {

@@ -83,6 +83,7 @@ static uint8_t cycle_read(GB_gameboy_t *gb, uint16_t addr)
     if (gb->pending_cycles) {
         GB_advance_cycles(gb, gb->pending_cycles);
     }
+    gb->address_bus = addr;
     uint8_t ret = GB_read_memory(gb, addr);
     gb->pending_cycles = 4;
     return ret;
@@ -93,10 +94,12 @@ static uint8_t cycle_read(GB_gameboy_t *gb, uint16_t addr)
    is both read be the CPU, modified by the ISR, and modified by an actual interrupt.
    If this timing proves incorrect, the ISR emulation must be updated so IF reads are
    timed correctly. */
+/* TODO: Does this affect the address bus? Verify. */
 static uint8_t cycle_write_if(GB_gameboy_t *gb, uint8_t value)
 {
     assert(gb->pending_cycles);
     GB_advance_cycles(gb, gb->pending_cycles);
+    gb->address_bus = 0xFF00 + GB_IO_IF;
     uint8_t old = (gb->io_registers[GB_IO_IF]) & 0x1F;
     GB_write_memory(gb, 0xFF00 + GB_IO_IF, value);
     gb->pending_cycles = 4;
@@ -125,19 +128,19 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             GB_advance_cycles(gb, gb->pending_cycles);
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 4;
-            return;
+            break;
             
         case GB_CONFLICT_READ_NEW:
             GB_advance_cycles(gb, gb->pending_cycles - 1);
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 5;
-            return;
+            break;
             
         case GB_CONFLICT_WRITE_CPU:
             GB_advance_cycles(gb, gb->pending_cycles + 1);
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 3;
-            return;
+            break;
         
         /* The DMG STAT-write bug is basically the STAT register being read as FF for a single T-cycle */
         case GB_CONFLICT_STAT_DMG:
@@ -155,7 +158,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             GB_advance_cycles(gb, 1);
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 3;
-            return;
+            break;
         
         case GB_CONFLICT_STAT_CGB: {
             /* Todo: Verify this with SCX adjustments */
@@ -166,7 +169,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             GB_advance_cycles(gb, 1);
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 3;
-            return;
+            break;
         }
         
         /* There is some "time travel" going on with these two values, as it appears
@@ -181,14 +184,14 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             GB_advance_cycles(gb, 1);
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 5;
-            return;
+            break;
         }
             
         case GB_CONFLICT_PALETTE_CGB: {
             GB_advance_cycles(gb, gb->pending_cycles - 2);
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 6;
-            return;
+            break;
         }
             
         case GB_CONFLICT_DMG_LCDC: {
@@ -212,7 +215,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             GB_advance_cycles(gb, 1);
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 5;
-            return;
+            break;
         }
             
         case GB_CONFLICT_SGB_LCDC: {
@@ -226,7 +229,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             GB_advance_cycles(gb, 1);
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 5;
-            return;
+            break;
         }
             
         case GB_CONFLICT_WX:
@@ -236,7 +239,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             GB_advance_cycles(gb, 1);
             gb->wx_just_changed = false;
             gb->pending_cycles = 3;
-            return;
+            break;
             
         case GB_CONFLICT_CGB_LCDC:
             if ((value ^ gb->io_registers[GB_IO_LCDC]) & 0x10) {
@@ -265,7 +268,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 GB_write_memory(gb, addr, value);
                 gb->pending_cycles = 4;
             }
-            return;
+            break;
         
         case GB_CONFLICT_NR10:
             /* Hack: Due to the coupling between DIV and the APU, GB_apu_run only runs at M-cycle
@@ -285,9 +288,9 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             }
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 4;
-            return;
-
+            break;
     }
+    gb->address_bus = addr;
 }
 
 static void cycle_no_access(GB_gameboy_t *gb)
@@ -297,28 +300,20 @@ static void cycle_no_access(GB_gameboy_t *gb)
 
 static void cycle_oam_bug(GB_gameboy_t *gb, uint8_t register_id)
 {
-    if (GB_is_cgb(gb)) {
-        /* Slight optimization */
-        gb->pending_cycles += 4;
-        return;
-    }
     if (gb->pending_cycles) {
         GB_advance_cycles(gb, gb->pending_cycles);
     }
+    gb->address_bus = gb->registers[register_id];
     GB_trigger_oam_bug(gb, gb->registers[register_id]); /* Todo: test T-cycle timing */
     gb->pending_cycles = 4;
 }
 
 static void cycle_oam_bug_pc(GB_gameboy_t *gb)
 {
-    if (GB_is_cgb(gb)) {
-        /* Slight optimization */
-        gb->pending_cycles += 4;
-        return;
-    }
     if (gb->pending_cycles) {
         GB_advance_cycles(gb, gb->pending_cycles);
     }
+    gb->address_bus = gb->pc;
     GB_trigger_oam_bug(gb, gb->pc); /* Todo: test T-cycle timing */
     gb->pending_cycles = 4;
 }
