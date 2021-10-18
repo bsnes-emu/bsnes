@@ -1799,7 +1799,7 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     GB_log(gb, "    Wave:");
     for (uint8_t i = 0; i < 16; i++) {
         GB_log(gb, "%s%X", i % 2? "" : " ", gb->io_registers[GB_IO_WAV_START + i] >> 4);
-        GB_log(gb, "%s%X", i % 2? "" : " ", gb->io_registers[GB_IO_WAV_START + i] & 0xF);
+        GB_log(gb, "%X", gb->io_registers[GB_IO_WAV_START + i] & 0xF);
     }
     GB_log(gb, "\n");
     GB_log(gb, "    Current position: %u\n", gb->apu.wave_channel.current_sample_index);
