@@ -190,10 +190,9 @@ ENDC
 IF !DEF(FAST)
     call DoIntroAnimation
 
-    ld a, 45
+    ld a, 48 ; frames to wait after playing the chime
     ldh [WaitLoopCounter], a
-; Wait ~0.75 seconds
-    ld b, a
+    ld b, 4 ; frames to wait before playing the chime
     call WaitBFrames
 
     ; Play first sound
@@ -1187,7 +1186,7 @@ ChangeAnimationPalette:
     call WaitFrame
     call LoadPalettesFromHRAM
     ; Delay the wait loop while the user is selecting a palette
-    ld a, 45
+    ld a, 48
     ldh [WaitLoopCounter], a
     pop de
     pop bc
