@@ -1243,12 +1243,11 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 gb->io_registers[GB_IO_DMA] = value;
                 return;
             case GB_IO_SVBK:
-                if (!gb->cgb_mode) {
-                    return;
-                }
-                gb->cgb_ram_bank = value & 0x7;
-                if (!gb->cgb_ram_bank) {
-                    gb->cgb_ram_bank++;
+                if (gb->cgb_mode || (GB_is_cgb(gb) && !gb->boot_rom_finished)) {
+                    gb->cgb_ram_bank = value & 0x7;
+                    if (!gb->cgb_ram_bank) {
+                        gb->cgb_ram_bank++;
+                    }
                 }
                 return;
             case GB_IO_VBK:
