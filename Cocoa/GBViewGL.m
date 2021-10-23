@@ -19,7 +19,7 @@
     NSOpenGLContext *context = [[NSOpenGLContext alloc] initWithFormat:pf shareContext:nil];
  
     self.internalView = [[GBOpenGLView alloc] initWithFrame:self.frame pixelFormat:pf];
-    ((GBOpenGLView *)self.internalView).wantsBestResolutionOpenGLSurface = YES;
+    ((GBOpenGLView *)self.internalView).wantsBestResolutionOpenGLSurface = true;
     ((GBOpenGLView *)self.internalView).openGLContext = context;
 }
 
@@ -27,8 +27,8 @@
 {
     [super flip];
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.internalView setNeedsDisplay:YES];
-        [self setNeedsDisplay:YES];
+        [self.internalView setNeedsDisplay:true];
+        [self setNeedsDisplay:true];
     });
 }
 

@@ -94,7 +94,7 @@ static const vector_float2 rect[] =
                                                              withString:scaler_source];
 
     MTLCompileOptions *options = [[MTLCompileOptions alloc] init];
-    options.fastMathEnabled = YES;
+    options.fastMathEnabled = true;
     id<MTLLibrary> library = [device newLibraryWithSource:shader_source
                                                    options:options
                                                      error:&error];
@@ -210,7 +210,7 @@ static const vector_float2 rect[] =
 {
     [super flip];
     dispatch_async(dispatch_get_main_queue(), ^{
-        [(MTKView *)self.internalView setNeedsDisplay:YES];
+        [(MTKView *)self.internalView setNeedsDisplay:true];
     });
 }
 

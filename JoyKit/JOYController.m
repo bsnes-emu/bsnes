@@ -98,7 +98,7 @@ static void HIDReport(void *context, IOReturn result, void *sender, IOHIDReportT
                       uint32_t reportID, uint8_t *report, CFIndex reportLength)
 {
     if (reportLength) {
-        [(__bridge JOYController *)context gotReport:[[NSData alloc] initWithBytesNoCopy:report length:reportLength freeWhenDone:NO]];
+        [(__bridge JOYController *)context gotReport:[[NSData alloc] initWithBytesNoCopy:report length:reportLength freeWhenDone:false]];
     }
 }
 

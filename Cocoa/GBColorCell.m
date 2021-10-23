@@ -42,7 +42,7 @@ static inline double scale_channel(uint8_t x)
 
 - (BOOL)drawsBackground
 {
-    return YES;
+    return true;
 }
 
 @end

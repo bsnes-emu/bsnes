@@ -52,7 +52,7 @@
     if (row >= cheatCount) {
         switch (columnIndex) {
             case 0:
-                return @(YES);
+                return @YES;
                 
             case 1:
                 return @NO;
@@ -67,7 +67,7 @@
     
     switch (columnIndex) {
         case 0:
-            return @(NO);
+            return @NO;
             
         case 1:
             return @(cheats[row]->enabled);

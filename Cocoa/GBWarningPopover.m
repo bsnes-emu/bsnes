@@ -10,7 +10,7 @@ static GBWarningPopover *lastPopover;
     lastPopover = [[self alloc] init];
     
     [lastPopover setBehavior:NSPopoverBehaviorApplicationDefined];
-    [lastPopover setAnimates:YES];
+    [lastPopover setAnimates:true];
     lastPopover.contentViewController = [[NSViewController alloc] initWithNibName:@"PopoverView" bundle:nil];
     NSTextField *field = (NSTextField *)lastPopover.contentViewController.view;
     [field setStringValue:contents];
@@ -20,7 +20,7 @@ static GBWarningPopover *lastPopover;
     [lastPopover setContentSize:textSize];
     
     if (!view.window.isVisible) {
-        [view.window setIsVisible:YES];
+        [view.window setIsVisible:true];
     }
     
     [lastPopover showRelativeToRect:view.bounds

@@ -34,6 +34,6 @@
 - (void) filterChanged
 {
     self.shader = nil;
-    [self setNeedsDisplay:YES];
+    [self setNeedsDisplay:true];
 }
 @end

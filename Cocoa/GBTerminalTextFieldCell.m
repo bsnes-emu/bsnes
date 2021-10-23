@@ -17,7 +17,7 @@
         return field_editor;
     }
     field_editor = [[GBTerminalTextView alloc] init];
-    [field_editor setFieldEditor:YES];
+    [field_editor setFieldEditor:true];
     field_editor.gb = self.gb;
     return field_editor;
 }
@@ -109,7 +109,7 @@
             [self updateReverseSearch];
         }
         else {
-            [self setNeedsDisplay:YES];
+            [self setNeedsDisplay:true];
             reverse_search_mode = true;
         }
 
