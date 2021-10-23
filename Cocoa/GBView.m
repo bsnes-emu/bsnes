@@ -677,4 +677,10 @@ static const uint8_t workboy_vk_to_key[] = {
     return false;
 }
 
+- (NSImage *)renderToImage;
+{
+    /* Not going to support this on OpenGL, OpenGL is too much of a terrible API for me
+       to bother figuring out how the hell something so trivial can be done. */
+    return nil;
+}
 @end

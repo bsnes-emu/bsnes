@@ -2201,4 +2201,115 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 {
     return &gb;
 }
+
+- (NSImage *)takeScreenshot
+{
+    NSImage *ret = nil;
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBFilterScreenshots"]) {
+        ret = [_view renderToImage];
+    }
+    if (!ret) {
+        ret = [Document imageFromData:[NSData dataWithBytesNoCopy:_view.currentBuffer
+                                                           length:GB_get_screen_width(&gb) * GB_get_screen_height(&gb) * 4
+                                                     freeWhenDone:false]
+                                width:GB_get_screen_width(&gb)
+                               height:GB_get_screen_height(&gb)
+                                scale:1.0];
+    }
+    [ret lockFocus];
+    NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithFocusedViewRect:NSMakeRect(0, 0,
+                                                                                               ret.size.width, ret.size.height)];
+    [ret unlockFocus];
+    ret = [[NSImage alloc] initWithSize:ret.size];
+    [ret addRepresentation:bitmapRep];
+    return ret;
+}
+
+- (NSString *)screenshotFilename
+{
+    NSDate *date = [NSDate date];
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    dateFormatter.dateStyle = NSDateFormatterLongStyle;
+    dateFormatter.timeStyle = NSDateFormatterMediumStyle;
+    return [[NSString stringWithFormat:@"%@ – %@.png",
+             self.fileURL.lastPathComponent.stringByDeletingPathExtension,
+             [dateFormatter stringFromDate:date]] stringByReplacingOccurrencesOfString:@":" withString:@"."]; // Gotta love Mac OS Classic
+
+}
+
+- (IBAction)saveScreenshot:(id)sender
+{
+    NSString *folder = [[NSUserDefaults standardUserDefaults] stringForKey:@"GBScreenshotFolder"];
+    BOOL isDirectory = false;
+    if (folder) {
+        [[NSFileManager defaultManager] fileExistsAtPath:folder isDirectory:&isDirectory];
+    }
+    if (!folder) {
+        bool shouldResume = running;
+        [self stop];
+        NSOpenPanel *openPanel = [NSOpenPanel openPanel];
+        openPanel.canChooseFiles = false;
+        openPanel.canChooseDirectories = true;
+        openPanel.message = @"Choose a folder for screenshots";
+        [openPanel beginSheetModalForWindow:self.mainWindow completionHandler:^(NSInteger result) {
+            if (result == NSModalResponseOK) {
+                [[NSUserDefaults standardUserDefaults] setObject:openPanel.URL.path
+                                                          forKey:@"GBScreenshotFolder"];
+                [self saveScreenshot:sender];
+            }
+            if (shouldResume) {
+                [self start];
+            }
+            
+        }];
+        return;
+    }
+    NSImage *image = [self takeScreenshot];
+    NSDateFormatter *dateFormatter = [[NSDateFormatter alloc] init];
+    dateFormatter.dateStyle = NSDateFormatterLongStyle;
+    dateFormatter.timeStyle = NSDateFormatterMediumStyle;
+    NSString *filename = [self screenshotFilename];
+    filename = [folder stringByAppendingPathComponent:filename];
+    unsigned i = 2;
+    while ([[NSFileManager defaultManager] fileExistsAtPath:filename]) {
+        filename = [[filename stringByDeletingPathExtension] stringByAppendingFormat:@" %d.png", i++];
+    }
+    
+    NSBitmapImageRep *imageRep = (NSBitmapImageRep *)image.representations.firstObject;
+    NSData *data = [imageRep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+    [data writeToFile:filename atomically:NO];
+    [self.osdView displayText:@"Screenshot saved"];
+}
+
+- (IBAction)saveScreenshotAs:(id)sender
+{
+    bool shouldResume = running;
+    [self stop];
+    NSImage *image = [self takeScreenshot];
+    NSSavePanel *savePanel = [NSSavePanel savePanel];
+    [savePanel setNameFieldStringValue:[self screenshotFilename]];
+    [savePanel beginSheetModalForWindow:self.mainWindow completionHandler:^(NSInteger result) {
+        if (result == NSModalResponseOK) {
+            [savePanel orderOut:self];
+            NSBitmapImageRep *imageRep = (NSBitmapImageRep *)image.representations.firstObject;
+            NSData *data = [imageRep representationUsingType:NSBitmapImageFileTypePNG properties:@{}];
+            [data writeToURL:savePanel.URL atomically:NO];
+            [[NSUserDefaults standardUserDefaults] setObject:savePanel.URL.path.stringByDeletingLastPathComponent
+                                                      forKey:@"GBScreenshotFolder"];
+        }
+        if (shouldResume) {
+            [self start];
+        }
+    }];
+    [self.osdView displayText:@"Screenshot saved"];
+}
+
+- (IBAction)copyScreenshot:(id)sender
+{
+    NSImage *image = [self takeScreenshot];
+    [[NSPasteboard generalPasteboard] clearContents];
+    [[NSPasteboard generalPasteboard] writeObjects:@[image]];
+    [self.osdView displayText:@"Screenshot copied"];
+}
+
 @end

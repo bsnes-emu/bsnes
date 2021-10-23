@@ -27,4 +27,5 @@ typedef enum {
 - (uint32_t *)previousBuffer;
 - (void)screenSizeChanged;
 - (void)setRumble: (double)amp;
+- (NSImage *)renderToImage;
 @end

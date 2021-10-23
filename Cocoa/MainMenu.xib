@@ -316,6 +316,23 @@
                                 </menu>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="5GS-tt-E0a"/>
+                            <menuItem title="Save Screenshot" keyEquivalent="s" id="0J3-yf-iXs">
+                                <connections>
+                                    <action selector="saveScreenshot:" target="-1" id="gJd-ml-J8p"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Save Screenshot As…" alternate="YES" keyEquivalent="s" id="98X-Fp-Uny">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                <connections>
+                                    <action selector="saveScreenshotAs:" target="-1" id="Cxc-Gx-ql1"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Copy Screenshot" keyEquivalent="S" id="vbX-pB-QC8">
+                                <connections>
+                                    <action selector="copyScreenshot:" target="-1" id="XJC-EB-HNl"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="zk7-gf-LXN"/>
                             <menuItem title="Game Boy" tag="1" id="g7C-LA-VAr">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>

@@ -2,6 +2,7 @@
 #import "NSString+StringForKey.h"
 #import "GBButtons.h"
 #import "BigSurToolbar.h"
+#import "GBViewMetal.h"
 #import <Carbon/Carbon.h>
 
 @implementation GBPreferencesWindow
@@ -32,6 +33,7 @@
     NSSlider *_volumeSlider;
     NSButton *_autoUpdatesCheckbox;
     NSButton *_OSDCheckbox;
+    NSButton *_screenshotFilterCheckbox;
 }
 
 + (NSArray *)filterList
@@ -766,4 +768,27 @@
                                             forKey:@"GBOSDEnabled"];
 
 }
+
+- (IBAction)changeFilterScreenshots:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setBool:[(NSButton *)sender state] == NSOnState
+                                            forKey:@"GBFilterScreenshots"];
+}
+
+- (NSButton *)screenshotFilterCheckbox
+{
+    return _screenshotFilterCheckbox;
+}
+
+- (void)setScreenshotFilterCheckbox:(NSButton *)screenshotFilterCheckbox
+{
+    _screenshotFilterCheckbox = screenshotFilterCheckbox;
+    if (![GBViewMetal isSupported]) {
+        [_screenshotFilterCheckbox setEnabled:false];
+    }
+    else {
+        [_screenshotFilterCheckbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBFilterScreenshots"]];
+    }
+}
+
 @end
