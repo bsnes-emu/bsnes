@@ -339,6 +339,12 @@
                                     <action selector="reset:" target="-1" id="rxG-cz-s1S"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Game Boy Pocket/Light" tag="5" id="1bM-CT-hoW">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="reset:" target="-1" id="U7l-BM-kB1"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Super Game Boy" tag="4" id="vc7-yy-ARW">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>

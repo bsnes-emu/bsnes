@@ -303,11 +303,6 @@ static inline void update_wave_sample(GB_gameboy_t *gb, unsigned cycles)
     }
 }
 
-/* the effects of NRX2 writes on current volume are not well documented and differ
-   between models and variants. The exact behavior can only be verified on CGB as it
-   requires the PCM12 register. The behavior implemented here was verified on *my*
-   CGB, which might behave differently from other CGB revisions, as well as from the
-   DMG, MGB or SGB/2 */
 static void _nrx2_glitch(uint8_t *volume, uint8_t value, uint8_t old_value, uint8_t *countdown, GB_envelope_clock_t *lock)
 {
     if (lock->clock) {
@@ -868,6 +863,7 @@ static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
             break;
 #endif
         case GB_MODEL_DMG_B:
+        case GB_MODEL_MGB:
         case GB_MODEL_SGB_NTSC:
         case GB_MODEL_SGB_PAL:
         case GB_MODEL_SGB_NTSC_NO_SFC:
@@ -1232,10 +1228,13 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                        DMG-B:     Most of them behave as emulated. A few behave differently.
                        SGB:       As far as I know, all tested instances behave as emulated.
                        MGB, SGB2: Most instances behave non-deterministically, a few behave as emulated.
+                     
+                       For DMG-B emulation I emulate the most common behavior, which blargg's tests expect (not my own DMG-B, which fails it)
+                       For MGB emulation, I emulate my Game Boy Light, which happens to be deterministic.
 
                       Additionally, I believe DMGs, including those we behave differently than emulated,
                       are all deterministic. */
-                    if (offset < 4) {
+                    if (offset < 4 && gb->model != GB_MODEL_MGB) {
                         gb->io_registers[GB_IO_WAV_START] = gb->io_registers[GB_IO_WAV_START + offset];
                     }
                     else {

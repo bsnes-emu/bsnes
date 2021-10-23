@@ -623,6 +623,7 @@ restart:
         [MODEL_DMG] = GB_MODEL_DMG_B,
         [MODEL_CGB] = GB_MODEL_CGB_E,
         [MODEL_AGB] = GB_MODEL_AGB,
+        [MODEL_MGB] = GB_MODEL_MGB,
         [MODEL_SGB] = (GB_model_t [])
         {
             [SGB_NTSC] = GB_MODEL_SGB_NTSC,

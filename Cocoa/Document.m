@@ -20,6 +20,7 @@ enum model {
     MODEL_CGB,
     MODEL_AGB,
     MODEL_SGB,
+    MODEL_MGB,
 };
 
 @interface Document ()
@@ -244,6 +245,9 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
             }
             return model;
         }
+        
+        case MODEL_MGB:
+            return GB_MODEL_MGB;
         
         case MODEL_AGB:
             return GB_MODEL_AGB;
@@ -606,6 +610,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         [[NSUserDefaults standardUserDefaults] setBool:current_model == MODEL_DMG forKey:@"EmulateDMG"];
         [[NSUserDefaults standardUserDefaults] setBool:current_model == MODEL_SGB forKey:@"EmulateSGB"];
         [[NSUserDefaults standardUserDefaults] setBool:current_model == MODEL_AGB forKey:@"EmulateAGB"];
+        [[NSUserDefaults standardUserDefaults] setBool:current_model == MODEL_MGB forKey:@"EmulateMGB"];
     }
     
     /* Reload the ROM, SAV and SYM files */
@@ -778,6 +783,9 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     }
     else if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateSGB"]) {
         current_model = MODEL_SGB;
+    }
+    else if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateMGB"]) {
+        current_model = MODEL_MGB;
     }
     else {
         current_model = [[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateAGB"]? MODEL_AGB : MODEL_CGB;

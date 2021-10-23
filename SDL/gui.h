@@ -88,6 +88,7 @@ typedef struct {
         MODEL_CGB,
         MODEL_AGB,
         MODEL_SGB,
+        MODEL_MGB,
         MODEL_MAX,
     } model;
     

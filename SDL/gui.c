@@ -388,7 +388,7 @@ static void cycle_model_backwards(unsigned index)
 
 const char *current_model_string(unsigned index)
 {
-    return (const char *[]){"Game Boy", "Game Boy Color", "Game Boy Advance", "Super Game Boy"}
+    return (const char *[]){"Game Boy", "Game Boy Color", "Game Boy Advance", "Super Game Boy", "Game Boy Pocket"}
         [configuration.model];
 }
 

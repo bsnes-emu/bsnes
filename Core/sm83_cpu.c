@@ -207,7 +207,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             uint8_t old_value = GB_read_memory(gb, addr);
             GB_advance_cycles(gb, gb->pending_cycles - 2);
             
-            if (/* gb->model != GB_MODEL_MGB && */ gb->position_in_line == 0 && (old_value & 2) && !(value & 2)) {
+            if (gb->model != GB_MODEL_MGB && gb->position_in_line == 0 && (old_value & 2) && !(value & 2)) {
                 old_value &= ~2;
             }
             

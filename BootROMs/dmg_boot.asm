@@ -115,7 +115,11 @@ Start:
     call WaitBFrames
     
 ; Set registers to match the original DMG boot
+IF DEF(MGB)
+    ld hl, $FFB0
+ELSE
     ld hl, $01B0
+ENDC
     push hl
     pop af
     ld hl, $014D

@@ -206,7 +206,11 @@ void GB_trigger_oam_bug_read(GB_gameboy_t *gb, uint16_t address)
             }
             else if ((gb->accessed_oam_row & 0x18) == 0x00) {
                 /* Everything in this specific case is *extremely* revision and instance specific. */
-                if (gb->accessed_oam_row == 0x40) {
+                if (gb->model == GB_MODEL_MGB) {
+                    /* TODO: This is rather simplified, research further */
+                    oam_bug_tertiary_read_corruption(gb, bitwise_glitch_tertiary_read_3);
+                }
+                else if (gb->accessed_oam_row == 0x40) {
                      oam_bug_quaternary_read_corruption(gb,
                                                         ((gb->model & ~GB_MODEL_NO_SFC_BIT) == GB_MODEL_SGB2)?
                                                         bitwise_glitch_quaternary_read_sgb2:
@@ -238,6 +242,9 @@ void GB_trigger_oam_bug_read(GB_gameboy_t *gb, uint16_t address)
                 gb->oam[gb->accessed_oam_row + i] = gb->oam[gb->accessed_oam_row - 8 + i];
             }
             if (gb->accessed_oam_row == 0x80) {
+                memcpy(gb->oam, gb->oam + gb->accessed_oam_row, 8);
+            }
+            else if (gb->model == GB_MODEL_MGB && gb->accessed_oam_row == 0x40) {
                 memcpy(gb->oam, gb->oam + gb->accessed_oam_row, 8);
             }
         }
@@ -507,6 +514,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 return gb->extra_oam[addr - 0xfea0];
                 
             case GB_MODEL_DMG_B:
+            case GB_MODEL_MGB:
             case GB_MODEL_SGB_NTSC:
             case GB_MODEL_SGB_PAL:
             case GB_MODEL_SGB_NTSC_NO_SFC:
@@ -1015,6 +1023,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     gb->extra_oam[addr - 0xfea0] = value;
                     break;
                 case GB_MODEL_DMG_B:
+                case GB_MODEL_MGB:
                 case GB_MODEL_SGB_NTSC:
                 case GB_MODEL_SGB_PAL:
                 case GB_MODEL_SGB_NTSC_NO_SFC:
