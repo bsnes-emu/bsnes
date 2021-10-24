@@ -1526,7 +1526,7 @@ uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest, uint8_t *sprite_h
     uint8_t count = 0;
     *sprite_height = (gb->io_registers[GB_IO_LCDC] & 4) ? 16:8;
     uint8_t oam_to_dest_index[40] = {0,};
-    for (unsigned y = 0; y < LINES; y++) {
+    for (signed y = 0; y < LINES; y++) {
         GB_object_t *sprite = (GB_object_t *) &gb->oam;
         uint8_t sprites_in_line = 0;
         for (uint8_t i = 0; i < 40; i++, sprite++) {
