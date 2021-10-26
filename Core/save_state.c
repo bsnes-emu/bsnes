@@ -596,6 +596,7 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file, bool appe
  
  
         case GB_MODEL_CGB_C: bess_core.full_model = BE32('CCC '); break;
+        case GB_MODEL_CGB_D: bess_core.full_model = BE32('CCD '); break;
         case GB_MODEL_CGB_E: bess_core.full_model = BE32('CCE '); break;
         case GB_MODEL_AGB: bess_core.full_model = BE32('CA  '); break; // SameBoy doesn't emulate a specific AGB revision yet
     }

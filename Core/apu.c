@@ -901,7 +901,6 @@ static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
                 effective_counter |= 0x20;
             }
             break;
-#if 0
         case GB_MODEL_CGB_D:
             if (effective_counter & ((gb->io_registers[GB_IO_NR43] & 8)? 0x40 : 0x80)) { // This is so weird
                 effective_counter |= 0xFF;
@@ -922,7 +921,6 @@ static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
                 effective_counter |= 0x10;
             }
             break;
-#endif
         case GB_MODEL_CGB_E:
             if (effective_counter & ((gb->io_registers[GB_IO_NR43] & 8)? 0x40 : 0x80)) { // This is so weird
                 effective_counter |= 0xFF;
@@ -1067,7 +1065,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             if ((value & 0x80) == 0 && gb->apu.is_active[index]) {
                 /* On an AGB, as well as on CGB C and earlier (TODO: Tested: 0, B and C), it behaves slightly different on
                    double speed. */
-                if (gb->model == GB_MODEL_CGB_E /* || gb->model == GB_MODEL_CGB_D */ || gb->apu.square_channels[index].sample_countdown & 1) {
+                if (gb->model == GB_MODEL_CGB_E || gb->model == GB_MODEL_CGB_D || gb->apu.square_channels[index].sample_countdown & 1) {
                     if (gb->apu.square_channels[index].sample_countdown >> 1 == (gb->apu.square_channels[index].sample_length ^ 0x7FF)) {
                         gb->apu.square_channels[index].current_sample_index--;
                         gb->apu.square_channels[index].current_sample_index &= 7;
@@ -1091,7 +1089,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 }
                 else {
                     unsigned extra_delay = 0;
-                    if (gb->model == GB_MODEL_CGB_E /* || gb->model == GB_MODEL_CGB_D */) {
+                    if (gb->model == GB_MODEL_CGB_E || gb->model == GB_MODEL_CGB_D) {
                         if (!(value & 4) && !(((gb->apu.square_channels[index].sample_countdown - 1) / 2) & 0x400)) {
                             gb->apu.square_channels[index].current_sample_index++;
                             gb->apu.square_channels[index].current_sample_index &= 0x7;
@@ -1153,10 +1151,12 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     else {
                         gb->apu.sweep_length_addend = 0;
                     }
-                    gb->apu.channel_1_restart_hold = 2 - gb->apu.lf_div + GB_is_cgb(gb) * 2;
-                    if (gb->model <= GB_MODEL_CGB_C && gb->apu.lf_div) {
+                    gb->apu.channel_1_restart_hold = 2 - gb->apu.lf_div + (GB_is_cgb(gb) && gb->model != GB_MODEL_CGB_D) * 2;
+                    /*
+                    if (GB_is_cgb(gb) && gb->model <= GB_MODEL_CGB_C && gb->apu.lf_div) {
+                        // TODO: This if makes channel_1_sweep_restart_2 fail on CGB-C mode
                         gb->apu.channel_1_restart_hold += 2;
-                    }
+                    }*/
                     gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7) ^ 7;
                 }
             }

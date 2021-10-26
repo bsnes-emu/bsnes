@@ -1473,12 +1473,23 @@ static void reset_ram(GB_gameboy_t *gb)
                 }
             }
             break;
+        case GB_MODEL_CGB_D:
+             for (unsigned i = 0; i < gb->ram_size; i++) {
+                gb->ram[i] = GB_random();
+                if (i & 0x800) {
+                    gb->ram[i] &= GB_random();
+                }
+                else {
+                    gb->ram[i] |= GB_random();
+                }
+            }
+            break;
     }
     
     /* HRAM */
     switch (gb->model) {
         case GB_MODEL_CGB_C:
-        // case GB_MODEL_CGB_D:
+        case GB_MODEL_CGB_D:
         case GB_MODEL_CGB_E:
         case GB_MODEL_AGB:
             for (unsigned i = 0; i < sizeof(gb->hram); i++) {
@@ -1508,6 +1519,7 @@ static void reset_ram(GB_gameboy_t *gb)
     /* OAM */
     switch (gb->model) {
         case GB_MODEL_CGB_C:
+        case GB_MODEL_CGB_D:
         case GB_MODEL_CGB_E:
         case GB_MODEL_AGB:
             /* Zero'd out by boot ROM anyway*/
@@ -1538,6 +1550,7 @@ static void reset_ram(GB_gameboy_t *gb)
     /* Wave RAM */
     switch (gb->model) {
         case GB_MODEL_CGB_C:
+        case GB_MODEL_CGB_D:
         case GB_MODEL_CGB_E:
         case GB_MODEL_AGB:
             /* Initialized by CGB-A and newer, 0s in CGB-0*/
@@ -1610,6 +1623,7 @@ static void request_boot_rom(GB_gameboy_t *gb)
                 type = GB_BOOT_ROM_SGB2;
                 break;
             case GB_MODEL_CGB_C:
+            case GB_MODEL_CGB_D:
             case GB_MODEL_CGB_E:
                 type = GB_BOOT_ROM_CGB;
                 break;

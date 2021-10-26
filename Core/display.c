@@ -483,18 +483,29 @@ static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
     }
 }
 
-static uint8_t data_for_tile_sel_glitch(GB_gameboy_t *gb, bool *should_use)
+static uint8_t data_for_tile_sel_glitch(GB_gameboy_t *gb, bool *should_use, bool *cgb_d_glitch)
 {
     /*
      Based on Matt Currie's research here:
      https://github.com/mattcurrie/mealybug-tearoom-tests/blob/master/the-comprehensive-game-boy-ppu-documentation.md#tile_sel-bit-4
     */
-        
     *should_use = true;
+    *cgb_d_glitch = false;
+    
     if (gb->io_registers[GB_IO_LCDC] & 0x10) {
-        *should_use = !(gb->current_tile & 0x80);
-        /* if (gb->model != GB_MODEL_CGB_D) */ return gb->current_tile;
-        // TODO: CGB D behaves differently
+        if (gb->model != GB_MODEL_CGB_D) {
+            *should_use = !(gb->current_tile & 0x80);
+            return gb->current_tile;
+        }
+        *cgb_d_glitch = true;
+        *should_use = false;
+        gb->io_registers[GB_IO_LCDC] &= ~0x10;
+        if (gb->fetcher_state == 3) {
+            *should_use = false;
+            *cgb_d_glitch = true;
+            return 0;
+        }
+        return 0;
     }
     return gb->data_for_sel_glitch;
 }
@@ -694,8 +705,9 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             
         case GB_FETCHER_GET_TILE_DATA_LOWER: {
             bool use_glitched = false;
+            bool cgb_d_glitch = false;
             if (gb->tile_sel_glitch) {
-                gb->current_tile_data[0] = data_for_tile_sel_glitch(gb, &use_glitched);
+                gb->current_tile_data[0] = data_for_tile_sel_glitch(gb, &use_glitched, &cgb_d_glitch);
             }
             uint8_t y_flip = 0;
             uint16_t tile_address = 0;
@@ -721,9 +733,15 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
                     gb->current_tile_data[0] = 0xFF;
                 }
             }
-            else {
+            if ((gb->io_registers[GB_IO_LCDC] & 0x10) && gb->tile_sel_glitch) {
                 gb->data_for_sel_glitch =
                 gb->vram[tile_address + ((y & 7) ^ y_flip) * 2];
+                if (gb->vram_ppu_blocked) {
+                    gb->data_for_sel_glitch = 0xFF;
+                }
+            }
+            else if (cgb_d_glitch) {
+                gb->data_for_sel_glitch = gb->vram[gb->current_tile * 0x10 + ((y & 7) ^ y_flip) * 2];
                 if (gb->vram_ppu_blocked) {
                     gb->data_for_sel_glitch = 0xFF;
                 }
@@ -736,8 +754,9 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
             
             bool use_glitched = false;
+            bool cgb_d_glitch = false;
             if (gb->tile_sel_glitch) {
-                gb->current_tile_data[1] = data_for_tile_sel_glitch(gb, &use_glitched);
+                gb->current_tile_data[1] = data_for_tile_sel_glitch(gb, &use_glitched, &cgb_d_glitch);
             }
 
             uint16_t tile_address = 0;
@@ -756,7 +775,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             if (gb->current_tile_attributes & 0x40) {
                 y_flip = 0x7;
             }
-            gb->last_tile_data_address = tile_address +  ((y & 7) ^ y_flip) * 2 + 1;
+            gb->last_tile_data_address = tile_address +  ((y & 7) ^ y_flip) * 2 + 1 - cgb_d_glitch;
             if (!use_glitched) {
                 gb->current_tile_data[1] =
                     gb->vram[gb->last_tile_data_address];
@@ -764,12 +783,16 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
                     gb->current_tile_data[1] = 0xFF;
                 }
             }
-            else {
-                if ((gb->io_registers[GB_IO_LCDC] & 0x10) && gb->tile_sel_glitch) {
-                    gb->data_for_sel_glitch = gb->vram[gb->last_tile_data_address];
-                    if (gb->vram_ppu_blocked) {
-                        gb->data_for_sel_glitch = 0xFF;
-                    }
+            if ((gb->io_registers[GB_IO_LCDC] & 0x10) && gb->tile_sel_glitch) {
+                gb->data_for_sel_glitch = gb->vram[gb->last_tile_data_address];
+                if (gb->vram_ppu_blocked) {
+                    gb->data_for_sel_glitch = 0xFF;
+                }
+            }
+            else if (cgb_d_glitch) {
+                gb->data_for_sel_glitch = gb->vram[gb->current_tile * 0x10 + ((y & 7) ^ y_flip) * 2 + 1];
+                if (gb->vram_ppu_blocked) {
+                    gb->data_for_sel_glitch = 0xFF;
                 }
             }
         }
