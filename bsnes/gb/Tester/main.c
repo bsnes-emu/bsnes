@@ -33,7 +33,7 @@ GB_gameboy_t gb;
 
 static unsigned int frames = 0;
 static bool use_tga = false;
-static const uint8_t bmp_header[] = {
+static uint8_t bmp_header[] = {
     0x42, 0x4D, 0x48, 0x68, 0x01, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x46, 0x00, 0x00, 0x00, 0x38, 0x00,
     0x00, 0x00, 0xA0, 0x00, 0x00, 0x00, 0x70, 0xFF,
@@ -45,13 +45,13 @@ static const uint8_t bmp_header[] = {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
-static const uint8_t tga_header[] = {
+static uint8_t tga_header[] = {
     0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0xA0, 0x00, 0x90, 0x00,
     0x20, 0x28,
 };
 
-uint32_t bitmap[160*144];
+uint32_t bitmap[256*224];
 
 static char *async_input_callback(GB_gameboy_t *gb)
 {
@@ -140,10 +140,22 @@ static void vblank(GB_gameboy_t *gb)
 
     if (frames >= test_length && !gb->disable_rendering) {
         bool is_screen_blank = true;
-        for (unsigned i = 160*144; i--;) {
-            if (bitmap[i] != bitmap[0]) {
-                is_screen_blank = false;
-                break;
+        if (!gb->sgb) {
+            for (unsigned i = 160 * 144; i--;) {
+                if (bitmap[i] != bitmap[0]) {
+                    is_screen_blank = false;
+                    break;
+                }
+            }
+        }
+        else {
+            if (gb->sgb->mask_mode == 0) {
+                for (unsigned i = 160 * 144; i--;) {
+                    if (gb->sgb->screen_buffer[i] != gb->sgb->screen_buffer[0]) {
+                        is_screen_blank = false;
+                        break;
+                    }
+                }
             }
         }
         
@@ -151,12 +163,20 @@ static void vblank(GB_gameboy_t *gb)
         if (!is_screen_blank || frames >= test_length + 60 * 4) {
             FILE *f = fopen(bmp_filename, "wb");
             if (use_tga) {
+                tga_header[0xC] = GB_get_screen_width(gb);
+                tga_header[0xD] = GB_get_screen_width(gb) >> 8;
+                tga_header[0xE] = GB_get_screen_height(gb);
+                tga_header[0xF] = GB_get_screen_height(gb) >> 8;
                 fwrite(&tga_header, 1, sizeof(tga_header), f);
             }
             else {
+                (*(uint32_t *)&bmp_header[0x2]) = sizeof(bmp_header) + sizeof(bitmap[0]) * GB_get_screen_width(gb) * GB_get_screen_height(gb) + 2;
+                (*(uint32_t *)&bmp_header[0x12]) = GB_get_screen_width(gb);
+                (*(int32_t *)&bmp_header[0x16]) = -GB_get_screen_height(gb);
+                (*(uint32_t *)&bmp_header[0x22]) = sizeof(bitmap[0]) * GB_get_screen_width(gb) * GB_get_screen_height(gb) + 2;
                 fwrite(&bmp_header, 1, sizeof(bmp_header), f);
             }
-            fwrite(&bitmap, 1, sizeof(bitmap), f);
+            fwrite(&bitmap, 1, sizeof(bitmap[0]) * GB_get_screen_width(gb) * GB_get_screen_height(gb), f);
             fclose(f);
             if (!gb->boot_rom_finished) {
                 GB_log(gb, "Boot ROM did not finish.\n");
@@ -271,7 +291,7 @@ int main(int argc, char **argv)
     fprintf(stderr, "SameBoy Tester v" GB_VERSION "\n");
 
     if (argc == 1) {
-        fprintf(stderr, "Usage: %s [--dmg] [--start] [--length seconds] [--sav] [--boot path to boot ROM]"
+        fprintf(stderr, "Usage: %s [--dmg] [--sgb] [--cgb] [--start] [--length seconds] [--sav] [--boot path to boot ROM]"
 #ifndef _WIN32
                         " [--jobs number of tests to run simultaneously]"
 #endif
@@ -285,6 +305,7 @@ int main(int argc, char **argv)
 #endif
 
     bool dmg = false;
+    bool sgb = false;
     bool sav = false;
     const char *boot_rom_path = NULL;
     
@@ -294,6 +315,21 @@ int main(int argc, char **argv)
         if (strcmp(argv[i], "--dmg") == 0) {
             fprintf(stderr, "Using DMG mode\n");
             dmg = true;
+            sgb = false;
+            continue;
+        }
+        
+        if (strcmp(argv[i], "--sgb") == 0) {
+            fprintf(stderr, "Using SGB mode\n");
+            sgb = true;
+            dmg = false;
+            continue;
+        }
+        
+        if (strcmp(argv[i], "--cgb") == 0) {
+            fprintf(stderr, "Using CGB mode\n");
+            dmg = false;
+            sgb = false;
             continue;
         }
         
@@ -371,6 +407,13 @@ int main(int argc, char **argv)
             GB_init(&gb, GB_MODEL_DMG_B);
             if (GB_load_boot_rom(&gb, boot_rom_path ?: executable_relative_path("dmg_boot.bin"))) {
                 fprintf(stderr, "Failed to load boot ROM from '%s'\n", boot_rom_path ?: executable_relative_path("dmg_boot.bin"));
+                exit(1);
+            }
+        }
+        else if (sgb) {
+            GB_init(&gb, GB_MODEL_SGB2);
+            if (GB_load_boot_rom(&gb, boot_rom_path ?: executable_relative_path("sgb2_boot.bin"))) {
+                fprintf(stderr, "Failed to load boot ROM from '%s'\n", boot_rom_path ?: executable_relative_path("sgb2_boot.bin"));
                 exit(1);
             }
         }

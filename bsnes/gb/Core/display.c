@@ -632,7 +632,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
         GB_FETCHER_SLEEP,
     } fetcher_step_t;
     
-    fetcher_step_t fetcher_state_machine [8] = {
+    static const fetcher_step_t fetcher_state_machine [8] = {
         GB_FETCHER_SLEEP,
         GB_FETCHER_GET_TILE,
         GB_FETCHER_SLEEP,
@@ -666,7 +666,10 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
                 x = gb->window_tile_x;
             }
             else {
-                x = ((gb->io_registers[GB_IO_SCX] / 8) + gb->fetcher_x) & 0x1F;
+                /* TODO: There is some CGB timing error around here.
+                   Adjusting SCX by 7 or less shouldn't have an effect on a CGB,
+                   but SameBoy is affected by a change of both 7 and 6 (but not less). */
+                x = ((gb->io_registers[GB_IO_SCX] + gb->position_in_line + 8) / 8) & 0x1F;
             }
             if (gb->model > GB_MODEL_CGB_C) {
                 /* This value is cached on the CGB-D and newer, so it cannot be used to mix tiles together */
@@ -777,12 +780,6 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             
         // fallthrough
         case GB_FETCHER_PUSH: {
-            if (gb->fetcher_state == 6) {
-                /* The background map index increase at this specific point. If this state is not reached,
-                   it will simply not increase. */
-                gb->fetcher_x++;
-                gb->fetcher_x &= 0x1f;
-            }
             if (gb->fetcher_state < 7) {
                 gb->fetcher_state++;
             }
@@ -1049,7 +1046,6 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
             gb->lcd_x = 0;
           
-            gb->fetcher_x = 0;
             gb->extra_penalty_for_sprite_at_0 = (gb->io_registers[GB_IO_SCX] & 7);
 
             
@@ -1530,7 +1526,7 @@ uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest, uint8_t *sprite_h
     uint8_t count = 0;
     *sprite_height = (gb->io_registers[GB_IO_LCDC] & 4) ? 16:8;
     uint8_t oam_to_dest_index[40] = {0,};
-    for (unsigned y = 0; y < LINES; y++) {
+    for (signed y = 0; y < LINES; y++) {
         GB_object_t *sprite = (GB_object_t *) &gb->oam;
         uint8_t sprites_in_line = 0;
         for (uint8_t i = 0; i < 40; i++, sprite++) {

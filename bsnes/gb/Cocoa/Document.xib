@@ -1004,7 +1004,7 @@
                                             </buttonCell>
                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                         </tableColumn>
-                                        <tableColumn width="50" minWidth="40" maxWidth="1000" id="9DZ-oW-Scx">
+                                        <tableColumn width="60" minWidth="40" maxWidth="1000" id="9DZ-oW-Scx">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="Enabled">
                                                 <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
@@ -1029,7 +1029,7 @@
                                             </textFieldCell>
                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                         </tableColumn>
-                                        <tableColumn editable="NO" width="144" minWidth="40" maxWidth="1000" id="ACq-gU-K36">
+                                        <tableColumn editable="NO" width="134" minWidth="40" maxWidth="1000" id="ACq-gU-K36">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="Action">
                                                 <font key="font" metaFont="smallSystem"/>
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>

@@ -24,6 +24,7 @@
 #include "cheats.h"
 #include "rumble.h"
 #include "workboy.h"
+#include "random.h"
 
 #define GB_STRUCT_VERSION 13
 
@@ -434,6 +435,7 @@ struct GB_gameboy_internal_s {
                
        int32_t ir_sensor;
        bool effective_ir_input;
+       uint16_t address_bus;
     );
 
     /* DMA and HDMA */
@@ -553,7 +555,7 @@ struct GB_gameboy_internal_s {
     /* Video Display */
     GB_SECTION(video,
         uint32_t vram_size; // Different between CGB and DMG
-        uint8_t cgb_vram_bank;
+        bool cgb_vram_bank;
         uint8_t oam[0xA0];
         uint8_t background_palettes_data[0x40];
         uint8_t sprite_palettes_data[0x40];
@@ -581,7 +583,7 @@ struct GB_gameboy_internal_s {
         uint8_t current_line;
         uint16_t ly_for_comparison;
         GB_fifo_t bg_fifo, oam_fifo;
-        uint8_t fetcher_x;
+        GB_PADDING(uint8_t, fetcher_x);
         uint8_t fetcher_y;
         uint16_t cycles_for_line;
         uint8_t current_tile;
@@ -892,5 +894,9 @@ unsigned GB_get_player_count(GB_gameboy_t *gb);
 // `title` must be at least 17 bytes in size
 void GB_get_rom_title(GB_gameboy_t *gb, char *title);
 uint32_t GB_get_rom_crc32(GB_gameboy_t *gb);
+
+#ifdef GB_INTERNAL
+void GB_borrow_sgb_border(GB_gameboy_t *gb);
+#endif
     
 #endif /* GB_h */

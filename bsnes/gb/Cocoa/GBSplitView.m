@@ -8,7 +8,7 @@
 - (void)setDividerColor:(NSColor *)color 
 {
     _dividerColor = color;
-    [self setNeedsDisplay:YES];
+    [self setNeedsDisplay:true];
 }
 
 - (NSColor *)dividerColor 

@@ -28,4 +28,5 @@
 @property (nonatomic, weak) IBOutlet NSButton *autoUpdatesCheckbox;
 @property (weak) IBOutlet NSSlider *volumeSlider;
 @property (weak) IBOutlet NSButton *OSDCheckbox;
+@property (weak) IBOutlet NSButton *screenshotFilterCheckbox;
 @end

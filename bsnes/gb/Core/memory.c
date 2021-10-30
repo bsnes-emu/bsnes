@@ -291,7 +291,7 @@ static uint8_t read_vram(GB_gameboy_t *gb, uint16_t addr)
             addr = gb->last_tile_data_address;
         }
     }
-    return gb->vram[(addr & 0x1FFF) + (uint16_t) gb->cgb_vram_bank * 0x2000];
+    return gb->vram[(addr & 0x1FFF) + (gb->cgb_vram_bank? 0x2000 : 0)];
 }
 
 static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
@@ -464,7 +464,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                                 break;
                                 
                             default:
-                                break;
+                                __builtin_unreachable();
                         }
                         
                         for (unsigned i = 0; i < 8; i++) {
@@ -635,8 +635,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 }
                 return 0xFF;
         }
-        /* Hardware registers */
-        return 0;
+        __builtin_unreachable();
     }
 
     if (addr == 0xFFFF) {
@@ -815,7 +814,7 @@ static void write_vram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             addr = gb->last_tile_data_address;
         }
     }
-    gb->vram[(addr & 0x1FFF) + (uint16_t) gb->cgb_vram_bank * 0x2000] = value;
+    gb->vram[(addr & 0x1FFF) + (gb->cgb_vram_bank? 0x2000 : 0)] = value;
 }
 
 static bool huc3_write(GB_gameboy_t *gb, uint8_t value)
@@ -1234,12 +1233,11 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 gb->io_registers[GB_IO_DMA] = value;
                 return;
             case GB_IO_SVBK:
-                if (!gb->cgb_mode) {
-                    return;
-                }
-                gb->cgb_ram_bank = value & 0x7;
-                if (!gb->cgb_ram_bank) {
-                    gb->cgb_ram_bank++;
+                if (gb->cgb_mode || (GB_is_cgb(gb) && !gb->boot_rom_finished)) {
+                    gb->cgb_ram_bank = value & 0x7;
+                    if (!gb->cgb_ram_bank) {
+                        gb->cgb_ram_bank++;
+                    }
                 }
                 return;
             case GB_IO_VBK:
@@ -1396,7 +1394,7 @@ static GB_write_function_t * const write_map[] =
     write_vram,        write_vram,                             /* 8XXX, 9XXX */
     write_mbc_ram,     write_mbc_ram,                          /* AXXX, BXXX */
     write_ram,         write_banked_ram,                       /* CXXX, DXXX */
-    write_ram,         write_high_memory,                     /* EXXX FXXX */
+    write_ram,         write_high_memory,                      /* EXXX FXXX */
 };
 
 void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)

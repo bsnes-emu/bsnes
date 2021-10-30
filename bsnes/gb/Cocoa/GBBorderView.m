@@ -5,12 +5,12 @@
 
 - (void)awakeFromNib
 {
-    self.wantsLayer = YES;
+    self.wantsLayer = true;
 }
 
 - (BOOL)wantsUpdateLayer
 {
-    return YES;
+    return true;
 }
 
 - (void)updateLayer

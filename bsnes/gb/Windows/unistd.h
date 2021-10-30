@@ -5,3 +5,4 @@
 
 #define read(...) _read(__VA_ARGS__)
 #define write(...) _write(__VA_ARGS__)
+#define isatty(...) _isatty(__VA_ARGS__)

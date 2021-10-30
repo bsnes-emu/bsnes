@@ -289,6 +289,19 @@ static void update_square_sample(GB_gameboy_t *gb, unsigned index)
                   0);
 }
 
+static inline void update_wave_sample(GB_gameboy_t *gb, unsigned cycles)
+{
+    if (gb->apu.wave_channel.current_sample_index & 1) {
+        update_sample(gb, GB_WAVE,
+                      (gb->apu.wave_channel.current_sample_byte & 0xF) >> gb->apu.wave_channel.shift,
+                      cycles);
+    }
+    else {
+        update_sample(gb, GB_WAVE,
+                      (gb->apu.wave_channel.current_sample_byte >> 4) >> gb->apu.wave_channel.shift,
+                      cycles);
+    }
+}
 
 /* the effects of NRX2 writes on current volume are not well documented and differ
    between models and variants. The exact behavior can only be verified on CGB as it
@@ -516,6 +529,16 @@ void GB_apu_div_event(GB_gameboy_t *gb)
         if (gb->apu.wave_channel.length_enabled) {
             if (gb->apu.wave_channel.pulse_length) {
                 if (!--gb->apu.wave_channel.pulse_length) {
+                    if (gb->apu.is_active[GB_WAVE] && gb->model == GB_MODEL_AGB) {
+                        if (gb->apu.wave_channel.sample_countdown == 0) {
+                            gb->apu.wave_channel.current_sample_byte =
+                                gb->io_registers[GB_IO_WAV_START + (((gb->apu.wave_channel.current_sample_index + 1) & 0xF) >> 1)];
+                        }
+                        else if (gb->apu.wave_channel.sample_countdown == 9) {
+                            // TODO: wtf?
+                            gb->apu.wave_channel.current_sample_byte = gb->io_registers[GB_IO_WAV_START];
+                        }
+                    }
                     gb->apu.is_active[GB_WAVE] = false;
                     update_sample(gb, GB_WAVE, 0, 0);
                 }
@@ -582,6 +605,12 @@ void GB_apu_run(GB_gameboy_t *gb)
     uint8_t cycles = gb->apu.apu_cycles >> 2;
     gb->apu.apu_cycles = 0;
     if (!cycles) return;
+    
+    if (unlikely(gb->apu.channel_3_delayed_bugged_read)) {
+        gb->apu.channel_3_delayed_bugged_read = false;
+            gb->apu.wave_channel.current_sample_byte =
+        gb->io_registers[GB_IO_WAV_START + (gb->address_bus & 0xF)];
+    }
     
     bool start_ch4 = false;
     if (likely(!gb->stopped || GB_is_cgb(gb))) {
@@ -665,16 +694,31 @@ void GB_apu_run(GB_gameboy_t *gb)
                 gb->apu.wave_channel.sample_countdown = gb->apu.wave_channel.sample_length ^ 0x7FF;
                 gb->apu.wave_channel.current_sample_index++;
                 gb->apu.wave_channel.current_sample_index &= 0x1F;
-                gb->apu.wave_channel.current_sample =
-                    gb->apu.wave_channel.wave_form[gb->apu.wave_channel.current_sample_index];
-                update_sample(gb, GB_WAVE,
-                              gb->apu.wave_channel.current_sample >> gb->apu.wave_channel.shift,
-                              cycles - cycles_left);
+                gb->apu.wave_channel.current_sample_byte =
+                    gb->io_registers[GB_IO_WAV_START + (gb->apu.wave_channel.current_sample_index >> 1)];
+                update_wave_sample(gb, cycles - cycles_left);
                 gb->apu.wave_channel.wave_form_just_read = true;
             }
             if (cycles_left) {
                 gb->apu.wave_channel.sample_countdown -= cycles_left;
                 gb->apu.wave_channel.wave_form_just_read = false;
+            }
+        }
+        else if (gb->apu.wave_channel.enable && gb->apu.channel_3_pulsed && gb->model < GB_MODEL_AGB) {
+            uint8_t cycles_left = cycles;
+            while (unlikely(cycles_left > gb->apu.wave_channel.sample_countdown)) {
+                cycles_left -= gb->apu.wave_channel.sample_countdown + 1;
+                gb->apu.wave_channel.sample_countdown = gb->apu.wave_channel.sample_length ^ 0x7FF;
+                if (cycles_left) {
+                    gb->apu.wave_channel.current_sample_byte =
+                    gb->io_registers[GB_IO_WAV_START + (gb->address_bus & 0xF)];
+                }
+                else {
+                    gb->apu.channel_3_delayed_bugged_read = true;
+                }
+            }
+            if (cycles_left) {
+                gb->apu.wave_channel.sample_countdown -= cycles_left;
             }
         }
         
@@ -729,12 +773,8 @@ void GB_apu_run(GB_gameboy_t *gb)
 void GB_apu_init(GB_gameboy_t *gb)
 {
     memset(&gb->apu, 0, sizeof(gb->apu));
-    /* Restore the wave form */
-    for (unsigned reg = GB_IO_WAV_START; reg <= GB_IO_WAV_END; reg++) {
-        gb->apu.wave_channel.wave_form[(reg - GB_IO_WAV_START) * 2]     = gb->io_registers[reg] >> 4;
-        gb->apu.wave_channel.wave_form[(reg - GB_IO_WAV_START) * 2 + 1] = gb->io_registers[reg] & 0xF;
-    }
     gb->apu.lf_div = 1;
+    gb->apu.wave_channel.shift = 4;
     /* APU glitch: When turning the APU on while DIV's bit 4 (or 5 in double speed mode) is on,
        the first DIV/APU event is skipped. */
     if (gb->div_counter & (gb->cgb_double_speed? 0x2000 : 0x1000)) {
@@ -922,7 +962,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
     }
 
     if (reg >= GB_IO_WAV_START && reg <= GB_IO_WAV_END && gb->apu.is_active[GB_WAVE]) {
-        if (!GB_is_cgb(gb) && !gb->apu.wave_channel.wave_form_just_read) {
+        if ((!GB_is_cgb(gb) && !gb->apu.wave_channel.wave_form_just_read) || gb->model == GB_MODEL_AGB) {
             return;
         }
         reg = GB_IO_WAV_START + gb->apu.wave_channel.current_sample_index / 2;
@@ -1059,7 +1099,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                         if (!(value & 4) && !(((gb->apu.square_channels[index].sample_countdown - 1) / 2) & 0x400)) {
                             gb->apu.square_channels[index].current_sample_index++;
                             gb->apu.square_channels[index].current_sample_index &= 0x7;
-                            gb->apu.is_active[index] = true;
                         }
                         /* Todo: verify with the schematics what's going on in here */
                         else if (gb->apu.square_channels[index].sample_length == 0x7FF &&
@@ -1150,6 +1189,16 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR30:
             gb->apu.wave_channel.enable = value & 0x80;
             if (!gb->apu.wave_channel.enable) {
+                gb->apu.channel_3_pulsed = false;
+                if (gb->apu.is_active[GB_WAVE]) {
+                    // Todo: I assume this happens on pre-CGB models; test this with an audible test
+                    if (gb->apu.wave_channel.sample_countdown == 0 && gb->model < GB_MODEL_AGB) {
+                        gb->apu.wave_channel.current_sample_byte = gb->io_registers[GB_IO_WAV_START + (gb->pc & 0xF)];
+                    }
+                    else if (gb->apu.wave_channel.wave_form_just_read && gb->model <= GB_MODEL_CGB_C) {
+                        gb->apu.wave_channel.current_sample_byte = gb->io_registers[GB_IO_WAV_START + (GB_IO_NR30 & 0xF)];
+                    }
+                }
                 gb->apu.is_active[GB_WAVE] = false;
                 update_sample(gb, GB_WAVE, 0, 0);
             }
@@ -1160,7 +1209,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR32:
             gb->apu.wave_channel.shift = (uint8_t[]){4, 0, 1, 2}[(value >> 5) & 3];
             if (gb->apu.is_active[GB_WAVE]) {
-                update_sample(gb, GB_WAVE, gb->apu.wave_channel.current_sample >> gb->apu.wave_channel.shift, 0);
+                update_wave_sample(gb, 0);
             }
             break;
         case GB_IO_NR33:
@@ -1170,13 +1219,13 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR34:
             gb->apu.wave_channel.sample_length &= 0xFF;
             gb->apu.wave_channel.sample_length |= (value & 7) << 8;
-            if ((value & 0x80)) {
+            if (value & 0x80) {
+                gb->apu.channel_3_pulsed = true;
                 /* DMG bug: wave RAM gets corrupted if the channel is retriggerred 1 cycle before the APU
                             reads from it. */
                 if (!GB_is_cgb(gb) &&
                     gb->apu.is_active[GB_WAVE] &&
-                    gb->apu.wave_channel.sample_countdown == 0 &&
-                    gb->apu.wave_channel.enable) {
+                    gb->apu.wave_channel.sample_countdown == 0) {
                     unsigned offset = ((gb->apu.wave_channel.current_sample_index + 1) >> 1) & 0xF;
 
                     /* This glitch varies between models and even specific instances:
@@ -1188,26 +1237,24 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                       are all deterministic. */
                     if (offset < 4) {
                         gb->io_registers[GB_IO_WAV_START] = gb->io_registers[GB_IO_WAV_START + offset];
-                        gb->apu.wave_channel.wave_form[0] = gb->apu.wave_channel.wave_form[offset / 2];
-                        gb->apu.wave_channel.wave_form[1] = gb->apu.wave_channel.wave_form[offset / 2 + 1];
                     }
                     else {
                         memcpy(gb->io_registers + GB_IO_WAV_START,
                                gb->io_registers + GB_IO_WAV_START + (offset & ~3),
                                4);
-                        memcpy(gb->apu.wave_channel.wave_form,
-                               gb->apu.wave_channel.wave_form + (offset & ~3) * 2,
-                               8);
                     }
                 }
-                if (!gb->apu.is_active[GB_WAVE]) {
+                gb->apu.wave_channel.current_sample_index = 0;
+                if (gb->apu.is_active[GB_WAVE] && gb->apu.wave_channel.sample_countdown == 0) {
+                    gb->apu.wave_channel.current_sample_byte = gb->io_registers[GB_IO_WAV_START];
+                }
+                if (gb->apu.wave_channel.enable) {
                     gb->apu.is_active[GB_WAVE] = true;
                     update_sample(gb, GB_WAVE,
-                                  gb->apu.wave_channel.current_sample >> gb->apu.wave_channel.shift,
+                                  (gb->apu.wave_channel.current_sample_byte >> 4) >> gb->apu.wave_channel.shift,
                                   0);
                 }
                 gb->apu.wave_channel.sample_countdown = (gb->apu.wave_channel.sample_length ^ 0x7FF) + 3;
-                gb->apu.wave_channel.current_sample_index = 0;
                 if (gb->apu.wave_channel.pulse_length == 0) {
                     gb->apu.wave_channel.pulse_length = 0x100;
                     gb->apu.wave_channel.length_enabled = false;
@@ -1232,10 +1279,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 }
             }
             gb->apu.wave_channel.length_enabled = value & 0x40;
-            if (gb->apu.is_active[GB_WAVE] && !gb->apu.wave_channel.enable) {
-                gb->apu.is_active[GB_WAVE] = false;
-                update_sample(gb, GB_WAVE, 0, 0);
-            }
 
             break;
 
@@ -1401,12 +1444,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             gb->apu.noise_channel.length_enabled = value & 0x40;
             break;
         }
-
-        default:
-            if (reg >= GB_IO_WAV_START && reg <= GB_IO_WAV_END) {
-                gb->apu.wave_channel.wave_form[(reg - GB_IO_WAV_START) * 2]     = value >> 4;
-                gb->apu.wave_channel.wave_form[(reg - GB_IO_WAV_START) * 2 + 1] = value & 0xF;
-            }
     }
     gb->io_registers[reg] = value;
 }

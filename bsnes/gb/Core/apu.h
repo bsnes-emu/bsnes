@@ -99,9 +99,9 @@ typedef struct
 
         uint16_t sample_countdown; // in APU ticks (Reloaded from sample_length, xorred $7FF)
         uint8_t current_sample_index;
-        uint8_t current_sample; // Current sample before shifting.
+        uint8_t current_sample_byte; // Current sample byte.
 
-        int8_t wave_form[32];
+        GB_PADDING(int8_t, wave_form)[32];
         bool wave_form_just_read;
     } wave_channel;
 
@@ -122,6 +122,7 @@ typedef struct
 
     } noise_channel;
 
+    /* Todo: merge these into their structs when breaking save state compatibility */
 #define GB_SKIP_DIV_EVENT_INACTIVE 0
 #define GB_SKIP_DIV_EVENT_SKIPPED 1
 #define GB_SKIP_DIV_EVENT_SKIP 2
@@ -136,6 +137,8 @@ typedef struct
     
     GB_envelope_clock_t square_envelope_clock[2];
     GB_envelope_clock_t noise_envelope_clock;
+    bool channel_3_pulsed;
+    bool channel_3_delayed_bugged_read;
 } GB_apu_t;
 
 typedef enum {
@@ -184,7 +187,6 @@ void GB_apu_div_secondary_event(GB_gameboy_t *gb);
 void GB_apu_init(GB_gameboy_t *gb);
 void GB_apu_run(GB_gameboy_t *gb);
 void GB_apu_update_cycles_per_sample(GB_gameboy_t *gb);
-void GB_borrow_sgb_border(GB_gameboy_t *gb);
 #endif
 
 #endif /* apu_h */

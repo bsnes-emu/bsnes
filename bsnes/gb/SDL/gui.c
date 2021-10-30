@@ -1160,6 +1160,12 @@ void run_gui(bool is_running)
     static SDL_Surface *converted_background = NULL;
     if (!converted_background) {
         SDL_Surface *background = SDL_LoadBMP(resource_path("background.bmp"));
+        
+        /* Create a blank background if background.bmp could not be loaded */
+        if (!background) {
+            background = SDL_CreateRGBSurface(0, 160, 144, 8, 0, 0, 0, 0);
+        }
+        
         SDL_SetPaletteColors(background->format->palette, gui_palette, 0, 4);
         converted_background = SDL_ConvertSurface(background, pixel_format, 0);
         SDL_LockSurface(converted_background);
@@ -1338,7 +1344,7 @@ void run_gui(bool is_running)
                 break;
             }
             case SDL_DROPFILE: {
-                if (GB_is_stave_state(event.drop.file)) {
+                if (GB_is_save_state(event.drop.file)) {
                     if (GB_is_inited(&gb)) {
                         dropped_state_file = event.drop.file;
                         pending_command = GB_SDL_LOAD_STATE_FROM_FILE_COMMAND;

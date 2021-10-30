@@ -43,10 +43,10 @@ static OSStatus render(CGContextRef cgContext, CFURLRef url, bool showBorder)
                                     bitmapInfo,
                                     provider,
                                     NULL,
-                                    YES,
+                                    true,
                                     renderingIntent);
     CGContextSetInterpolationQuality(cgContext, kCGInterpolationNone);
-    NSGraphicsContext *context = [NSGraphicsContext graphicsContextWithGraphicsPort:(void *)cgContext flipped:NO];
+    NSGraphicsContext *context = [NSGraphicsContext graphicsContextWithGraphicsPort:(void *)cgContext flipped:false];
     [NSGraphicsContext setCurrentContext:context];
     
     

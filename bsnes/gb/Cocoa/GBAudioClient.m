@@ -90,7 +90,7 @@ static OSStatus render(
 {
     OSErr err = AudioOutputUnitStart(audioUnit);
     NSAssert1(err == noErr, @"Error starting unit: %hd", err);
-    _playing = YES;
+    _playing = true;
 
 }
 
@@ -98,7 +98,7 @@ static OSStatus render(
 -(void) stop
 {
     AudioOutputUnitStop(audioUnit);
-    _playing = NO;
+    _playing = false;
 }
 
 -(void) dealloc 

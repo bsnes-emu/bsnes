@@ -106,9 +106,9 @@ static const uint8_t workboy_vk_to_key[] = {
 {
     uint32_t *image_buffers[3];
     unsigned char current_buffer;
-    BOOL mouse_hidden;
+    bool mouse_hidden;
     NSTrackingArea *tracking_area;
-    BOOL _mouseHidingEnabled;
+    bool _mouseHidingEnabled;
     bool axisActive[2];
     bool underclockKeyDown;
     double clockMultiplier;
@@ -183,7 +183,7 @@ static const uint8_t workboy_vk_to_key[] = {
 - (void) setFrameBlendingMode:(GB_frame_blending_mode_t)frameBlendingMode
 {
     _frameBlendingMode = frameBlendingMode;
-    [self setNeedsDisplay:YES];
+    [self setNeedsDisplay:true];
 }
 
 
@@ -585,7 +585,7 @@ static const uint8_t workboy_vk_to_key[] = {
 
 - (BOOL)acceptsFirstResponder
 {
-    return YES;
+    return true;
 }
 
 - (void)mouseEntered:(NSEvent *)theEvent
@@ -610,7 +610,7 @@ static const uint8_t workboy_vk_to_key[] = {
     [super mouseExited:theEvent];
 }
 
-- (void)setMouseHidingEnabled:(BOOL)mouseHidingEnabled
+- (void)setMouseHidingEnabled:(bool)mouseHidingEnabled
 {
     if (mouseHidingEnabled == _mouseHidingEnabled) return;
 
@@ -625,7 +625,7 @@ static const uint8_t workboy_vk_to_key[] = {
     }
 }
 
-- (BOOL)isMouseHidingEnabled
+- (bool)isMouseHidingEnabled
 {
     return _mouseHidingEnabled;
 }
@@ -658,7 +658,7 @@ static const uint8_t workboy_vk_to_key[] = {
     
     if ( [[pboard types] containsObject:NSURLPboardType] ) {
         NSURL *fileURL = [NSURL URLFromPasteboard:pboard];
-        if (GB_is_stave_state(fileURL.fileSystemRepresentation)) {
+        if (GB_is_save_state(fileURL.fileSystemRepresentation)) {
             return NSDragOperationGeneric;
         }
     }
@@ -677,4 +677,10 @@ static const uint8_t workboy_vk_to_key[] = {
     return false;
 }
 
+- (NSImage *)renderToImage;
+{
+    /* Not going to support this on OpenGL, OpenGL is too much of a terrible API for me
+       to bother figuring out how the hell something so trivial can be done. */
+    return nil;
+}
 @end

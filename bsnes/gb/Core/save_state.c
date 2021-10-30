@@ -9,6 +9,15 @@
 #define BESS_NAME "SameBoy v" GB_VERSION
 #endif
 
+_Static_assert((GB_SECTION_OFFSET(core_state) & 7) == 0, "Section core_state is not aligned");
+_Static_assert((GB_SECTION_OFFSET(dma) & 7) == 0, "Section dma is not aligned");
+_Static_assert((GB_SECTION_OFFSET(mbc) & 7) == 0, "Section mbc is not aligned");
+_Static_assert((GB_SECTION_OFFSET(hram) & 7) == 0, "Section hram is not aligned");
+_Static_assert((GB_SECTION_OFFSET(timing) & 7) == 0, "Section timing is not aligned");
+_Static_assert((GB_SECTION_OFFSET(apu) & 7) == 0, "Section apu is not aligned");
+_Static_assert((GB_SECTION_OFFSET(rtc) & 7) == 0, "Section rtc is not aligned");
+_Static_assert((GB_SECTION_OFFSET(video) & 7) == 0, "Section video is not aligned");
+
 typedef struct __attribute__((packed)) {
     uint32_t magic;
     uint32_t size;
@@ -298,6 +307,11 @@ static bool verify_and_update_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t
         return false;
     }
     
+    if (GB_is_cgb(gb) != GB_is_cgb(save) || GB_is_hle_sgb(gb) != GB_is_hle_sgb(save)) {
+        GB_log(gb, "The save state is for a different Game Boy model. Try changing the emulated model.\n");
+        return false;
+    }
+    
     if (gb->mbc_ram_size < save->mbc_ram_size) {
         GB_log(gb, "The save state has non-matching MBC RAM size.\n");
         return false;
@@ -324,7 +338,24 @@ static bool verify_and_update_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t
         }
     }
     
-    return true;
+    switch (save->model) {
+        case GB_MODEL_DMG_B: return true;
+        case GB_MODEL_SGB_NTSC: return true;
+        case GB_MODEL_SGB_PAL: return true;
+        case GB_MODEL_SGB_NTSC_NO_SFC: return true;
+        case GB_MODEL_SGB_PAL_NO_SFC: return true;
+        case GB_MODEL_SGB2: return true;
+        case GB_MODEL_SGB2_NO_SFC: return true;
+        case GB_MODEL_CGB_C: return true;
+        case GB_MODEL_CGB_E: return true;
+        case GB_MODEL_AGB: return true;
+    }
+    if ((gb->model & GB_MODEL_FAMILY_MASK) == (save->model & GB_MODEL_FAMILY_MASK)) {
+        save->model = gb->model;
+        return true;
+    }
+    GB_log(gb, "This save state is for an unknown Game Boy model\n");
+    return false;
 }
 
 static void sanitize_state(GB_gameboy_t *gb)
@@ -338,14 +369,48 @@ static void sanitize_state(GB_gameboy_t *gb)
     gb->bg_fifo.write_end &= 0xF;
     gb->oam_fifo.read_end &= 0xF;
     gb->oam_fifo.write_end &= 0xF;
+    gb->last_tile_index_address &= 0x1FFF;
+    gb->window_tile_x &= 0x1F;
+    
+    /* These are kind of DOS-ish if too large */
+    if (abs(gb->display_cycles) > 0x8000) {
+        gb->display_cycles = 0;
+    }
+    
+    if (abs(gb->div_cycles) > 0x8000) {
+        gb->div_cycles = 0;
+    }
+    
+    if (!GB_is_cgb(gb)) {
+        gb->cgb_mode = false;
+    }
+    
+    if (gb->ram_size == 0x8000) {
+        gb->cgb_ram_bank &= 0x7;
+    }
+    else {
+        gb->cgb_ram_bank = 1;
+    }
+    if (gb->vram_size != 0x4000) {
+        gb->cgb_vram_bank = 0;
+    }
+    if (!GB_is_cgb(gb)) {
+        gb->current_tile_attributes = 0;
+    }
+
     gb->object_low_line_address &= gb->vram_size & ~1;
-    gb->fetcher_x &= 0x1f;
     if (gb->lcd_x > gb->position_in_line) {
         gb->lcd_x = gb->position_in_line;
     }
     
     if (gb->object_priority == GB_OBJECT_PRIORITY_UNDEFINED) {
         gb->object_priority = gb->cgb_mode? GB_OBJECT_PRIORITY_INDEX : GB_OBJECT_PRIORITY_X;
+    }
+    if (gb->sgb) {
+        if (gb->sgb->player_count != 1 && gb->sgb->player_count != 2 && gb->sgb->player_count != 4) {
+            gb->sgb->player_count = 1;
+        }
+        gb->sgb->current_player &= gb->sgb->player_count - 1;
     }
     if (gb->sgb && !gb->sgb->v14_3) {
 #ifdef GB_BIG_ENDIAN
@@ -711,7 +776,7 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file, bool appe
             bess_sgb.attribute_files = (BESS_buffer_t){LE32(sizeof(gb->sgb->attribute_files)),
                                                        LE32(sgb_offset + offsetof(GB_sgb_t, attribute_files))};
             
-            bess_sgb.multiplayer_state = (gb->sgb->player_count << 4) | (gb->sgb->current_player & (gb->sgb->player_count - 1));
+            bess_sgb.multiplayer_state = (gb->sgb->player_count << 4) | gb->sgb->current_player;
             if (file->write(file, &bess_sgb, sizeof(bess_sgb)) != sizeof(bess_sgb)) {
                 goto error;
             }
@@ -904,7 +969,9 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                 
                 save.halted = core.execution_mode == 1;
                 save.stopped = core.execution_mode == 2;
-                                
+                              
+                // Done early for compatibility with 0.14.x
+                GB_write_memory(&save, 0xFF00 + GB_IO_SVBK, core.io_registers[GB_IO_SVBK]);
                 // CPU related
                 
                 // Determines DMG mode
@@ -965,7 +1032,6 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                 GB_write_memory(&save, 0xFF00 + GB_IO_BGPI, core.io_registers[GB_IO_BGPI]);
                 GB_write_memory(&save, 0xFF00 + GB_IO_OBPI, core.io_registers[GB_IO_OBPI]);
                 GB_write_memory(&save, 0xFF00 + GB_IO_OPRI, core.io_registers[GB_IO_OPRI]);
-                GB_write_memory(&save, 0xFF00 + GB_IO_SVBK, core.io_registers[GB_IO_SVBK]);
 
                 // Interrupts
                 GB_write_memory(&save, 0xFF00 + GB_IO_IF, core.io_registers[GB_IO_IF]);
@@ -1004,6 +1070,7 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
             case BE32('MBC '):
                 if (!found_core) goto parse_error;
                 if (LE32(block.size) % 3 != 0) goto parse_error;
+                if (LE32(block.size) > 0x1000) goto parse_error; 
                 for (unsigned i = LE32(block.size); i > 0;  i -= 3) {
                     BESS_MBC_pair_t pair;
                     file->read(file, &pair, sizeof(pair));
@@ -1151,6 +1218,7 @@ error:
         GB_log(gb, "Attempted to import a save state from a different emulator or incompatible version, but the save state is invalid.\n");
     }
     GB_free(&save);
+    sanitize_state(gb);
     return errno;
 }
 
@@ -1258,7 +1326,7 @@ int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t le
 }
 
 
-bool GB_is_stave_state(const char *path)
+bool GB_is_save_state(const char *path)
 {
     bool ret = false;
     FILE *f = fopen(path, "rb");

@@ -114,7 +114,7 @@
         return _fieldEditor;
     }
     _fieldEditor = [[GBCheatTextView alloc] initWithFrame:controlView.frame];
-    _fieldEditor.fieldEditor = YES;
+    _fieldEditor.fieldEditor = true;
     _fieldEditor.usesAddressFormat = self.usesAddressFormat;
     return _fieldEditor;
 }

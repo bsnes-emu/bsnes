@@ -10,6 +10,7 @@
 #include "gui.h"
 #include "shader.h"
 #include "audio/audio.h"
+#include "console.h"
 
 #ifndef _WIN32
 #include <unistd.h>
@@ -29,6 +30,7 @@ static char *filename = NULL;
 static typeof(free) *free_function = NULL;
 static char *battery_save_path_ptr = NULL;
 static SDL_GLContext gl_context = NULL;
+static bool console_supported = false;
 
 bool uses_gl(void)
 {
@@ -43,6 +45,80 @@ void set_filename(const char *new_filename, typeof(free) *new_free_function)
     filename = (char *) new_filename;
     free_function = new_free_function;
 }
+
+static char *completer(const char *substring, uintptr_t *context)
+{
+    if (!GB_is_inited(&gb)) return NULL;
+    char *temp = strdup(substring);
+    char *ret = GB_debugger_complete_substring(&gb, temp, context);
+    free(temp);
+    return ret;
+}
+
+static void log_callback(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes)
+{
+    CON_attributes_t con_attributes = {0,};
+    con_attributes.bold = attributes & GB_LOG_BOLD;
+    con_attributes.underline = attributes & GB_LOG_UNDERLINE;
+    if (attributes & GB_LOG_DASHED_UNDERLINE) {
+        while (*string) {
+            con_attributes.underline ^= true;
+            CON_attributed_printf("%c", &con_attributes, *string);
+            string++;
+        }
+    }
+    else {
+        CON_attributed_print(string, &con_attributes);
+    }
+}
+
+static void handle_eof(void)
+{
+    CON_set_async_prompt("");
+    char *line = CON_readline("Quit? [y]/n > ");
+    if (line[0] == 'n' || line[0] == 'N') {
+        free(line);
+        CON_set_async_prompt("> ");
+    }
+    else {
+        exit(0);
+    }
+}
+
+static char *input_callback(GB_gameboy_t *gb)
+{
+retry: {
+    char *ret = CON_readline("Stopped> ");
+    if (strcmp(ret, CON_EOF) == 0) {
+        handle_eof();
+        free(ret);
+        goto retry;
+    }
+    else {
+        CON_attributes_t attributes = {.bold = true};
+        CON_attributed_printf("> %s\n", &attributes, ret);
+    }
+    return ret;
+}
+}
+
+static char *asyc_input_callback(GB_gameboy_t *gb)
+{
+retry: {
+    char *ret = CON_readline_async();
+    if (ret && strcmp(ret, CON_EOF) == 0) {
+        handle_eof();
+        free(ret);
+        goto retry;
+    }
+    else if (ret) {
+        CON_attributes_t attributes = {.bold = true};
+        CON_attributed_printf("> %s\n", &attributes, ret);
+    }
+    return ret;
+}
+}
+
 
 static char *captured_log = NULL;
 
@@ -67,7 +143,7 @@ static void start_capturing_logs(void)
 
 static const char *end_capturing_logs(bool show_popup, bool should_exit, uint32_t popup_flags, const char *title)
 {
-    GB_set_log_callback(&gb, NULL);
+    GB_set_log_callback(&gb, console_supported? log_callback : NULL);
     if (captured_log[0] == 0) {
         free(captured_log);
         captured_log = NULL;
@@ -149,7 +225,7 @@ static void handle_events(GB_gameboy_t *gb)
                 break;
                 
             case SDL_DROPFILE: {
-                if (GB_is_stave_state(event.drop.file)) {
+                if (GB_is_save_state(event.drop.file)) {
                     dropped_state_file = event.drop.file;
                     pending_command = GB_SDL_LOAD_STATE_FROM_FILE_COMMAND;
                 }
@@ -256,6 +332,7 @@ static void handle_events(GB_gameboy_t *gb)
                     }
                     case SDL_SCANCODE_C:
                         if (event.type == SDL_KEYDOWN && (event.key.keysym.mod & KMOD_CTRL)) {
+                            CON_print("^C\a\n");
                             GB_debugger_break(gb);
                         }
                         break;
@@ -408,11 +485,14 @@ static void rumble(GB_gameboy_t *gb, double amp)
 
 static void debugger_interrupt(int ignore)
 {
-    if (!GB_is_inited(&gb)) return;
+    if (!GB_is_inited(&gb)) exit(0);
     /* ^C twice to exit */
     if (GB_debugger_is_stopped(&gb)) {
         GB_save_battery(&gb, battery_save_path_ptr);
         exit(0);
+    }
+    if (console_supported) {
+        CON_print("^C\n");
     }
     GB_debugger_break(&gb);
 }
@@ -442,7 +522,6 @@ static void gb_audio_callback(GB_gameboy_t *gb, GB_sample_t *sample)
     GB_audio_queue_sample(sample);
     
 }
-
     
 static bool handle_pending_command(void)
 {
@@ -577,6 +656,13 @@ restart:
         GB_set_rtc_mode(&gb, configuration.rtc_mode);
         GB_set_update_input_hint_callback(&gb, handle_events);
         GB_apu_set_sample_callback(&gb, gb_audio_callback);
+        
+        if (console_supported) {
+            CON_set_async_prompt("> ");
+            GB_set_log_callback(&gb, log_callback);
+            GB_set_input_callback(&gb, input_callback);
+            GB_set_async_input_callback(&gb, asyc_input_callback);
+        }
     }
     if (stop_on_start) {
         stop_on_start = false;
@@ -682,18 +768,29 @@ static bool get_arg_flag(const char *flag, int *argc, char **argv)
     return false;
 }
 
+#ifdef __APPLE__
+#include <CoreFoundation/CoreFoundation.h>
+static void enable_smooth_scrolling(void)
+{
+    CFPreferencesSetAppValue(CFSTR("AppleMomentumScrollSupported"), kCFBooleanTrue, kCFPreferencesCurrentApplication);
+}
+#endif
+
 int main(int argc, char **argv)
 {
 #ifdef _WIN32
     SetProcessDPIAware();
 #endif
-    fprintf(stderr, "SameBoy v" GB_VERSION "\n");
-    
+#ifdef __APPLE__
+    enable_smooth_scrolling();
+#endif
+
     bool fullscreen = get_arg_flag("--fullscreen", &argc, argv) || get_arg_flag("-f", &argc, argv);
     bool nogl = get_arg_flag("--nogl", &argc, argv);
     stop_on_start = get_arg_flag("--stop-debugger", &argc, argv) || get_arg_flag("-s", &argc, argv);
 
     if (argc > 2 || (argc == 2 && argv[1][0] == '-')) {
+        fprintf(stderr, "SameBoy v" GB_VERSION "\n");
         fprintf(stderr, "Usage: %s [--fullscreen|-f] [--nogl] [--stop-debugger|-s] [rom]\n", argv[0]);
         exit(1);
     }
@@ -705,6 +802,13 @@ int main(int argc, char **argv)
     signal(SIGINT, debugger_interrupt);
 
     SDL_Init(SDL_INIT_EVERYTHING);
+    if ((console_supported = CON_start(completer))) {
+        CON_set_repeat_empty(true);
+        CON_printf("SameBoy v" GB_VERSION "\n");
+    }
+    else {
+        fprintf(stderr, "SameBoy v" GB_VERSION "\n");
+    }
     
     strcpy(prefs_path, resource_path("prefs.bin"));
     if (access(prefs_path, R_OK | W_OK) != 0) {

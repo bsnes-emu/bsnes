@@ -1,3 +1,4 @@
+#import <CoreImage/CoreImage.h>
 #import "GBViewMetal.h"
 #pragma clang diagnostic ignored "-Wpartial-availability"
 
@@ -51,8 +52,9 @@ static const vector_float2 rect[] =
     MTKView *view = [[MTKView alloc] initWithFrame:self.frame device:(device = MTLCreateSystemDefaultDevice())];
     view.delegate = self;
     self.internalView = view;
-    view.paused = YES;
-    view.enableSetNeedsDisplay = YES;
+    view.paused = true;
+    view.enableSetNeedsDisplay = true;
+    view.framebufferOnly = false;
     
     vertices = [device newBufferWithBytes:rect
                                    length:sizeof(rect)
@@ -92,7 +94,7 @@ static const vector_float2 rect[] =
                                                              withString:scaler_source];
 
     MTLCompileOptions *options = [[MTLCompileOptions alloc] init];
-    options.fastMathEnabled = YES;
+    options.fastMathEnabled = true;
     id<MTLLibrary> library = [device newLibraryWithSource:shader_source
                                                    options:options
                                                      error:&error];
@@ -208,8 +210,23 @@ static const vector_float2 rect[] =
 {
     [super flip];
     dispatch_async(dispatch_get_main_queue(), ^{
-        [(MTKView *)self.internalView setNeedsDisplay:YES];
+        [(MTKView *)self.internalView setNeedsDisplay:true];
     });
+}
+
+- (NSImage *)renderToImage
+{
+    CIImage *ciImage = [CIImage imageWithMTLTexture:[[(MTKView *)self.internalView currentDrawable] texture]
+                                            options:@{
+                                                kCIImageColorSpace: (__bridge_transfer id)CGColorSpaceCreateDeviceRGB()
+                                            }];
+    ciImage = [ciImage imageByApplyingTransform:CGAffineTransformTranslate(CGAffineTransformMakeScale(1, -1),
+                                                                           0, ciImage.extent.size.height)];
+    CIContext *context = [CIContext context];
+    CGImageRef cgImage = [context createCGImage:ciImage fromRect:ciImage.extent];
+    NSImage *ret = [[NSImage alloc] initWithCGImage:cgImage size:self.internalView.bounds.size];
+    CGImageRelease(cgImage);
+    return ret;
 }
 
 @end

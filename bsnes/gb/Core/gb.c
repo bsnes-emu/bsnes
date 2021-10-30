@@ -284,7 +284,7 @@ int GB_load_rom(GB_gameboy_t *gb, const char *path)
         gb->rom_size |= gb->rom_size >> 1;
         gb->rom_size++;
     }
-    if (gb->rom_size == 0) {
+    if (gb->rom_size < 0x8000) {
         gb->rom_size = 0x8000;
     }
     fseek(f, 0, SEEK_SET);
@@ -396,7 +396,7 @@ int GB_load_gbs_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size
         gb->rom_size++;
     }
     
-    if (gb->rom_size == 0) {
+    if (gb->rom_size < 0x8000) {
         gb->rom_size = 0x8000;
     }
 
@@ -412,6 +412,7 @@ int GB_load_gbs_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size
     if (gb->mbc_ram) {
         free(gb->mbc_ram);
         gb->mbc_ram = NULL;
+        gb->mbc_ram_size = 0;
     }
     
     if (gb->cartridge_type->has_ram) {
@@ -1198,7 +1199,7 @@ uint8_t GB_run(GB_gameboy_t *gb)
 {
     gb->vblank_just_occured = false;
 
-    if (gb->sgb && gb->sgb->intro_animation < 140) {
+    if (gb->sgb && gb->sgb->intro_animation < 96) {
         /* On the SGB, the GB is halted after finishing the boot ROM.
            Then, after the boot animation is almost done, it's reset.
            Since the SGB HLE does not perform any header validity checks,
@@ -1535,18 +1536,13 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_SGB_PAL_NO_SFC: /* Unverified */
         case GB_MODEL_SGB2:
         case GB_MODEL_SGB2_NO_SFC: {
-            uint8_t temp;
             for (unsigned i = 0; i < GB_IO_WAV_END - GB_IO_WAV_START; i++) {
                 if (i & 1) {
-                    temp = GB_random() & GB_random() & GB_random();
+                    gb->io_registers[GB_IO_WAV_START + i] = GB_random() & GB_random() & GB_random();
                 }
                 else {
-                    temp = GB_random() | GB_random() | GB_random();
+                    gb->io_registers[GB_IO_WAV_START + i] = GB_random() | GB_random() | GB_random();
                 }
-                gb->apu.wave_channel.wave_form[i * 2]     = temp >> 4;
-                gb->apu.wave_channel.wave_form[i * 2 + 1] = temp & 0xF;
-                gb->io_registers[GB_IO_WAV_START + i] = temp;
-
             }
             break;
         }
@@ -1602,7 +1598,10 @@ void GB_reset(GB_gameboy_t *gb)
 {
     uint32_t mbc_ram_size = gb->mbc_ram_size;
     GB_model_t model = gb->model;
+    uint8_t rtc_section[GB_SECTION_SIZE(rtc)];
+    memcpy(rtc_section, GB_GET_SECTION(gb, rtc), sizeof(rtc_section));
     memset(gb, 0, (size_t)GB_GET_SECTION((GB_gameboy_t *) 0, unsaved));
+    memcpy(GB_GET_SECTION(gb, rtc), rtc_section, sizeof(rtc_section));
     gb->model = model;
     gb->version = GB_STRUCT_VERSION;
     

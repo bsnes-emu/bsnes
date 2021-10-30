@@ -2,6 +2,7 @@
 #import "NSString+StringForKey.h"
 #import "GBButtons.h"
 #import "BigSurToolbar.h"
+#import "GBViewMetal.h"
 #import <Carbon/Carbon.h>
 
 @implementation GBPreferencesWindow
@@ -32,6 +33,7 @@
     NSSlider *_volumeSlider;
     NSButton *_autoUpdatesCheckbox;
     NSButton *_OSDCheckbox;
+    NSButton *_screenshotFilterCheckbox;
 }
 
 + (NSArray *)filterList
@@ -67,8 +69,8 @@
 - (void)close
 {
     joystick_configuration_state = -1;
-    [self.configureJoypadButton setEnabled:YES];
-    [self.skipButton setEnabled:NO];
+    [self.configureJoypadButton setEnabled:true];
+    [self.skipButton setEnabled:false];
     [self.configureJoypadButton setTitle:@"Configure Controller"];
     [super close];
 }
@@ -266,12 +268,12 @@
     dispatch_async(dispatch_get_main_queue(), ^{
         is_button_being_modified = true;
         button_being_modified = row;
-        tableView.enabled = NO;
-        self.playerListButton.enabled = NO;
+        tableView.enabled = false;
+        self.playerListButton.enabled = false;
         [tableView reloadData];
         [self makeFirstResponder:self];
     });
-    return NO;
+    return false;
 }
 
 -(void)keyDown:(NSEvent *)theEvent
@@ -287,8 +289,8 @@
 
     [[NSUserDefaults standardUserDefaults] setInteger:theEvent.keyCode
                                               forKey:button_to_preference_name(button_being_modified, self.playerListButton.selectedTag)];
-    self.controlsTableView.enabled = YES;
-    self.playerListButton.enabled = YES;
+    self.controlsTableView.enabled = true;
+    self.playerListButton.enabled = true;
     [self.controlsTableView reloadData];
     [self makeFirstResponder:self.controlsTableView];
 }
@@ -408,8 +410,8 @@
 
 - (IBAction) configureJoypad:(id)sender
 {
-    [self.configureJoypadButton setEnabled:NO];
-    [self.skipButton setEnabled:YES];
+    [self.configureJoypadButton setEnabled:false];
+    [self.skipButton setEnabled:true];
     joystick_being_configured = nil;
     [self advanceConfigurationStateMachine];
 }
@@ -430,8 +432,8 @@
     }
     else {
         joystick_configuration_state = -1;
-        [self.configureJoypadButton setEnabled:YES];
-        [self.skipButton setEnabled:NO];
+        [self.configureJoypadButton setEnabled:true];
+        [self.skipButton setEnabled:false];
         [self.configureJoypadButton setTitle:@"Configure Joypad"];
     }
 }
@@ -563,8 +565,8 @@
 - (IBAction)selectOtherBootROMFolder:(id)sender
 {
     NSOpenPanel *panel = [[NSOpenPanel alloc] init];
-    [panel setCanChooseDirectories:YES];
-    [panel setCanChooseFiles:NO];
+    [panel setCanChooseDirectories:true];
+    [panel setCanChooseFiles:false];
     [panel setPrompt:@"Select"];
     [panel setDirectoryURL:[[NSUserDefaults standardUserDefaults] URLForKey:@"GBBootROMsFolder"]];
     [panel beginSheetModalForWindow:self completionHandler:^(NSModalResponse result) {
@@ -588,12 +590,12 @@
         [self.bootROMsFolderItem setTitle:[url lastPathComponent]];
         NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFile:[url path]];
         [icon setSize:NSMakeSize(16, 16)];
-        [self.bootROMsFolderItem setHidden:NO];
+        [self.bootROMsFolderItem setHidden:false];
         [self.bootROMsFolderItem setImage:icon];
         [self.bootROMsButton selectItemAtIndex:1];
     }
     else {
-        [self.bootROMsFolderItem setHidden:YES];
+        [self.bootROMsFolderItem setHidden:true];
         [self.bootROMsButton selectItemAtIndex:0];
     }
 }
@@ -766,4 +768,27 @@
                                             forKey:@"GBOSDEnabled"];
 
 }
+
+- (IBAction)changeFilterScreenshots:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setBool:[(NSButton *)sender state] == NSOnState
+                                            forKey:@"GBFilterScreenshots"];
+}
+
+- (NSButton *)screenshotFilterCheckbox
+{
+    return _screenshotFilterCheckbox;
+}
+
+- (void)setScreenshotFilterCheckbox:(NSButton *)screenshotFilterCheckbox
+{
+    _screenshotFilterCheckbox = screenshotFilterCheckbox;
+    if (![GBViewMetal isSupported]) {
+        [_screenshotFilterCheckbox setEnabled:false];
+    }
+    else {
+        [_screenshotFilterCheckbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBFilterScreenshots"]];
+    }
+}
+
 @end
