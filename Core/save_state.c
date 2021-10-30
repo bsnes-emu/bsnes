@@ -344,11 +344,9 @@ static bool verify_and_update_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t
         case GB_MODEL_SGB_PAL: return true;
         case GB_MODEL_SGB_NTSC_NO_SFC: return true;
         case GB_MODEL_SGB_PAL_NO_SFC: return true;
-        case GB_MODEL_MGB: return true;
         case GB_MODEL_SGB2: return true;
         case GB_MODEL_SGB2_NO_SFC: return true;
         case GB_MODEL_CGB_C: return true;
-        case GB_MODEL_CGB_D: return true;
         case GB_MODEL_CGB_E: return true;
         case GB_MODEL_AGB: return true;
     }
