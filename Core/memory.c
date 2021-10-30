@@ -503,8 +503,8 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 return gb->extra_oam[addr - 0xfea0];
                 
             case GB_MODEL_CGB_C:
+            case GB_MODEL_CGB_B:
             /*
-             case GB_MODEL_CGB_B:
              case GB_MODEL_CGB_A:
              case GB_MODEL_CGB_0:
              */
@@ -1009,8 +1009,8 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     gb->extra_oam[addr - 0xfea0] = value;
                     break;
                 case GB_MODEL_CGB_C:
+                case GB_MODEL_CGB_B:
                 /*
-                 case GB_MODEL_CGB_B:
                  case GB_MODEL_CGB_A:
                  case GB_MODEL_CGB_0:
                  */

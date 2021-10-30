@@ -834,7 +834,6 @@ static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
     switch (gb->model) {
             /* Pre CGB revisions are assumed to be like CGB-C, A and 0 for the lack of a better guess.
              TODO: It could be verified with audio based test ROMs. */
-#if 0
         case GB_MODEL_CGB_B:
             if (effective_counter & 8) {
                 effective_counter |= 0xE; // Seems to me F under some circumstances?
@@ -861,7 +860,6 @@ static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
                 effective_counter |= 0x20;
             }
             break;
-#endif
         case GB_MODEL_DMG_B:
         case GB_MODEL_MGB:
         case GB_MODEL_SGB_NTSC:
@@ -1056,7 +1054,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 
         case GB_IO_NR14:
         case GB_IO_NR24: {
-            /* TODO: GB_MODEL_CGB_D fails channel_1_sweep_restart_2, don't forget when adding support for this revision! */
             unsigned index = reg == GB_IO_NR24? GB_SQUARE_2: GB_SQUARE_1;
             bool was_active = gb->apu.is_active[index];
             /* TODO: When the sample length changes right before being updated, the countdown should change to the
@@ -1162,7 +1159,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             }
 
             /* APU glitch - if length is enabled while the DIV-divider's LSB is 1, tick the length once. */
-            if ((value & 0x40) &&
+            if (((value & 0x40) || (GB_is_cgb(gb) && gb->model <= GB_MODEL_CGB_B)) && // Current value is irrelevant on CGB-B and older
                 !gb->apu.square_channels[index].length_enabled &&
                 (gb->apu.div_divider & 1) &&
                 gb->apu.square_channels[index].pulse_length) {
@@ -1262,7 +1259,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             }
 
             /* APU glitch - if length is enabled while the DIV-divider's LSB is 1, tick the length once. */
-            if ((value & 0x40) &&
+            if (((value & 0x40) || (GB_is_cgb(gb) && gb->model <= GB_MODEL_CGB_B)) && // Current value is irrelevant on CGB-B and older
                 !gb->apu.wave_channel.length_enabled &&
                 (gb->apu.div_divider & 1) &&
                 gb->apu.wave_channel.pulse_length) {
