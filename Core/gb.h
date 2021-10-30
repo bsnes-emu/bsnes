@@ -24,6 +24,7 @@
 #include "cheats.h"
 #include "rumble.h"
 #include "workboy.h"
+#include "random.h"
 
 #define GB_STRUCT_VERSION 13
 
@@ -554,7 +555,7 @@ struct GB_gameboy_internal_s {
     /* Video Display */
     GB_SECTION(video,
         uint32_t vram_size; // Different between CGB and DMG
-        uint8_t cgb_vram_bank;
+        bool cgb_vram_bank;
         uint8_t oam[0xA0];
         uint8_t background_palettes_data[0x40];
         uint8_t sprite_palettes_data[0x40];

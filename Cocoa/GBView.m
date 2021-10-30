@@ -658,7 +658,7 @@ static const uint8_t workboy_vk_to_key[] = {
     
     if ( [[pboard types] containsObject:NSURLPboardType] ) {
         NSURL *fileURL = [NSURL URLFromPasteboard:pboard];
-        if (GB_is_stave_state(fileURL.fileSystemRepresentation)) {
+        if (GB_is_save_state(fileURL.fileSystemRepresentation)) {
             return NSDragOperationGeneric;
         }
     }

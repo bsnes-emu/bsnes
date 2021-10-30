@@ -225,7 +225,7 @@ static void handle_events(GB_gameboy_t *gb)
                 break;
                 
             case SDL_DROPFILE: {
-                if (GB_is_stave_state(event.drop.file)) {
+                if (GB_is_save_state(event.drop.file)) {
                     dropped_state_file = event.drop.file;
                     pending_command = GB_SDL_LOAD_STATE_FROM_FILE_COMMAND;
                 }
