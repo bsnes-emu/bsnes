@@ -52,6 +52,7 @@ void GB_update_joyp(GB_gameboy_t *gb)
             break;
 
         default:
+            __builtin_unreachable();
             break;
     }
     

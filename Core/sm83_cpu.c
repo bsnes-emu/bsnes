@@ -656,6 +656,7 @@ static bool condition_code(GB_gameboy_t *gb, uint8_t opcode)
         case 3:
             return (gb->af & GB_CARRY_FLAG);
     }
+    __builtin_unreachable();
 
     return false;
 }
