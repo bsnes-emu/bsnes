@@ -83,17 +83,41 @@ static listent_t *reverse_find(listent_t *entry, const char *string, bool exact)
 
 static bool is_term(void)
 {
+    if (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO)) return false;
 #ifdef _WIN32
     if (AllocConsole()) {
         FreeConsole();
         return false;
     }
+    
+    unsigned long input_mode, output_mode;
+    
+    GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), &input_mode);
+    GetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), &output_mode);
+    SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), ENABLE_VIRTUAL_TERMINAL_INPUT);
+    SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), ENABLE_WRAP_AT_EOL_OUTPUT | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    
+    CONSOLE_SCREEN_BUFFER_INFO before = {0,};
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &before);
+    
+    printf(SGR("0"));
+    
+    CONSOLE_SCREEN_BUFFER_INFO after = {0,};
+    GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &after);
+    
+    SetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), input_mode);
+    SetConsoleMode(GetStdHandle(STD_OUTPUT_HANDLE), output_mode);
+
+
+    if (before.dwCursorPosition.X != after.dwCursorPosition.X ||
+        before.dwCursorPosition.Y != after.dwCursorPosition.Y) {
+        printf("\r      \r");
+        return false;
+    }
+    return true;
+#else
+    return getenv("TERM");
 #endif
-    return isatty(STDIN_FILENO) && isatty(STDOUT_FILENO)
-#ifndef _WIN32
-    && getenv("TERM")
-#endif
-    ;
 }
 
 static unsigned width, height;
@@ -779,7 +803,6 @@ mainloop(char *(*completer)(const char *substring, uintptr_t *context))
                         complete_context = completion_length = 0;
                         break;
                     default:
-                        printf("Unsupported extended key %x\n", c);
                         printf("\a");
                         break;
                 }
@@ -809,7 +832,6 @@ mainloop(char *(*completer)(const char *substring, uintptr_t *context))
                     complete_context = completion_length = 0;
                 }
                 else {
-                    printf("Unsupported key %x\n", c);
                     printf("\a");
                 }
                 break;
