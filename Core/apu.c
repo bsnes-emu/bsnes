@@ -868,7 +868,7 @@ static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
         case GB_MODEL_SGB_PAL_NO_SFC:
         case GB_MODEL_SGB2:
         case GB_MODEL_SGB2_NO_SFC:
-            // case GB_MODEL_CGB_0:
+        case GB_MODEL_CGB_0:
             // case GB_MODEL_CGB_A:
         case GB_MODEL_CGB_C:
             if (effective_counter & 8) {

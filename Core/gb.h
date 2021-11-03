@@ -131,7 +131,7 @@ typedef enum {
     GB_MODEL_MGB = 0x100,
     GB_MODEL_SGB2 = 0x101,
     GB_MODEL_SGB2_NO_SFC = GB_MODEL_SGB2 | GB_MODEL_NO_SFC_BIT,
-    // GB_MODEL_CGB_0 = 0x200,
+    GB_MODEL_CGB_0 = 0x200,
     // GB_MODEL_CGB_A = 0x201,
     GB_MODEL_CGB_B = 0x202,
     GB_MODEL_CGB_C = 0x203,
@@ -277,12 +277,12 @@ typedef enum {
 } GB_log_attributes;
 
 typedef enum {
-    GB_BOOT_ROM_DMG0,
+    GB_BOOT_ROM_DMG_0,
     GB_BOOT_ROM_DMG,
     GB_BOOT_ROM_MGB,
     GB_BOOT_ROM_SGB,
     GB_BOOT_ROM_SGB2,
-    GB_BOOT_ROM_CGB0,
+    GB_BOOT_ROM_CGB_0,
     GB_BOOT_ROM_CGB,
     GB_BOOT_ROM_AGB,
 } GB_boot_rom_t;

@@ -23,6 +23,7 @@ Start:
     dec c
     jr nz, .clearOAMLoop
 
+IF !DEF(CGB0)
 ; Init waveform
     ld c, $10
     ld hl, $FF30
@@ -31,6 +32,7 @@ Start:
     cpl
     dec c
     jr nz, .waveformLoop
+ENDC
 
 ; Clear chosen input palette
     ldh [InputPalette], a

@@ -397,7 +397,7 @@
                         <font key="font" metaFont="menu"/>
                         <menu key="menu" autoenablesItems="NO" id="bbF-hB-Hv7">
                             <items>
-                                <menuItem title="CPU-CGB 0" tag="512" enabled="NO" id="2Uk-u3-6Gw"/>
+                                <menuItem title="CPU-CGB 0 (Experimental)" tag="512" id="2Uk-u3-6Gw"/>
                                 <menuItem title="CPU-CGB A" tag="513" enabled="NO" id="axv-yk-RWM"/>
                                 <menuItem title="CPU-CGB B (Experimental)" tag="514" id="NtJ-oo-IM2"/>
                                 <menuItem title="CPU-CGB C (Experimental)" tag="515" id="9YL-u8-12z"/>
