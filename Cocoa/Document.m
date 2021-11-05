@@ -10,6 +10,7 @@
 #include "GBCheatWindowController.h"
 #include "GBTerminalTextFieldCell.h"
 #include "BigSurToolbar.h"
+#import "GBPaletteEditorController.h"
 
 /* Todo: The general Objective-C coding style conflicts with SameBoy's. This file needs a cleanup. */
 /* Todo: Split into category files! This is so messy!!! */
@@ -256,23 +257,7 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
 
 - (void) updatePalette
 {
-    switch ([[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorPalette"]) {
-        case 1:
-            GB_set_palette(&gb, &GB_PALETTE_DMG);
-            break;
-            
-        case 2:
-            GB_set_palette(&gb, &GB_PALETTE_MGB);
-            break;
-            
-        case 3:
-            GB_set_palette(&gb, &GB_PALETTE_GBL);
-            break;
-            
-        default:
-            GB_set_palette(&gb, &GB_PALETTE_GREY);
-            break;
-    }
+    GB_set_palette(&gb, [GBPaletteEditorController userPalette]);
 }
 
 - (void) updateBorderMode
@@ -1952,7 +1937,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 {
     bool shouldResume = running;
     [self stop];
-    NSSavePanel * savePanel = [NSSavePanel savePanel];
+    NSSavePanel *savePanel = [NSSavePanel savePanel];
     [savePanel setAllowedFileTypes:@[@"png"]];
     [savePanel beginSheetModalForWindow:self.printerFeedWindow completionHandler:^(NSInteger result) {
         if (result == NSModalResponseOK) {

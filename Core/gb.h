@@ -81,7 +81,7 @@
 #endif
 
 typedef struct {
-    struct {
+    struct GB_color_s {
         uint8_t r, g, b;
     } colors[5];
 } GB_palette_t;

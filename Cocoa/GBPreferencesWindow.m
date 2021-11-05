@@ -153,8 +153,14 @@
 - (void)setColorPalettePopupButton:(NSPopUpButton *)colorPalettePopupButton
 {
     _colorPalettePopupButton = colorPalettePopupButton;
+    [self updatePalettesMenu];
     NSInteger mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorPalette"];
-    [_colorPalettePopupButton selectItemAtIndex:mode];
+    if (mode >= 0) {
+        [_colorPalettePopupButton selectItemWithTag:mode];
+    }
+    else {
+        [_colorPalettePopupButton selectItemWithTitle:[[NSUserDefaults standardUserDefaults] stringForKey:@"GBCurrentTheme"] ?: @""];
+    }
 }
 
 - (NSPopUpButton *)colorPalettePopupButton
@@ -366,10 +372,51 @@
     
 }
 
+- (void)updatePalettesMenu
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSDictionary *themes = [defaults dictionaryForKey:@"GBThemes"];
+    NSMenu *menu = _colorPalettePopupButton.menu;
+    while (menu.itemArray.count != 4) {
+        [menu removeItemAtIndex:4];
+    }
+    [menu addItem:[NSMenuItem separatorItem]];
+    for (NSString *name in [themes.allKeys sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)]) {
+        NSMenuItem *item = [[NSMenuItem alloc] initWithTitle:name action:nil keyEquivalent:@""];
+        item.tag = -2;
+        [menu addItem:item];
+    }
+    if (themes) {
+        [menu addItem:[NSMenuItem separatorItem]];
+    }
+    NSMenuItem *item = [[NSMenuItem alloc] initWithTitle:@"Custom…" action:nil keyEquivalent:@""];
+    item.tag = -1;
+    [menu addItem:item];
+}
+
 - (IBAction)colorPaletteChanged:(id)sender
 {
-    [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
-                                              forKey:@"GBColorPalette"];
+    signed tag = [sender selectedItem].tag;
+    if (tag == -2) {
+        [[NSUserDefaults standardUserDefaults] setObject:@(-1)
+                                                  forKey:@"GBColorPalette"];
+        [[NSUserDefaults standardUserDefaults] setObject:[sender selectedItem].title
+                                                  forKey:@"GBCurrentTheme"];
+
+    }
+    else if (tag == -1) {
+        [[NSUserDefaults standardUserDefaults] setObject:@(-1)
+                                                  forKey:@"GBColorPalette"];
+        [_paletteEditorController awakeFromNib];
+        [self beginSheet:_paletteEditor completionHandler:^(NSModalResponse returnCode) {
+            [self updatePalettesMenu];
+            [_colorPalettePopupButton selectItemWithTitle:[[NSUserDefaults standardUserDefaults] stringForKey:@"GBCurrentTheme"] ?: @""];
+        }];
+    }
+    else {
+        [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedItem].tag)
+                                                  forKey:@"GBColorPalette"];
+    }
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBColorPaletteChanged" object:nil];
 }
 

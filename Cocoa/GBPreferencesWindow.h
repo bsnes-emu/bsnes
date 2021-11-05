@@ -1,5 +1,6 @@
 #import <Cocoa/Cocoa.h>
 #import <JoyKit/JoyKit.h>
+#import "GBPaletteEditorController.h"
 
 @interface GBPreferencesWindow : NSWindow <NSTableViewDelegate, NSTableViewDataSource, JOYListener>
 @property (nonatomic, strong) IBOutlet NSTableView *controlsTableView;
@@ -29,4 +30,6 @@
 @property (weak) IBOutlet NSSlider *volumeSlider;
 @property (weak) IBOutlet NSButton *OSDCheckbox;
 @property (weak) IBOutlet NSButton *screenshotFilterCheckbox;
+@property (weak) IBOutlet GBPaletteEditorController *paletteEditorController;
+@property (strong) IBOutlet NSWindow *paletteEditor;
 @end
