@@ -148,7 +148,7 @@ static double blend(double from, double to, double position)
         return;
     }
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSMutableDictionary *themes = [[defaults dictionaryForKey:@"GBThemes"] ?: @[] mutableCopy];
+    NSMutableDictionary *themes = [[defaults dictionaryForKey:@"GBThemes"] ?: @{} mutableCopy];
     NSString *newName = object;
     unsigned i = 2;
     if (!newName.length) {
@@ -171,7 +171,7 @@ static double blend(double from, double to, double position)
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSString *name = [defaults stringForKey:@"GBCurrentTheme"];
-    NSMutableDictionary *themes = [[defaults dictionaryForKey:@"GBThemes"] ?: @[] mutableCopy];
+    NSMutableDictionary *themes = [[defaults dictionaryForKey:@"GBThemes"] ?: @{} mutableCopy];
     [themes removeObjectForKey:name];
     [defaults setObject:themes forKey:@"GBThemes"];
     [_themesList reloadData];
@@ -267,7 +267,7 @@ static double blend(double from, double to, double position)
         @"HueBiasStrength": @(_hueStrengthSlider.doubleValue / 256.0)
     };
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSMutableDictionary *themes = [[defaults dictionaryForKey:@"GBThemes"] ?: @[] mutableCopy];
+    NSMutableDictionary *themes = [[defaults dictionaryForKey:@"GBThemes"] ?: @{} mutableCopy];
     themes[[defaults stringForKey:@"GBCurrentTheme"]] = theme;
     [defaults setObject:themes forKey:@"GBThemes"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBColorPaletteChanged" object:nil];

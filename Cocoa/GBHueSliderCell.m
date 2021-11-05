@@ -48,7 +48,7 @@
     [super drawKnob:knobRect];
     NSRect peekRect = knobRect;
     peekRect.size.width /= 2;
-    peekRect.size.height /= 2;
+    peekRect.size.height = peekRect.size.width;
     peekRect.origin.x += peekRect.size.width / 2;
     peekRect.origin.y += peekRect.size.height / 2;
     NSColor *color = self.colorValue;
