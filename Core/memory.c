@@ -539,11 +539,11 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 }
                 return gb->io_registers[GB_IO_OPRI] | 0xFE;
 
-            case GB_IO_PCM_12:
+            case GB_IO_PCM12:
                 if (!GB_is_cgb(gb)) return 0xFF;
                 return ((gb->apu.is_active[GB_SQUARE_2] ? (gb->apu.samples[GB_SQUARE_2] << 4) : 0) |
                         (gb->apu.is_active[GB_SQUARE_1] ? (gb->apu.samples[GB_SQUARE_1]) : 0)) & (gb->model <= GB_MODEL_CGB_C? gb->apu.pcm_mask[0] : 0xFF);
-            case GB_IO_PCM_34:
+            case GB_IO_PCM34:
                 if (!GB_is_cgb(gb)) return 0xFF;
                 return ((gb->apu.is_active[GB_NOISE] ? (gb->apu.samples[GB_NOISE] << 4) : 0) |
                         (gb->apu.is_active[GB_WAVE] ? (gb->apu.samples[GB_WAVE]) : 0))  & (gb->model <= GB_MODEL_CGB_C? gb->apu.pcm_mask[1] : 0xFF);
@@ -626,10 +626,10 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 }
                 return ret;
             }
-            case GB_IO_UNKNOWN2:
-            case GB_IO_UNKNOWN3:
+            case GB_IO_PSWX:
+            case GB_IO_PSWY:
                 return GB_is_cgb(gb)? gb->io_registers[addr & 0xFF] : 0xFF;
-            case GB_IO_UNKNOWN4:
+            case GB_IO_PSW:
                 return gb->cgb_mode? gb->io_registers[addr & 0xFF] : 0xFF;
             case GB_IO_UNKNOWN5:
                 return GB_is_cgb(gb)? gb->io_registers[addr & 0xFF] | 0x8F : 0xFF;
@@ -1077,9 +1077,9 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             case GB_IO_OBP0:
             case GB_IO_OBP1:
             case GB_IO_SB:
-            case GB_IO_UNKNOWN2:
-            case GB_IO_UNKNOWN3:
-            case GB_IO_UNKNOWN4:
+            case GB_IO_PSWX:
+            case GB_IO_PSWY:
+            case GB_IO_PSW:
             case GB_IO_UNKNOWN5:
                 gb->io_registers[addr & 0xFF] = value;
                 return;

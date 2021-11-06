@@ -224,10 +224,7 @@ enum {
     GB_IO_OBP1       = 0x49, // Object Palette 1 Data (R/W) - Non CGB Mode Only
     GB_IO_WY         = 0x4a, // Window Y Position (R/W)
     GB_IO_WX         = 0x4b, // Window X Position minus 7 (R/W)
-    // Has some undocumented compatibility flags written at boot.
-    // Unfortunately it is not readable or writable after boot has finished, so research of this
-    // register is quite limited. The value written to this register, however, can be controlled
-    // in some cases.
+    // Controls DMG mode and PGB mode
     GB_IO_KEY0 = 0x4c,
 
     /* General CGB features */
@@ -260,13 +257,12 @@ enum {
     /* Missing */
 
     GB_IO_SVBK       = 0x70, // CGB Mode Only - WRAM Bank
-    GB_IO_UNKNOWN2   = 0x72, // (00h) - Bit 0-7 (Read/Write)
-    GB_IO_UNKNOWN3   = 0x73, // (00h) - Bit 0-7 (Read/Write)
-    GB_IO_UNKNOWN4   = 0x74, // (00h) - Bit 0-7 (Read/Write) - CGB Mode Only
+    GB_IO_PSWX       = 0x72, // X position of the palette switching window
+    GB_IO_PSWY       = 0x73, // Y position of the palette switching window
+    GB_IO_PSW        = 0x74, // Key combo to trigger the palette switching window
     GB_IO_UNKNOWN5   = 0x75, // (8Fh) - Bit 4-6 (Read/Write)
-    GB_IO_PCM_12     = 0x76, // Channels 1 and 2 amplitudes
-    GB_IO_PCM_34     = 0x77, // Channels 3 and 4 amplitudes
-    GB_IO_UNKNOWN8   = 0x7F, // Unknown, write only
+    GB_IO_PCM12     = 0x76, // Channels 1 and 2 amplitudes
+    GB_IO_PCM34     = 0x77, // Channels 3 and 4 amplitudes
 };
 
 typedef enum {
