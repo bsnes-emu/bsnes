@@ -1771,8 +1771,8 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
         GB_log(gb, "    Duty cycle %s%% (%s), current index %u/8%s\n",
                duty > 3? "" : (const char *[]){"12.5", "  25", "  50", "  75"}[duty],
                duty > 3? "" : (const char *[]){"_______-", "-______-", "-____---", "_------_"}[duty],
-               gb->apu.square_channels[channel].current_sample_index & 0x7f,
-               gb->apu.square_channels[channel].current_sample_index >> 7 ? " (suppressed)" : "");
+               gb->apu.square_channels[channel].current_sample_index,
+               gb->apu.square_channels[channel].sample_surpressed ? " (suppressed)" : "");
 
         if (channel == GB_SQUARE_1) {
             GB_log(gb, "    Frequency sweep %s and %s\n",
@@ -2541,7 +2541,7 @@ static bool is_in_trivial_memory(uint16_t addr)
     return false;
 }
 
-typedef uint16_t GB_opcode_address_getter_t(GB_gameboy_t *gb, uint8_t opcode);
+typedef uint16_t opcode_address_getter_t(GB_gameboy_t *gb, uint8_t opcode);
 
 uint16_t trivial_1(GB_gameboy_t *gb, uint8_t opcode)
 {
@@ -2631,7 +2631,7 @@ static uint16_t jp_hl(GB_gameboy_t *gb, uint8_t opcode)
     return gb->hl;
 }
 
-static GB_opcode_address_getter_t *opcodes[256] = {
+static opcode_address_getter_t *opcodes[256] = {
     /*  X0          X1          X2          X3          X4          X5          X6          X7                */
     /*  X8          X9          Xa          Xb          Xc          Xd          Xe          Xf                */
     trivial_1,  trivial_3,  trivial_1,  trivial_1,  trivial_1,  trivial_1,  trivial_2,  trivial_1,   /* 0X */
@@ -2709,7 +2709,7 @@ static jump_to_return_t test_jump_to_breakpoints(GB_gameboy_t *gb, uint16_t *add
         return JUMP_TO_NONE;
     }
 
-    GB_opcode_address_getter_t *getter = opcodes[opcode];
+    opcode_address_getter_t *getter = opcodes[opcode];
     if (!getter) {
         gb->n_watchpoints = n_watchpoints;
         return JUMP_TO_NONE;

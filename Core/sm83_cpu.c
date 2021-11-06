@@ -4,7 +4,7 @@
 #include "gb.h"
 
 
-typedef void GB_opcode_t(GB_gameboy_t *gb, uint8_t opcode);
+typedef void opcode_t(GB_gameboy_t *gb, uint8_t opcode);
 
 typedef enum {
     /* Default behavior. If the CPU writes while another component reads, it reads the old value */
@@ -23,10 +23,10 @@ typedef enum {
     GB_CONFLICT_WX,
     GB_CONFLICT_CGB_LCDC,
     GB_CONFLICT_NR10,
-} GB_conflict_t;
+} conflict_t;
 
 /* Todo: How does double speed mode affect these? */
-static const GB_conflict_t cgb_conflict_map[0x80] = {
+static const conflict_t cgb_conflict_map[0x80] = {
     [GB_IO_LCDC] = GB_CONFLICT_CGB_LCDC,
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_LYC] = GB_CONFLICT_WRITE_CPU,
@@ -41,7 +41,7 @@ static const GB_conflict_t cgb_conflict_map[0x80] = {
 };
 
 /* Todo: verify on an MGB */
-static const GB_conflict_t dmg_conflict_map[0x80] = {
+static const conflict_t dmg_conflict_map[0x80] = {
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_LYC] = GB_CONFLICT_READ_OLD,
     [GB_IO_LCDC] = GB_CONFLICT_DMG_LCDC,
@@ -60,7 +60,7 @@ static const GB_conflict_t dmg_conflict_map[0x80] = {
 };
 
 /* Todo: Verify on an SGB1 */
-static const GB_conflict_t sgb_conflict_map[0x80] = {
+static const conflict_t sgb_conflict_map[0x80] = {
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_LYC] = GB_CONFLICT_READ_OLD,
     [GB_IO_LCDC] = GB_CONFLICT_SGB_LCDC,
@@ -109,9 +109,9 @@ static uint8_t cycle_write_if(GB_gameboy_t *gb, uint8_t value)
 static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     assert(gb->pending_cycles);
-    GB_conflict_t conflict = GB_CONFLICT_READ_OLD;
+    conflict_t conflict = GB_CONFLICT_READ_OLD;
     if ((addr & 0xFF80) == 0xFF00) {
-        const GB_conflict_t *map = NULL;
+        const conflict_t *map = NULL;
         if (GB_is_cgb(gb)) {
             map = cgb_conflict_map;
         }
@@ -1530,7 +1530,7 @@ static void cb_prefix(GB_gameboy_t *gb, uint8_t opcode)
     }
 }
 
-static GB_opcode_t *opcodes[256] = {
+static opcode_t *opcodes[256] = {
 /*  X0          X1          X2          X3          X4          X5          X6          X7                */
 /*  X8          X9          Xa          Xb          Xc          Xd          Xe          Xf                */
     nop,        ld_rr_d16,  ld_drr_a,   inc_rr,     inc_hr,     dec_hr,     ld_hr_d8,   rlca,       /* 0X */

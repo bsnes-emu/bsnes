@@ -2,17 +2,17 @@
 #include <stdbool.h>
 #include "gb.h"
 
-typedef uint8_t GB_read_function_t(GB_gameboy_t *gb, uint16_t addr);
-typedef void GB_write_function_t(GB_gameboy_t *gb, uint16_t addr, uint8_t value);
+typedef uint8_t read_function_t(GB_gameboy_t *gb, uint16_t addr);
+typedef void write_function_t(GB_gameboy_t *gb, uint16_t addr, uint8_t value);
 
 typedef enum {
     GB_BUS_MAIN, /* In DMG: Cart and RAM. In CGB: Cart only */
     GB_BUS_RAM, /* In CGB only. */
     GB_BUS_VRAM,
     GB_BUS_INTERNAL, /* Anything in highram. Might not be the most correct name. */
-} GB_bus_t;
+} bus_t;
 
-static GB_bus_t bus_for_addr(GB_gameboy_t *gb, uint16_t addr)
+static bus_t bus_for_addr(GB_gameboy_t *gb, uint16_t addr)
 {
     if (addr < 0x8000) {
         return GB_BUS_MAIN;
@@ -304,18 +304,18 @@ static uint8_t read_vram(GB_gameboy_t *gb, uint16_t addr)
 static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
 {
     if (gb->cartridge_type->mbc_type == GB_HUC3) {
-        switch (gb->huc3_mode) {
+        switch (gb->huc3.mode) {
             case 0xC: // RTC read
-                if (gb->huc3_access_flags == 0x2) {
+                if (gb->huc3.access_flags == 0x2) {
                     return 1;
                 }
-                return gb->huc3_read;
+                return gb->huc3.read;
             case 0xD: // RTC status
                 return 1;
             case 0xE: // IR mode
                 return gb->effective_ir_input; // TODO: What are the other bits?
             default:
-                GB_log(gb, "Unsupported HuC-3 mode %x read: %04x\n", gb->huc3_mode, addr);
+                GB_log(gb, "Unsupported HuC-3 mode %x read: %04x\n", gb->huc3.mode, addr);
                 return 1; // TODO: What happens in this case?
             case 0: // TODO: R/O RAM? (or is it disabled?)
             case 0xA: // RAM
@@ -324,12 +324,12 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
     }
     
     if (gb->cartridge_type->mbc_type == GB_TPP1) {
-        switch (gb->tpp1_mode) {
+        switch (gb->tpp1.mode) {
             case 0:
                 switch (addr & 3) {
-                    case 0: return gb->tpp1_rom_bank;
-                    case 1: return gb->tpp1_rom_bank >> 8;
-                    case 2: return gb->tpp1_ram_bank;
+                    case 0: return gb->tpp1.rom_bank;
+                    case 1: return gb->tpp1.rom_bank >> 8;
+                    case 2: return gb->tpp1.ram_bank;
                     case 3: return gb->rumble_strength | gb->tpp1_mr4;
                 }
             case 2:
@@ -353,7 +353,7 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
     }
     
     if (gb->cartridge_type->has_rtc && gb->cartridge_type->mbc_type != GB_HUC3 &&
-        gb->mbc3_rtc_mapped) {
+        gb->mbc3.rtc_mapped) {
         /* RTC read */
         if (gb->mbc_ram_bank <= 4) {
             gb->rtc_latched.seconds &= 0x3F;
@@ -651,7 +651,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
     return gb->hram[addr - 0xFF80];
 }
 
-static GB_read_function_t * const read_map[] =
+static read_function_t *const read_map[] =
 {
     read_rom,         read_rom,         read_rom, read_rom,         /* 0XXX, 1XXX, 2XXX, 3XXX */
     read_mbc_rom,     read_mbc_rom,     read_mbc_rom, read_mbc_rom, /* 4XXX, 5XXX, 6XXX, 7XXX */
@@ -706,7 +706,7 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 case 0x2000: case 0x3000: gb->mbc3.rom_bank  = value; break;
                 case 0x4000: case 0x5000:
                     gb->mbc3.ram_bank  = value;
-                    gb->mbc3_rtc_mapped = value & 8;
+                    gb->mbc3.rtc_mapped = value & 8;
                     break;
                 case 0x6000: case 0x7000:
                     memcpy(&gb->rtc_latched, &gb->rtc_real, sizeof(gb->rtc_real));
@@ -741,8 +741,8 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         case GB_HUC3:
             switch (addr & 0xF000) {
                 case 0x0000: case 0x1000:
-                    gb->huc3_mode = value & 0xF;
-                    gb->mbc_ram_enable = gb->huc3_mode == 0xA;
+                    gb->huc3.mode = value & 0xF;
+                    gb->mbc_ram_enable = gb->huc3.mode == 0xA;
                     break;
                 case 0x2000: case 0x3000: gb->huc3.rom_bank  = value; break;
                 case 0x4000: case 0x5000: gb->huc3.ram_bank  = value; break;
@@ -751,15 +751,15 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         case GB_TPP1:
             switch (addr & 3) {
                 case 0:
-                    gb->tpp1_rom_bank &= 0xFF00;
-                    gb->tpp1_rom_bank |= value;
+                    gb->tpp1.rom_bank &= 0xFF00;
+                    gb->tpp1.rom_bank |= value;
                     break;
                 case 1:
-                    gb->tpp1_rom_bank &= 0xFF;
-                    gb->tpp1_rom_bank |= value << 8;
+                    gb->tpp1.rom_bank &= 0xFF;
+                    gb->tpp1.rom_bank |= value << 8;
                     break;
                 case 2:
-                    gb->tpp1_ram_bank = value;
+                    gb->tpp1.ram_bank = value;
                     break;
                 case 3:
                     switch (value) {
@@ -767,7 +767,7 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                         case 2:
                         case 3:
                         case 5:
-                            gb->tpp1_mode = value;
+                            gb->tpp1.mode = value;
                             break;
                         case 0x10:
                             memcpy(&gb->rtc_latched, &gb->rtc_real, sizeof(gb->rtc_real));
@@ -823,59 +823,59 @@ static void write_vram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
 static bool huc3_write(GB_gameboy_t *gb, uint8_t value)
 {
-    switch (gb->huc3_mode) {
+    switch (gb->huc3.mode) {
         case 0xB: // RTC Write
             switch (value >> 4) {
                 case 1:
-                    if (gb->huc3_access_index < 3) {
-                        gb->huc3_read = (gb->huc3_minutes >> (gb->huc3_access_index  * 4)) & 0xF;
+                    if (gb->huc3.access_index < 3) {
+                        gb->huc3.read = (gb->huc3.minutes >> (gb->huc3.access_index  * 4)) & 0xF;
                     }
-                    else if (gb->huc3_access_index < 7) {
-                        gb->huc3_read = (gb->huc3_days >> ((gb->huc3_access_index - 3) * 4)) & 0xF;
+                    else if (gb->huc3.access_index < 7) {
+                        gb->huc3.read = (gb->huc3.days >> ((gb->huc3.access_index - 3) * 4)) & 0xF;
                     }
                     else {
-                        // GB_log(gb, "Attempting to read from unsupported HuC-3 register: %03x\n", gb->huc3_access_index);
+                        // GB_log(gb, "Attempting to read from unsupported HuC-3 register: %03x\n", gb->huc3.access_index);
                     }
-                    gb->huc3_access_index++;
+                    gb->huc3.access_index++;
                     break;
                 case 2:
                 case 3:
-                    if (gb->huc3_access_index < 3) {
-                        gb->huc3_minutes &= ~(0xF << (gb->huc3_access_index * 4));
-                        gb->huc3_minutes |= ((value & 0xF) << (gb->huc3_access_index * 4));
+                    if (gb->huc3.access_index < 3) {
+                        gb->huc3.minutes &= ~(0xF << (gb->huc3.access_index * 4));
+                        gb->huc3.minutes |= ((value & 0xF) << (gb->huc3.access_index * 4));
                     }
-                    else if (gb->huc3_access_index < 7)  {
-                        gb->huc3_days &= ~(0xF << ((gb->huc3_access_index - 3) * 4));
-                        gb->huc3_days |= ((value & 0xF) << ((gb->huc3_access_index - 3) * 4));
+                    else if (gb->huc3.access_index < 7)  {
+                        gb->huc3.days &= ~(0xF << ((gb->huc3.access_index - 3) * 4));
+                        gb->huc3.days |= ((value & 0xF) << ((gb->huc3.access_index - 3) * 4));
                     }
-                    else if (gb->huc3_access_index >= 0x58 && gb->huc3_access_index <= 0x5a) {
-                        gb->huc3_alarm_minutes &= ~(0xF << ((gb->huc3_access_index - 0x58) * 4));
-                        gb->huc3_alarm_minutes |= ((value & 0xF) << ((gb->huc3_access_index - 0x58) * 4));
+                    else if (gb->huc3.access_index >= 0x58 && gb->huc3.access_index <= 0x5a) {
+                        gb->huc3.alarm_minutes &= ~(0xF << ((gb->huc3.access_index - 0x58) * 4));
+                        gb->huc3.alarm_minutes |= ((value & 0xF) << ((gb->huc3.access_index - 0x58) * 4));
                     }
-                    else if (gb->huc3_access_index >= 0x5b && gb->huc3_access_index <= 0x5e) {
-                        gb->huc3_alarm_days &= ~(0xF << ((gb->huc3_access_index - 0x5b) * 4));
-                        gb->huc3_alarm_days |= ((value & 0xF) << ((gb->huc3_access_index - 0x5b) * 4));
+                    else if (gb->huc3.access_index >= 0x5b && gb->huc3.access_index <= 0x5e) {
+                        gb->huc3.alarm_days &= ~(0xF << ((gb->huc3.access_index - 0x5b) * 4));
+                        gb->huc3.alarm_days |= ((value & 0xF) << ((gb->huc3.access_index - 0x5b) * 4));
                     }
-                    else if (gb->huc3_access_index == 0x5f) {
-                        gb->huc3_alarm_enabled = value & 1;
+                    else if (gb->huc3.access_index == 0x5f) {
+                        gb->huc3.alarm_enabled = value & 1;
                     }
                     else {
-                        // GB_log(gb, "Attempting to write %x to unsupported HuC-3 register: %03x\n", value & 0xF, gb->huc3_access_index);
+                        // GB_log(gb, "Attempting to write %x to unsupported HuC-3 register: %03x\n", value & 0xF, gb->huc3.access_index);
                     }
                     if ((value >> 4) == 3) {
-                        gb->huc3_access_index++;
+                        gb->huc3.access_index++;
                     }
                     break;
                 case 4:
-                    gb->huc3_access_index &= 0xF0;
-                    gb->huc3_access_index |= value & 0xF;
+                    gb->huc3.access_index &= 0xF0;
+                    gb->huc3.access_index |= value & 0xF;
                     break;
                 case 5:
-                    gb->huc3_access_index &= 0x0F;
-                    gb->huc3_access_index |= (value & 0xF) << 4;
+                    gb->huc3.access_index &= 0x0F;
+                    gb->huc3.access_index |= (value & 0xF) << 4;
                     break;
                 case 6:
-                    gb->huc3_access_flags = (value & 0xF);
+                    gb->huc3.access_flags = (value & 0xF);
                     break;
                     
                 default:
@@ -917,7 +917,7 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     }
     
     if (gb->cartridge_type->mbc_type == GB_TPP1) {
-        switch (gb->tpp1_mode) {
+        switch (gb->tpp1.mode) {
             case 3:
                 break;
             case 5:
@@ -941,7 +941,7 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         return;
     }
 
-    if (gb->cartridge_type->has_rtc && gb->mbc3_rtc_mapped) {
+    if (gb->cartridge_type->has_rtc && gb->mbc3.rtc_mapped) {
         if (gb->mbc_ram_bank <= 4) {
             if (gb->mbc_ram_bank == 0) {
                 gb->rtc_cycles = 0;
@@ -1191,6 +1191,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 return;
 
             case GB_IO_DIV:
+                GB_set_internal_div_counter(gb, 0);
                 /* Reset the div state machine */
                 gb->div_state = 0;
                 gb->div_cycles = 0;
@@ -1388,7 +1389,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
 
 
-static GB_write_function_t * const write_map[] =
+static write_function_t *const write_map[] =
 {
     write_mbc,         write_mbc,        write_mbc, write_mbc, /* 0XXX, 1XXX, 2XXX, 3XXX */
     write_mbc,         write_mbc,        write_mbc, write_mbc, /* 4XXX, 5XXX, 6XXX, 7XXX */

@@ -4,7 +4,7 @@
 #include <string.h>
 #include <sys/types.h>
 
-static size_t GB_map_find_symbol_index(GB_symbol_map_t *map, uint16_t addr)
+static size_t map_find_symbol_index(GB_symbol_map_t *map, uint16_t addr)
 {
     if (!map->symbols) {
         return 0;
@@ -26,7 +26,7 @@ static size_t GB_map_find_symbol_index(GB_symbol_map_t *map, uint16_t addr)
 
 GB_bank_symbol_t *GB_map_add_symbol(GB_symbol_map_t *map, uint16_t addr, const char *name)
 {
-    size_t index = GB_map_find_symbol_index(map, addr);
+    size_t index = map_find_symbol_index(map, addr);
 
     map->symbols = realloc(map->symbols, (map->n_symbols + 1) * sizeof(map->symbols[0]));
     memmove(&map->symbols[index + 1], &map->symbols[index], (map->n_symbols - index) * sizeof(map->symbols[0]));
@@ -39,7 +39,7 @@ GB_bank_symbol_t *GB_map_add_symbol(GB_symbol_map_t *map, uint16_t addr, const c
 const GB_bank_symbol_t *GB_map_find_symbol(GB_symbol_map_t *map, uint16_t addr)
 {
     if (!map) return NULL;
-    size_t index = GB_map_find_symbol_index(map, addr);
+    size_t index = map_find_symbol_index(map, addr);
     if (index >= map->n_symbols || map->symbols[index].addr != addr) {
         index--;
     }

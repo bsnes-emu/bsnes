@@ -112,9 +112,9 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
             gb->mbc_ram_bank = gb->huc3.ram_bank;
             break;
         case GB_TPP1:
-            gb->mbc_rom_bank = gb->tpp1_rom_bank;
-            gb->mbc_ram_bank = gb->tpp1_ram_bank;
-            gb->mbc_ram_enable = (gb->tpp1_mode == 2) || (gb->tpp1_mode == 3);
+            gb->mbc_rom_bank = gb->tpp1.rom_bank;
+            gb->mbc_ram_bank = gb->tpp1.ram_bank;
+            gb->mbc_ram_enable = (gb->tpp1.mode == 2) || (gb->tpp1.mode == 3);
             break;
     }
 }
@@ -127,7 +127,7 @@ void GB_configure_cart(GB_gameboy_t *gb)
         gb->rom[0x14a] == 0x65) {
         static const GB_cartridge_t tpp1 = {GB_TPP1, GB_STANDARD_MBC, true, true, true, true};
         gb->cartridge_type = &tpp1;
-        gb->tpp1_rom_bank = 1;
+        gb->tpp1.rom_bank = 1;
     }
     
     if (gb->rom[0x147] == 0 && gb->rom_size > 0x8000) {

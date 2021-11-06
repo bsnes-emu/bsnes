@@ -75,19 +75,20 @@ typedef struct
     uint16_t shadow_sweep_sample_length;
     bool unshifted_sweep;
     bool enable_zombie_calculate_stepping;
-
+    
+    uint8_t channel_1_restart_hold;
+    uint16_t channel1_completed_addend;
     struct {
         uint16_t pulse_length; // Reloaded from NRX1 (xorred), in 256Hz DIV ticks
         uint8_t current_volume; // Reloaded from NRX2
         uint8_t volume_countdown; // Reloaded from NRX2
-        uint8_t current_sample_index; /* For save state compatibility,
-                                         highest bit is reused (See NR14/NR24's
-                                         write code)*/
+        uint8_t current_sample_index;
+        bool sample_surpressed;
 
         uint16_t sample_countdown; // in APU ticks (Reloaded from sample_length, xorred $7FF)
         uint16_t sample_length; // From NRX3, NRX4, in APU ticks
         bool length_enabled; // NRX4
-
+        GB_envelope_clock_t envelope_clock;
     } square_channels[2];
 
     struct {
@@ -100,9 +101,9 @@ typedef struct
         uint16_t sample_countdown; // in APU ticks (Reloaded from sample_length, xorred $7FF)
         uint8_t current_sample_index;
         uint8_t current_sample_byte; // Current sample byte.
-
-        GB_PADDING(int8_t, wave_form)[32];
         bool wave_form_just_read;
+        bool pulsed;
+        bool delayed_bugged_read;
     } wave_channel;
 
     struct {
@@ -113,32 +114,24 @@ typedef struct
         bool narrow;
 
         uint8_t counter_countdown; // Counts from 0-7 to 0 to tick counter (Scaled from 512KHz to 2MHz)
-        uint8_t __padding;
         uint16_t counter; // A bit from this 14-bit register ticks LFSR
         bool length_enabled; // NR44
 
         uint8_t alignment; // If (NR43 & 7) != 0, samples are aligned to 512KHz clock instead of
                            // 1MHz. This variable keeps track of the alignment.
-
+        bool current_lfsr_sample;
+        int8_t delta;
+        bool countdown_reloaded;
+        uint8_t dmg_delayed_start;
+        GB_envelope_clock_t envelope_clock;
     } noise_channel;
 
-    /* Todo: merge these into their structs when breaking save state compatibility */
-#define GB_SKIP_DIV_EVENT_INACTIVE 0
-#define GB_SKIP_DIV_EVENT_SKIPPED 1
-#define GB_SKIP_DIV_EVENT_SKIP 2
-    uint8_t skip_div_event;
-    bool current_lfsr_sample;
+    enum {
+        GB_SKIP_DIV_EVENT_INACTIVE,
+        GB_SKIP_DIV_EVENT_SKIPPED,
+        GB_SKIP_DIV_EVENT_SKIP,
+    } skip_div_event:8;
     uint8_t pcm_mask[2]; // For CGB-0 to CGB-C PCM read glitch
-    uint8_t channel_1_restart_hold;
-    int8_t channel_4_delta;
-    bool channel_4_countdown_reloaded;
-    uint8_t channel_4_dmg_delayed_start;
-    uint16_t channel1_completed_addend;
-    
-    GB_envelope_clock_t square_envelope_clock[2];
-    GB_envelope_clock_t noise_envelope_clock;
-    bool channel_3_pulsed;
-    bool channel_3_delayed_bugged_read;
 } GB_apu_t;
 
 typedef enum {

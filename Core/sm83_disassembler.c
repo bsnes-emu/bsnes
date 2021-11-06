@@ -3,7 +3,7 @@
 #include "gb.h"
 
 
-typedef void GB_opcode_t(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc);
+typedef void opcode_t(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc);
 
 static void ill(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
 {
@@ -716,7 +716,7 @@ static void cb_prefix(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc)
     }
 }
 
-static GB_opcode_t *opcodes[256] = {
+static opcode_t *opcodes[256] = {
     /*  X0          X1          X2          X3          X4          X5          X6          X7                */
     /*  X8          X9          Xa          Xb          Xc          Xd          Xe          Xf                */
     nop,        ld_rr_d16,  ld_drr_a,   inc_rr,     inc_hr,     dec_hr,     ld_hr_d8,   rlca,       /* 0X */

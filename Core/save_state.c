@@ -276,30 +276,6 @@ size_t GB_get_save_state_size(GB_gameboy_t *gb)
 static bool verify_and_update_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t *save, bool *attempt_bess)
 {
     *attempt_bess = false;
-    if (save->ram_size == 0 && (&save->ram_size)[-1] == gb->ram_size) {
-        /* This is a save state with a bad printer struct from a 32-bit OS */
-        memmove(save->extra_oam + 4, save->extra_oam, (uintptr_t)&save->ram_size - (uintptr_t)&save->extra_oam);
-    }
-    if (save->ram_size == 0) {
-        /* Save doesn't have ram size specified, it's a pre 0.12 save state with potentially
-         incorrect RAM amount if it's a CGB instance */
-        if (GB_is_cgb(save)) {
-            save->ram_size = 0x2000 * 8; // Incorrect RAM size
-        }
-        else {
-            save->ram_size = gb->ram_size;
-        }
-    }
-    
-    if (save->model & GB_MODEL_PAL_BIT_OLD) {
-        save->model &= ~GB_MODEL_PAL_BIT_OLD;
-        save->model |= GB_MODEL_PAL_BIT;
-    }
-    
-    if (save->model & GB_MODEL_NO_SFC_BIT_OLD) {
-        save->model &= ~GB_MODEL_NO_SFC_BIT_OLD;
-        save->model |= GB_MODEL_NO_SFC_BIT;
-    }
     
     if (gb->version != save->version) {
         GB_log(gb, "The save state is for a different version of SameBoy.\n");
@@ -328,14 +304,8 @@ static bool verify_and_update_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t
     }
     
     if (gb->ram_size != save->ram_size) {
-        if (gb->ram_size == 0x1000 * 8 && save->ram_size == 0x2000 * 8) {
-            /* A bug in versions prior to 0.12 made CGB instances allocate twice the ammount of RAM.
-               Ignore this issue to retain compatibility with older, 0.11, save states. */
-        }
-        else {
-            GB_log(gb, "The save state has non-matching RAM size. Try changing the emulated model.\n");
-            return false;
-        }
+        GB_log(gb, "The save state has non-matching RAM size. Try changing the emulated model.\n");
+        return false;
     }
     
     switch (save->model) {
@@ -407,61 +377,11 @@ static void sanitize_state(GB_gameboy_t *gb)
         gb->lcd_x = gb->position_in_line;
     }
     
-    if (gb->object_priority == GB_OBJECT_PRIORITY_UNDEFINED) {
-        gb->object_priority = gb->cgb_mode? GB_OBJECT_PRIORITY_INDEX : GB_OBJECT_PRIORITY_X;
-    }
     if (gb->sgb) {
         if (gb->sgb->player_count != 1 && gb->sgb->player_count != 2 && gb->sgb->player_count != 4) {
             gb->sgb->player_count = 1;
         }
         gb->sgb->current_player &= gb->sgb->player_count - 1;
-    }
-    if (gb->sgb && !gb->sgb->v14_3) {
-#ifdef GB_BIG_ENDIAN
-        for (unsigned i = 0; i < sizeof(gb->sgb->border.raw_data) / 2; i++) {
-            gb->sgb->border.raw_data[i] = LE16(gb->sgb->border.raw_data[i]);
-        }
-        
-        for (unsigned i = 0; i < sizeof(gb->sgb->pending_border.raw_data) / 2; i++) {
-            gb->sgb->pending_border.raw_data[i] = LE16(gb->sgb->pending_border.raw_data[i]);
-        }
-        
-        for (unsigned i = 0; i < sizeof(gb->sgb->effective_palettes) / 2; i++) {
-            gb->sgb->effective_palettes[i] = LE16(gb->sgb->effective_palettes[i]);
-        }
-        
-        for (unsigned i = 0; i < sizeof(gb->sgb->ram_palettes) / 2; i++) {
-            gb->sgb->ram_palettes[i] = LE16(gb->sgb->ram_palettes[i]);
-        }
-#endif
-        uint8_t converted_tiles[sizeof(gb->sgb->border.tiles)] = {0,};
-        for (unsigned tile = 0; tile < sizeof(gb->sgb->border.tiles_legacy) / 64; tile++) {
-            for (unsigned y = 0; y < 8; y++) {
-                unsigned base = tile * 32 + y * 2;
-                for (unsigned x = 0; x < 8; x++) {
-                    uint8_t pixel = gb->sgb->border.tiles_legacy[tile * 8 * 8 + y * 8 + x];
-                    if (pixel & 1) converted_tiles[base]      |= (1 << (7 ^ x));
-                    if (pixel & 2) converted_tiles[base + 1]  |= (1 << (7 ^ x));
-                    if (pixel & 4) converted_tiles[base + 16] |= (1 << (7 ^ x));
-                    if (pixel & 8) converted_tiles[base + 17] |= (1 << (7 ^ x));
-                }
-            }
-        }
-        memcpy(gb->sgb->border.tiles, converted_tiles, sizeof(converted_tiles));
-        memset(converted_tiles, 0, sizeof(converted_tiles));
-        for (unsigned tile = 0; tile < sizeof(gb->sgb->pending_border.tiles_legacy) / 64; tile++) {
-            for (unsigned y = 0; y < 8; y++) {
-                unsigned base = tile * 32 + y * 2;
-                for (unsigned x = 0; x < 8; x++) {
-                    uint8_t pixel = gb->sgb->pending_border.tiles_legacy[tile * 8 * 8 + y * 8 + x];
-                    if (pixel & 1) converted_tiles[base]      |= (1 << (7 ^ x));
-                    if (pixel & 2) converted_tiles[base + 1]  |= (1 << (7 ^ x));
-                    if (pixel & 4) converted_tiles[base + 16] |= (1 << (7 ^ x));
-                    if (pixel & 8) converted_tiles[base + 17] |= (1 << (7 ^ x));
-                }
-            }
-        }
-        memcpy(gb->sgb->pending_border.tiles, converted_tiles, sizeof(converted_tiles));
     }
 }
 
@@ -503,7 +423,7 @@ static int save_bess_mbc_block(GB_gameboy_t *gb, virtual_file_t *file)
         case GB_MBC3:
             pairs[0] = (BESS_MBC_pair_t){LE16(0x0000), gb->mbc_ram_enable? 0xA : 0x0};
             pairs[1] = (BESS_MBC_pair_t){LE16(0x2000), gb->mbc3.rom_bank};
-            pairs[2] = (BESS_MBC_pair_t){LE16(0x4000), gb->mbc3.ram_bank | (gb->mbc3_rtc_mapped? 8 : 0)};
+            pairs[2] = (BESS_MBC_pair_t){LE16(0x4000), gb->mbc3.ram_bank | (gb->mbc3.rtc_mapped? 8 : 0)};
             mbc_block.size = 3 * sizeof(pairs[0]);
             break;
         case GB_MBC5:
@@ -521,17 +441,17 @@ static int save_bess_mbc_block(GB_gameboy_t *gb, virtual_file_t *file)
             mbc_block.size = 4 * sizeof(pairs[0]);
             
         case GB_HUC3:
-            pairs[0] = (BESS_MBC_pair_t){LE16(0x0000), gb->huc3_mode};
+            pairs[0] = (BESS_MBC_pair_t){LE16(0x0000), gb->huc3.mode};
             pairs[1] = (BESS_MBC_pair_t){LE16(0x2000), gb->huc3.rom_bank};
             pairs[2] = (BESS_MBC_pair_t){LE16(0x4000), gb->huc3.ram_bank};
             mbc_block.size = 3 * sizeof(pairs[0]);
             break;
         
         case GB_TPP1:
-            pairs[0] = (BESS_MBC_pair_t){LE16(0x0000), gb->tpp1_rom_bank};
-            pairs[1] = (BESS_MBC_pair_t){LE16(0x0001), gb->tpp1_rom_bank >> 8};
-            pairs[2] = (BESS_MBC_pair_t){LE16(0x0002), gb->tpp1_rom_bank};
-            pairs[3] = (BESS_MBC_pair_t){LE16(0x0003), gb->tpp1_mode};
+            pairs[0] = (BESS_MBC_pair_t){LE16(0x0000), gb->tpp1.rom_bank};
+            pairs[1] = (BESS_MBC_pair_t){LE16(0x0001), gb->tpp1.rom_bank >> 8};
+            pairs[2] = (BESS_MBC_pair_t){LE16(0x0002), gb->tpp1.rom_bank};
+            pairs[3] = (BESS_MBC_pair_t){LE16(0x0003), gb->tpp1.mode};
             mbc_block.size = 4 * sizeof(pairs[0]);
             break;
     }
@@ -566,7 +486,6 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file, bool appe
     uint32_t sgb_offset = 0;
     
     if (GB_is_hle_sgb(gb)) {
-        gb->sgb->v14_3 = true;
         sgb_offset = file->tell(file) + 4;
         if (!dump_section(file, gb->sgb, sizeof(*gb->sgb))) goto error;
     }
@@ -746,11 +665,11 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file, bool appe
 
             bess_huc3.data = (GB_huc3_rtc_time_t) {
                 LE64(gb->last_rtc_second),
-                LE16(gb->huc3_minutes),
-                LE16(gb->huc3_days),
-                LE16(gb->huc3_alarm_minutes),
-                LE16(gb->huc3_alarm_days),
-                gb->huc3_alarm_enabled,
+                LE16(gb->huc3.minutes),
+                LE16(gb->huc3.days),
+                LE16(gb->huc3.alarm_minutes),
+                LE16(gb->huc3.alarm_days),
+                gb->huc3.alarm_enabled,
             };
             if (file->write(file, &bess_huc3, sizeof(bess_huc3)) != sizeof(bess_huc3)) {
                 goto error;
@@ -1116,11 +1035,11 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                 if (gb->rtc_mode == GB_RTC_MODE_SYNC_TO_HOST) {
                     save.last_rtc_second = MIN(LE64(bess_huc3.data.last_rtc_second), time(NULL));
                 }
-                save.huc3_minutes = LE16(bess_huc3.data.minutes);
-                save.huc3_days = LE16(bess_huc3.data.days);
-                save.huc3_alarm_minutes = LE16(bess_huc3.data.alarm_minutes);
-                save.huc3_alarm_days = LE16(bess_huc3.data.alarm_days);
-                save.huc3_alarm_enabled = bess_huc3.data.alarm_enabled;
+                save.huc3.minutes = LE16(bess_huc3.data.minutes);
+                save.huc3.days = LE16(bess_huc3.data.days);
+                save.huc3.alarm_minutes = LE16(bess_huc3.data.alarm_minutes);
+                save.huc3.alarm_days = LE16(bess_huc3.data.alarm_days);
+                save.huc3.alarm_enabled = bess_huc3.data.alarm_enabled;
                 break;
             case BE32('TPP1'):
                 if (!found_core) goto parse_error;

@@ -12,6 +12,8 @@
 #include "BigSurToolbar.h"
 #import "GBPaletteEditorController.h"
 
+#define GB_MODEL_PAL_BIT_OLD 0x1000
+
 /* Todo: The general Objective-C coding style conflicts with SameBoy's. This file needs a cleanup. */
 /* Todo: Split into category files! This is so messy!!! */
 

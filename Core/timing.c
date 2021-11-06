@@ -8,7 +8,7 @@
 #include <sys/time.h>
 #endif
 
-static const unsigned GB_TAC_TRIGGER_BITS[] = {512, 8, 32, 128};
+static const unsigned TAC_TRIGGER_BITS[] = {512, 8, 32, 128};
 
 #ifndef GB_DISABLE_TIMEKEEPING
 static int64_t get_nanoseconds(void)
@@ -99,7 +99,7 @@ void GB_timing_sync(GB_gameboy_t *gb)
 #define IR_THRESHOLD 19900
 #define IR_MAX IR_THRESHOLD * 2 + IR_DECAY
 
-static void GB_ir_run(GB_gameboy_t *gb, uint32_t cycles)
+static void ir_run(GB_gameboy_t *gb, uint32_t cycles)
 {
     if (gb->model == GB_MODEL_AGB) return;
     if (gb->infrared_input || gb->cart_ir || (gb->io_registers[GB_IO_RP] & 1)) {
@@ -142,11 +142,11 @@ static void increase_tima(GB_gameboy_t *gb)
     }
 }
 
-static void GB_set_internal_div_counter(GB_gameboy_t *gb, uint16_t value)
+void GB_set_internal_div_counter(GB_gameboy_t *gb, uint16_t value)
 {
     /* TIMA increases when a specific high-bit becomes a low-bit. */
     uint16_t triggers = gb->div_counter & ~value;
-    if ((gb->io_registers[GB_IO_TAC] & 4) && (triggers & GB_TAC_TRIGGER_BITS[gb->io_registers[GB_IO_TAC] & 3])) {
+    if ((gb->io_registers[GB_IO_TAC] & 4) && (triggers & TAC_TRIGGER_BITS[gb->io_registers[GB_IO_TAC] & 3])) {
         increase_tima(gb);
     }
     
@@ -166,7 +166,7 @@ static void GB_set_internal_div_counter(GB_gameboy_t *gb, uint16_t value)
     gb->div_counter = value;
 }
 
-static void GB_timers_run(GB_gameboy_t *gb, uint8_t cycles)
+static void timers_run(GB_gameboy_t *gb, uint8_t cycles)
 {
     if (gb->stopped) {
         if (GB_is_cgb(gb)) {
@@ -178,25 +178,14 @@ static void GB_timers_run(GB_gameboy_t *gb, uint8_t cycles)
     GB_STATE_MACHINE(gb, div, cycles, 1) {
         GB_STATE(gb, div, 1);
         GB_STATE(gb, div, 2);
-        GB_STATE(gb, div, 3);
     }
     
-    GB_set_internal_div_counter(gb, 0);
-main:
     GB_SLEEP(gb, div, 1, 3);
     while (true) {
         advance_tima_state_machine(gb);
         GB_set_internal_div_counter(gb, gb->div_counter + 4);
         gb->apu.apu_cycles += 4 << !gb->cgb_double_speed;
         GB_SLEEP(gb, div, 2, 4);
-    }
-    
-    /* Todo: This is ugly to allow compatibility with 0.11 save states. Fix me when breaking save compatibility */
-    {
-        div3:
-        /* Compensate for lack of prefetch emulation, as well as DIV's internal initial value */
-        GB_set_internal_div_counter(gb, 8);
-        goto main;
     }
 }
 
@@ -247,7 +236,7 @@ static void advance_serial(GB_gameboy_t *gb, uint8_t cycles)
     
 }
 
-static void GB_rtc_run(GB_gameboy_t *gb, uint8_t cycles)
+static void rtc_run(GB_gameboy_t *gb, uint8_t cycles)
 {
     if (gb->cartridge_type->mbc_type != GB_HUC3 && !gb->cartridge_type->has_rtc) return;
     gb->rtc_cycles += cycles;
@@ -274,10 +263,10 @@ static void GB_rtc_run(GB_gameboy_t *gb, uint8_t cycles)
     if (gb->cartridge_type->mbc_type == GB_HUC3) {
         while (gb->last_rtc_second / 60 < current_time / 60) {
             gb->last_rtc_second += 60;
-            gb->huc3_minutes++;
-            if (gb->huc3_minutes == 60 * 24) {
-                gb->huc3_days++;
-                gb->huc3_minutes = 0;
+            gb->huc3.minutes++;
+            if (gb->huc3.minutes == 60 * 24) {
+                gb->huc3.days++;
+                gb->huc3.minutes = 0;
             }
         }
         return;
@@ -366,7 +355,7 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     // Affected by speed boost
     gb->dma_cycles += cycles;
 
-    GB_timers_run(gb, cycles);
+    timers_run(gb, cycles);
     if (!gb->stopped) {
         advance_serial(gb, cycles); // TODO: Verify what happens in STOP mode
     }
@@ -414,8 +403,8 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     }
     GB_apu_run(gb);
     GB_display_run(gb, cycles);
-    GB_ir_run(gb, cycles);
-    GB_rtc_run(gb, cycles);
+    ir_run(gb, cycles);
+    rtc_run(gb, cycles);
 }
 
 /* 
@@ -428,8 +417,8 @@ void GB_emulate_timer_glitch(GB_gameboy_t *gb, uint8_t old_tac, uint8_t new_tac)
     /* Glitch only happens when old_tac is enabled. */
     if (!(old_tac & 4)) return;
 
-    unsigned old_clocks = GB_TAC_TRIGGER_BITS[old_tac & 3];
-    unsigned new_clocks = GB_TAC_TRIGGER_BITS[new_tac & 3];
+    unsigned old_clocks = TAC_TRIGGER_BITS[old_tac & 3];
+    unsigned new_clocks = TAC_TRIGGER_BITS[new_tac & 3];
 
     /* The bit used for overflow testing must have been 1 */
     if (gb->div_counter & old_clocks) {

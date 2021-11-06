@@ -6,10 +6,7 @@
 
 typedef struct GB_sgb_s GB_sgb_t;
 typedef struct {
-    union {
-        uint8_t tiles[0x100 * 8 * 4];
-        uint8_t tiles_legacy[0x100 * 8 * 8]; /* High nibble not used; TODO: Remove when breaking save-state compatibility! */
-    };
+    uint8_t tiles[0x100 * 8 * 4];
     union {
         struct {
             uint16_t map[32 * 32];
@@ -59,11 +56,6 @@ struct GB_sgb_s {
     
     /* GB Header */
     uint8_t received_header[0x54];
-    
-    /* Multiplayer (cont) */
-    GB_PADDING(bool, mlt_lock);
-    
-    bool v14_3; // True on save states created on 0.14.3 or newer; Remove when breaking save state compatibility!
 };
 
 void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);

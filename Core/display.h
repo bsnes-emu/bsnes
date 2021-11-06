@@ -12,7 +12,6 @@ void GB_STAT_update(GB_gameboy_t *gb);
 void GB_lcd_off(GB_gameboy_t *gb);
 
 enum {
-  GB_OBJECT_PRIORITY_UNDEFINED, // For save state compatibility
   GB_OBJECT_PRIORITY_X,
   GB_OBJECT_PRIORITY_INDEX,
 };

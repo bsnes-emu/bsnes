@@ -26,7 +26,7 @@
 #include "workboy.h"
 #include "random.h"
 
-#define GB_STRUCT_VERSION 13
+#define GB_STRUCT_VERSION 14
 
 #define GB_MODEL_FAMILY_MASK 0xF00
 #define GB_MODEL_DMG_FAMILY 0x000
@@ -34,9 +34,6 @@
 #define GB_MODEL_CGB_FAMILY 0x200
 #define GB_MODEL_PAL_BIT 0x40
 #define GB_MODEL_NO_SFC_BIT 0x80
-
-#define GB_MODEL_PAL_BIT_OLD 0x1000
-#define GB_MODEL_NO_SFC_BIT_OLD 0x2000
 
 #ifdef GB_INTERNAL
 #if __clang__
@@ -471,6 +468,7 @@ struct GB_gameboy_internal_s {
             struct {
                 uint8_t rom_bank:8;
                 uint8_t ram_bank:3;
+                bool rtc_mapped:1;
             } mbc3;
 
             struct {
@@ -490,26 +488,27 @@ struct GB_gameboy_internal_s {
                 uint8_t rom_bank:7;
                 uint8_t padding:1;
                 uint8_t ram_bank:4;
+                uint8_t mode;
+                uint8_t access_index;
+                uint16_t minutes, days;
+                uint16_t alarm_minutes, alarm_days;
+                bool alarm_enabled;
+                uint8_t read;
+                uint8_t access_flags;
             } huc3;
+               
+           struct {
+               uint16_t rom_bank;
+               uint8_t ram_bank;
+               uint8_t mode;
+           } tpp1;
         };
         uint16_t mbc_rom0_bank; /* For some MBC1 wirings. */
         bool camera_registers_mapped;
         uint8_t camera_registers[0x36];
         uint8_t rumble_strength;
         bool cart_ir;
-        
-        // TODO: move to huc3/mbc3/tpp1 struct when breaking save compat
-        uint8_t huc3_mode;
-        uint8_t huc3_access_index;
-        uint16_t huc3_minutes, huc3_days;
-        uint16_t huc3_alarm_minutes, huc3_alarm_days;
-        bool huc3_alarm_enabled;
-        uint8_t huc3_read;
-        uint8_t huc3_access_flags;
-        bool mbc3_rtc_mapped;
-        uint16_t tpp1_rom_bank;
-        uint8_t tpp1_ram_bank;
-        uint8_t tpp1_mode;
+
     );
 
 
@@ -543,7 +542,6 @@ struct GB_gameboy_internal_s {
     GB_SECTION(rtc,
         GB_rtc_time_t rtc_real, rtc_latched;
         uint64_t last_rtc_second;
-        GB_PADDING(bool, rtc_latch);
         uint32_t rtc_cycles;
         uint8_t tpp1_mr4;
     );
@@ -579,7 +577,6 @@ struct GB_gameboy_internal_s {
         uint8_t current_line;
         uint16_t ly_for_comparison;
         GB_fifo_t bg_fifo, oam_fifo;
-        GB_PADDING(uint8_t, fetcher_x);
         uint8_t fetcher_y;
         uint16_t cycles_for_line;
         uint8_t current_tile;
