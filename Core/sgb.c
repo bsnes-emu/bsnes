@@ -262,9 +262,7 @@ static void command_ready(GB_gameboy_t *gb)
             } *command = (void *)(gb->sgb->command + 1);
             
             uint16_t count = command->length;
-#ifdef GB_BIG_ENDIAN
-            count = __builtin_bswap16(count);
-#endif
+            count = LE16(count);
             uint8_t x = command->x;
             uint8_t y = command->y;
             if (x >= 20 || y >= 18) {
@@ -641,9 +639,7 @@ void GB_sgb_render(GB_gameboy_t *gb)
                     for (unsigned x = 0; x < 8; x++) {
                         *data |= pixel_to_bits[gb->sgb->screen_buffer[(tile_x + x) + (tile_y + y) * 160] & 3] >> x;
                     }
-#ifdef GB_BIG_ENDIAN
-                    *data = __builtin_bswap16(*data);
-#endif
+                    *data = LE16(*data);
                     data++;
                 }
             }

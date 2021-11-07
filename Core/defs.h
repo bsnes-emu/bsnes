@@ -17,7 +17,6 @@
 #define unrolled
 #endif
 
-/* Todo: similar macros are everywhere, clean this up and remove direct calls to bswap */
 #ifdef GB_BIG_ENDIAN
 #define LE16(x) __builtin_bswap16(x)
 #define LE32(x) __builtin_bswap32(x)

@@ -250,7 +250,7 @@ void GB_load_cheats(GB_gameboy_t *gb, const char *path)
     uint32_t struct_size = 0;
     fread(&magic, sizeof(magic), 1, f);
     fread(&struct_size, sizeof(struct_size), 1, f);
-    if (magic != CHEAT_MAGIC && magic != __builtin_bswap32(CHEAT_MAGIC)) {
+    if (magic != LE32(CHEAT_MAGIC) && magic != BE32(CHEAT_MAGIC)) {
         GB_log(gb, "The file is not a SameBoy cheat database");
         return;
     }
@@ -267,7 +267,7 @@ void GB_load_cheats(GB_gameboy_t *gb, const char *path)
     
     GB_cheat_t cheat;
     while (fread(&cheat, sizeof(cheat), 1, f)) {
-        if (magic == __builtin_bswap32(CHEAT_MAGIC)) {
+        if (magic != CHEAT_MAGIC) {
             cheat.address = __builtin_bswap16(cheat.address);
             cheat.bank = __builtin_bswap16(cheat.bank);
         }
