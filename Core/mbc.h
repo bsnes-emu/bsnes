@@ -26,8 +26,8 @@ typedef struct {
 
 #ifdef GB_INTERNAL
 extern const GB_cartridge_t GB_cart_defs[256];
-void internal GB_update_mbc_mappings(GB_gameboy_t *gb);
-void internal GB_configure_cart(GB_gameboy_t *gb);
+internal void GB_update_mbc_mappings(GB_gameboy_t *gb);
+internal void GB_configure_cart(GB_gameboy_t *gb);
 #endif
 
 #endif /* MBC_h */

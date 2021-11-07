@@ -6,10 +6,10 @@
 #include <stdint.h>
 
 #ifdef GB_INTERNAL
-void internal GB_display_run(GB_gameboy_t *gb, uint8_t cycles);
-void internal GB_palette_changed(GB_gameboy_t *gb, bool background_palette, uint8_t index);
-void internal GB_STAT_update(GB_gameboy_t *gb);
-void internal GB_lcd_off(GB_gameboy_t *gb);
+internal void GB_display_run(GB_gameboy_t *gb, uint8_t cycles);
+internal void GB_palette_changed(GB_gameboy_t *gb, bool background_palette, uint8_t index);
+internal void GB_STAT_update(GB_gameboy_t *gb);
+internal void GB_lcd_off(GB_gameboy_t *gb);
 
 enum {
   GB_OBJECT_PRIORITY_X,

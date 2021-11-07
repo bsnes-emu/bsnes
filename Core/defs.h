@@ -7,7 +7,7 @@
 #define likely(x)   __builtin_expect((x), 1)
 #define unlikely(x) __builtin_expect((x), 0)
 
-#define internal __attribute__((visibility("hidden")))
+#define internal __attribute__((visibility("internal")))
 
 #if __clang__
 #define unrolled _Pragma("unroll")

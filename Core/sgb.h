@@ -58,9 +58,9 @@ struct GB_sgb_s {
     uint8_t received_header[0x54];
 };
 
-void internal GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
-void internal GB_sgb_render(GB_gameboy_t *gb);
-void internal GB_sgb_load_default_data(GB_gameboy_t *gb);
+internal void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
+internal void GB_sgb_render(GB_gameboy_t *gb);
+internal void GB_sgb_load_default_data(GB_gameboy_t *gb);
 
 #endif
 

@@ -17,14 +17,14 @@
 #define GB_debugger_add_symbol(gb, bank, address, symbol) ((void)bank, (void)address, (void)symbol)
 
 #else
-void internal GB_debugger_run(GB_gameboy_t *gb);
-void internal GB_debugger_handle_async_commands(GB_gameboy_t *gb);
-void internal GB_debugger_call_hook(GB_gameboy_t *gb, uint16_t call_addr);
-void internal GB_debugger_ret_hook(GB_gameboy_t *gb);
-void internal GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, uint16_t addr, uint8_t value);
-void internal GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, uint16_t addr);
-const GB_bank_symbol_t *internal GB_debugger_find_symbol(GB_gameboy_t *gb, uint16_t addr);
-void internal GB_debugger_add_symbol(GB_gameboy_t *gb, uint16_t bank, uint16_t address, const char *symbol);
+internal void GB_debugger_run(GB_gameboy_t *gb);
+internal void GB_debugger_handle_async_commands(GB_gameboy_t *gb);
+internal void GB_debugger_call_hook(GB_gameboy_t *gb, uint16_t call_addr);
+internal void GB_debugger_ret_hook(GB_gameboy_t *gb);
+internal void GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, uint16_t addr, uint8_t value);
+internal void GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, uint16_t addr);
+internal const GB_bank_symbol_t *GB_debugger_find_symbol(GB_gameboy_t *gb, uint16_t addr);
+internal void GB_debugger_add_symbol(GB_gameboy_t *gb, uint16_t bank, uint16_t address, const char *symbol);
 #endif /* GB_DISABLE_DEBUGGER */
 #endif
 

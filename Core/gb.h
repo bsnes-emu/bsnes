@@ -856,7 +856,7 @@ void GB_get_rom_title(GB_gameboy_t *gb, char *title);
 uint32_t GB_get_rom_crc32(GB_gameboy_t *gb);
 
 #ifdef GB_INTERNAL
-void internal GB_borrow_sgb_border(GB_gameboy_t *gb);
+internal void GB_borrow_sgb_border(GB_gameboy_t *gb);
 #endif
     
 #endif /* GB_h */

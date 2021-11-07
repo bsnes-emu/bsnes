@@ -20,6 +20,6 @@ void GB_set_key_state_for_player(GB_gameboy_t *gb, GB_key_t index, unsigned play
 void GB_icd_set_joyp(GB_gameboy_t *gb, uint8_t value);
 
 #ifdef GB_INTERNAL
-void internal GB_update_joyp(GB_gameboy_t *gb);
+internal void GB_update_joyp(GB_gameboy_t *gb);
 #endif
 #endif /* joypad_h */
