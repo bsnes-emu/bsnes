@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <time.h>
 
-#include "gb_struct_def.h"
+#include "defs.h"
 #include "save_state.h"
 
 #include "apu.h"
@@ -35,17 +35,6 @@
 #define GB_MODEL_PAL_BIT 0x40
 #define GB_MODEL_NO_SFC_BIT 0x80
 
-#ifdef GB_INTERNAL
-#if __clang__
-#define unrolled _Pragma("unroll")
-#elif __GNUC__ >= 8
-#define unrolled _Pragma("GCC unroll 8")
-#else
-#define unrolled
-#endif
-
-#endif
-
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #define GB_BIG_ENDIAN
 #elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -54,28 +43,6 @@
 #error Unable to detect endianess
 #endif
 
-#ifdef GB_INTERNAL
-/* Todo: similar macros are everywhere, clean this up and remove direct calls to bswap */
-#ifdef GB_BIG_ENDIAN
-#define LE16(x) __builtin_bswap16(x)
-#define LE32(x) __builtin_bswap32(x)
-#define LE64(x) __builtin_bswap64(x)
-#define BE16(x) (x)
-#define BE32(x) (x)
-#define BE64(x) (x)
-#else
-#define LE16(x) (x)
-#define LE32(x) (x)
-#define LE64(x) (x)
-#define BE16(x) __builtin_bswap16(x)
-#define BE32(x) __builtin_bswap32(x)
-#define BE64(x) __builtin_bswap64(x)
-#endif
-#endif
-
-#if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 8)
-#define __builtin_bswap16(x) ({ typeof(x) _x = (x); _x >> 8 | _x << 8; })
-#endif
 
 typedef struct {
     struct GB_color_s {
@@ -889,7 +856,7 @@ void GB_get_rom_title(GB_gameboy_t *gb, char *title);
 uint32_t GB_get_rom_crc32(GB_gameboy_t *gb);
 
 #ifdef GB_INTERNAL
-void GB_borrow_sgb_border(GB_gameboy_t *gb);
+void internal GB_borrow_sgb_border(GB_gameboy_t *gb);
 #endif
     
 #endif /* GB_h */

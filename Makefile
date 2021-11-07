@@ -175,7 +175,7 @@ CFLAGS += -O3 -DNDEBUG
 STRIP := strip
 ifeq ($(PLATFORM),Darwin)
 LDFLAGS += -Wl,-exported_symbols_list,$(NULL)
-STRIP := -@true
+STRIP := strip -x
 endif
 ifneq ($(PLATFORM),windows32)
 LDFLAGS += -flto

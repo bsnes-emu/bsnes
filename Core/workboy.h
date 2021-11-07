@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
-#include "gb_struct_def.h"
+#include "defs.h"
 
 
 typedef struct {

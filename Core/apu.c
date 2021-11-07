@@ -4,9 +4,6 @@
 #include <assert.h>
 #include "gb.h"
 
-#define likely(x)   __builtin_expect((x), 1)
-#define unlikely(x) __builtin_expect((x), 0)
-
 static const uint8_t duties[] = {
     0, 0, 0, 0, 0, 0, 0, 1,
     1, 0, 0, 0, 0, 0, 0, 1,

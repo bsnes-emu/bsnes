@@ -1,6 +1,6 @@
 #ifndef sgb_h
 #define sgb_h
-#include "gb_struct_def.h"
+#include "defs.h"
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -58,9 +58,9 @@ struct GB_sgb_s {
     uint8_t received_header[0x54];
 };
 
-void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
-void GB_sgb_render(GB_gameboy_t *gb);
-void GB_sgb_load_default_data(GB_gameboy_t *gb);
+void internal GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
+void internal GB_sgb_render(GB_gameboy_t *gb);
+void internal GB_sgb_load_default_data(GB_gameboy_t *gb);
 
 #endif
 

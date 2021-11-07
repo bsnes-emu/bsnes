@@ -1,6 +1,6 @@
 #ifndef joypad_h
 #define joypad_h
-#include "gb_struct_def.h"
+#include "defs.h"
 #include <stdbool.h>
 
 typedef enum {
@@ -20,6 +20,6 @@ void GB_set_key_state_for_player(GB_gameboy_t *gb, GB_key_t index, unsigned play
 void GB_icd_set_joyp(GB_gameboy_t *gb, uint8_t value);
 
 #ifdef GB_INTERNAL
-void GB_update_joyp(GB_gameboy_t *gb);
+void internal GB_update_joyp(GB_gameboy_t *gb);
 #endif
 #endif /* joypad_h */

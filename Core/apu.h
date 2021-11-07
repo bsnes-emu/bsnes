@@ -3,8 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
-#include "gb_struct_def.h"
-
+#include "defs.h"
 
 #ifdef GB_INTERNAL
 /* Speed = 1 / Length (in seconds) */
@@ -172,14 +171,14 @@ void GB_set_interference_volume(GB_gameboy_t *gb, double volume);
 void GB_apu_set_sample_callback(GB_gameboy_t *gb, GB_sample_callback_t callback);
 
 #ifdef GB_INTERNAL
-bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, unsigned index);
-void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);
-uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg);
-void GB_apu_div_event(GB_gameboy_t *gb);
-void GB_apu_div_secondary_event(GB_gameboy_t *gb);
-void GB_apu_init(GB_gameboy_t *gb);
-void GB_apu_run(GB_gameboy_t *gb);
-void GB_apu_update_cycles_per_sample(GB_gameboy_t *gb);
+bool internal GB_apu_is_DAC_enabled(GB_gameboy_t *gb, unsigned index);
+void internal GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);
+uint8_t internal GB_apu_read(GB_gameboy_t *gb, uint8_t reg);
+void internal GB_apu_div_event(GB_gameboy_t *gb);
+void internal GB_apu_div_secondary_event(GB_gameboy_t *gb);
+void internal GB_apu_init(GB_gameboy_t *gb);
+void internal GB_apu_run(GB_gameboy_t *gb);
+void internal GB_apu_update_cycles_per_sample(GB_gameboy_t *gb);
 #endif
 
 #endif /* apu_h */
