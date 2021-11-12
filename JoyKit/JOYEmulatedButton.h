@@ -4,7 +4,7 @@
 #import "JOYHat.h"
 
 @interface JOYEmulatedButton : JOYButton
-- (instancetype)initWithUsage:(JOYButtonUsage)usage uniqueID:(uint64_t)uniqueID;
+- (instancetype)initWithUsage:(JOYButtonUsage)usage type:(JOYButtonType)type uniqueID:(uint64_t)uniqueID;
 - (bool)updateStateFromAxis:(JOYAxis *)axis;
 - (bool)updateStateFromAxes2D:(JOYAxes2D *)axes;
 - (bool)updateStateFromHat:(JOYHat *)hat;

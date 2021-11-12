@@ -10,13 +10,15 @@
 @implementation JOYEmulatedButton
 {
     uint64_t _uniqueID;
+    JOYButtonType _type;
 }
 
-- (instancetype)initWithUsage:(JOYButtonUsage)usage uniqueID:(uint64_t)uniqueID;
+- (instancetype)initWithUsage:(JOYButtonUsage)usage type:(JOYButtonType)type uniqueID:(uint64_t)uniqueID;
 {
     self = [super init];
     self.usage = usage;
     _uniqueID = uniqueID;
+    _type = type;
     
     return self;
 }
@@ -87,6 +89,11 @@
         }
     }
     return _state != old;
+}
+
+- (JOYButtonType)type
+{
+    return _type;
 }
 
 @end

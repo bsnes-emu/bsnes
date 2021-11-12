@@ -459,6 +459,12 @@ static const uint8_t workboy_vk_to_key[] = {
     [lastController setRumbleAmplitude:amp];
 }
 
+- (bool)shouldControllerUseJoystickForMotion:(JOYController *)controller
+{
+    if (!GB_has_accelerometer(_gb)) return false;
+    return true;
+}
+
 - (void)controller:(JOYController *)controller movedAxis:(JOYAxis *)axis
 {
     if (![self.window isMainWindow]) return;
@@ -481,9 +487,17 @@ static const uint8_t workboy_vk_to_key[] = {
     }
 }
 
+- (void)controller:(JOYController *)controller movedAxes2D:(JOYAxes2D *)axes
+{
+    if ([self shouldControllerUseJoystickForMotion:controller]) {
+        GB_set_accelerometer_values(_gb, -axes.value.x, -axes.value.y);
+    }
+}
+
 - (void)controller:(JOYController *)controller buttonChangedState:(JOYButton *)button
 {
     if (![self.window isMainWindow]) return;
+    if (button.type == JOYButtonTypeAxes2DEmulated && [self shouldControllerUseJoystickForMotion:controller]) return;
     
     unsigned player_count = GB_get_player_count(_gb);
     if (self.document.partner) {

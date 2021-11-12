@@ -3,7 +3,7 @@
 #import "JOYElement.h"
 #import "JOYSubElement.h"
 #import "JOYFullReportElement.h"
-
+#import "JOYButton.h"
 #import "JOYEmulatedButton.h"
 #include <IOKit/hid/IOHIDLib.h>
 
@@ -307,10 +307,10 @@ typedef union {
                 
                 if (axes2DEmulateButtons) {
                     _axes2DEmulatedButtons[@(axes.uniqueID)] = @[
-                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadLeft  uniqueID:axes.uniqueID | 0x100000000L],
-                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadRight uniqueID:axes.uniqueID | 0x200000000L],
-                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadUp  uniqueID:axes.uniqueID | 0x300000000L],
-                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadDown uniqueID:axes.uniqueID | 0x400000000L],
+                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadLeft type:JOYButtonTypeAxes2DEmulated uniqueID:axes.uniqueID | 0x100000000L],
+                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadRight type:JOYButtonTypeAxes2DEmulated uniqueID:axes.uniqueID | 0x200000000L],
+                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadUp type:JOYButtonTypeAxes2DEmulated  uniqueID:axes.uniqueID | 0x300000000L],
+                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadDown type:JOYButtonTypeAxes2DEmulated uniqueID:axes.uniqueID | 0x400000000L],
                     ];
                 }
                 
@@ -346,7 +346,7 @@ typedef union {
                 
                 if ([_hacks[JOYEmulateAxisButtons] boolValue]) {
                     _axisEmulatedButtons[@(axis.uniqueID)] =
-                    [[JOYEmulatedButton alloc] initWithUsage:axis.equivalentButtonUsage uniqueID:axis.uniqueID];
+                    [[JOYEmulatedButton alloc] initWithUsage:axis.equivalentButtonUsage type:JOYButtonTypeAxisEmulated uniqueID:axis.uniqueID];
                 }
                 
                 
@@ -366,10 +366,10 @@ typedef union {
                 [_hats setObject:hat forKey:element];
                 if (hatsEmulateButtons) {
                     _hatEmulatedButtons[@(hat.uniqueID)] = @[
-                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadLeft  uniqueID:hat.uniqueID | 0x100000000L],
-                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadRight uniqueID:hat.uniqueID | 0x200000000L],
-                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadUp  uniqueID:hat.uniqueID | 0x300000000L],
-                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadDown uniqueID:hat.uniqueID | 0x400000000L],
+                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadLeft type:JOYButtonTypeHatEmulated  uniqueID:hat.uniqueID | 0x100000000L],
+                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadRight type:JOYButtonTypeHatEmulated uniqueID:hat.uniqueID | 0x200000000L],
+                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadUp type:JOYButtonTypeHatEmulated  uniqueID:hat.uniqueID | 0x300000000L],
+                        [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadDown type:JOYButtonTypeHatEmulated uniqueID:hat.uniqueID | 0x400000000L],
                     ];
                 }
                 break;
