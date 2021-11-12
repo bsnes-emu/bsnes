@@ -1010,9 +1010,11 @@ void GB_load_battery_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t
 reset_rtc:
     gb->last_rtc_second = time(NULL);
     gb->rtc_real.high |= 0x80; /* This gives the game a hint that the clock should be reset. */
-    gb->huc3.days = 0xFFFF;
-    gb->huc3.minutes = 0xFFF;
-    gb->huc3.alarm_enabled = false;
+    if (gb->cartridge_type->mbc_type == GB_HUC3) {
+        gb->huc3.days = 0xFFFF;
+        gb->huc3.minutes = 0xFFF;
+        gb->huc3.alarm_enabled = false;
+    }
 exit:
     return;
 }
@@ -1116,9 +1118,11 @@ void GB_load_battery(GB_gameboy_t *gb, const char *path)
 reset_rtc:
     gb->last_rtc_second = time(NULL);
     gb->rtc_real.high |= 0x80; /* This gives the game a hint that the clock should be reset. */
-    gb->huc3.days = 0xFFFF;
-    gb->huc3.minutes = 0xFFF;
-    gb->huc3.alarm_enabled = false;
+    if (gb->cartridge_type->mbc_type == GB_HUC3) {
+        gb->huc3.days = 0xFFFF;
+        gb->huc3.minutes = 0xFFF;
+        gb->huc3.alarm_enabled = false;
+    }
 exit:
     fclose(f);
     return;
@@ -1842,6 +1846,17 @@ void GB_set_rtc_mode(GB_gameboy_t *gb, GB_rtc_mode_t mode)
         gb->rtc_cycles = 0;
         gb->last_rtc_second = time(NULL);
     }
+}
+
+bool GB_has_accelerometer(GB_gameboy_t *gb)
+{
+    return gb->cartridge_type->mbc_type == GB_MBC7;
+}
+
+void GB_set_accelerometer_values(GB_gameboy_t *gb, double x, double y)
+{
+    gb->accelerometer_x = x;
+    gb->accelerometer_y = y;
 }
 
 void GB_get_rom_title(GB_gameboy_t *gb, char *title)

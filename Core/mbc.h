@@ -10,6 +10,7 @@ typedef struct {
         GB_MBC2,
         GB_MBC3,
         GB_MBC5,
+        GB_MBC7,
         GB_HUC1,
         GB_HUC3,
         GB_TPP1,

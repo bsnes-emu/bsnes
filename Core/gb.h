@@ -443,6 +443,22 @@ struct GB_gameboy_internal_s {
                 uint8_t rom_bank_high:1;
                 uint8_t ram_bank:4;
             } mbc5;
+               
+           struct {
+               uint8_t rom_bank;
+               uint16_t x_latch;
+               uint16_t y_latch;
+               bool latch_ready:1;
+               bool eeprom_do:1;
+               bool eeprom_di:1;
+               bool eeprom_clk:1;
+               bool eeprom_cs:1;
+               uint16_t eeprom_command:11;
+               uint16_t read_bits;
+               uint8_t bits_countdown:5;
+               bool secondary_ram_enable:1;
+               bool eeprom_write_enabled:1;
+           } mbc7;
             
             struct {
                 uint8_t bank_low:6;
@@ -609,6 +625,7 @@ struct GB_gameboy_internal_s {
         GB_color_correction_mode_t color_correction_mode;
         double light_temperature;
         bool keys[4][GB_KEY_MAX];
+        double accelerometer_x, accelerometer_y;
         GB_border_mode_t border_mode;
         GB_sgb_border_t borrowed_border;
         bool tried_loading_sgb_border;
@@ -834,6 +851,10 @@ unsigned GB_time_to_alarm(GB_gameboy_t *gb); // 0 if no alarm
     
 /* RTC emulation mode */
 void GB_set_rtc_mode(GB_gameboy_t *gb, GB_rtc_mode_t mode);
+    
+/* For cartridges motion controls */
+bool GB_has_accelerometer(GB_gameboy_t *gb);
+void GB_set_accelerometer_values(GB_gameboy_t *gb, double x, double y);
     
 /* For integration with SFC/SNES emulators */
 void GB_set_joyp_write_callback(GB_gameboy_t *gb, GB_joyp_write_callback_t callback);

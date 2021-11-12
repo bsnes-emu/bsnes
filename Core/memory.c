@@ -301,8 +301,28 @@ static uint8_t read_vram(GB_gameboy_t *gb, uint16_t addr)
     return gb->vram[(addr & 0x1FFF) + (gb->cgb_vram_bank? 0x2000 : 0)];
 }
 
+static uint8_t read_mbc7_ram(GB_gameboy_t *gb, uint16_t addr)
+{
+    if (!gb->mbc_ram_enable || !gb->mbc7.secondary_ram_enable) return 0xFF;
+    if (addr >= 0xB000) return 0xFF;
+    switch ((addr >> 4) & 0xF) {
+        case 2: return gb->mbc7.x_latch;
+        case 3: return gb->mbc7.x_latch >> 8;
+        case 4: return gb->mbc7.y_latch;
+        case 5: return gb->mbc7.y_latch >> 8;
+        case 6: return 0;
+        case 8: return  gb->mbc7.eeprom_do | (gb->mbc7.eeprom_di << 1) |
+                       (gb->mbc7.eeprom_clk << 6) | (gb->mbc7.eeprom_cs << 7);
+    }
+    return 0xFF;
+}
+
 static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
 {
+    if (gb->cartridge_type->mbc_type == GB_MBC7) {
+        return read_mbc7_ram(gb, addr);
+    }
+
     if (gb->cartridge_type->mbc_type == GB_HUC3) {
         switch (gb->huc3.mode) {
             case 0xC: // RTC read
@@ -730,6 +750,13 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     break;
             }
             break;
+        case GB_MBC7:
+            switch (addr & 0xF000) {
+                case 0x0000: case 0x1000: gb->mbc_ram_enable             = value == 0x0A; break;
+                case 0x2000: case 0x3000: gb->mbc7.rom_bank              = value; break;
+                case 0x4000: case 0x5000: gb->mbc7.secondary_ram_enable  = value == 0x40; break;
+            }
+            break;
         case GB_HUC1:
             switch (addr & 0xF000) {
                 case 0x0000: case 0x1000: gb->huc1.ir_mode = (value & 0xF) == 0xE; break;
@@ -905,8 +932,133 @@ static bool huc3_write(GB_gameboy_t *gb, uint8_t value)
     }
 }
 
+static void write_mbc7_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
+{
+    if (!gb->mbc_ram_enable || !gb->mbc7.secondary_ram_enable) return;
+    if (addr >= 0xB000) return;
+    switch ((addr >> 4) & 0xF) {
+        case 0: {
+            if (value == 0x55) {
+                gb->mbc7.latch_ready = true;
+                gb->mbc7.x_latch = gb->mbc7.y_latch = 0x8000;
+            }
+        }
+        case 1: {
+            if (value == 0xAA) {
+                gb->mbc7.latch_ready = false;
+                gb->mbc7.x_latch = 0x81D0 + 0x70 * gb->accelerometer_x;
+                gb->mbc7.y_latch = 0x81D0 + 0x70 * gb->accelerometer_y;
+            }
+        }
+        case 8: {
+            gb->mbc7.eeprom_cs = value & 0x80;
+            gb->mbc7.eeprom_di = value & 2;
+            if (gb->mbc7.eeprom_cs) {
+                if (!gb->mbc7.eeprom_clk && (value & 0x40)) { // Clocked
+                    gb->mbc7.eeprom_do = gb->mbc7.read_bits >> 15;
+                    gb->mbc7.read_bits <<= 1;
+                    gb->mbc7.read_bits |= 1;
+                    if (gb->mbc7.bits_countdown == 0) {
+                        /* Not transferring extra bits for a command*/
+                        gb->mbc7.eeprom_command <<= 1;
+                        gb->mbc7.eeprom_command |= gb->mbc7.eeprom_di;
+                        if (gb->mbc7.eeprom_command & 0x400) {
+                            // Got full command
+                            switch ((gb->mbc7.eeprom_command >> 6) & 0xF) {
+                                case 0x8:
+                                case 0x9:
+                                case 0xA:
+                                case 0xB:
+                                    // READ
+                                    gb->mbc7.read_bits = LE16(((uint16_t *)gb->mbc_ram)[gb->mbc7.eeprom_command & 0x7F]);
+                                    gb->mbc7.eeprom_command = 0;
+                                    break;
+                                case 0x3: // EWEN (Eeprom Write ENable)
+                                    gb->mbc7.eeprom_write_enabled = true;
+                                    gb->mbc7.eeprom_command = 0;
+                                    break;
+                                case 0x0: // EWDS (Eeprom Write DiSable)
+                                    gb->mbc7.eeprom_write_enabled = false;
+                                    gb->mbc7.eeprom_command = 0;
+                                    break;
+                                case 0x4:
+                                case 0x5:
+                                case 0x6:
+                                case 0x7:
+                                    // WRITE
+                                    if (gb->mbc7.eeprom_write_enabled) {
+                                        ((uint16_t *)gb->mbc_ram)[gb->mbc7.eeprom_command & 0x7F] = 0;
+                                    }
+                                    gb->mbc7.bits_countdown = 16;
+                                    // We still need to process this command, don't erase eeprom_command
+                                    break;
+                                case 0xC:
+                                case 0xD:
+                                case 0xE:
+                                case 0xF:
+                                    // ERASE
+                                    if (gb->mbc7.eeprom_write_enabled) {
+                                        ((uint16_t *)gb->mbc_ram)[gb->mbc7.eeprom_command & 0x7F] = 0xFFFF;
+                                        gb->mbc7.read_bits = 0x3FFF; // Emulate some time to settle
+                                    }
+                                    gb->mbc7.eeprom_command = 0;
+                                    break;
+                                case 0x2:
+                                    // ERAL (ERase ALl)
+                                    if (gb->mbc7.eeprom_write_enabled) {
+                                        memset(gb->mbc_ram, 0xFF, gb->mbc_ram_size);
+                                        ((uint16_t *)gb->mbc_ram)[gb->mbc7.eeprom_command & 0x7F] = 0xFFFF;
+                                        gb->mbc7.read_bits = 0xFF; // Emulate some time to settle
+                                    }
+                                    gb->mbc7.eeprom_command = 0;
+                                    break;
+                                case 0x1:
+                                    // WRAL (WRite ALl)
+                                    if (gb->mbc7.eeprom_write_enabled) {
+                                        memset(gb->mbc_ram, 0, gb->mbc_ram_size);
+                                    }
+                                    gb->mbc7.bits_countdown = 16;
+                                    // We still need to process this command, don't erase eeprom_command
+                                    break;
+                            }
+                        }
+                    }
+                    else {
+                        // We're shifting in extra bits for a WRITE/WRAL command
+                        gb->mbc7.bits_countdown--;
+                        gb->mbc7.eeprom_do = true;
+                        if (gb->mbc7.eeprom_di) {
+                            uint16_t bit = LE16(1 << gb->mbc7.bits_countdown);
+                            if (gb->mbc7.eeprom_command & 0x100) {
+                                // WRITE
+                                ((uint16_t *)gb->mbc_ram)[gb->mbc7.eeprom_command & 0x7F] |= bit;
+                            }
+                            else {
+                                // WRAL
+                                for (unsigned i = 0; i < 0x7F; i++) {
+                                    ((uint16_t *)gb->mbc_ram)[i] |= bit;
+                                }
+                            }
+                        }
+                        if (gb->mbc7.bits_countdown == 0) { // We're done
+                            gb->mbc7.eeprom_command = 0;
+                            gb->mbc7.read_bits = (gb->mbc7.eeprom_command & 0x100)? 0xFF : 0x3FFF; // Emulate some time to settle
+                        }
+                    }
+                }
+            }
+            gb->mbc7.eeprom_clk = value & 0x40;
+        }
+    }
+}
+
 static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
+    if (gb->cartridge_type->mbc_type == GB_MBC7) {
+        write_mbc7_ram(gb, addr, value);
+        return;
+    }
+    
     if (gb->cartridge_type->mbc_type == GB_HUC3) {
         if (huc3_write(gb, value)) return;
     }

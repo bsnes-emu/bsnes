@@ -34,6 +34,8 @@ const GB_cartridge_t GB_cart_defs[256] = {
     {  GB_MBC5  , GB_STANDARD_MBC, false, false, false, true }, // 1Ch  MBC5+RUMBLE
     {  GB_MBC5  , GB_STANDARD_MBC, true , false, false, true }, // 1Dh  MBC5+RUMBLE+RAM
     {  GB_MBC5  , GB_STANDARD_MBC, true , true , false, true }, // 1Eh  MBC5+RUMBLE+RAM+BATTERY
+    [0x22] =
+    {  GB_MBC7  , GB_STANDARD_MBC, true,  true,  false, false}, // 22h  MBC7+ACCEL+EEPROM
     [0xFC] =
     {  GB_MBC5  , GB_CAMERA      , true , true , false, false}, // FCh  POCKET CAMERA
     {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // FDh  BANDAI TAMA5 (Todo: Not supported)
@@ -97,6 +99,9 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
             gb->mbc_rom_bank = gb->mbc5.rom_bank_low | (gb->mbc5.rom_bank_high << 8);
             gb->mbc_ram_bank = gb->mbc5.ram_bank;
             break;
+        case GB_MBC7:
+            gb->mbc_rom_bank = gb->mbc7.rom_bank;
+            break;
         case GB_HUC1:
             if (gb->huc1.mode == 0) {
                 gb->mbc_rom_bank = gb->huc1.bank_low | (gb->mbc1.bank_high << 6);
@@ -148,6 +153,9 @@ void GB_configure_cart(GB_gameboy_t *gb)
         if (gb->cartridge_type->mbc_type == GB_MBC2) {
             gb->mbc_ram_size = 0x200;
         }
+        else if (gb->cartridge_type->mbc_type == GB_MBC7) {
+            gb->mbc_ram_size = 0x100;
+        }
         else if (gb->cartridge_type->mbc_type == GB_TPP1) {
             if (gb->rom[0x152] >= 1 && gb->rom[0x152] <= 9) {
                 gb->mbc_ram_size = 0x2000 << (gb->rom[0x152] - 1);
@@ -186,5 +194,13 @@ void GB_configure_cart(GB_gameboy_t *gb)
     /* Set MBC5's bank to 1 correctly */
     if (gb->cartridge_type->mbc_type == GB_MBC5) {
         gb->mbc5.rom_bank_low = 1;
+    }
+    
+    /* Initial MBC7 state */
+    if (gb->cartridge_type->mbc_type == GB_MBC7) {
+        gb->mbc7.x_latch = gb->mbc7.y_latch = 0x8000;
+        gb->mbc7.latch_ready = true;
+        gb->mbc7.read_bits = -1;
+        gb->mbc7.eeprom_do = true;
     }
 }
