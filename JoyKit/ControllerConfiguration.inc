@@ -110,6 +110,22 @@ hacksByManufacturer = @{
             @{@"reportID": @(0x31), @"size":@1, @"offset":@0x50, @"usagePage":@(kHIDPage_Button), @"usage":@13},
             @{@"reportID": @(0x31), @"size":@1, @"offset":@0x51, @"usagePage":@(kHIDPage_Button), @"usage":@14},
             @{@"reportID": @(0x31), @"size":@1, @"offset":@0x52, @"usagePage":@(kHIDPage_Button), @"usage":@15},
+            
+            @{@"reportID": @(0x31), @"size":@16, @"offset":@0x80, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityXAxis)},
+            @{@"reportID": @(0x31), @"size":@16, @"offset":@0x90, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityYAxis)},
+            @{@"reportID": @(0x31), @"size":@16, @"offset":@0xA0, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityZAxis)},
+            @{@"reportID": @(0x31), @"size":@16, @"offset":@0xB0, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisX)},
+            @{@"reportID": @(0x31), @"size":@16, @"offset":@0xC0, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisY)},
+            @{@"reportID": @(0x31), @"size":@16, @"offset":@0xD0, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisZ)},
+            ],
+            
+            @(1): @[
+                @{@"reportID": @(1), @"size":@16, @"offset":@0x78, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityXAxis)},
+                @{@"reportID": @(1), @"size":@16, @"offset":@0x88, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityYAxis)},
+                @{@"reportID": @(1), @"size":@16, @"offset":@0x98, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityZAxis)},
+                @{@"reportID": @(1), @"size":@16, @"offset":@0xA8, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisX)},
+                @{@"reportID": @(1), @"size":@16, @"offset":@0xB8, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisY)},
+                @{@"reportID": @(1), @"size":@16, @"offset":@0xC8, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisZ)},
             ],
         },
          

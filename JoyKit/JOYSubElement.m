@@ -57,6 +57,12 @@
     memcpy(temp, bytes + _offset / 8, (_offset + _size - 1) / 8 - _offset / 8 + 1);
     uint32_t ret = (*(uint32_t *)temp) >> (_offset % 8);
     ret &= (1 << _size) - 1;
+    //
+    if (_min < 0 || _max < 0) { // Uses unsigned values
+        if (ret & (1 << (_size - 1)) ) { // Is negative
+            ret |= ~((1 << _size) - 1); // Fill with 1s
+        }
+    }
     
     if (_max < _min) {
         return _max + _min - ret;

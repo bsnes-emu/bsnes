@@ -462,6 +462,11 @@ static const uint8_t workboy_vk_to_key[] = {
 - (bool)shouldControllerUseJoystickForMotion:(JOYController *)controller
 {
     if (!GB_has_accelerometer(_gb)) return false;
+    for (JOYAxes3D *axes in controller.axes3D) {
+        if (axes.usage == JOYAxes3DUsageOrientation || axes.usage == JOYAxes3DUsageAcceleration) {
+            return false;
+        }
+    }
     return true;
 }
 
@@ -491,6 +496,24 @@ static const uint8_t workboy_vk_to_key[] = {
 {
     if ([self shouldControllerUseJoystickForMotion:controller]) {
         GB_set_accelerometer_values(_gb, -axes.value.x, -axes.value.y);
+    }
+}
+
+- (void)controller:(JOYController *)controller movedAxes3D:(JOYAxes3D *)axes
+{
+    if (axes.usage == JOYAxes3DUsageOrientation) {
+        for (JOYAxes3D *axes in controller.axes3D) {
+            // Only use orientation if there's no acceleration axes
+            if (axes.usage == JOYAxes3DUsageAcceleration) {
+                return;
+            }
+        }
+        JOYPoint3D point = axes.normalizedValue;
+        GB_set_accelerometer_values(_gb, point.x, point.z);
+    }
+    else if (axes.usage == JOYAxes3DUsageAcceleration) {
+        JOYPoint3D point = axes.gUnitsValue;
+        GB_set_accelerometer_values(_gb, point.x, point.z);
     }
 }
 

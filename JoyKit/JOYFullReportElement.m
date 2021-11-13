@@ -61,9 +61,10 @@
     return self.uniqueID;
 }
 
-- (BOOL)isEqual:(id)object
+- (BOOL)isEqual:(JOYFullReportElement *)object
 {
-    return self.uniqueID == self.uniqueID;
+    if ([object isKindOfClass:self.class]) return false;
+    return self.uniqueID == object.uniqueID;
 }
 
 - (id)copyWithZone:(nullable NSZone *)zone;

@@ -71,6 +71,14 @@ static bool hatsEmulateButtons = false;
 - (bool)updateState;
 @end
 
+@interface JOYAxes3D ()
+{
+    @public JOYElement *_element1, *_element2, *_element3;
+}
+- (instancetype)initWithFirstElement:(JOYElement *)element1 secondElement:(JOYElement *)element2 thirdElement:(JOYElement *)element2;
+- (bool)updateState;
+@end
+
 static NSDictionary *CreateHIDDeviceMatchDictionary(const UInt32 page, const UInt32 usage)
 {
     return @{
@@ -168,10 +176,12 @@ typedef union {
     NSMutableDictionary<JOYElement *, JOYButton *> *_buttons;
     NSMutableDictionary<JOYElement *, JOYAxis *> *_axes;
     NSMutableDictionary<JOYElement *, JOYAxes2D *> *_axes2D;
+    NSMutableDictionary<JOYElement *, JOYAxes3D *> *_axes3D;
     NSMutableDictionary<JOYElement *, JOYHat *> *_hats;
     NSMutableDictionary<NSNumber *, JOYFullReportElement *> *_fullReportElements;
     NSMutableDictionary<JOYFullReportElement *, NSArray<JOYElement *> *> *_multiElements;
-
+    JOYAxes3D *_lastAxes3D;
+    
     // Button emulation
     NSMutableDictionary<NSNumber *, JOYEmulatedButton *> *_axisEmulatedButtons;
     NSMutableDictionary<NSNumber *, NSArray <JOYEmulatedButton *> *> *_axes2DEmulatedButtons;
@@ -246,6 +256,69 @@ typedef union {
         @(kHIDUsage_GD_Rz): @(1),
     };
     
+    if (element.usagePage == kHIDPage_Sensor) {
+        JOYAxes3DUsage usage;
+        JOYElement *element1 = nil, *element2 = nil, *element3 = nil;
+        
+        switch (element.usage) {
+            case kHIDUsage_Snsr_Data_Motion_AccelerationAxisX:
+            case kHIDUsage_Snsr_Data_Motion_AccelerationAxisY:
+            case kHIDUsage_Snsr_Data_Motion_AccelerationAxisZ:
+                usage = JOYAxes3DUsageAcceleration;
+                break;
+            case kHIDUsage_Snsr_Data_Motion_AngularPositionXAxis:
+            case kHIDUsage_Snsr_Data_Motion_AngularPositionYAxis:
+            case kHIDUsage_Snsr_Data_Motion_AngularPositionZAxis:
+                usage = JOYAxes3DUsageOrientation;
+                break;
+            case kHIDUsage_Snsr_Data_Motion_AngularVelocityXAxis:
+            case kHIDUsage_Snsr_Data_Motion_AngularVelocityYAxis:
+            case kHIDUsage_Snsr_Data_Motion_AngularVelocityZAxis:
+                usage = JOYAxes3DUsageGyroscope;
+                break;
+            default:
+                return;
+        }
+        
+        switch (element.usage) {
+            case kHIDUsage_Snsr_Data_Motion_AccelerationAxisX:
+            case kHIDUsage_Snsr_Data_Motion_AngularPositionXAxis:
+            case kHIDUsage_Snsr_Data_Motion_AngularVelocityXAxis:
+                element1 = element;
+                if (_lastAxes3D && !_lastAxes3D->_element1 && _lastAxes3D.usage == usage) {
+                    element2 = _lastAxes3D->_element2;
+                    element3 = _lastAxes3D->_element3;
+                }
+                break;
+            case kHIDUsage_Snsr_Data_Motion_AccelerationAxisY:
+            case kHIDUsage_Snsr_Data_Motion_AngularPositionYAxis:
+            case kHIDUsage_Snsr_Data_Motion_AngularVelocityYAxis:
+                element2 = element;
+                if (_lastAxes3D && !_lastAxes3D->_element2 && _lastAxes3D.usage == usage) {
+                    element1 = _lastAxes3D->_element1;
+                    element3 = _lastAxes3D->_element3;
+                }
+                break;
+            case kHIDUsage_Snsr_Data_Motion_AccelerationAxisZ:
+            case kHIDUsage_Snsr_Data_Motion_AngularPositionZAxis:
+            case kHIDUsage_Snsr_Data_Motion_AngularVelocityZAxis:
+                element3 = element;
+                if (_lastAxes3D && !_lastAxes3D->_element3 && _lastAxes3D.usage == usage) {
+                    element1 = _lastAxes3D->_element1;
+                    element2 = _lastAxes3D->_element2;
+                }
+                break;
+        }
+        
+        _lastAxes3D = [[JOYAxes3D alloc] initWithFirstElement:element1 secondElement:element2 thirdElement:element3];
+        _lastAxes3D.usage = usage;
+        if (element1) _axes3D[element1] = _lastAxes3D;
+        if (element2) _axes3D[element2] = _lastAxes3D;
+        if (element3) _axes3D[element3] = _lastAxes3D;
+        
+        return;
+    }
+    
     axisGroups = _hacks[JOYAxisGroups] ?: axisGroups;
     
     if (element.usagePage == kHIDPage_Button ||
@@ -313,23 +386,6 @@ typedef union {
                         [[JOYEmulatedButton alloc] initWithUsage:JOYButtonUsageDPadDown type:JOYButtonTypeAxes2DEmulated uniqueID:axes.uniqueID | 0x400000000L],
                     ];
                 }
-                
-                /*
-                 for (NSArray *group in axes2d) {
-                 break;
-                 IOHIDElementRef first  = (__bridge IOHIDElementRef)group[0];
-                 IOHIDElementRef second = (__bridge IOHIDElementRef)group[1];
-                 if (IOHIDElementGetUsage(first)  > element.usage) continue;
-                 if (IOHIDElementGetUsage(second) > element.usage) continue;
-                 if (IOHIDElementGetReportID(first) != IOHIDElementGetReportID(element)) continue;
-                 if ((IOHIDElementGetUsage(first) - kHIDUsage_GD_X) / 3 != (element.usage - kHIDUsage_GD_X) / 3) continue;
-                 if (IOHIDElementGetParent(first) != IOHIDElementGetParent(element)) continue;
-                 
-                 [axes2d removeObject:group];
-                 [axes3d addObject:@[(__bridge id)first, (__bridge id)second, _element]];
-                 found = true;
-                 break;
-                 }*/
                 break;
             }
             case kHIDUsage_GD_Slider:
@@ -396,6 +452,7 @@ typedef union {
     _buttons = [NSMutableDictionary dictionary];
     _axes = [NSMutableDictionary dictionary];
     _axes2D = [NSMutableDictionary dictionary];
+    _axes3D = [NSMutableDictionary dictionary];
     _hats = [NSMutableDictionary dictionary];
     _axisEmulatedButtons = [NSMutableDictionary dictionary];
     _axes2DEmulatedButtons = [NSMutableDictionary dictionary];
@@ -619,6 +676,11 @@ typedef union {
     return [[NSSet setWithArray:[_axes2D allValues]] allObjects];
 }
 
+- (NSArray<JOYAxes3D *> *)axes3D
+{
+    return [[NSSet setWithArray:[_axes3D allValues]] allObjects];
+}
+
 - (NSArray<JOYHat *> *)hats
 {
     return [_hats allValues];
@@ -729,6 +791,20 @@ typedef union {
                                 [listener controller:self buttonChangedState:button];
                             }
                         }
+                    }
+                }
+            }
+            return;
+        }
+    }
+    
+    {
+        JOYAxes3D *axes = _axes3D[element];
+        if (axes) {
+            if ([axes updateState]) {
+                for (id<JOYListener> listener in listeners) {
+                    if ([listener respondsToSelector:@selector(controller:movedAxes3D:)]) {
+                        [listener controller:self movedAxes3D:axes];
                     }
                 }
             }
@@ -865,7 +941,7 @@ typedef union {
     if (_isDualShock3) {
         return 2 << player;
     }
-    if (_isUSBDualSense) {
+    if (_isDualSense) {
         switch (player) {
             case 0: return 0x04;
             case 1: return 0x0A;
