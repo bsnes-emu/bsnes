@@ -854,6 +854,8 @@ void GB_set_rtc_mode(GB_gameboy_t *gb, GB_rtc_mode_t mode);
     
 /* For cartridges motion controls */
 bool GB_has_accelerometer(GB_gameboy_t *gb);
+// In units of g (gravity's acceleration).
+// Values within ±4 recommended
 void GB_set_accelerometer_values(GB_gameboy_t *gb, double x, double y);
     
 /* For integration with SFC/SNES emulators */
