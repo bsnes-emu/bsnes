@@ -68,6 +68,9 @@ static uint32_t color_to_int(NSColor *color)
                                                               @"GBRumbleMode": @(GB_RUMBLE_CARTRIDGE_ONLY),
                                                               
                                                               @"GBVolume": @(1.0),
+                                                              
+                                                              @"GBMBC7JoystickOverride": @NO,
+                                                              @"GBMBC7AllowMouse": @YES,
                                                               }];
     
     [JOYController startOnRunLoop:[NSRunLoop currentRunLoop] withOptions:@{

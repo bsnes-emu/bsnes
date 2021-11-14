@@ -32,4 +32,6 @@
 @property (weak) IBOutlet NSButton *screenshotFilterCheckbox;
 @property (weak) IBOutlet GBPaletteEditorController *paletteEditorController;
 @property (strong) IBOutlet NSWindow *paletteEditor;
+@property (weak) IBOutlet NSButton *joystickMBC7Checkbox;
+@property (weak) IBOutlet NSButton *mouseMBC7Checkbox;
 @end

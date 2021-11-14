@@ -34,6 +34,8 @@
     NSButton *_autoUpdatesCheckbox;
     NSButton *_OSDCheckbox;
     NSButton *_screenshotFilterCheckbox;
+    NSButton *_joystickMBC7Checkbox;
+    NSButton *_mouseMBC7Checkbox;
 }
 
 + (NSArray *)filterList
@@ -324,6 +326,19 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBHighpassFilterChanged" object:nil];
 }
 
+
+- (IBAction)changeMBC7JoystickOverride:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] == NSOnState
+                                            forKey:@"GBMBC7JoystickOverride"];
+}
+
+- (IBAction)changeMBC7AllowMouse:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] == NSOnState
+                                            forKey:@"GBMBC7AllowMouse"];
+}
+
 - (IBAction)changeAnalogControls:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] == NSOnState
@@ -570,6 +585,28 @@
     [[NSUserDefaults standardUserDefaults] setObject:instance_mappings forKey:@"JoyKitInstanceMapping"];
     [[NSUserDefaults standardUserDefaults] setObject:name_mappings forKey:@"JoyKitNameMapping"];
     [self advanceConfigurationStateMachine];
+}
+
+- (NSButton *)joystickMBC7Checkbox
+{
+    return _joystickMBC7Checkbox;
+}
+
+- (void)setJoystickMBC7Checkbox:(NSButton *)joystickMBC7Checkbox
+{
+    _joystickMBC7Checkbox = joystickMBC7Checkbox;
+    [_joystickMBC7Checkbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBMBC7JoystickOverride"]];
+}
+
+- (NSButton *)mouseMBC7Checkbox
+{
+    return _mouseMBC7Checkbox;
+}
+
+- (void)setMouseMBC7Checkbox:(NSButton *)mouseMBC7Checkbox
+{
+    _mouseMBC7Checkbox = mouseMBC7Checkbox;
+    [_mouseMBC7Checkbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBMBC7AllowMouse"]];
 }
 
 - (NSButton *)analogControlsCheckbox
