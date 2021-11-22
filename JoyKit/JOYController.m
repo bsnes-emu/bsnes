@@ -460,8 +460,6 @@ typedef union {
     _iokitToJOY = [NSMutableDictionary dictionary];
     
     
-    //NSMutableArray *axes3d = [NSMutableArray array];
-    
     _hacks = hacks;
     _isSwitch = [_hacks[JOYIsSwitch] boolValue];
     _isDualShock3 = [_hacks[JOYIsDualShock3] boolValue];
@@ -579,6 +577,19 @@ typedef union {
     if (_isSwitch) {
         [self sendReport:[NSData dataWithBytes:(uint8_t[]){0x80, 0x04} length:2]];
         [self sendReport:[NSData dataWithBytes:(uint8_t[]){0x80, 0x02} length:2]];
+        
+        _lastVendorSpecificOutput.switchPacket.reportID = 0x1; // Rumble and LEDs
+        _lastVendorSpecificOutput.switchPacket.sequence++;
+        _lastVendorSpecificOutput.switchPacket.sequence &= 0xF;
+        _lastVendorSpecificOutput.switchPacket.command = 3; // Set input report mode
+        _lastVendorSpecificOutput.switchPacket.commandData[0] = 0x30; // Standard full mode
+        [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.switchPacket length:sizeof(_lastVendorSpecificOutput.switchPacket)]];
+        
+        _lastVendorSpecificOutput.switchPacket.sequence++;
+        _lastVendorSpecificOutput.switchPacket.sequence &= 0xF;
+        _lastVendorSpecificOutput.switchPacket.command = 0x40; // Enable/disableIMU
+        _lastVendorSpecificOutput.switchPacket.commandData[0] = 1; // Enabled
+        [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.switchPacket length:sizeof(_lastVendorSpecificOutput.switchPacket)]];
     }
     
     if (_isDualShock3) {

@@ -422,8 +422,6 @@ hacksByName = @{
         JOYCustomReports: @{
             @(0x30): @[
             
-            // For USB mode, which uses the wrong report descriptor
-            
             @{@"reportID": @(1), @"size":@1, @"offset":@16, @"usagePage":@(kHIDPage_Button), @"usage":@3},
             @{@"reportID": @(1), @"size":@1, @"offset":@17, @"usagePage":@(kHIDPage_Button), @"usage":@4},
             @{@"reportID": @(1), @"size":@1, @"offset":@18, @"usagePage":@(kHIDPage_Button), @"usage":@1},
@@ -456,6 +454,13 @@ hacksByName = @{
             
             @{@"reportID": @(1), @"size":@12, @"offset":@64, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Rx), @"min": @0, @"max": @0xFFF},
             @{@"reportID": @(1), @"size":@12, @"offset":@76, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Ry), @"min": @0xFFF, @"max": @0},
+            
+            @{@"reportID": @(1), @"size":@16, @"offset":@96, @"usagePage":@(kHIDPage_Sensor), @"min": @0x7FFF, @"max": @-0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisZ)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@112, @"usagePage":@(kHIDPage_Sensor), @"min": @0x7FFF, @"max": @-0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisX)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@128, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisY)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@144, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityZAxis)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@160, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityXAxis)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@176, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityYAxis)},
             ],
         },
         
