@@ -1072,8 +1072,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
             gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
             gb->lcd_x = 0;
           
-            gb->extra_penalty_for_sprite_at_0 = (gb->io_registers[GB_IO_SCX] & 7);
-
+            gb->extra_penalty_for_sprite_at_0 = MIN((gb->io_registers[GB_IO_SCX] & 7), 5);
             
             /* The actual rendering cycle */
             gb->fetcher_state = 0;
