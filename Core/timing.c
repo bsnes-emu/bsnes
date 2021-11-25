@@ -54,13 +54,17 @@ bool GB_timing_sync_turbo(GB_gameboy_t *gb)
 
 void GB_timing_sync(GB_gameboy_t *gb)
 {
-    if (gb->turbo) {
-        gb->cycles_since_last_sync = 0;
-        return;
-    }
     /* Prevent syncing if not enough time has passed.*/
     if (gb->cycles_since_last_sync < LCDC_PERIOD / 3) return;
 
+    if (gb->turbo) {
+        gb->cycles_since_last_sync = 0;
+        if (gb->update_input_hint_callback) {
+            gb->update_input_hint_callback(gb);
+        }
+        return;
+    }
+    
     uint64_t target_nanoseconds = gb->cycles_since_last_sync * 1000000000LL / 2 / GB_get_clock_rate(gb); /* / 2 because we use 8MHz units */
     int64_t nanoseconds = get_nanoseconds();
     int64_t time_to_sleep = target_nanoseconds + gb->last_sync - nanoseconds;
