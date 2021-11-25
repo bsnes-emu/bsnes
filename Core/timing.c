@@ -95,6 +95,16 @@ bool GB_timing_sync_turbo(GB_gameboy_t *gb)
 
 void GB_timing_sync(GB_gameboy_t *gb)
 {
+    if (gb->cycles_since_last_sync < LCDC_PERIOD / 3) return;
+    gb->cycles_since_last_sync = 0;
+
+    if (gb->turbo) {
+        gb->cycles_since_last_sync = 0;
+        if (gb->update_input_hint_callback) {
+            gb->update_input_hint_callback(gb);
+        }
+        return;
+    }
 }
 
 #endif
