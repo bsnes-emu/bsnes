@@ -1319,6 +1319,11 @@ bool GB_is_cgb(GB_gameboy_t *gb)
     return (gb->model & GB_MODEL_FAMILY_MASK) == GB_MODEL_CGB_FAMILY;
 }
 
+bool GB_is_cgb_in_cgb_mode(GB_gameboy_t *gb)
+{
+    return gb->cgb_mode;
+}
+
 bool GB_is_sgb(GB_gameboy_t *gb)
 {
     return (gb->model & ~GB_MODEL_PAL_BIT & ~GB_MODEL_NO_SFC_BIT) == GB_MODEL_SGB || (gb->model & ~GB_MODEL_NO_SFC_BIT) == GB_MODEL_SGB2;

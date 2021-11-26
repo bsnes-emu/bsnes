@@ -765,6 +765,7 @@ __attribute__((__format__ (__printf__, fmtarg, firstvararg)))
 void GB_init(GB_gameboy_t *gb, GB_model_t model);
 bool GB_is_inited(GB_gameboy_t *gb);
 bool GB_is_cgb(GB_gameboy_t *gb);
+bool GB_is_cgb_in_cgb_mode(GB_gameboy_t *gb);
 bool GB_is_sgb(GB_gameboy_t *gb); // Returns true if the model is SGB or SGB2
 bool GB_is_hle_sgb(GB_gameboy_t *gb); // Returns true if the model is SGB or SGB2 and the SFC/SNES side is HLE'd
 GB_model_t GB_get_model(GB_gameboy_t *gb);
