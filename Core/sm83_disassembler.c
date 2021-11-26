@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include "gb.h"
 
+#define GB_read_memory GB_safe_read_memory
 
 typedef void opcode_t(GB_gameboy_t *gb, uint8_t opcode, uint16_t *pc);
 

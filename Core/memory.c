@@ -444,7 +444,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
         }
         
         if (gb->oam_read_blocked) {
-            if (!GB_is_cgb(gb)) {
+            if (!GB_is_cgb(gb) && !gb->disable_oam_corruption) {
                 if (addr < 0xFEA0) {
                     uint16_t *oam = (uint16_t *)gb->oam;
                     if (gb->accessed_oam_row == 0) {
@@ -695,6 +695,18 @@ uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
         addr = gb->dma_current_src;
     }
     uint8_t data = read_map[addr >> 12](gb, addr);
+    GB_apply_cheat(gb, addr, &data);
+    if (gb->read_memory_callback) {
+        data = gb->read_memory_callback(gb, addr, data);
+    }
+    return data;
+}
+
+uint8_t GB_safe_read_memory(GB_gameboy_t *gb, uint16_t addr)
+{
+    gb->disable_oam_corruption = true;
+    uint8_t data = read_map[addr >> 12](gb, addr);
+    gb->disable_oam_corruption = false;
     GB_apply_cheat(gb, addr, &data);
     if (gb->read_memory_callback) {
         data = gb->read_memory_callback(gb, addr, data);

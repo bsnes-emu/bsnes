@@ -742,6 +742,7 @@ struct GB_gameboy_internal_s {
         /* Temporary state */
         bool wx_just_changed;
         bool tile_sel_glitch;
+        bool disable_oam_corruption; // For safe memory reads
                
         GB_gbs_header_t gbs_header;
    );

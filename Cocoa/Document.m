@@ -1335,7 +1335,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 - (uint8_t) readMemory:(uint16_t)addr
 {
     while (!GB_is_inited(&gb));
-    return GB_read_memory(&gb, addr);
+    return GB_safe_read_memory(&gb, addr);
 }
 
 - (void) writeMemory:(uint16_t)addr value:(uint8_t)value

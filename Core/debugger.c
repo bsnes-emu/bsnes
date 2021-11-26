@@ -1451,7 +1451,7 @@ static bool examine(GB_gameboy_t *gb, char *arguments, char *modifiers, const de
             while (count) {
                 GB_log(gb, "%02x:%04x: ", addr.bank, addr.value);
                 for (unsigned i = 0; i < 16 && count; i++) {
-                    GB_log(gb, "%02x ", GB_read_memory(gb, addr.value + i));
+                    GB_log(gb, "%02x ", GB_safe_read_memory(gb, addr.value + i));
                     count--;
                 }
                 addr.value += 16;
@@ -1464,7 +1464,7 @@ static bool examine(GB_gameboy_t *gb, char *arguments, char *modifiers, const de
             while (count) {
                 GB_log(gb, "%04x: ", addr.value);
                 for (unsigned i = 0; i < 16 && count; i++) {
-                    GB_log(gb, "%02x ", GB_read_memory(gb, addr.value + i));
+                    GB_log(gb, "%02x ", GB_safe_read_memory(gb, addr.value + i));
                     count--;
                 }
                 addr.value += 16;
