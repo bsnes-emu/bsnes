@@ -688,15 +688,15 @@ void GB_set_read_memory_callback(GB_gameboy_t *gb, GB_read_memory_callback_t cal
 
 uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
 {
-    if (gb->n_watchpoints) {
+    if (unlikely(gb->n_watchpoints)) {
         GB_debugger_test_read_watchpoint(gb, addr);
     }
-    if (is_addr_in_dma_use(gb, addr)) {
+    if (unlikely(is_addr_in_dma_use(gb, addr))) {
         addr = gb->dma_current_src;
     }
     uint8_t data = read_map[addr >> 12](gb, addr);
     GB_apply_cheat(gb, addr, &data);
-    if (gb->read_memory_callback) {
+    if (unlikely(gb->read_memory_callback)) {
         data = gb->read_memory_callback(gb, addr, data);
     }
     return data;
@@ -708,7 +708,7 @@ uint8_t GB_safe_read_memory(GB_gameboy_t *gb, uint16_t addr)
     uint8_t data = read_map[addr >> 12](gb, addr);
     gb->disable_oam_corruption = false;
     GB_apply_cheat(gb, addr, &data);
-    if (gb->read_memory_callback) {
+    if (unlikely(gb->read_memory_callback)) {
         data = gb->read_memory_callback(gb, addr, data);
     }
     return data;
@@ -1563,12 +1563,22 @@ static write_function_t *const write_map[] =
     write_ram,         write_high_memory,                      /* EXXX FXXX */
 };
 
+void GB_set_write_memory_callback(GB_gameboy_t *gb, GB_write_memory_callback_t callback)
+{
+    gb->write_memory_callback = callback;
+}
+
 void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
-    if (gb->n_watchpoints) {
+    if (unlikely(gb->n_watchpoints)) {
         GB_debugger_test_write_watchpoint(gb, addr, value);
     }
-    if (is_addr_in_dma_use(gb, addr)) {
+    
+    if (unlikely(gb->write_memory_callback)) {
+        if (!gb->write_memory_callback(gb, addr, value)) return;
+    }
+    
+    if (unlikely(is_addr_in_dma_use(gb, addr))) {
         /* Todo: What should happen? Will this affect DMA? Will data be written? What and where? */
         return;
     }

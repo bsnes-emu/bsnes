@@ -4,7 +4,9 @@
 #include <stdint.h>
 
 typedef uint8_t (*GB_read_memory_callback_t)(GB_gameboy_t *gb, uint16_t addr, uint8_t data);
+typedef bool (*GB_write_memory_callback_t)(GB_gameboy_t *gb, uint16_t addr, uint8_t data); // Return false to prevent the write
 void GB_set_read_memory_callback(GB_gameboy_t *gb, GB_read_memory_callback_t callback);
+void GB_set_write_memory_callback(GB_gameboy_t *gb, GB_write_memory_callback_t callback);
 
 uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr);
 uint8_t GB_safe_read_memory(GB_gameboy_t *gb, uint16_t addr); // Without side effects

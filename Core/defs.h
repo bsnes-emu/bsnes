@@ -4,8 +4,8 @@
 #ifdef GB_INTERNAL
 
 // "Keyword" definitions
-#define likely(x)   __builtin_expect((x), 1)
-#define unlikely(x) __builtin_expect((x), 0)
+#define likely(x)   __builtin_expect((bool)(x), 1)
+#define unlikely(x) __builtin_expect((bool)(x), 0)
 
 #define internal __attribute__((visibility("internal")))
 
