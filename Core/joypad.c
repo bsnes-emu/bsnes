@@ -91,3 +91,31 @@ void GB_set_key_state_for_player(GB_gameboy_t *gb, GB_key_t index, unsigned play
     gb->keys[player][index] = pressed;
     GB_update_joyp(gb);
 }
+
+void GB_set_key_mask(GB_gameboy_t *gb, GB_key_mask_t mask)
+{
+    memset(gb->keys, 0, sizeof(gb->keys));
+    bool *key = &gb->keys[0][0];
+    while (mask) {
+        if (mask & 1) {
+            *key = true;
+        }
+        mask >>= 1;
+    }
+    
+    GB_update_joyp(gb);
+}
+
+void GB_set_key_mask_for_player(GB_gameboy_t *gb, GB_key_mask_t mask, unsigned player)
+{
+    memset(gb->keys[player], 0, sizeof(gb->keys[player]));
+    bool *key = gb->keys[player];
+    while (mask) {
+        if (mask & 1) {
+            *key = true;
+        }
+        mask >>= 1;
+    }
+    
+    GB_update_joyp(gb);
+}
