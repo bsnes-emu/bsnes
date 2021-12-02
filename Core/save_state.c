@@ -347,7 +347,7 @@ static void sanitize_state(GB_gameboy_t *gb)
     gb->window_tile_x &= 0x1F;
     
     /* These are kind of DOS-ish if too large */
-    if (abs(gb->display_cycles) > 0x8000) {
+    if (abs(gb->display_cycles) > 0x80000) {
         gb->display_cycles = 0;
     }
     
