@@ -101,6 +101,7 @@ void GB_set_key_mask(GB_gameboy_t *gb, GB_key_mask_t mask)
             *key = true;
         }
         mask >>= 1;
+        key++;
     }
     
     GB_update_joyp(gb);
@@ -115,6 +116,7 @@ void GB_set_key_mask_for_player(GB_gameboy_t *gb, GB_key_mask_t mask, unsigned p
             *key = true;
         }
         mask >>= 1;
+        key++;
     }
     
     GB_update_joyp(gb);
