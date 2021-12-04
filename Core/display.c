@@ -109,9 +109,11 @@ typedef struct __attribute__((packed)) {
     uint8_t flags;
 } object_t;
 
-static void display_vblank(GB_gameboy_t *gb)
+void GB_display_vblank(GB_gameboy_t *gb)
 {  
     gb->vblank_just_occured = true;
+    gb->cycles_since_vblank_callback = 0;
+    gb->lcd_disabled_outside_of_vblank = false;
     
     /* TODO: Slow in turbo mode! */
     if (GB_is_hle_sgb(gb)) {
@@ -126,7 +128,7 @@ static void display_vblank(GB_gameboy_t *gb)
     
     bool is_ppu_stopped = !GB_is_cgb(gb) && gb->stopped && gb->io_registers[GB_IO_LCDC] & 0x80;
     
-    if (!gb->disable_rendering && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || is_ppu_stopped) || gb->cgb_repeated_a_frame)) {
+    if (!gb->disable_rendering && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || is_ppu_stopped) || gb->cgb_repeated_a_frame || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
         /* LCD is off, set screen to white or black (if LCD is on in stop mode) */
         if (!GB_is_sgb(gb)) {
             uint32_t color = 0;
@@ -855,12 +857,12 @@ static uint16_t get_object_line_address(GB_gameboy_t *gb, const object_t *object
  */
 void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
 {
+    gb->cycles_since_vblank_callback += cycles / 2;
+
     /* The PPU does not advance while in STOP mode on the DMG */
     if (gb->stopped && !GB_is_cgb(gb)) {
-        gb->cycles_in_stop_mode += cycles;
-        if (gb->cycles_in_stop_mode >= LCDC_PERIOD) {
-            gb->cycles_in_stop_mode -= LCDC_PERIOD;
-            display_vblank(gb);
+        if (gb->cycles_since_vblank_callback >= LCDC_PERIOD) {
+            GB_display_vblank(gb);
         }
         return;
     }
@@ -912,8 +914,10 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
     
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
         while (true) {
-            GB_SLEEP(gb, display, 1, LCDC_PERIOD);
-            display_vblank(gb);
+            if (gb->cycles_since_vblank_callback < LCDC_PERIOD) {
+                GB_SLEEP(gb, display, 1, LCDC_PERIOD - gb->cycles_since_vblank_callback);
+            }
+            GB_display_vblank(gb);
             gb->cgb_repeated_a_frame = true;
         }
         return;
@@ -1327,7 +1331,7 @@ abort_fetching_object:
             // Todo: unverified timing
             gb->current_lcd_line++;
             if (gb->current_lcd_line == LINES && GB_is_sgb(gb)) {
-                display_vblank(gb);
+                GB_display_vblank(gb);
             }
             
             if (gb->icd_hreset_callback) {
@@ -1361,13 +1365,13 @@ abort_fetching_object:
                 
                 if (gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON) {
                     if (GB_is_cgb(gb)) {
-                        GB_timing_sync(gb);
+                        GB_display_vblank(gb);
                         gb->frame_skip_state = GB_FRAMESKIP_FIRST_FRAME_SKIPPED;
                     }
                     else {
                         if (!GB_is_sgb(gb) || gb->current_lcd_line < LINES) {
                             gb->is_odd_frame ^= true;
-                            display_vblank(gb);
+                            GB_display_vblank(gb);
                         }
                         gb->frame_skip_state = GB_FRAMESKIP_SECOND_FRAME_RENDERED;
                     }
@@ -1375,7 +1379,7 @@ abort_fetching_object:
                 else {
                     if (!GB_is_sgb(gb) || gb->current_lcd_line < LINES) {
                         gb->is_odd_frame ^= true;
-                        display_vblank(gb);
+                        GB_display_vblank(gb);
                     }
                     if (gb->frame_skip_state == GB_FRAMESKIP_FIRST_FRAME_SKIPPED) {
                         gb->cgb_repeated_a_frame = true;

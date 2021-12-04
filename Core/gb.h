@@ -514,6 +514,9 @@ struct GB_gameboy_internal_s {
         int32_t speed_switch_halt_countdown;
         uint8_t speed_switch_countdown; // To compensate for the lack of pipeline emulation
         uint8_t speed_switch_freeze; // Solely for realigning the PPU, should be removed when the odd modes are implemented
+        /* For timing of the vblank callback */
+        uint32_t cycles_since_vblank_callback;
+        bool lcd_disabled_outside_of_vblank;
     );
 
     /* APU */
@@ -579,7 +582,6 @@ struct GB_gameboy_internal_s {
         bool lyc_interrupt_line;
         bool cgb_palettes_blocked;
         uint8_t current_lcd_line; // The LCD can go out of sync since the vsync signal is skipped in some cases.
-        uint32_t cycles_in_stop_mode;
         uint8_t object_priority;
         bool oam_ppu_blocked;
         bool vram_ppu_blocked;
