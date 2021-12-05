@@ -1639,6 +1639,10 @@ void GB_cpu_run(GB_gameboy_t *gb)
                 interrupt_queue >>= 1;
                 interrupt_bit++;
             }
+            assert(gb->pending_cycles > 2);
+            gb->pending_cycles -= 2;
+            flush_pending_cycles(gb);
+            gb->pending_cycles = 2;
             gb->io_registers[GB_IO_IF] &= ~(1 << interrupt_bit);
             gb->pc = interrupt_bit * 8 + 0x40;
         }
