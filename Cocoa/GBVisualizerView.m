@@ -1,4 +1,5 @@
 #import "GBVisualizerView.h"
+#import "GBPaletteEditorController.h"
 #include <Core/gb.h>
 
 #define SAMPLE_COUNT 1024
@@ -28,24 +29,7 @@ static NSColor *color_to_effect_color(typeof(GB_PALETTE_DMG.colors[0]) color)
 
 - (void)drawRect:(NSRect)dirtyRect
 {
-    const GB_palette_t *palette;
-    switch ([[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorPalette"]) {
-        case 1:
-            palette = &GB_PALETTE_DMG;
-            break;
-            
-        case 2:
-            palette = &GB_PALETTE_MGB;
-            break;
-            
-        case 3:
-            palette = &GB_PALETTE_GBL;
-            break;
-            
-        default:
-            palette = &GB_PALETTE_GREY;
-            break;
-    }
+    const GB_palette_t *palette = [GBPaletteEditorController userPalette];
     NSSize size = self.bounds.size;
     
     [color_to_effect_color(palette->colors[0]) setFill];
