@@ -456,6 +456,10 @@ void GB_lcd_off(GB_gameboy_t *gb)
     
     gb->accessed_oam_row = -1;
     gb->wy_triggered = false;
+    
+    if (unlikely(gb->lcd_line_callback)) {
+        gb->lcd_line_callback(gb, 0);
+    }
 }
 
 static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
@@ -983,6 +987,9 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         /* Lines 0 - 143 */
         gb->window_y = -1;
         for (; gb->current_line < LINES; gb->current_line++) {
+            if (unlikely(gb->lcd_line_callback)) {
+                gb->lcd_line_callback(gb, gb->current_line);
+            }
             
             gb->oam_write_blocked = GB_is_cgb(gb) && !gb->cgb_double_speed;
             gb->accessed_oam_row = 0;
@@ -1343,6 +1350,9 @@ abort_fetching_object:
         for (; gb->current_line < VIRTUAL_LINES - 1; gb->current_line++) {
             gb->io_registers[GB_IO_LY] = gb->current_line;
             gb->ly_for_comparison = -1;
+            if (unlikely(gb->lcd_line_callback)) {
+                gb->lcd_line_callback(gb, gb->current_line);
+            }
             GB_SLEEP(gb, display, 26, 2);
             if (gb->current_line == LINES && !gb->stat_interrupt_line && (gb->io_registers[GB_IO_STAT] & 0x20)) {
                 gb->io_registers[GB_IO_IF] |= 2;
