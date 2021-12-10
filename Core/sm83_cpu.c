@@ -1655,7 +1655,10 @@ void GB_cpu_run(GB_gameboy_t *gb)
     /* Run mode */
     else if (!gb->halted) {
         gb->last_opcode_read = cycle_read(gb, gb->pc++);
-        if (gb->halt_bug) {
+        if (unlikely(gb->execution_callback)) {
+            gb->execution_callback(gb, gb->pc - 1, gb->last_opcode_read);
+        }
+        if (unlikely(gb->halt_bug)) {
             gb->pc--;
             gb->halt_bug = false;
         }

@@ -283,6 +283,8 @@ typedef void (*GB_icd_hreset_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_icd_vreset_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_boot_rom_load_callback_t)(GB_gameboy_t *gb, GB_boot_rom_t type);
 
+typedef void (*GB_execution_callback_t)(GB_gameboy_t *gb, uint16_t address, uint8_t opcode);
+
 struct GB_breakpoint_s;
 struct GB_watchpoint_s;
 
@@ -665,6 +667,7 @@ struct GB_gameboy_internal_s {
         GB_print_image_callback_t printer_callback;
         GB_workboy_set_time_callback workboy_set_time_callback;
         GB_workboy_get_time_callback workboy_get_time_callback;
+        GB_execution_callback_t execution_callback;
 
         /*** Debugger ***/
         volatile bool debug_stopped, debug_disable;
@@ -838,6 +841,8 @@ void GB_set_rumble_callback(GB_gameboy_t *gb, GB_rumble_callback_t callback);
 void GB_set_update_input_hint_callback(GB_gameboy_t *gb, GB_update_input_hint_callback_t callback);
 /* Called when a new boot ROM is needed. The callback should call GB_load_boot_rom or GB_load_boot_rom_from_buffer */
 void GB_set_boot_rom_load_callback(GB_gameboy_t *gb, GB_boot_rom_load_callback_t callback);
+    
+void GB_set_execution_callback(GB_gameboy_t *gb, GB_execution_callback_t callback);
     
 void GB_set_palette(GB_gameboy_t *gb, const GB_palette_t *palette);
 
