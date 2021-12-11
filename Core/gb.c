@@ -1854,15 +1854,6 @@ unsigned GB_time_to_alarm(GB_gameboy_t *gb)
     return alarm_time - current_time;
 }
 
-void GB_set_rtc_mode(GB_gameboy_t *gb, GB_rtc_mode_t mode)
-{
-    if (gb->rtc_mode != mode) {
-        gb->rtc_mode = mode;
-        gb->rtc_cycles = 0;
-        gb->last_rtc_second = time(NULL);
-    }
-}
-
 bool GB_has_accelerometer(GB_gameboy_t *gb)
 {
     return gb->cartridge_type->mbc_type == GB_MBC7;

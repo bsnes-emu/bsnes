@@ -247,11 +247,6 @@ typedef enum {
     GB_BOOT_ROM_AGB,
 } GB_boot_rom_t;
 
-typedef enum {
-    GB_RTC_MODE_SYNC_TO_HOST,
-    GB_RTC_MODE_ACCURATE,
-} GB_rtc_mode_t;
-
 #ifdef GB_INTERNAL
 #define LCDC_PERIOD 70224
 #define CPU_FREQUENCY 0x400000
@@ -640,6 +635,7 @@ struct GB_gameboy_internal_s {
         uint64_t last_sync;
         uint64_t cycles_since_last_sync; // In 8MHz units
         GB_rtc_mode_t rtc_mode;
+        uint32_t rtc_second_length;
 
         /* Audio */
         GB_apu_output_t apu_output;
@@ -861,10 +857,7 @@ void GB_disconnect_serial(GB_gameboy_t *gb);
     
 /* For cartridges with an alarm clock */
 unsigned GB_time_to_alarm(GB_gameboy_t *gb); // 0 if no alarm
-    
-/* RTC emulation mode */
-void GB_set_rtc_mode(GB_gameboy_t *gb, GB_rtc_mode_t mode);
-    
+
 /* For cartridges motion controls */
 bool GB_has_accelerometer(GB_gameboy_t *gb);
 // In units of g (gravity's acceleration).

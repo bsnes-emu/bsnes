@@ -248,11 +248,32 @@ static void advance_serial(GB_gameboy_t *gb, uint8_t cycles)
     
 }
 
+void GB_set_rtc_mode(GB_gameboy_t *gb, GB_rtc_mode_t mode)
+{
+    if (gb->rtc_mode != mode) {
+        gb->rtc_mode = mode;
+        gb->rtc_cycles = 0;
+        gb->last_rtc_second = time(NULL);
+    }
+}
+
+
+void GB_set_rtc_multiplier(GB_gameboy_t *gb, double multiplier)
+{
+    if (multiplier == 1) {
+        gb->rtc_second_length = 0;
+        return;
+    }
+    
+    gb->rtc_second_length = GB_get_unmultiplied_clock_rate(gb) * 2 * multiplier;
+}
+
 static void rtc_run(GB_gameboy_t *gb, uint8_t cycles)
 {
     if (gb->cartridge_type->mbc_type != GB_HUC3 && !gb->cartridge_type->has_rtc) return;
     gb->rtc_cycles += cycles;
     time_t current_time = 0;
+    uint32_t rtc_second_length = unlikely(gb->rtc_second_length)? gb->rtc_second_length : GB_get_unmultiplied_clock_rate(gb) * 2;
     
     switch (gb->rtc_mode) {
         case GB_RTC_MODE_SYNC_TO_HOST:
@@ -266,8 +287,8 @@ static void rtc_run(GB_gameboy_t *gb, uint8_t cycles)
                 gb->rtc_cycles -= cycles;
                 return;
             }
-            if (gb->rtc_cycles < GB_get_unmultiplied_clock_rate(gb) * 2) return;
-            gb->rtc_cycles -= GB_get_unmultiplied_clock_rate(gb) * 2;
+            if (gb->rtc_cycles < rtc_second_length) return;
+            gb->rtc_cycles -= rtc_second_length;
             current_time = gb->last_rtc_second + 1;
             break;
     }
