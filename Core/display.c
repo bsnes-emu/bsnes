@@ -890,7 +890,7 @@ void GB_display_run(GB_gameboy_t *gb, uint8_t cycles)
         GB_STATE(gb, display, 15);
         GB_STATE(gb, display, 16);
         GB_STATE(gb, display, 17);
-        // GB_STATE(gb, display, 19);
+        GB_STATE(gb, display, 19);
         GB_STATE(gb, display, 20);
         GB_STATE(gb, display, 21);
         GB_STATE(gb, display, 22);
@@ -1348,12 +1348,13 @@ abort_fetching_object:
         gb->wx166_glitch = false;
         /* Lines 144 - 152 */
         for (; gb->current_line < VIRTUAL_LINES - 1; gb->current_line++) {
-            gb->io_registers[GB_IO_LY] = gb->current_line;
             gb->ly_for_comparison = -1;
             if (unlikely(gb->lcd_line_callback)) {
                 gb->lcd_line_callback(gb, gb->current_line);
             }
+            GB_STAT_update(gb);
             GB_SLEEP(gb, display, 26, 2);
+            gb->io_registers[GB_IO_LY] = gb->current_line;
             if (gb->current_line == LINES && !gb->stat_interrupt_line && (gb->io_registers[GB_IO_STAT] & 0x20)) {
                 gb->io_registers[GB_IO_IF] |= 2;
             }
@@ -1406,12 +1407,13 @@ abort_fetching_object:
         
         /* TODO: Verified on SGB2 and CGB-E. Actual interrupt timings not tested. */
         /* Lines 153 */
-        gb->io_registers[GB_IO_LY] = 153;
         gb->ly_for_comparison = -1;
         GB_STAT_update(gb);
-        GB_SLEEP(gb, display, 14, (gb->model > GB_MODEL_CGB_C)? 4: 6);
+        GB_SLEEP(gb, display, 19, 2);
+        gb->io_registers[GB_IO_LY] = 153;
+        GB_SLEEP(gb, display, 14, (gb->model > GB_MODEL_CGB_C)? 2: 4);
         
-        if (!GB_is_cgb(gb)) {
+        if (gb->model <= GB_MODEL_CGB_C && !gb->cgb_double_speed) {
             gb->io_registers[GB_IO_LY] = 0;
         }
         gb->ly_for_comparison = 153;
