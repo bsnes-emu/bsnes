@@ -522,8 +522,8 @@ static uint8_t data_for_tile_sel_glitch(GB_gameboy_t *gb, bool *should_use, bool
 
 static void render_pixel_if_possible(GB_gameboy_t *gb)
 {
-    GB_fifo_item_t *fifo_item = NULL;
-    GB_fifo_item_t *oam_fifo_item = NULL;
+    const GB_fifo_item_t *fifo_item = NULL;
+    const GB_fifo_item_t *oam_fifo_item = NULL;
     bool draw_oam = false;
     bool bg_enabled = true, bg_priority = false;
     
@@ -533,7 +533,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         
         if (fifo_size(&gb->oam_fifo)) {
             oam_fifo_item = fifo_pop(&gb->oam_fifo);
-            if (oam_fifo_item->pixel && (gb->io_registers[GB_IO_LCDC] & 2)) {
+            if (oam_fifo_item->pixel && (gb->io_registers[GB_IO_LCDC] & 2) && unlikely(!gb->objects_disabled)) {
                 draw_oam = true;
                 bg_priority |= oam_fifo_item->bg_priority;
             }
@@ -558,6 +558,12 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         else {
             bg_enabled = false;
         }
+    }
+    
+    if (unlikely(gb->background_disabled)) {
+        bg_enabled = false;
+        static const GB_fifo_item_t empty_item = {0,};
+        fifo_item = &empty_item;
     }
 
     uint8_t icd_pixel = 0;
@@ -1624,3 +1630,24 @@ bool GB_is_odd_frame(GB_gameboy_t *gb)
 {
     return gb->is_odd_frame;
 }
+
+void GB_set_object_rendering_disabled(GB_gameboy_t *gb, bool disabled)
+{
+    gb->objects_disabled = disabled;
+}
+
+void GB_set_background_rendering_disabled(GB_gameboy_t *gb, bool disabled)
+{
+    gb->background_disabled = disabled;
+}
+
+bool GB_is_object_rendering_disabled(GB_gameboy_t *gb)
+{
+    return gb->objects_disabled;
+}
+
+bool GB_is_background_rendering_disabled(GB_gameboy_t *gb)
+{
+    return gb->background_disabled;
+}
+

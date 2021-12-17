@@ -61,4 +61,11 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border);
 void GB_set_color_correction_mode(GB_gameboy_t *gb, GB_color_correction_mode_t mode);
 void GB_set_light_temperature(GB_gameboy_t *gb, double temperature);
 bool GB_is_odd_frame(GB_gameboy_t *gb);
+
+void GB_set_object_rendering_disabled(GB_gameboy_t *gb, bool disabled);
+void GB_set_background_rendering_disabled(GB_gameboy_t *gb, bool disabled);
+bool GB_is_object_rendering_disabled(GB_gameboy_t *gb);
+bool GB_is_background_rendering_disabled(GB_gameboy_t *gb);
+
+
 #endif /* display_h */

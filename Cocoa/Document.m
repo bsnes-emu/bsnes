@@ -1043,6 +1043,13 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     else if ([anItem action] == @selector(toggleCheats:)) {
         [(NSMenuItem*)anItem setState:GB_cheats_enabled(&gb)];
     }
+    else if ([anItem action] == @selector(toggleDisplayBackground:)) {
+        [(NSMenuItem*)anItem setState:!GB_is_background_rendering_disabled(&gb)];
+    }
+    else if ([anItem action] == @selector(toggleDisplayObjects:)) {
+        [(NSMenuItem*)anItem setState:!GB_is_object_rendering_disabled(&gb)];
+    }
+    
     return [super validateUserInterfaceItem:anItem];
 }
 
@@ -2305,6 +2312,16 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     [[NSPasteboard generalPasteboard] clearContents];
     [[NSPasteboard generalPasteboard] writeObjects:@[image]];
     [self.osdView displayText:@"Screenshot copied"];
+}
+
+- (IBAction)toggleDisplayBackground:(id)sender
+{
+    GB_set_background_rendering_disabled(&gb, !GB_is_background_rendering_disabled(&gb));
+}
+
+- (IBAction)toggleDisplayObjects:(id)sender
+{
+    GB_set_object_rendering_disabled(&gb, !GB_is_object_rendering_disabled(&gb));
 }
 
 @end

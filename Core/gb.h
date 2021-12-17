@@ -630,6 +630,8 @@ struct GB_gameboy_internal_s {
         GB_sgb_border_t borrowed_border;
         bool tried_loading_sgb_border;
         bool has_sgb_border;
+        bool objects_disabled;
+        bool background_disabled;
                
         /* Timing */
         uint64_t last_sync;
