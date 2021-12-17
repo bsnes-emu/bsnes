@@ -632,7 +632,8 @@ struct GB_gameboy_internal_s {
         bool has_sgb_border;
         bool objects_disabled;
         bool background_disabled;
-               
+        bool joyp_accessed;
+
         /* Timing */
         uint64_t last_sync;
         uint64_t cycles_since_last_sync; // In 8MHz units

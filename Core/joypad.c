@@ -121,3 +121,13 @@ void GB_set_key_mask_for_player(GB_gameboy_t *gb, GB_key_mask_t mask, unsigned p
     
     GB_update_joyp(gb);
 }
+
+bool GB_get_joyp_accessed(GB_gameboy_t *gb)
+{
+    return gb->joyp_accessed;
+}
+
+void GB_clear_joyp_accessed(GB_gameboy_t *gb)
+{
+    gb->joyp_accessed = false;
+}

@@ -363,6 +363,9 @@ static void leave_stop_mode(GB_gameboy_t *gb)
 static void stop(GB_gameboy_t *gb, uint8_t opcode)
 {
     flush_pending_cycles(gb);
+    if ((gb->io_registers[GB_IO_JOYP] & 0x30) != 0x30) {
+        gb->joyp_accessed = true;
+    }
     bool exit_by_joyp = ((gb->io_registers[GB_IO_JOYP] & 0xF) != 0xF);
     bool speed_switch = (gb->io_registers[GB_IO_KEY1] & 0x1) && !exit_by_joyp;
     bool immediate_exit = speed_switch || exit_by_joyp;
@@ -1575,6 +1578,9 @@ void GB_cpu_run(GB_gameboy_t *gb)
     if (gb->stopped) {
         GB_timing_sync(gb);
         GB_advance_cycles(gb, 4);
+        if ((gb->io_registers[GB_IO_JOYP] & 0x30) != 0x30) {
+            gb->joyp_accessed = true;
+        }
         if ((gb->io_registers[GB_IO_JOYP] & 0xF) != 0xF) {
             leave_stop_mode(gb);
             GB_advance_cycles(gb, 8);

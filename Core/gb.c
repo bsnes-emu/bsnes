@@ -1151,6 +1151,9 @@ uint8_t GB_run(GB_gameboy_t *gb)
         GB_debugger_handle_async_commands(gb);
         GB_rewind_push(gb);
     }
+    if (!(gb->io_registers[GB_IO_IF] & 0x10) && (gb->io_registers[GB_IO_JOYP] & 0x30) != 0x30) {
+        gb->joyp_accessed = true;
+    }
     return gb->cycles_since_run;
 }
 

@@ -568,6 +568,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 return ((gb->apu.is_active[GB_NOISE] ? (gb->apu.samples[GB_NOISE] << 4) : 0) |
                         (gb->apu.is_active[GB_WAVE] ? (gb->apu.samples[GB_WAVE]) : 0))  & (gb->model <= GB_MODEL_CGB_C? gb->apu.pcm_mask[1] : 0xFF);
             case GB_IO_JOYP:
+                gb->joyp_accessed = true;
                 GB_timing_sync(gb);
             case GB_IO_TMA:
             case GB_IO_LCDC:
