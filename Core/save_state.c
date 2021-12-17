@@ -67,7 +67,7 @@ typedef struct __attribute__((packed)) {
     BESS_buffer_t oam;
     BESS_buffer_t hram;
     BESS_buffer_t background_palettes;
-    BESS_buffer_t sprite_palettes;
+    BESS_buffer_t object_palettes;
 } BESS_CORE_t;
 
 typedef struct __attribute__((packed)) {
@@ -604,8 +604,8 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file, bool appe
     if (GB_is_cgb(gb)) {
         bess_core.background_palettes.size = LE32(sizeof(gb->background_palettes_data));
         bess_core.background_palettes.offset = LE32(video_offset + offsetof(GB_gameboy_t, background_palettes_data) - GB_SECTION_OFFSET(video));
-        bess_core.sprite_palettes.size = LE32(sizeof(gb->sprite_palettes_data));
-        bess_core.sprite_palettes.offset = LE32(video_offset + offsetof(GB_gameboy_t, sprite_palettes_data) - GB_SECTION_OFFSET(video));
+        bess_core.object_palettes.size = LE32(sizeof(gb->object_palettes_data));
+        bess_core.object_palettes.offset = LE32(video_offset + offsetof(GB_gameboy_t, object_palettes_data) - GB_SECTION_OFFSET(video));
     }
     
     if (file->write(file, &bess_core, sizeof(bess_core)) != sizeof(bess_core)) {
@@ -1088,7 +1088,7 @@ done:
     read_bess_buffer(&core.oam, file, gb->oam, sizeof(gb->oam));
     read_bess_buffer(&core.hram, file, gb->hram, sizeof(gb->hram));
     read_bess_buffer(&core.background_palettes, file, gb->background_palettes_data, sizeof(gb->background_palettes_data));
-    read_bess_buffer(&core.sprite_palettes, file, gb->sprite_palettes_data, sizeof(gb->sprite_palettes_data));
+    read_bess_buffer(&core.object_palettes, file, gb->object_palettes_data, sizeof(gb->object_palettes_data));
     if (gb->sgb) {
         memset(gb->sgb, 0, sizeof(*gb->sgb));
         GB_sgb_load_default_data(gb);

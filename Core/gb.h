@@ -214,8 +214,8 @@ enum {
     /* CGB Paletts */
     GB_IO_BGPI       = 0x68, // CGB Mode Only - Background Palette Index
     GB_IO_BGPD       = 0x69, // CGB Mode Only - Background Palette Data
-    GB_IO_OBPI       = 0x6a, // CGB Mode Only - Sprite Palette Index
-    GB_IO_OBPD       = 0x6b, // CGB Mode Only - Sprite Palette Data
+    GB_IO_OBPI       = 0x6a, // CGB Mode Only - Object Palette Index
+    GB_IO_OBPD       = 0x6b, // CGB Mode Only - Object Palette Data
     GB_IO_OPRI       = 0x6c, // Affects object priority (X based or index based)
 
     /* Missing */
@@ -287,8 +287,8 @@ struct GB_watchpoint_s;
 typedef struct {
     uint8_t pixel; // Color, 0-3
     uint8_t palette; // Palette, 0 - 7 (CGB); 0-1 in DMG (or just 0 for BG)
-    uint8_t priority; // Sprite priority – 0 in DMG, OAM index in CGB
-    bool bg_priority; // For sprite FIFO – the BG priority bit. For the BG FIFO – the CGB attributes priority bit
+    uint8_t priority; // Object priority – 0 in DMG, OAM index in CGB
+    bool bg_priority; // For object FIFO – the BG priority bit. For the BG FIFO – the CGB attributes priority bit
 } GB_fifo_item_t;
 
 #define GB_FIFO_LENGTH 16
@@ -536,7 +536,7 @@ struct GB_gameboy_internal_s {
         bool cgb_vram_bank;
         uint8_t oam[0xA0];
         uint8_t background_palettes_data[0x40];
-        uint8_t sprite_palettes_data[0x40];
+        uint8_t object_palettes_data[0x40];
         uint8_t position_in_line;
         bool stat_interrupt_line;
         uint8_t effective_scx;
@@ -575,7 +575,7 @@ struct GB_gameboy_internal_s {
         uint8_t n_visible_objs;
         uint8_t oam_search_index;
         uint8_t accessed_oam_row;
-        uint8_t extra_penalty_for_sprite_at_0;
+        uint8_t extra_penalty_for_object_at_0;
         uint8_t mode_for_interrupt;
         bool lyc_interrupt_line;
         bool cgb_palettes_blocked;
@@ -620,7 +620,7 @@ struct GB_gameboy_internal_s {
         /* I/O */
         uint32_t *screen;
         uint32_t background_palettes_rgb[0x20];
-        uint32_t sprite_palettes_rgb[0x20];
+        uint32_t object_palettes_rgb[0x20];
         const GB_palette_t *dmg_palette;
         GB_color_correction_mode_t color_correction_mode;
         double light_temperature;

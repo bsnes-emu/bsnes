@@ -1639,9 +1639,9 @@ static bool palettes(GB_gameboy_t *gb, char *arguments, char *modifiers, const d
         }
     }
 
-    GB_log(gb, "Sprites palettes: \n");
+    GB_log(gb, "Object palettes: \n");
     for (unsigned i = 0; i < 32; i++) {
-        GB_log(gb, "%04x ", ((uint16_t *)&gb->sprite_palettes_data)[i]);
+        GB_log(gb, "%04x ", ((uint16_t *)&gb->object_palettes_data)[i]);
         if (i % 4 == 3) {
             GB_log(gb, "\n");
         }
@@ -1659,7 +1659,7 @@ static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     }
     GB_log(gb, "LCDC:\n");
     GB_log(gb, "    LCD enabled: %s\n",(gb->io_registers[GB_IO_LCDC] & 128)? "Enabled" : "Disabled");
-    GB_log(gb, "    %s: %s\n", (gb->cgb_mode? "Sprite priority flags" : "Background and Window"),
+    GB_log(gb, "    %s: %s\n", (gb->cgb_mode? "Object priority flags" : "Background and Window"),
                                (gb->io_registers[GB_IO_LCDC] & 1)? "Enabled" : "Disabled");
     GB_log(gb, "    Objects: %s\n", (gb->io_registers[GB_IO_LCDC] & 2)? "Enabled" : "Disabled");
     GB_log(gb, "    Object size: %s\n", (gb->io_registers[GB_IO_LCDC] & 4)? "8x16" : "8x8");

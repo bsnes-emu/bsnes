@@ -30,7 +30,7 @@
 @property (nonatomic, strong) IBOutlet NSPanel *vramWindow;
 @property (nonatomic, strong) IBOutlet NSTextField *vramStatusLabel;
 @property (nonatomic, strong) IBOutlet NSTableView *paletteTableView;
-@property (nonatomic, strong) IBOutlet NSTableView *spritesTableView;
+@property (nonatomic, strong) IBOutlet NSTableView *objectsTableView;
 @property (nonatomic, strong) IBOutlet NSPanel *printerFeedWindow;
 @property (nonatomic, strong) IBOutlet NSImageView *feedImageView;
 @property (nonatomic, strong) IBOutlet NSTextView *debuggerSideViewInput;

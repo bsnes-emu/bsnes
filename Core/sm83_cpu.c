@@ -198,7 +198,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             /* Similar to the palette registers, these interact directly with the LCD, so they appear to be affected by it. Both my DMG (B, blob) and Game Boy Light behave this way though.
              
                Additionally, LCDC.1 is very nasty because on the it is read both by the FIFO when popping pixels,
-               and the sprite-fetching state machine, and both behave differently when it comes to access conflicts.
+               and the object-fetching state machine, and both behave differently when it comes to access conflicts.
                Hacks ahead.
              */
             

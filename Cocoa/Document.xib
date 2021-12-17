@@ -25,10 +25,10 @@
                 <outlet property="memoryBankItem" destination="bWC-FW-IYP" id="Lf2-dh-z32"/>
                 <outlet property="memoryView" destination="8hr-8o-3rN" id="fF0-rh-8ND"/>
                 <outlet property="memoryWindow" destination="mRm-dL-mCj" id="VPR-lu-vtI"/>
+                <outlet property="objectsTableView" destination="TOc-XJ-w9w" id="O4R-4Z-9hU"/>
                 <outlet property="osdView" destination="MX4-l2-7NE" id="Am7-fq-uvu"/>
                 <outlet property="paletteTableView" destination="gfC-d3-dmq" id="fTC-eL-Qg3"/>
                 <outlet property="printerFeedWindow" destination="NdE-0B-WCf" id="yVK-cS-NOJ"/>
-                <outlet property="spritesTableView" destination="TOc-XJ-w9w" id="O4R-4Z-9hU"/>
                 <outlet property="tilemapImageView" destination="LlK-tV-bjv" id="nSY-Xd-BjZ"/>
                 <outlet property="tilemapMapButton" destination="YIJ-Qc-SIZ" id="BB7-Gg-7XP"/>
                 <outlet property="tilemapPaletteButton" destination="loB-0k-Qff" id="2Or-7l-6vn"/>
@@ -502,7 +502,7 @@
                                     </subviews>
                                 </view>
                             </tabViewItem>
-                            <tabViewItem label="Sprites" identifier="" id="a08-eg-Maw">
+                            <tabViewItem label="Objects" identifier="" id="a08-eg-Maw">
                                 <view key="view" id="EiO-p0-3xn">
                                     <rect key="frame" x="0.0" y="0.0" width="512" height="408"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -770,7 +770,7 @@
                                 <segments>
                                     <segment label="Tileset" selected="YES"/>
                                     <segment label="Tilemap" tag="1"/>
-                                    <segment label="Sprites"/>
+                                    <segment label="Objects"/>
                                     <segment label="Palettes"/>
                                 </segments>
                             </segmentedCell>

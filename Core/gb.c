@@ -1225,13 +1225,13 @@ static void update_dmg_palette(GB_gameboy_t *gb)
 {
     const GB_palette_t *palette = gb->dmg_palette ?: &GB_PALETTE_GREY;
     if (gb->rgb_encode_callback && !GB_is_cgb(gb)) {
-        gb->sprite_palettes_rgb[4] = gb->sprite_palettes_rgb[0] = gb->background_palettes_rgb[0] =
+        gb->object_palettes_rgb[4] = gb->object_palettes_rgb[0] = gb->background_palettes_rgb[0] =
         gb->rgb_encode_callback(gb, palette->colors[3].r, palette->colors[3].g, palette->colors[3].b);
-        gb->sprite_palettes_rgb[5] = gb->sprite_palettes_rgb[1] = gb->background_palettes_rgb[1] =
+        gb->object_palettes_rgb[5] = gb->object_palettes_rgb[1] = gb->background_palettes_rgb[1] =
         gb->rgb_encode_callback(gb, palette->colors[2].r, palette->colors[2].g, palette->colors[2].b);
-        gb->sprite_palettes_rgb[6] = gb->sprite_palettes_rgb[2] = gb->background_palettes_rgb[2] =
+        gb->object_palettes_rgb[6] = gb->object_palettes_rgb[2] = gb->background_palettes_rgb[2] =
         gb->rgb_encode_callback(gb, palette->colors[1].r, palette->colors[1].g, palette->colors[1].b);
-        gb->sprite_palettes_rgb[7] = gb->sprite_palettes_rgb[3] = gb->background_palettes_rgb[3] =
+        gb->object_palettes_rgb[7] = gb->object_palettes_rgb[3] = gb->background_palettes_rgb[3] =
         gb->rgb_encode_callback(gb, palette->colors[0].r, palette->colors[0].g, palette->colors[0].b);
         
         // LCD off color
@@ -1537,7 +1537,7 @@ static void reset_ram(GB_gameboy_t *gb)
     if (GB_is_cgb(gb)) {
         for (unsigned i = 0; i < 64; i++) {
             gb->background_palettes_data[i] = GB_random(); /* Doesn't really matter as the boot ROM overrides it anyway*/
-            gb->sprite_palettes_data[i] = GB_random();
+            gb->object_palettes_data[i] = GB_random();
         }
         for (unsigned i = 0; i < 32; i++) {
             GB_palette_changed(gb, true, i * 2);
@@ -1733,9 +1733,9 @@ void *GB_get_direct_access(GB_gameboy_t *gb, GB_direct_access_t access, size_t *
             *bank = 0;
             return &gb->background_palettes_data;
         case GB_DIRECT_ACCESS_OBP:
-            *size = sizeof(gb->sprite_palettes_data);
+            *size = sizeof(gb->object_palettes_data);
             *bank = 0;
-            return &gb->sprite_palettes_data;
+            return &gb->object_palettes_data;
         case GB_DIRECT_ACCESS_IE:
             *size = sizeof(gb->interrupt_enable);
             *bank = 0;
