@@ -782,7 +782,7 @@ struct GB_gameboy_internal_s {
     
 #ifndef GB_INTERNAL
 struct GB_gameboy_s {
-    char __internal[sizeof(struct GB_gameboy_internal_s)];
+    _Alignas(struct GB_gameboy_internal_s) uint8_t __internal[sizeof(struct GB_gameboy_internal_s)];
 };
 #endif
 
