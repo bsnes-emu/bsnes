@@ -1750,6 +1750,11 @@ void *GB_get_direct_access(GB_gameboy_t *gb, GB_direct_access_t access, size_t *
     }
 }
 
+GB_registers_t *GB_get_registers(GB_gameboy_t *gb)
+{
+    return (GB_registers_t *)&gb->registers;
+}
+
 void GB_set_clock_multiplier(GB_gameboy_t *gb, double multiplier)
 {
     gb->clock_multiplier = multiplier;

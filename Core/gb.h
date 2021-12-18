@@ -321,6 +321,31 @@ typedef struct {
     char copyright[33];
 } GB_gbs_info_t;
 
+/* Duplicated so it can remain anonymous in GB_gameboy_t */
+typedef union {
+    uint16_t registers[GB_REGISTERS_16_BIT];
+    struct {
+        uint16_t af,
+        bc,
+        de,
+        hl,
+        sp;
+    };
+    struct {
+#ifdef GB_BIG_ENDIAN
+        uint8_t a, f,
+        b, c,
+        d, e,
+        h, l;
+#else
+        uint8_t f, a,
+        c, b,
+        e, d,
+        l, h;
+#endif
+    };
+} GB_registers_t;
+
 /* When state saving, each section is dumped independently of other sections.
    This allows adding data to the end of the section without worrying about future compatibility.
    Some other changes might be "safe" as well.
@@ -345,30 +370,29 @@ struct GB_gameboy_internal_s {
     GB_SECTION(core_state,
         /* Registers */
         uint16_t pc;
-           union {
-               uint16_t registers[GB_REGISTERS_16_BIT];
-               struct {
-                   uint16_t af,
-                            bc,
-                            de,
-                            hl,
-                            sp;
-               };
-               struct {
+        union {
+            uint16_t registers[GB_REGISTERS_16_BIT];
+            struct {
+                uint16_t af,
+                         bc,
+                         de,
+                         hl,
+                         sp;
+            };
+            struct {
 #ifdef GB_BIG_ENDIAN
-                   uint8_t a, f,
-                           b, c,
-                           d, e,
-                           h, l;
+                uint8_t a, f,
+                        b, c,
+                        d, e,
+                        h, l;
 #else
-                   uint8_t f, a,
-                           c, b,
-                           e, d,
-                           l, h;
+                uint8_t f, a,
+                        c, b,
+                        e, d,
+                        l, h;
 #endif
-               };
-               
-           };
+            };
+        };
         uint8_t ime;
         uint8_t interrupt_enable;
         uint8_t cgb_ram_bank;
@@ -801,6 +825,7 @@ typedef enum {
 /* Returns a mutable pointer to various hardware memories. If that memory is banked, the current bank
    is returned at *bank, even if only a portion of the memory is banked. */
 void *GB_get_direct_access(GB_gameboy_t *gb, GB_direct_access_t access, size_t *size, uint16_t *bank);
+GB_registers_t *GB_get_registers(GB_gameboy_t *gb);
 
 void *GB_get_user_data(GB_gameboy_t *gb);
 void GB_set_user_data(GB_gameboy_t *gb, void *data);
