@@ -657,6 +657,7 @@ struct GB_gameboy_internal_s {
         bool objects_disabled;
         bool background_disabled;
         bool joyp_accessed;
+        bool illegal_inputs_allowed;
 
         /* Timing */
         uint64_t last_sync;

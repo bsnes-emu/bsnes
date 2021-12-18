@@ -30,11 +30,13 @@ void GB_update_joyp(GB_gameboy_t *gb)
                 gb->io_registers[GB_IO_JOYP] |= (!gb->keys[current_player][i]) << i;
             }
             /* Forbid pressing two opposing keys, this breaks a lot of games; even if it's somewhat possible. */
-            if (!(gb->io_registers[GB_IO_JOYP] & 1)) {
-                gb->io_registers[GB_IO_JOYP] |= 2;
-            }
-            if (!(gb->io_registers[GB_IO_JOYP] & 4)) {
-                gb->io_registers[GB_IO_JOYP] |= 8;
+            if (likely(!gb->illegal_inputs_allowed)) {
+                if (!(gb->io_registers[GB_IO_JOYP] & 1)) {
+                    gb->io_registers[GB_IO_JOYP] |= 2;
+                }
+                if (!(gb->io_registers[GB_IO_JOYP] & 4)) {
+                    gb->io_registers[GB_IO_JOYP] |= 8;
+                }
             }
             break;
 
@@ -130,4 +132,9 @@ bool GB_get_joyp_accessed(GB_gameboy_t *gb)
 void GB_clear_joyp_accessed(GB_gameboy_t *gb)
 {
     gb->joyp_accessed = false;
+}
+
+void GB_set_allow_illegal_inputs(GB_gameboy_t *gb, bool allow)
+{
+    gb->illegal_inputs_allowed = allow;
 }

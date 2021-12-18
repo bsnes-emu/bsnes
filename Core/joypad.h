@@ -36,6 +36,7 @@ void GB_set_key_mask_for_player(GB_gameboy_t *gb, GB_key_mask_t mask, unsigned p
 void GB_icd_set_joyp(GB_gameboy_t *gb, uint8_t value);
 bool GB_get_joyp_accessed(GB_gameboy_t *gb);
 void GB_clear_joyp_accessed(GB_gameboy_t *gb);
+void GB_set_allow_illegal_inputs(GB_gameboy_t *gb, bool allow);
 
 
 #ifdef GB_INTERNAL
