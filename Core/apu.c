@@ -598,10 +598,19 @@ void GB_apu_run(GB_gameboy_t *gb)
     gb->apu.apu_cycles = 0;
     if (!cycles) return;
     
-    if (unlikely(gb->apu.wave_channel.delayed_bugged_read)) {
-        gb->apu.wave_channel.delayed_bugged_read = false;
-            gb->apu.wave_channel.current_sample_byte =
-        gb->io_registers[GB_IO_WAV_START + (gb->address_bus & 0xF)];
+    if (unlikely(gb->apu.wave_channel.bugged_read_countdown)) {
+        uint8_t cycles_left = cycles;
+        while (cycles_left) {
+            cycles_left--;
+            if (--gb->apu.wave_channel.bugged_read_countdown == 0) {
+                    gb->apu.wave_channel.current_sample_byte =
+                gb->io_registers[GB_IO_WAV_START + (gb->address_bus & 0xF)];
+                if (gb->apu.is_active[GB_WAVE]) {
+                    update_wave_sample(gb, 0);
+                }
+                break;
+            }
+        }
     }
     
     bool start_ch4 = false;
@@ -707,11 +716,14 @@ void GB_apu_run(GB_gameboy_t *gb)
                     gb->io_registers[GB_IO_WAV_START + (gb->address_bus & 0xF)];
                 }
                 else {
-                    gb->apu.wave_channel.delayed_bugged_read = true;
+                    gb->apu.wave_channel.bugged_read_countdown = 1;
                 }
             }
             if (cycles_left) {
                 gb->apu.wave_channel.sample_countdown -= cycles_left;
+            }
+            if (gb->apu.wave_channel.sample_countdown == 0) {
+                gb->apu.wave_channel.bugged_read_countdown = 2;
             }
         }
         

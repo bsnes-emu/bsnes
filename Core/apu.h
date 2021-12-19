@@ -102,7 +102,7 @@ typedef struct
         uint8_t current_sample_byte; // Current sample byte.
         bool wave_form_just_read;
         bool pulsed;
-        bool delayed_bugged_read;
+        uint8_t bugged_read_countdown;
     } wave_channel;
 
     struct {
