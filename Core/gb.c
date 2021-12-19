@@ -1329,7 +1329,7 @@ bool GB_is_inited(GB_gameboy_t *gb)
 
 bool GB_is_cgb(GB_gameboy_t *gb)
 {
-    return (gb->model & GB_MODEL_FAMILY_MASK) == GB_MODEL_CGB_FAMILY;
+    return gb->model >= GB_MODEL_CGB_0;
 }
 
 bool GB_is_cgb_in_cgb_mode(GB_gameboy_t *gb)
