@@ -3,6 +3,7 @@
 #define typeof __typeof__
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdalign.h>
 #include <time.h>
 
 #include "defs.h"
@@ -782,7 +783,7 @@ struct GB_gameboy_internal_s {
     
 #ifndef GB_INTERNAL
 struct GB_gameboy_s {
-    _Alignas(struct GB_gameboy_internal_s) uint8_t __internal[sizeof(struct GB_gameboy_internal_s)];
+    alignas(struct GB_gameboy_internal_s) uint8_t __internal[sizeof(struct GB_gameboy_internal_s)];
 };
 #endif
 
