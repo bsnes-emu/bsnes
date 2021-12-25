@@ -1413,6 +1413,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 - (IBAction) reloadVRAMData: (id) sender
 {
     if (self.vramWindow.isVisible) {
+        uint8_t *io_regs = GB_get_direct_access(&gb, GB_DIRECT_ACCESS_IO, NULL, NULL);
         switch ([self.vramTabView.tabViewItems indexOfObject:self.vramTabView.selectedTabViewItem]) {
             case 0:
             /* Tileset */
@@ -1451,8 +1452,8 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
                                 (GB_map_type_t) self.tilemapMapButton.indexOfSelectedItem,
                                 (GB_tileset_type_t) self.TilemapSetButton.indexOfSelectedItem);
                 
-                self.tilemapImageView.scrollRect = NSMakeRect(GB_read_memory(&gb, 0xFF00 | GB_IO_SCX),
-                                                              GB_read_memory(&gb, 0xFF00 | GB_IO_SCY),
+                self.tilemapImageView.scrollRect = NSMakeRect(io_regs[GB_IO_SCX],
+                                                              io_regs[GB_IO_SCY],
                                                               160, 144);
                 self.tilemapImageView.image = [Document imageFromData:data width:256 height:256 scale:1.0];
                 self.tilemapImageView.layer.magnificationFilter = kCAFilterNearest;

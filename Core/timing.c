@@ -435,7 +435,7 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
         GB_hdma_run(gb);
     }
     GB_apu_run(gb);
-    GB_display_run(gb, cycles);
+    GB_display_run(gb, cycles, false);
     ir_run(gb, cycles);
     rtc_run(gb, cycles);
 }

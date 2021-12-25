@@ -540,6 +540,8 @@ struct GB_gameboy_internal_s {
         /* For timing of the vblank callback */
         uint32_t cycles_since_vblank_callback;
         bool lcd_disabled_outside_of_vblank;
+        int32_t allowed_pending_cycles;
+        uint16_t mode3_batching_length;
     );
 
     /* APU */
@@ -796,7 +798,7 @@ __attribute__((__format__ (__printf__, fmtarg, firstvararg)))
 
 void GB_init(GB_gameboy_t *gb, GB_model_t model);
 bool GB_is_inited(GB_gameboy_t *gb);
-bool GB_is_cgb(GB_gameboy_t *gb);
+bool GB_is_cgb(const GB_gameboy_t *gb);
 bool GB_is_cgb_in_cgb_mode(GB_gameboy_t *gb);
 bool GB_is_sgb(GB_gameboy_t *gb); // Returns true if the model is SGB or SGB2
 bool GB_is_hle_sgb(GB_gameboy_t *gb); // Returns true if the model is SGB or SGB2 and the SFC/SNES side is HLE'd

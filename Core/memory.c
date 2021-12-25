@@ -98,6 +98,7 @@ void GB_trigger_oam_bug(GB_gameboy_t *gb, uint16_t address)
     if (GB_is_cgb(gb)) return;
     
     if (address >= 0xFE00 && address < 0xFF00) {
+        GB_display_sync(gb);
         if (gb->accessed_oam_row != 0xff && gb->accessed_oam_row >= 8) {
             uint16_t *base = (uint16_t *)(gb->oam + gb->accessed_oam_row);
             base[0] = bitwise_glitch(base[0],
@@ -283,6 +284,7 @@ static uint8_t read_mbc_rom(GB_gameboy_t *gb, uint16_t addr)
 
 static uint8_t read_vram(GB_gameboy_t *gb, uint16_t addr)
 {
+    GB_display_sync(gb);
     if (gb->vram_read_blocked) {
         return 0xFF;
     }
@@ -421,6 +423,37 @@ static uint8_t read_banked_ram(GB_gameboy_t *gb, uint16_t addr)
     return gb->ram[(addr & 0x0FFF) + gb->cgb_ram_bank * 0x1000];
 }
 
+static inline void sync_ppu_if_needed(GB_gameboy_t *gb, uint8_t register_accessed)
+{
+    switch (register_accessed) {
+        case GB_IO_IF:
+        case GB_IO_LCDC:
+        case GB_IO_STAT:
+        case GB_IO_SCY:
+        case GB_IO_SCX:
+        case GB_IO_LY:
+        case GB_IO_LYC:
+        case GB_IO_DMA:
+        case GB_IO_BGP:
+        case GB_IO_OBP0:
+        case GB_IO_OBP1:
+        case GB_IO_WY:
+        case GB_IO_WX:
+        case GB_IO_HDMA1:
+        case GB_IO_HDMA2:
+        case GB_IO_HDMA3:
+        case GB_IO_HDMA4:
+        case GB_IO_HDMA5:
+        case GB_IO_BGPI:
+        case GB_IO_BGPD:
+        case GB_IO_OBPI:
+        case GB_IO_OBPD:
+        case GB_IO_OPRI:
+            GB_display_sync(gb);
+            break;
+    }
+}
+
 static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
 {
 
@@ -433,6 +466,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
     }
 
     if (addr < 0xFF00) {
+        GB_display_sync(gb);
         if (gb->oam_write_blocked && !GB_is_cgb(gb)) {
             if (!gb->disable_oam_corruption) {
                 GB_trigger_oam_bug_read(gb, addr);
@@ -548,6 +582,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
     }
 
     if (addr < 0xFF80) {
+        sync_ppu_if_needed(gb, addr);
         switch (addr & 0xFF) {
             case GB_IO_IF:
                 return gb->io_registers[GB_IO_IF] | 0xE0;
@@ -846,6 +881,7 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
 static void write_vram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
+    GB_display_sync(gb);
     if (gb->vram_write_blocked) {
         //GB_log(gb, "Wrote %02x to %04x (VRAM) during mode 3\n", value, addr);
         return;
@@ -1155,6 +1191,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     }
 
     if (addr < 0xFF00) {
+        GB_display_sync(gb);
         if (gb->oam_write_blocked) {
             GB_trigger_oam_bug(gb, addr);
             return;
@@ -1233,6 +1270,8 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     /* Todo: Clean this code up: use a function table and move relevant code to display.c and timing.c
        (APU read and writes are already at apu.c) */
     if (addr < 0xFF80) {
+        sync_ppu_if_needed(gb, addr);
+        
         /* Hardware registers */
         switch (addr & 0xFF) {
             case GB_IO_WY:
@@ -1563,6 +1602,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     }
 
     if (addr == 0xFFFF) {
+        GB_display_sync(gb);
         /* Interrupt mask */
         gb->interrupt_enable = value;
         return;

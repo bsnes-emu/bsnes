@@ -1139,7 +1139,7 @@ uint8_t GB_run(GB_gameboy_t *gb)
            we just halt the CPU (with hacky code) until the correct time.
            This ensures the Nintendo logo doesn't flash on screen, and
            the game does "run in background" while the animation is playing. */
-        GB_display_run(gb, 228);
+        GB_display_run(gb, 228, true);
         gb->cycles_since_last_sync += 228;
         return 228;
     }
@@ -1327,7 +1327,7 @@ bool GB_is_inited(GB_gameboy_t *gb)
     return gb->magic == state_magic();
 }
 
-bool GB_is_cgb(GB_gameboy_t *gb)
+bool GB_is_cgb(const GB_gameboy_t *gb)
 {
     return gb->model >= GB_MODEL_CGB_0;
 }
