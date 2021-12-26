@@ -1643,6 +1643,7 @@ abort_fetching_object:
 skip_slow_mode_3:
             
             /* TODO: This seems incorrect (glitches Tesserae), verify further */
+            gb->data_for_sel_glitch = 0;
             /*
             if (gb->fetcher_state == 4 || gb->fetcher_state == 5) {
                 gb->data_for_sel_glitch = gb->current_tile_data[0];
