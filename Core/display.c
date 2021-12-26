@@ -930,6 +930,9 @@ static void render_line(GB_gameboy_t *gb)
             uint16_t line_address = get_object_line_address(gb, object);
             uint8_t data0 = gb->vram[line_address];
             uint8_t data1 = gb->vram[line_address + 1];
+            if (gb->n_visible_objs == 0) {
+                gb->data_for_sel_glitch = data1;
+            }
             if (object->flags & 0x20) {
                 data0 = flip(data0);
                 data1 = flip(data1);
@@ -1643,7 +1646,6 @@ abort_fetching_object:
 skip_slow_mode_3:
             
             /* TODO: This seems incorrect (glitches Tesserae), verify further */
-            gb->data_for_sel_glitch = 0;
             /*
             if (gb->fetcher_state == 4 || gb->fetcher_state == 5) {
                 gb->data_for_sel_glitch = gb->current_tile_data[0];
