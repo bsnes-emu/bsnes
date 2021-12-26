@@ -1653,8 +1653,6 @@ void GB_reset(GB_gameboy_t *gb)
     
     GB_set_internal_div_counter(gb, 8);
 
-    GB_apu_update_cycles_per_sample(gb);
-    
     if (gb->nontrivial_jump_state) {
         free(gb->nontrivial_jump_state);
         gb->nontrivial_jump_state = NULL;
@@ -1758,7 +1756,6 @@ GB_registers_t *GB_get_registers(GB_gameboy_t *gb)
 void GB_set_clock_multiplier(GB_gameboy_t *gb, double multiplier)
 {
     gb->clock_multiplier = multiplier;
-    GB_apu_update_cycles_per_sample(gb);
 }
 
 uint32_t GB_get_clock_rate(GB_gameboy_t *gb)

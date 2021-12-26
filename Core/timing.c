@@ -423,7 +423,7 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
         gb->double_speed_alignment += cycles;
     }
     gb->hdma_cycles += cycles;
-    gb->apu_output.sample_cycles += cycles;
+    gb->apu_output.sample_cycles += cycles * gb->apu_output.sample_rate;
     gb->cycles_since_last_sync += cycles;
     gb->cycles_since_run += cycles;
     
