@@ -1642,14 +1642,15 @@ abort_fetching_object:
             }
 skip_slow_mode_3:
             
-            /* TODO: Verify */
+            /* TODO: This seems incorrect (glitches Tesserae), verify further */
+            /*
             if (gb->fetcher_state == 4 || gb->fetcher_state == 5) {
                 gb->data_for_sel_glitch = gb->current_tile_data[0];
             }
             else {
                 gb->data_for_sel_glitch = gb->current_tile_data[1];
             }
-            
+            */
             while (gb->lcd_x != 160 && !gb->disable_rendering && gb->screen && !gb->sgb) {
                 /* Oh no! The PPU and LCD desynced! Fill the rest of the line whith white. */
                 uint32_t *dest = NULL;
