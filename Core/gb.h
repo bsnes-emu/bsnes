@@ -667,6 +667,8 @@ struct GB_gameboy_internal_s {
         uint64_t cycles_since_last_sync; // In 8MHz units
         GB_rtc_mode_t rtc_mode;
         uint32_t rtc_second_length;
+        uint32_t clock_rate;
+        uint32_t unmultiplied_clock_rate;
 
         /* Audio */
         GB_apu_output_t apu_output;
@@ -918,6 +920,7 @@ uint32_t GB_get_rom_crc32(GB_gameboy_t *gb);
 
 #ifdef GB_INTERNAL
 internal void GB_borrow_sgb_border(GB_gameboy_t *gb);
+internal void GB_update_clock_rate(GB_gameboy_t *gb);
 #endif
     
 #endif /* GB_h */

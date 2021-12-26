@@ -383,6 +383,7 @@ static void sanitize_state(GB_gameboy_t *gb)
         }
         gb->sgb->current_player &= gb->sgb->player_count - 1;
     }
+    GB_update_clock_rate(gb);
 }
 
 static bool dump_section(virtual_file_t *file, const void *src, uint32_t size)

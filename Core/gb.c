@@ -1591,6 +1591,7 @@ void GB_reset(GB_gameboy_t *gb)
 {
     uint32_t mbc_ram_size = gb->mbc_ram_size;
     GB_model_t model = gb->model;
+    GB_update_clock_rate(gb);
     uint8_t rtc_section[GB_SECTION_SIZE(rtc)];
     memcpy(rtc_section, GB_GET_SECTION(gb, rtc), sizeof(rtc_section));
     memset(gb, 0, (size_t)GB_GET_SECTION((GB_gameboy_t *) 0, unsaved));
@@ -1756,24 +1757,34 @@ GB_registers_t *GB_get_registers(GB_gameboy_t *gb)
 void GB_set_clock_multiplier(GB_gameboy_t *gb, double multiplier)
 {
     gb->clock_multiplier = multiplier;
+    GB_update_clock_rate(gb);
 }
 
 uint32_t GB_get_clock_rate(GB_gameboy_t *gb)
 {
-    return GB_get_unmultiplied_clock_rate(gb) * gb->clock_multiplier;
+    return gb->clock_rate;
 }
-
 
 uint32_t GB_get_unmultiplied_clock_rate(GB_gameboy_t *gb)
 {
-    if (gb->model & GB_MODEL_PAL_BIT) {
-        return SGB_PAL_FREQUENCY;
-    }
-    if ((gb->model & ~GB_MODEL_NO_SFC_BIT) == GB_MODEL_SGB) {
-        return SGB_NTSC_FREQUENCY;
-    }
-    return CPU_FREQUENCY;
+    return gb->unmultiplied_clock_rate;
 }
+
+void GB_update_clock_rate(GB_gameboy_t *gb)
+{
+    if (gb->model & GB_MODEL_PAL_BIT) {
+        gb->unmultiplied_clock_rate = SGB_PAL_FREQUENCY;
+    }
+    else if ((gb->model & ~GB_MODEL_NO_SFC_BIT) == GB_MODEL_SGB) {
+        gb->unmultiplied_clock_rate = SGB_NTSC_FREQUENCY;
+    }
+    else {
+        gb->unmultiplied_clock_rate = CPU_FREQUENCY;
+    }
+    
+    gb->clock_rate = gb->unmultiplied_clock_rate * gb->clock_multiplier;
+}
+
 void GB_set_border_mode(GB_gameboy_t *gb, GB_border_mode_t border_mode)
 {
     if (gb->border_mode > GB_BORDER_ALWAYS) return;
