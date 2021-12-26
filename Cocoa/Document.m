@@ -2210,6 +2210,12 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     NSImage *ret = nil;
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBFilterScreenshots"]) {
         ret = [_view renderToImage];
+        [ret lockFocus];
+        NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithFocusedViewRect:NSMakeRect(0, 0,
+                                                                                                   ret.size.width, ret.size.height)];
+        [ret unlockFocus];
+        ret = [[NSImage alloc] initWithSize:ret.size];
+        [ret addRepresentation:bitmapRep];
     }
     if (!ret) {
         ret = [Document imageFromData:[NSData dataWithBytesNoCopy:_view.currentBuffer
@@ -2219,12 +2225,6 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
                                height:GB_get_screen_height(&gb)
                                 scale:1.0];
     }
-    [ret lockFocus];
-    NSBitmapImageRep *bitmapRep = [[NSBitmapImageRep alloc] initWithFocusedViewRect:NSMakeRect(0, 0,
-                                                                                               ret.size.width, ret.size.height)];
-    [ret unlockFocus];
-    ret = [[NSImage alloc] initWithSize:ret.size];
-    [ret addRepresentation:bitmapRep];
     return ret;
 }
 
