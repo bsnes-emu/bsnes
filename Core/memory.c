@@ -1648,7 +1648,7 @@ void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
 void GB_dma_run(GB_gameboy_t *gb)
 {
-    while (gb->dma_cycles >= 4 && gb->dma_steps_left) {
+    while (unlikely(gb->dma_cycles >= 4 && gb->dma_steps_left)) {
         /* Todo: measure this value */
         gb->dma_cycles -= 4;
         gb->dma_steps_left--;
@@ -1671,7 +1671,7 @@ void GB_dma_run(GB_gameboy_t *gb)
 
 void GB_hdma_run(GB_gameboy_t *gb)
 {
-    if (!gb->hdma_on) return;
+    if (likely(!gb->hdma_on)) return;
 
     while (gb->hdma_cycles >= 0x4) {
         gb->hdma_cycles -= 0x4;

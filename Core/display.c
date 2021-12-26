@@ -912,12 +912,15 @@ static void render_line(GB_gameboy_t *gb)
         unsigned priority:6; // Object priority – 0 in DMG, OAM index in CGB
         unsigned palette:3; // Palette, 0 - 7 (CGB); 0-1 in DMG (or just 0 for BG)
         bool bg_priority:1; // BG priority bit
-    } object_buffer[160 + 16]; // allocate extra to avoid per pixel checks
-    memset(object_buffer, 0, sizeof(object_buffer));
-
+    } _object_buffer[160 + 16]; // allocate extra to avoid per pixel checks
+    static const uint8_t empty_object_buffer[sizeof(_object_buffer)];
+    const typeof(_object_buffer[0]) *object_buffer;
+    
     if (gb->n_visible_objs && !gb->objects_disabled && (gb->io_registers[GB_IO_LCDC] & 2)) {
+        object_buffer = &_object_buffer[0];
         object_t *objects = (object_t *) &gb->oam;
-        
+        memset(_object_buffer, 0, sizeof(_object_buffer));
+
         while (gb->n_visible_objs) {
             unsigned object_index = gb->visible_objs[gb->n_visible_objs - 1];
             unsigned priority = gb->object_priority == GB_OBJECT_PRIORITY_X? 0 : object_index;
@@ -932,7 +935,7 @@ static void render_line(GB_gameboy_t *gb)
                 data1 = flip(data1);
             }
 
-            typeof(object_buffer[0]) *p = object_buffer + object->x;
+            typeof(_object_buffer[0]) *p = _object_buffer + object->x;
             if (object->x >= 168) {
                 continue;
             }
@@ -955,6 +958,9 @@ static void render_line(GB_gameboy_t *gb)
                 p++;
             }
         }
+    }
+    else {
+        object_buffer = (const void *)empty_object_buffer;
     }
     
     
@@ -1069,11 +1075,14 @@ static void render_line_sgb(GB_gameboy_t *gb)
         unsigned pixel:2; // Color, 0-3
         unsigned palette:1; // Palette, 0 - 7 (CGB); 0-1 in DMG (or just 0 for BG)
         bool bg_priority:1; // BG priority bit
-    } object_buffer[160 + 16]; // allocate extra to avoid per pixel checks
-    memset(object_buffer, 0, sizeof(object_buffer));
+    } _object_buffer[160 + 16]; // allocate extra to avoid per pixel checks
+    static const uint8_t empty_object_buffer[sizeof(_object_buffer)];
+    const typeof(_object_buffer[0]) *object_buffer;
     
     if (gb->n_visible_objs && !gb->objects_disabled && (gb->io_registers[GB_IO_LCDC] & 2)) {
+        object_buffer = &_object_buffer[0];
         object_t *objects = (object_t *) &gb->oam;
+        memset(_object_buffer, 0, sizeof(_object_buffer));
         
         while (gb->n_visible_objs) {
             const object_t *object = &objects[gb->visible_objs[gb->n_visible_objs - 1]];
@@ -1087,7 +1096,7 @@ static void render_line_sgb(GB_gameboy_t *gb)
                 data1 = flip(data1);
             }
             
-            typeof(object_buffer[0]) *p = object_buffer + object->x;
+            typeof(_object_buffer[0]) *p = _object_buffer + object->x;
             if (object->x >= 168) {
                 continue;
             }
@@ -1103,6 +1112,9 @@ static void render_line_sgb(GB_gameboy_t *gb)
                 p++;
             }
         }
+    }
+    else {
+        object_buffer = (const void *)empty_object_buffer;
     }
     
     
