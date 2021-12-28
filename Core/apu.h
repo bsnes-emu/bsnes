@@ -57,7 +57,7 @@ typedef void (*GB_sample_callback_t)(GB_gameboy_t *gb, GB_sample_t *sample);
 typedef struct
 {
     bool global_enable;
-    uint8_t apu_cycles;
+    uint16_t apu_cycles;
 
     uint8_t samples[GB_N_CHANNELS];
     bool is_active[GB_N_CHANNELS];
@@ -175,7 +175,7 @@ internal uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg);
 internal void GB_apu_div_event(GB_gameboy_t *gb);
 internal void GB_apu_div_secondary_event(GB_gameboy_t *gb);
 internal void GB_apu_init(GB_gameboy_t *gb);
-internal void GB_apu_run(GB_gameboy_t *gb);
+internal void GB_apu_run(GB_gameboy_t *gb, bool force);
 #endif
 
 #endif /* apu_h */

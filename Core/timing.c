@@ -165,13 +165,11 @@ void GB_set_internal_div_counter(GB_gameboy_t *gb, uint16_t value)
     /* TODO: Can switching to double speed mode trigger an event? */
     uint16_t apu_bit = gb->cgb_double_speed? 0x2000 : 0x1000;
     if (triggers & apu_bit) {
-        GB_apu_run(gb);
         GB_apu_div_event(gb);
     }
     else {
         uint16_t secondary_triggers = ~gb->div_counter & value;
         if (secondary_triggers & apu_bit) {
-            GB_apu_run(gb);
             GB_apu_div_secondary_event(gb);
         }
     }
@@ -434,7 +432,7 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
         GB_dma_run(gb);
         GB_hdma_run(gb);
     }
-    GB_apu_run(gb);
+    GB_apu_run(gb, false);
     GB_display_run(gb, cycles, false);
     ir_run(gb, cycles);
     rtc_run(gb, cycles);

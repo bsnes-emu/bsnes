@@ -2198,6 +2198,7 @@ bool GB_debugger_execute_command(GB_gameboy_t *gb, char *input)
     }
     
     GB_display_sync(gb);
+    GB_apu_run(gb, true);
 
     char *command_string = input;
     char *arguments = strchr(input, ' ');
