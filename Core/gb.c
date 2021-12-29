@@ -1249,6 +1249,11 @@ void GB_set_palette(GB_gameboy_t *gb, const GB_palette_t *palette)
     update_dmg_palette(gb);
 }
 
+const GB_palette_t *GB_get_palette(GB_gameboy_t *gb)
+{
+    return gb->dmg_palette;
+}
+
 void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback)
 {
 
