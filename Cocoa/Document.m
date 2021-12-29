@@ -390,7 +390,7 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
         
         if (audioBufferPosition < nFrames) {
             audioBufferNeeded = nFrames;
-            [audioLock wait];
+            [audioLock waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.125]];
         }
         
         if (stopping || GB_debugger_is_stopped(&gb)) {
