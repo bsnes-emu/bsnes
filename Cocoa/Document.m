@@ -399,7 +399,13 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
             return;
         }
         
-        if (audioBufferPosition >= nFrames && audioBufferPosition < nFrames + 4800) {
+        if (audioBufferPosition < nFrames) {
+            // Not enough audio
+            memset(buffer, 0, (nFrames - audioBufferPosition) * sizeof(*buffer));
+            memcpy(buffer, audioBuffer, audioBufferPosition * sizeof(*buffer));
+            audioBufferPosition = 0;
+        }
+        else if (audioBufferPosition < nFrames + 4800) {
             memcpy(buffer, audioBuffer, nFrames * sizeof(*buffer));
             memmove(audioBuffer, audioBuffer + nFrames, (audioBufferPosition - nFrames) * sizeof(*buffer));
             audioBufferPosition = audioBufferPosition - nFrames;
