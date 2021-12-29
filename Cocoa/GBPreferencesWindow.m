@@ -377,6 +377,7 @@
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender doubleValue] / 256.0)
                                               forKey:@"GBVolume"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBVolumeChanged" object:nil];
 }
 
 - (IBAction)franeBlendingModeChanged:(id)sender

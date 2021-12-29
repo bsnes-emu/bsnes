@@ -69,6 +69,7 @@ enum model {
     size_t audioBufferSize;
     size_t audioBufferPosition;
     size_t audioBufferNeeded;
+    double _volume;
     
     bool borderModeChanged;
     
@@ -212,6 +213,7 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
         debugger_input_queue = [[NSMutableArray alloc] init];
         console_output_lock = [[NSRecursiveLock alloc] init];
         audioLock = [[NSCondition alloc] init];
+        _volume = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBVolume"];
     }
     return self;
 }
@@ -346,7 +348,7 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
         [_gbsVisualizer addSample:sample];
     }
     [audioLock lock];
-    if (self.audioClient.isPlaying) {
+    if (_audioClient.isPlaying) {
         if (audioBufferPosition == audioBufferSize) {
             if (audioBufferSize >= 0x4000) {
                 audioBufferPosition = 0;
@@ -362,10 +364,9 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
             }
             audioBuffer = realloc(audioBuffer, sizeof(*sample) * audioBufferSize);
         }
-        double volume = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBVolume"];
-        if (volume != 1) {
-            sample->left *= volume;
-            sample->right *= volume;
+        if (_volume != 1) {
+            sample->left *= _volume;
+            sample->right *= _volume;
         }
         audioBuffer[audioBufferPosition++] = *sample;
     }
@@ -385,7 +386,7 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
 {
     GB_set_pixels_output(&gb, self.view.pixels);
     GB_set_sample_rate(&gb, 96000);
-    self.audioClient = [[GBAudioClient alloc] initWithRendererBlock:^(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer) {
+    _audioClient = [[GBAudioClient alloc] initWithRendererBlock:^(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer) {
         [audioLock lock];
         
         if (audioBufferPosition < nFrames) {
@@ -417,7 +418,7 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
         [audioLock unlock];
     } andSampleRate:96000];
     if (![[NSUserDefaults standardUserDefaults] boolForKey:@"Mute"]) {
-        [self.audioClient start];
+        [_audioClient start];
     }
     hex_timer = [NSTimer timerWithTimeInterval:0.25 target:self selector:@selector(reloadMemoryView) userInfo:nil repeats:true];
     [[NSRunLoop mainRunLoop] addTimer:hex_timer forMode:NSDefaultRunLoopMode];
@@ -497,8 +498,8 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     audioBufferPosition = audioBufferNeeded;
     [audioLock signal];
     [audioLock unlock];
-    [self.audioClient stop];
-    self.audioClient = nil;
+    [_audioClient stop];
+    _audioClient = nil;
     self.view.mouseHidingEnabled = false;
     GB_save_battery(&gb, [[[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"sav"].path UTF8String]);
     GB_save_cheats(&gb, [[[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"cht"].path UTF8String]);
@@ -771,6 +772,11 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
                                                  name:@"GBCGBModelChanged"
                                                object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(updateVolume)
+                                                 name:@"GBVolumeChanged"
+                                               object:nil];
+        
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateDMG"]) {
         current_model = MODEL_DMG;
     }
@@ -929,8 +935,8 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         [self.gbsNextPrevButton imageForSegment:i].template = true;
     }
 
-    if (!self.audioClient.isPlaying) {
-        [self.audioClient start];
+    if (!_audioClient.isPlaying) {
+        [_audioClient start];
     }
     
     if (@available(macOS 10.10, *)) {
@@ -1001,22 +1007,22 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 
 - (IBAction)mute:(id)sender
 {
-    if (self.audioClient.isPlaying) {
-        [self.audioClient stop];
+    if (_audioClient.isPlaying) {
+        [_audioClient stop];
     }
     else {
-        [self.audioClient start];
-        if ([[NSUserDefaults standardUserDefaults] doubleForKey:@"GBVolume"] == 0) {
+        [_audioClient start];
+        if (_volume == 0) {
             [GBWarningPopover popoverWithContents:@"Warning: Volume is set to to zero in the preferences panel" onWindow:self.mainWindow];
         }
     }
-    [[NSUserDefaults standardUserDefaults] setBool:!self.audioClient.isPlaying forKey:@"Mute"];
+    [[NSUserDefaults standardUserDefaults] setBool:!_audioClient.isPlaying forKey:@"Mute"];
 }
 
 - (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)anItem
 {
     if ([anItem action] == @selector(mute:)) {
-        [(NSMenuItem *)anItem setState:!self.audioClient.isPlaying];
+        [(NSMenuItem *)anItem setState:!_audioClient.isPlaying];
     }
     else if ([anItem action] == @selector(togglePause:)) {
         if (master) {
@@ -1998,6 +2004,11 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         accessory = GBAccessoryWorkboy;
         GB_connect_workboy(&gb, setWorkboyTime, getWorkboyTime);
     }];
+}
+
+- (void) updateVolume
+{
+    _volume = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBVolume"];
 }
 
 - (void) updateHighpassFilter
