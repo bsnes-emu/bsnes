@@ -64,6 +64,13 @@ static uint8_t agb_bias_for_channel(GB_gameboy_t *gb, unsigned index)
 
 static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsigned cycles_offset)
 {
+    if (gb->model >= GB_MODEL_AGB && index == GB_WAVE) {
+        /* For some reason, channel 3 is inverted on the AGB */
+        value ^= 0xF;
+    }
+    
+    if (value == 0 && gb->apu.samples[index] == 0) return;
+    
     if (gb->model >= GB_MODEL_AGB) {
         /* On the AGB, because no analog mixing is done, the behavior of NR51 is a bit different.
            A channel that is not connected to a terminal is idenitcal to a connected channel
@@ -73,11 +80,6 @@ static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsign
         if (gb->apu_output.sample_rate) {
             unsigned right_volume = (gb->io_registers[GB_IO_NR50] & 7) + 1;
             unsigned left_volume = ((gb->io_registers[GB_IO_NR50] >> 4) & 7) + 1;
-            
-            if (index == GB_WAVE) {
-                /* For some reason, channel 3 is inverted on the AGB */
-                value ^= 0xF;
-            }
             
             GB_sample_t output;
             uint8_t bias = agb_bias_for_channel(gb, index);
