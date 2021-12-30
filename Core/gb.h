@@ -111,6 +111,7 @@ enum {
     GB_REGISTER_DE,
     GB_REGISTER_HL,
     GB_REGISTER_SP,
+    GB_REGISTER_PC,
     GB_REGISTERS_16_BIT /* Count */
 };
 
@@ -327,22 +328,23 @@ typedef union {
     uint16_t registers[GB_REGISTERS_16_BIT];
     struct {
         uint16_t af,
-        bc,
-        de,
-        hl,
-        sp;
+                 bc,
+                 de,
+                 hl,
+                 sp,
+                 pc;
     };
     struct {
 #ifdef GB_BIG_ENDIAN
         uint8_t a, f,
-        b, c,
-        d, e,
-        h, l;
+                b, c,
+                d, e,
+                h, l;
 #else
         uint8_t f, a,
-        c, b,
-        e, d,
-        l, h;
+                c, b,
+                e, d,
+                l, h;
 #endif
     };
 } GB_registers_t;
@@ -370,7 +372,6 @@ struct GB_gameboy_internal_s {
 
     GB_SECTION(core_state,
         /* Registers */
-        uint16_t pc;
         union {
             uint16_t registers[GB_REGISTERS_16_BIT];
             struct {
@@ -378,7 +379,8 @@ struct GB_gameboy_internal_s {
                          bc,
                          de,
                          hl,
-                         sp;
+                         sp,
+                         pc;
             };
             struct {
 #ifdef GB_BIG_ENDIAN
