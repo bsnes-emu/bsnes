@@ -40,6 +40,8 @@ bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, unsigned index)
 
         case GB_NOISE:
             return gb->io_registers[GB_IO_NR42] & 0xF8;
+            
+        nodefault;
     }
 
     return false;
@@ -58,6 +60,8 @@ static uint8_t agb_bias_for_channel(GB_gameboy_t *gb, unsigned index)
             return 0;
         case GB_NOISE:
             return gb->apu.noise_channel.current_volume;
+            
+        nodefault;
     }
     return 0;
 }
@@ -257,7 +261,8 @@ static void render(GB_gameboy_t *gb)
             {left_volume * (1 - gb->apu_output.highpass_rate) + gb->apu_output.highpass_diff.left * gb->apu_output.highpass_rate,
                 right_volume * (1 - gb->apu_output.highpass_rate) + gb->apu_output.highpass_diff.right * gb->apu_output.highpass_rate};
 
-        case GB_HIGHPASS_MAX:;
+        case GB_HIGHPASS_MAX:
+        nodefault;
         }
 
     }

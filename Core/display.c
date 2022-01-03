@@ -834,6 +834,8 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             gb->fetcher_state++;
         }
         break;
+        
+        nodefault;
     }
 }
 

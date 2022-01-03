@@ -360,6 +360,7 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
                     case 1: return gb->tpp1.rom_bank >> 8;
                     case 2: return gb->tpp1.ram_bank;
                     case 3: return gb->rumble_strength | gb->tpp1_mr4;
+                    nodefault;
                 }
             case 2:
             case 3:
@@ -533,8 +534,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                                 oam[target >> 1] = bitwise_glitch_read(a, b, c);
                                 break;
                                 
-                            default:
-                                __builtin_unreachable();
+                            nodefault;
                         }
                         
                         for (unsigned i = 0; i < 8; i++) {
@@ -706,7 +706,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 }
                 return 0xFF;
         }
-        __builtin_unreachable();
+        unreachable();
     }
 
     if (addr == 0xFFFF) {
@@ -899,6 +899,7 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     }
             }
             break;
+            nodefault;
     }
     GB_update_mbc_mappings(gb);
 }
@@ -1243,7 +1244,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 case GB_MODEL_SGB_PAL_NO_SFC:
                 case GB_MODEL_SGB2:
                 case GB_MODEL_SGB2_NO_SFC:
-                    __builtin_unreachable();
+                    unreachable();
             }
             return;
         }

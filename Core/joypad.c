@@ -53,9 +53,7 @@ void GB_update_joyp(GB_gameboy_t *gb)
             }
             break;
 
-        default:
-            __builtin_unreachable();
-            break;
+        nodefault;
     }
     
     /* Todo: This assumes the keys *always* bounce, which is incorrect when emulating an SGB */
