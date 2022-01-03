@@ -1194,6 +1194,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         if (GB_is_cgb(gb)) {
             if (addr < 0xFEA0) {
                 gb->oam[addr & 0xFF] = value;
+                return;
             }
             switch (gb->model) {
                 case GB_MODEL_CGB_D:
@@ -1209,6 +1210,9 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     addr &= ~0x18;
                     gb->extra_oam[addr - 0xfea0] = value;
                     break;
+                case GB_MODEL_CGB_E:
+                case GB_MODEL_AGB:
+                    break;
                 case GB_MODEL_DMG_B:
                 case GB_MODEL_MGB:
                 case GB_MODEL_SGB_NTSC:
@@ -1217,9 +1221,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 case GB_MODEL_SGB_PAL_NO_SFC:
                 case GB_MODEL_SGB2:
                 case GB_MODEL_SGB2_NO_SFC:
-                case GB_MODEL_CGB_E:
-                case GB_MODEL_AGB:
-                    break;
+                    __builtin_unreachable();
             }
             return;
         }
