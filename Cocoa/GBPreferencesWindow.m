@@ -561,7 +561,6 @@
         double max = 0;
         for (JOYAxis *axis in controller.axes) {
             if ((axis.value > 0.5 || (axis.equivalentButtonUsage == button.usage)) && axis.value >= max) {
-                max = axis.value;
                 mapping[@"AnalogUnderclock"] = @(axis.uniqueID);
                 break;
             }
