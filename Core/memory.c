@@ -1670,6 +1670,10 @@ void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         else {
             addr = gb->dma_current_src;
         }
+        if (GB_is_cgb(gb)) {
+            gb->dma_write_zero = true;
+            if (gb->model < GB_MODEL_CGB_E) return;
+        }
     }
     write_map[addr >> 12](gb, addr, value);
 }
@@ -1680,8 +1684,11 @@ void GB_dma_run(GB_gameboy_t *gb)
         /* Todo: measure this value */
         gb->dma_cycles -= 4;
         gb->dma_steps_left--;
-        
-        if (gb->dma_current_src < 0xe000) {
+        if (unlikely(gb->dma_write_zero)) {
+            gb->oam[gb->dma_current_dest++] = 0;
+            gb->dma_write_zero = false;
+        }
+        else if (gb->dma_current_src < 0xe000) {
             gb->oam[gb->dma_current_dest++] = GB_read_memory(gb, gb->dma_current_src);
         }
         else {
