@@ -318,6 +318,7 @@ static bool verify_and_update_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t
         case GB_MODEL_SGB2: return true;
         case GB_MODEL_SGB2_NO_SFC: return true;
         case GB_MODEL_CGB_0: return true;
+        case GB_MODEL_CGB_A: return true;
         case GB_MODEL_CGB_B: return true;
         case GB_MODEL_CGB_C: return true;
         case GB_MODEL_CGB_D: return true;
@@ -575,6 +576,7 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file, bool appe
             bess_core.full_model = BE32('S2  '); break;
  
         case GB_MODEL_CGB_0: bess_core.full_model = BE32('CC0 '); break;
+        case GB_MODEL_CGB_A: bess_core.full_model = BE32('CCA '); break;
         case GB_MODEL_CGB_B: bess_core.full_model = BE32('CCB '); break;
         case GB_MODEL_CGB_C: bess_core.full_model = BE32('CCC '); break;
         case GB_MODEL_CGB_D: bess_core.full_model = BE32('CCD '); break;

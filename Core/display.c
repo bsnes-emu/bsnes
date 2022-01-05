@@ -169,6 +169,9 @@ void GB_display_vblank(GB_gameboy_t *gb)
             if (gb->model == GB_MODEL_CGB_0) {
                 index = 1; // CGB 0 was only available in Indigo!
             }
+            else if (gb->model == GB_MODEL_CGB_A) {
+                index = 0; // CGB 0 was only available in Indigo!
+            }
             gb->borrowed_border.palette[0] = LE16(colors[index]);
             gb->borrowed_border.palette[10] = LE16(colors[5 + index]);
             gb->borrowed_border.palette[14] = LE16(colors[10 + index]);

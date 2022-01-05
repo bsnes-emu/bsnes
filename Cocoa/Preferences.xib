@@ -402,7 +402,7 @@
                         <menu key="menu" autoenablesItems="NO" id="bbF-hB-Hv7">
                             <items>
                                 <menuItem title="CPU-CGB 0 (Experimental)" tag="512" id="2Uk-u3-6Gw"/>
-                                <menuItem title="CPU-CGB A" tag="513" enabled="NO" id="axv-yk-RWM"/>
+                                <menuItem title="CPU-CGB A (Experimental)" tag="513" id="axv-yk-RWM"/>
                                 <menuItem title="CPU-CGB B (Experimental)" tag="514" id="NtJ-oo-IM2"/>
                                 <menuItem title="CPU-CGB C (Experimental)" tag="515" id="9YL-u8-12z"/>
                                 <menuItem title="CPU-CGB D" tag="516" id="c76-oF-fkU"/>
@@ -854,7 +854,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" heightSizable="YES"/>
                         <clipView key="contentView" ambiguous="YES" drawsBackground="NO" id="5Al-aC-tq8">
                             <rect key="frame" x="1" y="1" width="158" height="316"/>
-                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <autoresizingMask key="autoresizingMask"/>
                             <subviews>
                                 <tableView focusRingType="none" verticalHuggingPriority="750" ambiguous="YES" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="sourceList" columnResizing="NO" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" id="ZVn-bk-duk">
                                     <rect key="frame" x="0.0" y="0.0" width="158" height="316"/>
