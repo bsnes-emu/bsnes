@@ -18,6 +18,7 @@ namespace nall {
 
 struct thread {
   inline auto join() -> void;
+  inline auto cancel() -> void;
 
   static inline auto create(const function<void (uintptr)>& callback, uintptr parameter = 0, uint stacksize = 0) -> thread;
   static inline auto detach() -> void;
@@ -66,6 +67,11 @@ auto thread::exit() -> void {
   pthread_exit(nullptr);
 }
 
+auto thread::cancel() -> void {
+  pthread_cancel(handle);
+  pthread_join(handle, nullptr);
+}
+
 }
 
 #elif defined(API_WINDOWS)
@@ -75,6 +81,7 @@ namespace nall {
 struct thread {
   inline ~thread();
   inline auto join() -> void;
+  inline auto cancel() -> void;
 
   static inline auto create(const function<void (uintptr)>& callback, uintptr parameter = 0, uint stacksize = 0) -> thread;
   static inline auto detach() -> void;
@@ -132,6 +139,12 @@ auto thread::exit() -> void {
   ExitThread(0);
 }
 
+auto thread::cancel() -> void {
+  TerminateThread(handle, 0);
+	WaitForSingleObject(handle, INFINITE);
+  CloseHandle(handle);
+  handle = 0;
+}
 }
 
 #endif
