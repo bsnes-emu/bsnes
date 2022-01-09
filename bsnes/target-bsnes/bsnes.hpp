@@ -19,8 +19,9 @@ extern unique_pointer<Emulator::Interface> emulator;
 #include <nall/encode/rle.hpp>
 #include <nall/encode/zip.hpp>
 #include <nall/hash/crc16.hpp>
-#include <nall/atomic-queue.hpp>
 #include <nall/thread.hpp>
+#include <nall/atomic-queue.hpp>
+#include <nall/http/server.hpp>
 
 #include "program/program.hpp"
 #include "input/input.hpp"

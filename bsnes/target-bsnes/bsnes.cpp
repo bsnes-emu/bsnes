@@ -1,4 +1,6 @@
 #include "bsnes.hpp"
+#include <nall/http/server.cpp>
+
 #include <sfc/interface/interface.hpp>
 Video video;
 Audio audio;
