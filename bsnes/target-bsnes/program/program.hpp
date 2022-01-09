@@ -221,7 +221,8 @@ public:
     string arg;
   };
 
-  vector<RpcCommand> pendingRpcCommands;
+  ProducerConsumerQueue<RpcCommand> pendingRpcCommands;
+  nall::thread* rpcHandlerThread;
 
   bool fastForwarding = false;
   bool rewinding = false;

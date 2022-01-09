@@ -15,6 +15,7 @@
 #include "hacks.cpp"
 #include "filter.cpp"
 #include "viewport.cpp"
+#include "rpc.cpp"
 Program program;
 
 auto Program::create() -> void {
@@ -43,6 +44,8 @@ auto Program::create() -> void {
   stateWindow.create();
   stateManager.create();
   manifestViewer.create();
+
+  startRpcListener();
 
   if(settings.general.crashed) {
     MessageDialog(
@@ -84,6 +87,7 @@ auto Program::main() -> void {
 
   inputManager.poll();
   inputManager.pollHotkeys();
+  processRpcCommands();
 
   static bool previouslyInactive = true;
   bool currentlyInactive = inactive();
@@ -118,7 +122,8 @@ auto Program::main() -> void {
     emulator->unserialize(state);
   }
 
-  if(emulatorSettings.autoSaveMemory.checked()) {
+  if (emulatorSettings.autoSaveMemory.checked())
+  {
     auto currentTime = chrono::timestamp();
     if(currentTime - autoSaveTime >= settings.emulator.autoSaveMemory.interval) {
       autoSaveTime = currentTime;
@@ -132,9 +137,11 @@ auto Program::quit() -> void {
   presentation.setVisible(false);
   Application::processEvents();
 
+
   //in case the emulator was closed prior to initialization completing:
   settings.general.crashed = false;
 
+  stopRpcListener();
   unload();
   settings.save();
   video.reset();
