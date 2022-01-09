@@ -1002,7 +1002,9 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             /* These registers affect the output of all 4 channels (but not the output of the PCM registers).*/
             /* We call update_samples with the current value so the APU output is updated with the new outputs */
             for (unsigned i = GB_N_CHANNELS; i--;) {
-                update_sample(gb, i, gb->apu.samples[i], 0);
+                int8_t sample = gb->apu.samples[i];
+                gb->apu.samples[i] = 0x10; // Invalidate to force update
+                update_sample(gb, i, sample, 0);
             }
             break;
         case GB_IO_NR52: {
