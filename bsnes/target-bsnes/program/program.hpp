@@ -222,7 +222,7 @@ public:
   };
 
   ProducerConsumerQueue<RpcCommand> pendingRpcCommands;
-  nall::thread rpcHandlerThread;
+  nall::HTTP::Server rpcServer;
 
   bool fastForwarding = false;
   bool rewinding = false;
