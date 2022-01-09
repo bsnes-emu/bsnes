@@ -48,6 +48,11 @@ struct Program : Lock, Emulator::Platform {
   auto cheatPath() -> string;
   auto statePath() -> string;
   auto screenshotPath() -> string;
+  
+  // rpc
+  auto startRpcListener() -> void;
+  auto stopRpcListener() -> void;
+  auto processRpcCommands() -> void;
 
   //states.cpp
   struct State {
@@ -205,6 +210,18 @@ public:
     Rewind      = 1 << 4,
   };};
   uint mute = 0;
+
+  // rpc.cpp
+  struct RpcCommandType { enum : uint {
+      SaveStateToFile = 1 << 1
+  }; };
+
+  struct RpcCommand {
+    RpcCommandType type;
+    string arg;
+  };
+
+  vector<RpcCommand> pendingRpcCommands;
 
   bool fastForwarding = false;
   bool rewinding = false;
