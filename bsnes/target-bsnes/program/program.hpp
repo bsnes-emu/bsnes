@@ -213,11 +213,13 @@ public:
 
   // rpc.cpp
   struct RpcCommandType { enum : uint {
-      SaveStateToFile = 1 << 1
+      SaveStateToFile = 1 << 1,
+      Pause = 1 << 2,
   }; };
 
   struct RpcCommand {
-    RpcCommandType type;
+  public:
+    uint type;
     string arg;
   };
 
