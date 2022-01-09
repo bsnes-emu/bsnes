@@ -9,7 +9,7 @@ auto Server::open(uint port, const string &serviceName, const string &command) -
 	}
 
 	fd4 = socket(AF_INET, SOCK_STREAM, 0);
-	fd6 = socket(AF_INET6, SOCK_STREAM, 0);
+	fd6 = -1; // socket(AF_INET6, SOCK_STREAM, 0);
 	if (!ipv4() && !ipv6())
 		return false;
 
@@ -66,7 +66,7 @@ auto Server::open(uint port, const string &serviceName, const string &command) -
 	}
 
 	addrin4.sin_family = AF_INET;
-	addrin4.sin_addr.s_addr = htonl(INADDR_ANY);
+	addrin4.sin_addr.s_addr = inet_addr("127.0.0.1");
 	addrin4.sin_port = htons(port);
 
 	addrin6.sin6_family = AF_INET6;
