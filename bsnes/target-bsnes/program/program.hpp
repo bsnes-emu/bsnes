@@ -225,6 +225,7 @@ public:
 
   ProducerConsumerQueue<RpcCommand> pendingRpcCommands;
   nall::HTTP::Server rpcServer;
+  int rpcServerPort = 0;
 
   bool fastForwarding = false;
   bool rewinding = false;

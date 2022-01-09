@@ -1,7 +1,9 @@
 #include <debugapi.h>
 
 auto Program::startRpcListener() -> void {
-	rpcServer.main([&](nall::HTTP::Request& rq) -> nall::HTTP::Response {
+	if (rpcServerPort < 1024) return;
+
+	rpcServer.main([&](nall::HTTP::Request &rq) -> nall::HTTP::Response {
 		nall::HTTP::Response resp;
 
 		if (rq.requestType() != nall::HTTP::Request::RequestType::Post) {
@@ -43,17 +45,20 @@ auto Program::startRpcListener() -> void {
 			return true;
 		});
 
-		return resp;
+		return resp; 
 	});
 
-	rpcServer.open();
+	rpcServer.open(rpcServerPort);
 }
 
 auto Program::stopRpcListener() -> void {
+	if (rpcServerPort < 1024) return;
 	rpcServer.close();
 }
 
 auto Program::processRpcCommands() -> void {
+	if (rpcServerPort < 1024) return;
+
 	rpcServer.scan();
 
 	RpcCommand cmd;

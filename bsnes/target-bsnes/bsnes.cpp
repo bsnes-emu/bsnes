@@ -30,10 +30,12 @@ auto nall::main(Arguments arguments) -> void {
       Application::locale().select(argument.trimLeft("--locale=", 1L));
     } else if(argument.beginsWith("--settings=")) {
       settings.location = argument.trimLeft("--settings=", 1L);
-    } else if(inode::exists(argument)) {
+    } else if(argument.beginsWith("--rpcPort=")) {
+      program.rpcServerPort = std::stoi(std::string(argument.trimLeft("--rpcPort=").data()));
+    } else if (inode::exists(argument)) {
       //game without option
       program.gameQueue.append({"Auto;", argument});
-    } else if(argument.find(";")) {
+    } else if (argument.find(";")) {
       //game with option
       auto game = argument.split(";", 1L);
       if(inode::exists(game.last())) program.gameQueue.append(argument);
