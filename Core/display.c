@@ -470,7 +470,7 @@ static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
     if (gb->n_visible_objs == 10) return;
     
     /* TODO: It appears that DMA blocks PPU access to OAM, but it needs verification. */
-    if (gb->dma_steps_left && (gb->dma_cycles >= 0 || gb->is_dma_restarting)) {
+    if (GB_is_dma_active(gb)) {
         return;
     }
     
@@ -1215,7 +1215,7 @@ static inline uint16_t mode3_batching_length(GB_gameboy_t *gb)
 {
     if (gb->model & GB_MODEL_NO_SFC_BIT) return 0;
     if (gb->hdma_on) return 0;
-    if (gb->dma_steps_left) return 0;
+    if (GB_is_dma_active(gb)) return 0;
     if (gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20) && (gb->io_registers[GB_IO_WX] < 8 || gb->io_registers[GB_IO_WX] == 166)) {
         return 0;
     }
@@ -1406,7 +1406,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
             GB_STAT_update(gb);
             gb->n_visible_objs = 0;
             
-            if (!gb->dma_steps_left && !gb->oam_ppu_blocked) {
+            if (!GB_is_dma_active(gb) && !gb->oam_ppu_blocked) {
                 GB_BATCHPOINT(gb, display, 5, 80);
             }
             for (gb->oam_search_index = 0; gb->oam_search_index < 40; gb->oam_search_index++) {

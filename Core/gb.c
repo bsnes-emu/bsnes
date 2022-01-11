@@ -1639,8 +1639,8 @@ void GB_reset(GB_gameboy_t *gb)
     gb->io_registers[GB_IO_DMA] = gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = GB_is_cgb(gb)? 0x00 : 0xFF;
     
     gb->accessed_oam_row = -1;
-    
-    
+    gb->dma_current_dest = 0xa1;
+
     if (GB_is_hle_sgb(gb)) {
         if (!gb->sgb) {
             gb->sgb = malloc(sizeof(*gb->sgb));

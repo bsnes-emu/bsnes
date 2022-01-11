@@ -372,11 +372,6 @@ static void sanitize_state(GB_gameboy_t *gb)
     if (!GB_is_cgb(gb)) {
         gb->current_tile_attributes = 0;
     }
-    
-    if ((unsigned)gb->dma_current_dest + (unsigned)gb->dma_steps_left >= 0xa0) {
-        gb->dma_current_dest = 0;
-        gb->dma_steps_left = 0;
-    }
 
     gb->object_low_line_address &= gb->vram_size & ~1;
     if (gb->lcd_x > gb->position_in_line) {
