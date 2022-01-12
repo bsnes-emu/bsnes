@@ -435,8 +435,7 @@ struct GB_gameboy_internal_s {
         uint8_t last_dma_read;
         uint16_t dma_current_src;
         int16_t dma_cycles;
-        bool is_dma_restarting;
-        uint8_t last_opcode_read; /* Required to emulte HDMA reads from Exxx */
+        uint8_t last_opcode_read; /* Required to emulate HDMA reads from Exxx */
         bool hdma_starting;
     );
     
