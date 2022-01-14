@@ -368,7 +368,7 @@ struct GB_gameboy_internal_s {
         /* The version field makes sure we don't load save state files with a completely different structure.
            This happens when struct fields are removed/resized in an backward incompatible manner. */
         uint32_t version;
-    );
+    )
 
     GB_SECTION(core_state,
         /* Registers */
@@ -421,7 +421,7 @@ struct GB_gameboy_internal_s {
        int32_t ir_sensor;
        bool effective_ir_input;
        uint16_t address_bus;
-    );
+    )
 
     /* DMA and HDMA */
     GB_SECTION(dma,
@@ -437,7 +437,7 @@ struct GB_gameboy_internal_s {
         int16_t dma_cycles;
         uint8_t last_opcode_read; /* Required to emulate HDMA reads from Exxx */
         bool hdma_starting;
-    );
+    )
     
     /* MBC */
     GB_SECTION(mbc,
@@ -515,15 +515,13 @@ struct GB_gameboy_internal_s {
         uint8_t camera_registers[0x36];
         uint8_t rumble_strength;
         bool cart_ir;
-
-    );
-
+    )
 
     /* HRAM and HW Registers */
     GB_SECTION(hram,
         uint8_t hram[0xFFFF - 0xFF80];
         uint8_t io_registers[0x80];
-    );
+    )
 
     /* Timing */
     GB_SECTION(timing,
@@ -543,12 +541,12 @@ struct GB_gameboy_internal_s {
         bool lcd_disabled_outside_of_vblank;
         int32_t allowed_pending_cycles;
         uint16_t mode3_batching_length;
-    );
+    )
 
     /* APU */
     GB_SECTION(apu,
         GB_apu_t apu;
-    );
+    )
 
     /* RTC */
     GB_SECTION(rtc,
@@ -556,7 +554,7 @@ struct GB_gameboy_internal_s {
         uint64_t last_rtc_second;
         uint32_t rtc_cycles;
         uint8_t tpp1_mr4;
-    );
+    )
 
     /* Video Display */
     GB_SECTION(video,
@@ -625,7 +623,7 @@ struct GB_gameboy_internal_s {
         uint16_t last_tile_index_address;
         bool cgb_repeated_a_frame;
         uint8_t data_for_sel_glitch;
-    );
+    )
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
     /* This data is reserved on reset and must come last in the struct */
@@ -785,7 +783,7 @@ struct GB_gameboy_internal_s {
         bool disable_oam_corruption; // For safe memory reads
                
         GB_gbs_header_t gbs_header;
-   );
+   )
 };
     
 #ifndef GB_INTERNAL
