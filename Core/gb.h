@@ -36,6 +36,8 @@
 #define GB_MODEL_PAL_BIT 0x40
 #define GB_MODEL_NO_SFC_BIT 0x80
 
+#define GB_REWIND_FRAMES_PER_KEY 255
+
 #if __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
 #define GB_BIG_ENDIAN
 #elif __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
@@ -44,6 +46,11 @@
 #error Unable to detect endianess
 #endif
 
+#ifdef GB_BIG_ENDIAN
+#define GB_REGISTER_ORDER a,f,b,c,d,e,h,l;
+#else
+#define GB_REGISTER_ORDER f,a,c,b,e,d,l,h;
+#endif
 
 typedef struct {
     struct GB_color_s {
@@ -335,17 +342,7 @@ typedef union {
                  pc;
     };
     struct {
-#ifdef GB_BIG_ENDIAN
-        uint8_t a, f,
-                b, c,
-                d, e,
-                h, l;
-#else
-        uint8_t f, a,
-                c, b,
-                e, d,
-                l, h;
-#endif
+        uint8_t GB_REGISTER_ORDER
     };
 } GB_registers_t;
 
@@ -383,17 +380,7 @@ struct GB_gameboy_internal_s {
                          pc;
             };
             struct {
-#ifdef GB_BIG_ENDIAN
-                uint8_t a, f,
-                        b, c,
-                        d, e,
-                        h, l;
-#else
-                uint8_t f, a,
-                        c, b,
-                        e, d,
-                        l, h;
-#endif
+                uint8_t GB_REGISTER_ORDER
             };
         };
         uint8_t ime;
@@ -743,7 +730,6 @@ struct GB_gameboy_internal_s {
         const char *undo_label;
 
         /* Rewind */
-#define GB_REWIND_FRAMES_PER_KEY 255
         size_t rewind_buffer_length;
         struct {
             uint8_t *key_state;
