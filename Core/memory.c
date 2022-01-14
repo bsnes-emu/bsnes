@@ -252,6 +252,7 @@ void GB_trigger_oam_bug_read(GB_gameboy_t *gb, uint16_t address)
 static bool is_addr_in_dma_use(GB_gameboy_t *gb, uint16_t addr)
 {
     if (!GB_is_dma_active(gb) || addr >= 0xfe00) return false;
+    if (gb->dma_current_dest == 0xFF) return false; // Warm up
     if (addr >= 0xfe00) return false;
     if (gb->dma_current_src == addr) return false; // Shortcut for DMA access flow
     if (gb->dma_current_src > 0xe000 && (gb->dma_current_src & ~0x2000) == addr) return false;
@@ -1459,8 +1460,8 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 return;
 
             case GB_IO_DMA:
-                gb->dma_cycles = -3;
-                gb->dma_current_dest = 0;
+                gb->dma_cycles = 0;
+                gb->dma_current_dest = 0xFF;
                 gb->dma_current_src = value << 8;
                 gb->io_registers[GB_IO_DMA] = value;
                 return;
@@ -1681,12 +1682,12 @@ void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
 bool GB_is_dma_active(GB_gameboy_t *gb)
 {
-    return gb->dma_current_dest < 0xa1;
+    return gb->dma_current_dest != 0xa1;
 }
 
 void GB_dma_run(GB_gameboy_t *gb)
 {
-    if (gb->dma_current_dest >= 0xa1) return;
+    if (gb->dma_current_dest == 0xa1) return;
     while (unlikely(gb->dma_cycles >= 4)) {
         gb->dma_cycles -= 4;
         if (gb->dma_current_dest >= 0xa0) {

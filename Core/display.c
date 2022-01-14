@@ -844,13 +844,13 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
     }
 }
 
-static uint8_t oam_read(GB_gameboy_t *gb, uint8_t addr)
+static inline uint8_t oam_read(GB_gameboy_t *gb, uint8_t addr)
 {
     if (unlikely(gb->oam_ppu_blocked)) {
         return 0xFF;
     }
-    if (unlikely(GB_is_dma_active(gb))) {
-        
+    if (unlikely(gb->dma_current_dest > 0 && gb->dma_current_dest <= 0xa0)) { // TODO: what happens in the last and first M cycles?
+       return gb->oam[((gb->dma_current_dest - 1) & ~1) | (addr & 1)];
     }
     return gb->oam[addr];
 }
@@ -1611,6 +1611,18 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                         goto abort_fetching_object;
                     }
                     
+                    if (unlikely(GB_is_dma_active(gb) || gb->dma_current_src == 0xFF)) {
+                        unsigned offset = cycles - gb->display_cycles; // Time passed in 8MHz ticks
+                        if (offset) {
+                            if (!gb->cgb_double_speed) {
+                                offset >>= 1; // Convert to T-cycles
+                            }
+                            unsigned old = gb->dma_cycles;
+                            gb->dma_cycles = offset;
+                            GB_dma_run(gb);
+                            gb->dma_cycles += old - offset;
+                        }
+                    }
                     
                     gb->object_low_line_address = get_object_line_address(gb,
                                                                           gb->objects_y[gb->n_visible_objs - 1],
@@ -1618,7 +1630,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                                                                           gb->object_flags = oam_read(gb, gb->visible_objs[gb->n_visible_objs - 1] * 4 + 3)
                                                                           );
                     
-                    gb->cycles_for_line++;
+                    gb->cycles_for_line += 1;
                     GB_SLEEP(gb, display, 39, 1);
                     if (gb->object_fetch_aborted) {
                         goto abort_fetching_object;
