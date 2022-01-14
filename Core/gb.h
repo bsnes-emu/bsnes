@@ -47,9 +47,15 @@
 #endif
 
 #ifdef GB_BIG_ENDIAN
-#define GB_REGISTER_ORDER a,f,b,c,d,e,h,l;
+#define GB_REGISTER_ORDER a, f, \
+                          b, c, \
+                          d, e, \
+                          h, l
 #else
-#define GB_REGISTER_ORDER f,a,c,b,e,d,l,h;
+#define GB_REGISTER_ORDER f, a, \
+                          c, b, \
+                          e, d, \
+                          l, h
 #endif
 
 typedef struct {
@@ -342,7 +348,7 @@ typedef union {
                  pc;
     };
     struct {
-        uint8_t GB_REGISTER_ORDER
+        uint8_t GB_REGISTER_ORDER;
     };
 } GB_registers_t;
 
@@ -380,7 +386,7 @@ struct GB_gameboy_internal_s {
                          pc;
             };
             struct {
-                uint8_t GB_REGISTER_ORDER
+                uint8_t GB_REGISTER_ORDER;
             };
         };
         uint8_t ime;
