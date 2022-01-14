@@ -485,12 +485,14 @@ static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
     if (y <= gb->current_line && y + (height_16? 16 : 8) > gb->current_line) {
         unsigned j = 0;
         for (; j < gb->n_visible_objs; j++) {
-            if (gb->obj_comparators[j] <= objects[index].x) break;
+            if (gb->objects_x[j] <= objects[index].x) break;
         }
         memmove(gb->visible_objs + j + 1, gb->visible_objs + j, gb->n_visible_objs - j);
-        memmove(gb->obj_comparators + j + 1, gb->obj_comparators + j, gb->n_visible_objs - j);
+        memmove(gb->objects_x + j + 1, gb->objects_x + j, gb->n_visible_objs - j);
+        memmove(gb->objects_y + j + 1, gb->objects_y + j, gb->n_visible_objs - j);
         gb->visible_objs[j] = index;
-        gb->obj_comparators[j] = objects[index].x;
+        gb->objects_x[j] = objects[index].x;
+        gb->objects_y[j] = objects[index].y;
         gb->n_visible_objs++;
     }
 }
@@ -842,25 +844,30 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
     }
 }
 
-static uint16_t get_object_line_address(GB_gameboy_t *gb, const object_t *object)
+static uint8_t oam_read(GB_gameboy_t *gb, uint8_t addr)
 {
-    /* TODO: what does the PPU read if DMA is active? */
-    if (gb->oam_ppu_blocked) {
-        static const object_t blocked = {0xFF, 0xFF, 0xFF, 0xFF};
-        object = &blocked;
+    if (unlikely(gb->oam_ppu_blocked)) {
+        return 0xFF;
     }
-    
+    if (unlikely(GB_is_dma_active(gb))) {
+        
+    }
+    return gb->oam[addr];
+}
+
+static uint16_t get_object_line_address(GB_gameboy_t *gb, uint8_t y, uint8_t tile, uint8_t flags)
+{
     bool height_16 = (gb->io_registers[GB_IO_LCDC] & 4) != 0; /* Todo: Which T-cycle actually reads this? */
-    uint8_t tile_y = (gb->current_line - object->y) & (height_16? 0xF : 7);
+    uint8_t tile_y = (gb->current_line - y) & (height_16? 0xF : 7);
     
-    if (object->flags & 0x40) { /* Flip Y */
+    if (flags & 0x40) { /* Flip Y */
         tile_y ^= height_16? 0xF : 7;
     }
     
     /* Todo: I'm not 100% sure an access to OAM can't trigger the OAM bug while we're accessing this */
-    uint16_t line_address = (height_16? object->tile & 0xFE : object->tile) * 0x10 + tile_y * 2;
+    uint16_t line_address = (height_16? tile & 0xFE : tile) * 0x10 + tile_y * 2;
     
-    if (gb->cgb_mode && (object->flags & 0x8)) { /* Use VRAM bank 2 */
+    if (gb->cgb_mode && (flags & 0x8)) { /* Use VRAM bank 2 */
         line_address += 0x2000;
     }
     return line_address;
@@ -932,7 +939,7 @@ static void render_line(GB_gameboy_t *gb)
             const object_t *object = &objects[object_index];
             gb->n_visible_objs--;
             
-            uint16_t line_address = get_object_line_address(gb, object);
+            uint16_t line_address = get_object_line_address(gb, object->y, object->tile, object->flags);
             uint8_t data0 = gb->vram[line_address];
             uint8_t data1 = gb->vram[line_address + 1];
             if (gb->n_visible_objs == 0) {
@@ -1096,7 +1103,7 @@ static void render_line_sgb(GB_gameboy_t *gb)
             const object_t *object = &objects[gb->visible_objs[gb->n_visible_objs - 1]];
             gb->n_visible_objs--;
             
-            uint16_t line_address = get_object_line_address(gb, object);
+            uint16_t line_address = get_object_line_address(gb, object->y, object->tile, object->flags);
             uint8_t data0 = gb->vram[line_address];
             uint8_t data1 = gb->vram[line_address + 1];
             if (object->flags & 0x20) {
@@ -1251,7 +1258,6 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
         }
         return;
     }
-    object_t *objects = (object_t *) &gb->oam;
     
     GB_BATCHABLE_STATE_MACHINE(gb, display, cycles, 2, !force) {
         GB_STATE(gb, display, 1);
@@ -1558,14 +1564,14 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                 
                 while (gb->n_visible_objs != 0 &&
                        (gb->position_in_line < 160 || gb->position_in_line >= (uint8_t)(-8)) &&
-                       gb->obj_comparators[gb->n_visible_objs - 1] < (uint8_t)(gb->position_in_line + 8)) {
+                       gb->objects_x[gb->n_visible_objs - 1] < (uint8_t)(gb->position_in_line + 8)) {
                     gb->n_visible_objs--;
                 }
                 
                 gb->during_object_fetch = true;
                 while (gb->n_visible_objs != 0 &&
                        (gb->io_registers[GB_IO_LCDC] & 2 || GB_is_cgb(gb)) &&
-                       gb->obj_comparators[gb->n_visible_objs - 1] == (uint8_t)(gb->position_in_line + 8)) {
+                       gb->objects_x[gb->n_visible_objs - 1] == (uint8_t)(gb->position_in_line + 8)) {
                     
                     while (gb->fetcher_state < 5 || fifo_size(&gb->bg_fifo) == 0) {
                         advance_fetcher_state_machine(gb);
@@ -1578,7 +1584,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     
                     /* Todo: Measure if penalty occurs before or after waiting for the fetcher. */
                     if (gb->extra_penalty_for_object_at_0 != 0) {
-                        if (gb->obj_comparators[gb->n_visible_objs - 1] == 0) {
+                        if (gb->objects_x[gb->n_visible_objs - 1] == 0) {
                             gb->cycles_for_line += gb->extra_penalty_for_object_at_0;
                             GB_SLEEP(gb, display, 28, gb->extra_penalty_for_object_at_0);
                             gb->extra_penalty_for_object_at_0 = 0;
@@ -1605,7 +1611,12 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                         goto abort_fetching_object;
                     }
                     
-                    gb->object_low_line_address = get_object_line_address(gb, &objects[gb->visible_objs[gb->n_visible_objs - 1]]);
+                    
+                    gb->object_low_line_address = get_object_line_address(gb,
+                                                                          gb->objects_y[gb->n_visible_objs - 1],
+                                                                          oam_read(gb, gb->visible_objs[gb->n_visible_objs - 1] * 4 + 2),
+                                                                          gb->object_flags = oam_read(gb, gb->visible_objs[gb->n_visible_objs - 1] * 4 + 3)
+                                                                          );
                     
                     gb->cycles_for_line++;
                     GB_SLEEP(gb, display, 39, 1);
@@ -1617,23 +1628,20 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     gb->cycles_for_line++;
                     GB_SLEEP(gb, display, 40, 1);
 
-                    const object_t *object = &objects[gb->visible_objs[gb->n_visible_objs - 1]];
                     
-                    uint16_t line_address = get_object_line_address(gb, object);
-                    
-                    uint8_t palette = (object->flags & 0x10) ? 1 : 0;
+                    uint8_t palette = (gb->object_flags & 0x10) ? 1 : 0;
                     if (gb->cgb_mode) {
-                        palette = object->flags & 0x7;
+                        palette = gb->object_flags & 0x7;
                     }
                     fifo_overlay_object_row(&gb->oam_fifo,
                                             gb->vram_ppu_blocked? 0xFF : gb->vram[gb->object_low_line_address],
-                                            gb->vram_ppu_blocked? 0xFF : gb->vram[line_address + 1],
+                                            gb->vram_ppu_blocked? 0xFF : gb->vram[gb->object_low_line_address + 1],
                                             palette,
-                                            object->flags & 0x80,
+                                            gb->object_flags & 0x80,
                                             gb->object_priority == GB_OBJECT_PRIORITY_INDEX? gb->visible_objs[gb->n_visible_objs - 1] : 0,
-                                            object->flags & 0x20);
+                                            gb->object_flags & 0x20);
 
-                    gb->data_for_sel_glitch = gb->vram_ppu_blocked? 0xFF : gb->vram[line_address + 1];
+                    gb->data_for_sel_glitch = gb->vram_ppu_blocked? 0xFF : gb->vram[gb->object_low_line_address + 1];
                     gb->n_visible_objs--;
                 }
                 
