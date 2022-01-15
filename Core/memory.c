@@ -292,7 +292,11 @@ static uint8_t read_mbc_rom(GB_gameboy_t *gb, uint16_t addr)
 
 static uint8_t read_vram(GB_gameboy_t *gb, uint16_t addr)
 {
-    GB_display_sync(gb);
+    if (!GB_is_dma_active(gb)) {
+        /* Prevent syncing from a DMA read. Batching doesn't happen during DMA anyway. */
+        GB_display_sync(gb);
+    }
+    
     if (unlikely(gb->vram_read_blocked)) {
         return 0xFF;
     }

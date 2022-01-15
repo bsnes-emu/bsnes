@@ -1613,6 +1613,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     
                     if (unlikely(GB_is_dma_active(gb))) {
                         unsigned offset = cycles - gb->display_cycles; // Time passed in 8MHz ticks
+                        cycles = gb->display_cycles;
                         if (offset) {
                             if (!gb->cgb_double_speed) {
                                 offset >>= 1; // Convert to T-cycles
