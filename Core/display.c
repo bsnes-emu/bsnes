@@ -1611,7 +1611,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                         goto abort_fetching_object;
                     }
                     
-                    if (unlikely(GB_is_dma_active(gb) || gb->dma_current_src == 0xFF)) {
+                    if (unlikely(GB_is_dma_active(gb))) {
                         unsigned offset = cycles - gb->display_cycles; // Time passed in 8MHz ticks
                         if (offset) {
                             if (!gb->cgb_double_speed) {
