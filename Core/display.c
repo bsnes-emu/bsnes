@@ -643,6 +643,23 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     gb->window_is_being_fetched = false;
 }
 
+static inline void dma_sync(GB_gameboy_t *gb, unsigned *cycles)
+{
+    if (unlikely(GB_is_dma_active(gb))) {
+        unsigned offset = *cycles - gb->display_cycles; // Time passed in 8MHz ticks
+        if (offset) {
+            *cycles = gb->display_cycles;
+            if (!gb->cgb_double_speed) {
+                offset >>= 1; // Convert to T-cycles
+            }
+            unsigned old = gb->dma_cycles;
+            gb->dma_cycles = offset;
+            GB_dma_run(gb);
+            gb->dma_cycles = old - offset;
+        }
+    }
+}
+
 /* All verified CGB timings are based on CGB CPU E. CGB CPUs >= D are known to have
    slightly different timings than CPUs <= C.
  
@@ -653,7 +670,21 @@ static inline uint8_t fetcher_y(GB_gameboy_t *gb)
     return gb->wx_triggered? gb->window_y : gb->current_line + gb->io_registers[GB_IO_SCY];
 }
 
-static void advance_fetcher_state_machine(GB_gameboy_t *gb)
+static inline uint8_t vram_read(GB_gameboy_t *gb, uint16_t addr)
+{
+    if (unlikely(gb->vram_ppu_blocked)) {
+        return 0xFF;
+    }
+    if (unlikely(gb->dma_current_dest <= 0xa0 && gb->dma_current_dest > 0 && (gb->dma_current_src & 0xE000) == 0x8000)) { // TODO: what happens in the last and first M cycles?
+        // DMAing from VRAM!
+        /* TODO: This is only correct on a DMG/MGB, CGBs and AGBs use some other pattern; AGS has a completely different one */
+        addr |= ((gb->dma_current_src - 1) & 0x1FFF);
+        gb->oam[gb->dma_current_dest - 1] = gb->vram[addr];
+    }
+    return gb->vram[addr];
+}
+
+static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
 {
     typedef enum {
         GB_FETCHER_GET_TILE,
@@ -675,6 +706,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
     };
     switch (fetcher_state_machine[gb->fetcher_state & 7]) {
         case GB_FETCHER_GET_TILE: {
+            dma_sync(gb, cycles);
             uint16_t map = 0x1800;
             
             if (!(gb->io_registers[GB_IO_LCDC] & 0x20)) {
@@ -707,23 +739,18 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
                 gb->fetcher_y = y;
             }
             gb->last_tile_index_address = map + x + y / 8 * 32;
-            gb->current_tile = gb->vram[gb->last_tile_index_address];
-            if (gb->vram_ppu_blocked) {
-                gb->current_tile = 0xFF;
-            }
+            gb->current_tile = vram_read(gb, gb->last_tile_index_address);
             if (GB_is_cgb(gb)) {
                 /* The CGB actually accesses both the tile index AND the attributes in the same T-cycle.
                    This probably means the CGB has a 16-bit data bus for the VRAM. */
-                gb->current_tile_attributes = gb->vram[gb->last_tile_index_address + 0x2000];
-                if (gb->vram_ppu_blocked) {
-                    gb->current_tile_attributes = 0xFF;
-                }
+                gb->current_tile_attributes = vram_read(gb, gb->last_tile_index_address + 0x2000);
             }
         }
         gb->fetcher_state++;
         break;
             
         case GB_FETCHER_GET_TILE_DATA_LOWER: {
+            dma_sync(gb, cycles);
             bool use_glitched = false;
             bool cgb_d_glitch = false;
             if (gb->tile_sel_glitch) {
@@ -748,29 +775,22 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             }
             if (!use_glitched) {
                 gb->current_tile_data[0] =
-                    gb->vram[tile_address + ((y & 7) ^ y_flip) * 2];
-                if (gb->vram_ppu_blocked) {
-                    gb->current_tile_data[0] = 0xFF;
-                }
+                    vram_read(gb, tile_address + ((y & 7) ^ y_flip) * 2);
+
             }
             if ((gb->io_registers[GB_IO_LCDC] & 0x10) && gb->tile_sel_glitch) {
                 gb->data_for_sel_glitch =
-                gb->vram[tile_address + ((y & 7) ^ y_flip) * 2];
-                if (gb->vram_ppu_blocked) {
-                    gb->data_for_sel_glitch = 0xFF;
-                }
+                    vram_read(gb, tile_address + ((y & 7) ^ y_flip) * 2);
             }
             else if (cgb_d_glitch) {
-                gb->data_for_sel_glitch = gb->vram[gb->current_tile * 0x10 + ((y & 7) ^ y_flip) * 2];
-                if (gb->vram_ppu_blocked) {
-                    gb->data_for_sel_glitch = 0xFF;
-                }
+                gb->data_for_sel_glitch = vram_read(gb, gb->current_tile * 0x10 + ((y & 7) ^ y_flip) * 2);
             }
         }
         gb->fetcher_state++;
         break;
             
         case GB_FETCHER_GET_TILE_DATA_HIGH: {
+            dma_sync(gb, cycles);
             /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
             
             bool use_glitched = false;
@@ -798,22 +818,15 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb)
             gb->last_tile_data_address = tile_address +  ((y & 7) ^ y_flip) * 2 + 1 - cgb_d_glitch;
             if (!use_glitched) {
                 gb->current_tile_data[1] =
-                    gb->vram[gb->last_tile_data_address];
-                if (gb->vram_ppu_blocked) {
-                    gb->current_tile_data[1] = 0xFF;
-                }
+                    vram_read(gb, gb->last_tile_data_address);
             }
             if ((gb->io_registers[GB_IO_LCDC] & 0x10) && gb->tile_sel_glitch) {
-                gb->data_for_sel_glitch = gb->vram[gb->last_tile_data_address];
-                if (gb->vram_ppu_blocked) {
-                    gb->data_for_sel_glitch = 0xFF;
-                }
+                gb->data_for_sel_glitch = vram_read(gb, gb->last_tile_data_address);
+
             }
             else if (cgb_d_glitch) {
-                gb->data_for_sel_glitch = gb->vram[gb->current_tile * 0x10 + ((y & 7) ^ y_flip) * 2 + 1];
-                if (gb->vram_ppu_blocked) {
-                    gb->data_for_sel_glitch = 0xFF;
-                }
+                gb->data_for_sel_glitch = vram_read(gb, gb->current_tile * 0x10 + ((y & 7) ^ y_flip) * 2 + 1);
+
             }
         }
         if (gb->wx_triggered) {
@@ -849,8 +862,8 @@ static inline uint8_t oam_read(GB_gameboy_t *gb, uint8_t addr)
     if (unlikely(gb->oam_ppu_blocked)) {
         return 0xFF;
     }
-    if (unlikely(gb->dma_current_dest > 0 && gb->dma_current_dest <= 0xa0)) { // TODO: what happens in the last and first M cycles?
-       return gb->oam[((gb->dma_current_dest - 1) & ~1) | (addr & 1)];
+    if (unlikely(gb->dma_current_dest <= 0xa0 && gb->dma_current_dest > 0)) { // TODO: what happens in the last and first M cycles?
+        return gb->oam[((gb->dma_current_dest - 1) & ~1) | (addr & 1)];
     }
     return gb->oam[addr];
 }
@@ -1574,7 +1587,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                        gb->objects_x[gb->n_visible_objs - 1] == (uint8_t)(gb->position_in_line + 8)) {
                     
                     while (gb->fetcher_state < 5 || fifo_size(&gb->bg_fifo) == 0) {
-                        advance_fetcher_state_machine(gb);
+                        advance_fetcher_state_machine(gb, &cycles);
                         gb->cycles_for_line++;
                         GB_SLEEP(gb, display, 27, 1);
                         if (gb->object_fetch_aborted) {
@@ -1595,7 +1608,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     }
                     
                     /* TODO: Can this be deleted?  { */
-                    advance_fetcher_state_machine(gb);
+                    advance_fetcher_state_machine(gb, &cycles);
                     gb->cycles_for_line++;
                     GB_SLEEP(gb, display, 41, 1);
                     if (gb->object_fetch_aborted) {
@@ -1603,39 +1616,35 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     }
                     /* } */
                     
-                    advance_fetcher_state_machine(gb);
-                    
-                    gb->cycles_for_line += 3;
-                    GB_SLEEP(gb, display, 20, 3);
-                    if (gb->object_fetch_aborted) {
-                        goto abort_fetching_object;
-                    }
-                    
-                    if (unlikely(GB_is_dma_active(gb))) {
-                        unsigned offset = cycles - gb->display_cycles; // Time passed in 8MHz ticks
-                        cycles = gb->display_cycles;
-                        if (offset) {
-                            if (!gb->cgb_double_speed) {
-                                offset >>= 1; // Convert to T-cycles
-                            }
-                            unsigned old = gb->dma_cycles;
-                            gb->dma_cycles = offset;
-                            GB_dma_run(gb);
-                            gb->dma_cycles += old - offset;
-                        }
-                    }
-                    
+                    advance_fetcher_state_machine(gb, &cycles);
+                    dma_sync(gb, &cycles);
                     gb->object_low_line_address = get_object_line_address(gb,
                                                                           gb->objects_y[gb->n_visible_objs - 1],
                                                                           oam_read(gb, gb->visible_objs[gb->n_visible_objs - 1] * 4 + 2),
                                                                           gb->object_flags = oam_read(gb, gb->visible_objs[gb->n_visible_objs - 1] * 4 + 3)
                                                                           );
                     
-                    gb->cycles_for_line += 1;
-                    GB_SLEEP(gb, display, 39, 1);
+                    gb->cycles_for_line += 2;
+                    GB_SLEEP(gb, display, 20, 2);
                     if (gb->object_fetch_aborted) {
                         goto abort_fetching_object;
                     }
+                    
+                    /* TODO: timing not verified */
+                    dma_sync(gb, &cycles);
+                    gb->object_tile_data[0] = vram_read(gb, gb->object_low_line_address);
+
+                    
+                    gb->cycles_for_line += 2;
+                    GB_SLEEP(gb, display, 39, 2);
+                    if (gb->object_fetch_aborted) {
+                        goto abort_fetching_object;
+                    }
+                    
+                    /* TODO: timing not verified */
+                    dma_sync(gb, &cycles);
+                    gb->object_tile_data[1] = vram_read(gb, gb->object_low_line_address + 1);
+
                     
                     gb->during_object_fetch = false;
                     gb->cycles_for_line++;
@@ -1647,8 +1656,8 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                         palette = gb->object_flags & 0x7;
                     }
                     fifo_overlay_object_row(&gb->oam_fifo,
-                                            gb->vram_ppu_blocked? 0xFF : gb->vram[gb->object_low_line_address],
-                                            gb->vram_ppu_blocked? 0xFF : gb->vram[gb->object_low_line_address + 1],
+                                            gb->object_tile_data[0],
+                                            gb->object_tile_data[1],
                                             palette,
                                             gb->object_flags & 0x80,
                                             gb->object_priority == GB_OBJECT_PRIORITY_INDEX? gb->visible_objs[gb->n_visible_objs - 1] : 0,
@@ -1663,7 +1672,7 @@ abort_fetching_object:
                 gb->during_object_fetch = false;
                 
                 render_pixel_if_possible(gb);
-                advance_fetcher_state_machine(gb);
+                advance_fetcher_state_machine(gb, &cycles);
 
                 if (gb->position_in_line == 160) break;
                 gb->cycles_for_line++;

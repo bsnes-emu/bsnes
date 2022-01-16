@@ -427,7 +427,8 @@ struct GB_gameboy_internal_s {
         uint8_t dma_current_dest;
         uint8_t last_dma_read;
         uint16_t dma_current_src;
-        int16_t dma_cycles;
+        uint16_t dma_cycles;
+        int8_t dma_cycles_modulo;
         uint8_t last_opcode_read; /* Required to emulate HDMA reads from Exxx */
         bool hdma_starting;
     )
@@ -592,6 +593,7 @@ struct GB_gameboy_internal_s {
         uint8_t visible_objs[10];
         uint8_t objects_x[10];
         uint8_t objects_y[10];
+        uint8_t object_tile_data[2];
         uint8_t object_flags;
         uint8_t n_visible_objs;
         uint8_t oam_search_index;
