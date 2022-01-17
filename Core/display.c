@@ -678,6 +678,7 @@ static inline uint8_t vram_read(GB_gameboy_t *gb, uint16_t addr)
     if (unlikely(gb->dma_current_dest <= 0xa0 && gb->dma_current_dest > 0 && (gb->dma_current_src & 0xE000) == 0x8000)) { // TODO: what happens in the last and first M cycles?
         // DMAing from VRAM!
         /* TODO: AGS has its own, very different pattern, but AGS is not currently a supported model */
+        /* TODO: Research this when researching odd modes */
         if (GB_is_cgb(gb)) {
             if (gb->dma_ppu_vram_conflict) {
                 addr = (gb->dma_ppu_vram_conflict_addr & 0x1FFF) | (addr & 0x2000);
