@@ -677,9 +677,25 @@ static inline uint8_t vram_read(GB_gameboy_t *gb, uint16_t addr)
     }
     if (unlikely(gb->dma_current_dest <= 0xa0 && gb->dma_current_dest > 0 && (gb->dma_current_src & 0xE000) == 0x8000)) { // TODO: what happens in the last and first M cycles?
         // DMAing from VRAM!
-        /* TODO: This is only correct on a DMG/MGB, CGBs and AGBs use some other pattern; AGS has a completely different one */
-        addr |= ((gb->dma_current_src - 1) & 0x1FFF);
-        gb->oam[gb->dma_current_dest - 1] = gb->vram[addr];
+        /* TODO: AGS has its own, very different pattern, but AGS is not currently a supported model */
+        if (GB_is_cgb(gb)) {
+            if (gb->dma_ppu_vram_conflict) {
+                addr = (gb->dma_ppu_vram_conflict_addr & 0x1FFF) | (addr & 0x2000);
+            }
+            else if (gb->dma_cycles_modulo) {
+                addr &= 0x2000;
+                addr |= ((gb->dma_current_src - 1) & 0x1FFF);
+            }
+            else {
+                addr &= 0x2000 | ((gb->dma_current_src - 1) & 0x1FFF);
+                gb->dma_ppu_vram_conflict_addr = addr;
+                gb->dma_ppu_vram_conflict = true;
+            }
+        }
+        else {
+            addr |= ((gb->dma_current_src - 1) & 0x1FFF);
+        }
+        gb->oam[gb->dma_current_dest - 1] = gb->vram[(addr & 0x1FFF) | (gb->cgb_vram_bank? 0x2000 : 0)];
     }
     return gb->vram[addr];
 }

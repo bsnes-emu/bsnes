@@ -429,6 +429,8 @@ struct GB_gameboy_internal_s {
         uint16_t dma_current_src;
         uint16_t dma_cycles;
         int8_t dma_cycles_modulo;
+        bool dma_ppu_vram_conflict;
+        uint16_t dma_ppu_vram_conflict_addr;
         uint8_t last_opcode_read; /* Required to emulate HDMA reads from Exxx */
         bool hdma_starting;
     )
@@ -775,6 +777,7 @@ struct GB_gameboy_internal_s {
         bool wx_just_changed;
         bool tile_sel_glitch;
         bool disable_oam_corruption; // For safe memory reads
+        bool in_dma_read;
                
         GB_gbs_header_t gbs_header;
    )

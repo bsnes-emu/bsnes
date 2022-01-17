@@ -303,7 +303,7 @@ static uint8_t read_vram(GB_gameboy_t *gb, uint16_t addr)
         }
     }
     
-    if (unlikely(gb->vram_read_blocked)) {
+    if (unlikely(gb->vram_read_blocked && !gb->in_dma_read)) {
         return 0xFF;
     }
     if (unlikely(gb->display_state == 22 && GB_is_cgb(gb) && !gb->cgb_double_speed)) {
@@ -1700,6 +1700,7 @@ void GB_dma_run(GB_gameboy_t *gb)
 {
     if (gb->dma_current_dest == 0xa1) return;
     signed cycles = gb->dma_cycles + gb->dma_cycles_modulo;
+    gb->in_dma_read = true;
     while (unlikely(cycles >= 4)) {
         cycles -= 4;
         if (gb->dma_current_dest >= 0xa0) {
@@ -1720,7 +1721,9 @@ void GB_dma_run(GB_gameboy_t *gb)
         
         /* dma_current_src must be the correct value during GB_read_memory */
         gb->dma_current_src++;
+        gb->dma_ppu_vram_conflict = false;
     }
+    gb->in_dma_read = false;
     gb->dma_cycles_modulo = cycles;
     gb->dma_cycles = 0;
 }
