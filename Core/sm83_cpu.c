@@ -372,6 +372,11 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
     bool interrupt_pending = (gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F);
     // When entering with IF&IE, the 2nd byte of STOP is actually executed
     if (!exit_by_joyp) {
+        if (!immediate_exit) {
+            // TODO: verify this!
+            gb->dma_cycles = 4;
+            GB_dma_run(gb);
+        }
         enter_stop_mode(gb);
     }
     
@@ -414,6 +419,9 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
     if (immediate_exit) {
         leave_stop_mode(gb);
         if (!interrupt_pending) {
+            // TODO: verify this!
+            gb->dma_cycles = 4;
+            GB_dma_run(gb);
             gb->halted = true;
             gb->just_halted = true;
         }
@@ -1004,7 +1012,6 @@ static void halt(GB_gameboy_t *gb, uint8_t opcode)
     gb->pending_cycles = 0;
     GB_advance_cycles(gb, 4);
     
-    gb->halted = true;
     /* Despite what some online documentations say, the HALT bug also happens on a CGB, in both CGB and DMG modes. */
     if (((gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F) != 0)) {
         if (gb->ime) {
@@ -1015,6 +1022,12 @@ static void halt(GB_gameboy_t *gb, uint8_t opcode)
             gb->halted = false;
             gb->halt_bug = true;
         }
+    }
+    else {
+        // TODO: verify the timing!
+        gb->dma_cycles = 4;
+        GB_dma_run(gb);
+        gb->halted = true;
     }
     gb->just_halted = true;
 }

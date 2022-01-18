@@ -1699,6 +1699,7 @@ bool GB_is_dma_active(GB_gameboy_t *gb)
 void GB_dma_run(GB_gameboy_t *gb)
 {
     if (gb->dma_current_dest == 0xa1) return;
+    if (unlikely(gb->halted || gb->stopped)) return;
     signed cycles = gb->dma_cycles + gb->dma_cycles_modulo;
     gb->in_dma_read = true;
     while (unlikely(cycles >= 4)) {
