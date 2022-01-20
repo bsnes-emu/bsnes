@@ -831,7 +831,7 @@ int main(int argc, char **argv)
         configuration.highpass_mode %= GB_HIGHPASS_MAX;
         configuration.model %= MODEL_MAX;
         configuration.sgb_revision %= SGB_MAX;
-        configuration.dmg_palette %= 3;
+        configuration.dmg_palette %= 4;
         configuration.border_mode %= GB_BORDER_ALWAYS + 1;
         configuration.rumble_mode %= GB_RUMBLE_ALL_GAMES + 1;
         configuration.color_temperature %= 21;
