@@ -1924,6 +1924,8 @@ static bool wave(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
 static bool undo(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
     NO_MODIFIERS
+    STOPPED_ONLY
+    
     if (strlen(lstrip(arguments))) {
         print_usage(gb, command);
         return true;
