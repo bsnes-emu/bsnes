@@ -1128,9 +1128,8 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
             [self.consoleWindow orderFront:nil];
         }
         pending_console_output = nil;
-}
+    }
     [console_output_lock unlock];
-
 }
 
 - (void) log: (const char *) string withAttributes: (GB_log_attributes) attributes

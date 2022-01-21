@@ -72,9 +72,7 @@ static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsign
         /* For some reason, channel 3 is inverted on the AGB */
         value ^= 0xF;
     }
-    
-    if (value == 0 && gb->apu.samples[index] == 0) return;
-    
+        
     if (gb->model >= GB_MODEL_AGB) {
         /* On the AGB, because no analog mixing is done, the behavior of NR51 is a bit different.
            A channel that is not connected to a terminal is idenitcal to a connected channel
@@ -110,6 +108,8 @@ static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsign
         
         return;
     }
+    
+    if (value == 0 && gb->apu.samples[index] == 0) return;
     
     if (!GB_apu_is_DAC_enabled(gb, index)) {
         value = gb->apu.samples[index];
@@ -283,7 +283,12 @@ static void render(GB_gameboy_t *gb)
 
 static void update_square_sample(GB_gameboy_t *gb, unsigned index)
 {
-    if (gb->apu.square_channels[index].sample_surpressed) return;
+    if (gb->apu.square_channels[index].sample_surpressed) {
+        if (gb->model >= GB_MODEL_AGB) {
+            update_sample(gb, index, gb->apu.samples[index], 0);
+        }
+        return;
+    }
 
     uint8_t duty = gb->io_registers[index == GB_SQUARE_1? GB_IO_NR11 :GB_IO_NR21] >> 6;
     update_sample(gb, index,
