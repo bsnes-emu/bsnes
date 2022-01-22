@@ -679,18 +679,19 @@ static inline uint8_t vram_read(GB_gameboy_t *gb, uint16_t addr)
         // DMAing from VRAM!
         /* TODO: AGS has its own, very different pattern, but AGS is not currently a supported model */
         /* TODO: Research this when researching odd modes */
+        /* TODO: probably not 100% on the first few reads during halt/stop modes*/
         if (GB_is_cgb(gb)) {
             if (gb->dma_ppu_vram_conflict) {
                 addr = (gb->dma_ppu_vram_conflict_addr & 0x1FFF) | (addr & 0x2000);
             }
-            else if (gb->dma_cycles_modulo) {
+            else if (gb->dma_cycles_modulo && !gb->halted && !gb->stopped) {
                 addr &= 0x2000;
                 addr |= ((gb->dma_current_src - 1) & 0x1FFF);
             }
             else {
                 addr &= 0x2000 | ((gb->dma_current_src - 1) & 0x1FFF);
                 gb->dma_ppu_vram_conflict_addr = addr;
-                gb->dma_ppu_vram_conflict = true;
+                gb->dma_ppu_vram_conflict = !gb->halted && !gb->stopped;
             }
         }
         else {
