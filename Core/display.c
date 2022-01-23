@@ -465,34 +465,55 @@ void GB_lcd_off(GB_gameboy_t *gb)
     }
 }
 
+static inline uint8_t oam_read(GB_gameboy_t *gb, uint8_t addr)
+{
+    if (unlikely(gb->oam_ppu_blocked)) {
+        return 0xFF;
+    }
+    if (unlikely(gb->dma_current_dest <= 0xa0 && gb->dma_current_dest > 0)) { // TODO: what happens in the last and first M cycles?
+        return gb->oam[((gb->dma_current_dest - 1 + (gb->halted || gb->stopped)) & ~1) | (addr & 1)];
+    }
+    return gb->oam[addr];
+}
+
 static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
 {
     if (gb->n_visible_objs == 10) return;
     
     /* TODO: It appears that DMA blocks PPU access to OAM, but it needs verification. */
-    if (GB_is_dma_active(gb)) {
-        return;
+    if (unlikely(GB_is_dma_active(gb))) {
+        if (!gb->halted && !gb->stopped) {
+            return;
+        }
+        if (gb->model < GB_MODEL_CGB_E) {
+            return;
+        }
+        /* CGB-0 to CGB-D: Halted DMA still blocks Mode 2;
+           Pre-CGB: Unit specific behavior, some units read FFs, some units read using
+                    several different corruption pattterns. For simplicity, we emulate
+                    FFs. */
     }
     
-    if (gb->oam_ppu_blocked) {
+    if (unlikely(gb->oam_ppu_blocked)) {
         return;
     }
 
     /* This reverse sorts the visible objects by location and priority */
-    object_t *objects = (object_t *) &gb->oam;
+    uint8_t oam_y = oam_read(gb, index * 4);
+    uint8_t oam_x = oam_read(gb, index * 4) + 1;
     bool height_16 = (gb->io_registers[GB_IO_LCDC] & 4) != 0;
-    signed y = objects[index].y - 16;
+    signed y = oam_y - 16;
     if (y <= gb->current_line && y + (height_16? 16 : 8) > gb->current_line) {
         unsigned j = 0;
         for (; j < gb->n_visible_objs; j++) {
-            if (gb->objects_x[j] <= objects[index].x) break;
+            if (gb->objects_x[j] <= oam_x) break;
         }
         memmove(gb->visible_objs + j + 1, gb->visible_objs + j, gb->n_visible_objs - j);
         memmove(gb->objects_x + j + 1, gb->objects_x + j, gb->n_visible_objs - j);
         memmove(gb->objects_y + j + 1, gb->objects_y + j, gb->n_visible_objs - j);
         gb->visible_objs[j] = index;
-        gb->objects_x[j] = objects[index].x;
-        gb->objects_y[j] = objects[index].y;
+        gb->objects_x[j] = oam_y;
+        gb->objects_y[j] = oam_y;
         gb->n_visible_objs++;
     }
 }
@@ -680,24 +701,25 @@ static inline uint8_t vram_read(GB_gameboy_t *gb, uint16_t addr)
         /* TODO: AGS has its own, very different pattern, but AGS is not currently a supported model */
         /* TODO: Research this when researching odd modes */
         /* TODO: probably not 100% on the first few reads during halt/stop modes*/
+        unsigned offset = 1 - (gb->halted || gb->stopped);
         if (GB_is_cgb(gb)) {
             if (gb->dma_ppu_vram_conflict) {
                 addr = (gb->dma_ppu_vram_conflict_addr & 0x1FFF) | (addr & 0x2000);
             }
             else if (gb->dma_cycles_modulo && !gb->halted && !gb->stopped) {
                 addr &= 0x2000;
-                addr |= ((gb->dma_current_src - 1) & 0x1FFF);
+                addr |= ((gb->dma_current_src - offset) & 0x1FFF);
             }
             else {
-                addr &= 0x2000 | ((gb->dma_current_src - 1) & 0x1FFF);
+                addr &= 0x2000 | ((gb->dma_current_src - offset) & 0x1FFF);
                 gb->dma_ppu_vram_conflict_addr = addr;
                 gb->dma_ppu_vram_conflict = !gb->halted && !gb->stopped;
             }
         }
         else {
-            addr |= ((gb->dma_current_src - 1) & 0x1FFF);
+            addr |= ((gb->dma_current_src - offset) & 0x1FFF);
         }
-        gb->oam[gb->dma_current_dest - 1] = gb->vram[(addr & 0x1FFF) | (gb->cgb_vram_bank? 0x2000 : 0)];
+        gb->oam[gb->dma_current_dest - offset] = gb->vram[(addr & 0x1FFF) | (gb->cgb_vram_bank? 0x2000 : 0)];
     }
     return gb->vram[addr];
 }
@@ -873,17 +895,6 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
         
         nodefault;
     }
-}
-
-static inline uint8_t oam_read(GB_gameboy_t *gb, uint8_t addr)
-{
-    if (unlikely(gb->oam_ppu_blocked)) {
-        return 0xFF;
-    }
-    if (unlikely(gb->dma_current_dest <= 0xa0 && gb->dma_current_dest > 0)) { // TODO: what happens in the last and first M cycles?
-        return gb->oam[((gb->dma_current_dest - 1) & ~1) | (addr & 1)];
-    }
-    return gb->oam[addr];
 }
 
 static uint16_t get_object_line_address(GB_gameboy_t *gb, uint8_t y, uint8_t tile, uint8_t flags)

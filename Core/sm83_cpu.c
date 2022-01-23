@@ -354,6 +354,9 @@ static void enter_stop_mode(GB_gameboy_t *gb)
 static void leave_stop_mode(GB_gameboy_t *gb)
 {
     gb->stopped = false;
+    // TODO: verify this
+    gb->dma_cycles = 4;
+    GB_dma_run(gb);
     gb->oam_ppu_blocked = false;
     gb->vram_ppu_blocked = false;
     gb->cgb_palettes_ppu_blocked = false;
@@ -373,8 +376,6 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
     // When entering with IF&IE, the 2nd byte of STOP is actually executed
     if (!exit_by_joyp) {
         if (!immediate_exit) {
-            // TODO: verify this!
-            gb->dma_cycles = 4;
             GB_dma_run(gb);
         }
         enter_stop_mode(gb);
@@ -419,8 +420,6 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
     if (immediate_exit) {
         leave_stop_mode(gb);
         if (!interrupt_pending) {
-            // TODO: verify this!
-            gb->dma_cycles = 4;
             GB_dma_run(gb);
             gb->halted = true;
             gb->just_halted = true;
@@ -1024,9 +1023,6 @@ static void halt(GB_gameboy_t *gb, uint8_t opcode)
         }
     }
     else {
-        // TODO: verify the timing!
-        gb->dma_cycles = 4;
-        GB_dma_run(gb);
         gb->halted = true;
     }
     gb->just_halted = true;
@@ -1625,12 +1621,17 @@ void GB_cpu_run(GB_gameboy_t *gb)
     /* Wake up from HALT mode without calling interrupt code. */
     if (gb->halted && !effective_ime && interrupt_queue) {
         gb->halted = false;
+        gb->dma_cycles = 4;
+        GB_dma_run(gb);
         gb->speed_switch_halt_countdown = 0;
     }
     
     /* Call interrupt */
     else if (effective_ime && interrupt_queue) {
         gb->halted = false;
+        // TODO: verify the timing!
+        gb->dma_cycles = 4;
+        GB_dma_run(gb);
         gb->speed_switch_halt_countdown = 0;
         uint16_t call_addr = gb->pc;
         
