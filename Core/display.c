@@ -500,7 +500,7 @@ static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
 
     /* This reverse sorts the visible objects by location and priority */
     uint8_t oam_y = oam_read(gb, index * 4);
-    uint8_t oam_x = oam_read(gb, index * 4) + 1;
+    uint8_t oam_x = oam_read(gb, index * 4 + 1);
     bool height_16 = (gb->io_registers[GB_IO_LCDC] & 4) != 0;
     signed y = oam_y - 16;
     if (y <= gb->current_line && y + (height_16? 16 : 8) > gb->current_line) {
@@ -512,7 +512,7 @@ static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
         memmove(gb->objects_x + j + 1, gb->objects_x + j, gb->n_visible_objs - j);
         memmove(gb->objects_y + j + 1, gb->objects_y + j, gb->n_visible_objs - j);
         gb->visible_objs[j] = index;
-        gb->objects_x[j] = oam_y;
+        gb->objects_x[j] = oam_x;
         gb->objects_y[j] = oam_y;
         gb->n_visible_objs++;
     }
