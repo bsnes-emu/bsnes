@@ -1580,9 +1580,8 @@ static opcode_t *opcodes[256] = {
 };
 void GB_cpu_run(GB_gameboy_t *gb)
 {
-    if (gb->hdma_on) {
-        GB_advance_cycles(gb, 4);
-        return;
+    if (unlikely(gb->hdma_on && (gb->stopped || gb->halted))) {
+        GB_hdma_run(gb);
     }
     if (gb->stopped) {
         GB_timing_sync(gb);
@@ -1635,7 +1634,7 @@ void GB_cpu_run(GB_gameboy_t *gb)
         gb->speed_switch_halt_countdown = 0;
         uint16_t call_addr = gb->pc;
         
-        gb->last_opcode_read = cycle_read(gb, gb->pc++);
+        cycle_read(gb, gb->pc++);
         cycle_oam_bug_pc(gb);
         gb->pc--;
         GB_trigger_oam_bug(gb, gb->sp); /* Todo: test T-cycle timing */
@@ -1674,22 +1673,22 @@ void GB_cpu_run(GB_gameboy_t *gb)
     }
     /* Run mode */
     else if (!gb->halted) {
-        gb->last_opcode_read = cycle_read(gb, gb->pc++);
+        uint8_t opcode = gb->hdma_open_bus = cycle_read(gb, gb->pc++);
+        if (unlikely(gb->hdma_on)) {
+            GB_hdma_run(gb);
+        }
         if (unlikely(gb->execution_callback)) {
-            gb->execution_callback(gb, gb->pc - 1, gb->last_opcode_read);
+            gb->execution_callback(gb, gb->pc - 1, opcode);
         }
         if (unlikely(gb->halt_bug)) {
             gb->pc--;
             gb->halt_bug = false;
         }
-        opcodes[gb->last_opcode_read](gb, gb->last_opcode_read);
+        opcodes[opcode](gb, opcode);
+    }
+    else if (gb->hdma_on) {
+        GB_hdma_run(gb);
     }
     
     flush_pending_cycles(gb);
-
-    if (gb->hdma_starting) {
-        gb->hdma_starting = false;
-        gb->hdma_on = true;
-        gb->hdma_cycles = -8;
-    }
 }

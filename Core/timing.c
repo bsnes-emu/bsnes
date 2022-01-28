@@ -420,7 +420,6 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     if (likely(gb->io_registers[GB_IO_LCDC] & 0x80)) {
         gb->double_speed_alignment += cycles;
     }
-    gb->hdma_cycles += cycles;
     gb->apu_output.sample_cycles += cycles * gb->apu_output.sample_rate;
     gb->cycles_since_last_sync += cycles;
     gb->cycles_since_run += cycles;
@@ -432,7 +431,6 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     GB_display_run(gb, cycles, false);
     if (unlikely(!gb->stopped)) { // TODO: Verify what happens in STOP mode
         GB_dma_run(gb);
-        GB_hdma_run(gb);
     }
     ir_run(gb, cycles);
     rtc_run(gb, cycles);

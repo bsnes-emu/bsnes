@@ -1779,7 +1779,7 @@ skip_slow_mode_3:
             GB_SLEEP(gb, display, 25, 8);
             
             if (gb->hdma_on_hblank) {
-                gb->hdma_starting = true;
+                gb->hdma_on = true;
             }
             GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line - 2);
             /*

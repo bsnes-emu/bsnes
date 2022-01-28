@@ -421,7 +421,6 @@ struct GB_gameboy_internal_s {
         bool hdma_on;
         bool hdma_on_hblank;
         uint8_t hdma_steps_left;
-        int16_t hdma_cycles; // in 8MHz units
         uint16_t hdma_current_src, hdma_current_dest;
 
         uint8_t dma_current_dest;
@@ -431,8 +430,7 @@ struct GB_gameboy_internal_s {
         int8_t dma_cycles_modulo;
         bool dma_ppu_vram_conflict;
         uint16_t dma_ppu_vram_conflict_addr;
-        uint8_t last_opcode_read; /* Required to emulate HDMA reads from Exxx */
-        bool hdma_starting;
+        uint8_t hdma_open_bus; /* Required to emulate HDMA reads from Exxx */
     )
     
     /* MBC */
@@ -767,7 +765,7 @@ struct GB_gameboy_internal_s {
         bool disable_rendering;
         uint8_t boot_rom[0x900];
         bool vblank_just_occured; // For slow operations involving syscalls; these should only run once per vblank
-        uint8_t cycles_since_run; // How many cycles have passed since the last call to GB_run(), in 8MHz units
+        unsigned cycles_since_run; // How many cycles have passed since the last call to GB_run(), in 8MHz units
         double clock_multiplier;
         GB_rumble_mode_t rumble_mode;
         uint32_t rumble_on_cycles;
@@ -808,7 +806,7 @@ void GB_reset(GB_gameboy_t *gb);
 void GB_switch_model_and_reset(GB_gameboy_t *gb, GB_model_t model);
 
 /* Returns the time passed, in 8MHz ticks. */
-uint8_t GB_run(GB_gameboy_t *gb);
+unsigned GB_run(GB_gameboy_t *gb);
 /* Returns the time passed since the last frame, in nanoseconds */
 uint64_t GB_run_frame(GB_gameboy_t *gb);
 

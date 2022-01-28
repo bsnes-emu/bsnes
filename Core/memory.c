@@ -475,11 +475,6 @@ static inline void sync_ppu_if_needed(GB_gameboy_t *gb, uint8_t register_accesse
 
 static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
 {
-
-    if (gb->hdma_on) {
-        return gb->last_opcode_read;
-    }
-    
     if (addr < 0xFE00) {
         return read_banked_ram(gb, addr);
     }
@@ -1534,6 +1529,10 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     gb->hdma_current_src &= 0xF0;
                     gb->hdma_current_src |= value << 8;
                 }
+                /* Range 0xE*** like 0xF***  and can't overflow (with 0x800 bytes) to anything meaningful */
+                if (gb->hdma_current_src >= 0xE000) {
+                    gb->hdma_current_src |= 0xF000;
+                }
                 return;
             case GB_IO_HDMA2:
                 if (gb->cgb_mode) {
@@ -1545,6 +1544,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 if (gb->cgb_mode) {
                     gb->hdma_current_dest &= 0xF0;
                     gb->hdma_current_dest |= value << 8;
+                    gb->hdma_current_dest &= 0x1FF0;
                 }
                 return;
             case GB_IO_HDMA4:
@@ -1570,7 +1570,6 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 if (gb->hdma_current_dest + (gb->hdma_steps_left << 4) > 0xFFFF) {
                     gb->hdma_steps_left = (0x10000 - gb->hdma_current_dest) >> 4;
                 }
-                gb->hdma_cycles = -12;
                 return;
 
             /*  Todo: what happens when starting a transfer during a transfer?
@@ -1731,24 +1730,32 @@ void GB_dma_run(GB_gameboy_t *gb)
 
 void GB_hdma_run(GB_gameboy_t *gb)
 {
-    if (likely(!gb->hdma_on)) return;
-
-    while (gb->hdma_cycles >= 0x4) {
-        gb->hdma_cycles -= 0x4;
-
-        GB_write_memory(gb, 0x8000 | (gb->hdma_current_dest++ & 0x1FFF), GB_read_memory(gb, (gb->hdma_current_src++)));
+    unsigned cycles = gb->cgb_double_speed? 4 : 2;
+    /* This is a bit cart, revision and unit specific. TODO: what if PC is in cart RAM? */
+    if (gb->model < GB_MODEL_CGB_D || gb->pc > 0x8000) {
+        gb->hdma_open_bus = 0xFF;
+    }
+    GB_advance_cycles(gb, 4);
+    while (gb->hdma_on) {
+        uint8_t byte = gb->hdma_open_bus;
+        if (gb->hdma_current_src < 0x8000 ||
+            (gb->hdma_current_src & 0xE000) == 0xC000 ||
+            (gb->hdma_current_src & 0xE000) == 0xA000) {
+            byte = GB_read_memory(gb, gb->hdma_current_src);
+        }
+        gb->hdma_current_src++;
+        GB_write_memory(gb, 0x8000 | (gb->hdma_current_dest++ & 0x1FFF), byte);
+        GB_advance_cycles(gb, cycles);
+        gb->hdma_open_bus = 0xFF;
         
         if ((gb->hdma_current_dest & 0xf) == 0) {
             if (--gb->hdma_steps_left == 0) {
                 gb->hdma_on = false;
                 gb->hdma_on_hblank = false;
-                gb->hdma_starting = false;
                 gb->io_registers[GB_IO_HDMA5] &= 0x7F;
-                break;
             }
-            if (gb->hdma_on_hblank) {
+            else if (gb->hdma_on_hblank) {
                 gb->hdma_on = false;
-                break;
             }
         }
     }

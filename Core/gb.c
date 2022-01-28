@@ -1128,7 +1128,7 @@ exit:
     return;
 }
 
-uint8_t GB_run(GB_gameboy_t *gb)
+unsigned GB_run(GB_gameboy_t *gb)
 {
     gb->vblank_just_occured = false;
 
