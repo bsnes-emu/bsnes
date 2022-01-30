@@ -1580,9 +1580,6 @@ static opcode_t *opcodes[256] = {
 };
 void GB_cpu_run(GB_gameboy_t *gb)
 {
-    if (unlikely(gb->hdma_on && (gb->stopped || gb->halted))) {
-        GB_hdma_run(gb);
-    }
     if (gb->stopped) {
         GB_timing_sync(gb);
         GB_advance_cycles(gb, 4);
@@ -1685,9 +1682,6 @@ void GB_cpu_run(GB_gameboy_t *gb)
             gb->halt_bug = false;
         }
         opcodes[opcode](gb, opcode);
-    }
-    else if (gb->hdma_on) {
-        GB_hdma_run(gb);
     }
     
     flush_pending_cycles(gb);

@@ -437,16 +437,14 @@ void GB_lcd_off(GB_gameboy_t *gb)
     gb->display_cycles = 0;
     /* When the LCD is disabled, state is constant */
     
+    if (gb->hdma_on_hblank && (gb->io_registers[GB_IO_STAT] & 3)) {
+        gb->hdma_on = true;
+    }
+    
     /* When the LCD is off, LY is 0 and STAT mode is 0.  */
     gb->io_registers[GB_IO_LY] = 0;
     gb->io_registers[GB_IO_STAT] &= ~3;
-    if (gb->hdma_on_hblank) {
-        gb->hdma_on_hblank = false;
-        gb->hdma_on = false;
-        
-        /* Todo: is this correct? */
-        gb->hdma_steps_left = 0xff;
-    }
+    
     
     gb->oam_read_blocked = false;
     gb->vram_read_blocked = false;
@@ -696,7 +694,7 @@ static inline uint8_t vram_read(GB_gameboy_t *gb, uint16_t addr)
     if (unlikely(gb->vram_ppu_blocked)) {
         return 0xFF;
     }
-    if (unlikely(gb->hdma_on)) {
+    if (unlikely(gb->hdma_in_progress)) {
         gb->addr_for_hdma_conflict = addr;
         return 0;
     }

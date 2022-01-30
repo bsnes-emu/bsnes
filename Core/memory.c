@@ -1736,6 +1736,7 @@ void GB_hdma_run(GB_gameboy_t *gb)
     while (gb->hdma_on) {
         uint8_t byte = gb->hdma_open_bus;
         gb->addr_for_hdma_conflict = 0xFFFF;
+        gb->hdma_in_progress = true; // TODO: timing? (affects VRAM reads)
         GB_advance_cycles(gb, cycles);
         
         if (gb->hdma_current_src < 0x8000 ||
@@ -1773,6 +1774,7 @@ void GB_hdma_run(GB_gameboy_t *gb)
             }
         }
     }
+    gb->hdma_in_progress = false; // TODO: timing? (affects VRAM reads)
     if (!gb->cgb_double_speed) {
         GB_advance_cycles(gb, 2);
     }

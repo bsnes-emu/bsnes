@@ -779,6 +779,7 @@ struct GB_gameboy_internal_s {
         bool tile_sel_glitch;
         bool disable_oam_corruption; // For safe memory reads
         bool in_dma_read;
+        bool hdma_in_progress;
         uint16_t addr_for_hdma_conflict;
                
         GB_gbs_header_t gbs_header;
