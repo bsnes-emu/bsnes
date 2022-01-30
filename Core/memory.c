@@ -1750,7 +1750,7 @@ void GB_hdma_run(GB_gameboy_t *gb)
             byte = GB_read_memory(gb, gb->hdma_current_src);
         }
         gb->hdma_current_src++;
-        if (gb->addr_for_hdma_conflict == 0xFFFF /* || gb->model == GB_MODEL_AGS */) {
+        if (gb->addr_for_hdma_conflict == 0xFFFF /* || (gb->model == GB_MODEL_AGS && gb->cgb_double_speed) */) {
             gb->vram[vram_base + gb->hdma_current_dest++] = byte;
         }
         else {
