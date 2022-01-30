@@ -1544,12 +1544,11 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 if (gb->cgb_mode) {
                     gb->hdma_current_dest &= 0xF0;
                     gb->hdma_current_dest |= value << 8;
-                    gb->hdma_current_dest &= 0x1FF0;
                 }
                 return;
             case GB_IO_HDMA4:
                 if (gb->cgb_mode) {
-                    gb->hdma_current_dest &= 0x1F00;
+                    gb->hdma_current_dest &= 0xFF00;
                     gb->hdma_current_dest |= value & 0xF0;
                 }
                 return;
@@ -1751,7 +1750,7 @@ void GB_hdma_run(GB_gameboy_t *gb)
         }
         gb->hdma_current_src++;
         if (gb->addr_for_hdma_conflict == 0xFFFF /* || (gb->model == GB_MODEL_AGS && gb->cgb_double_speed) */) {
-            gb->vram[vram_base + gb->hdma_current_dest++] = byte;
+            gb->vram[vram_base + (gb->hdma_current_dest++ & 0x1FFF)] = byte;
         }
         else {
             if (gb->model == GB_MODEL_CGB_E || gb->cgb_double_speed) {
@@ -1761,7 +1760,7 @@ void GB_hdma_run(GB_gameboy_t *gb)
                 gb->addr_for_hdma_conflict &= 0x1FFF;
                 // Can't write to even bitmap bytes in single speed mode
                 if (gb->cgb_double_speed || gb->addr_for_hdma_conflict >= 0x1900 || (gb->addr_for_hdma_conflict & 1)) {
-                    gb->vram[vram_base + (gb->hdma_current_dest & gb->addr_for_hdma_conflict)] = byte;
+                    gb->vram[vram_base + (gb->hdma_current_dest & gb->addr_for_hdma_conflict & 0x1FFF)] = byte;
                 }
             }
             gb->hdma_current_dest++;
@@ -1769,7 +1768,7 @@ void GB_hdma_run(GB_gameboy_t *gb)
         gb->hdma_open_bus = 0xFF;
         
         if ((gb->hdma_current_dest & 0xf) == 0) {
-            if (--gb->hdma_steps_left == 0) {
+            if (--gb->hdma_steps_left == 0 || gb->hdma_current_dest == 0x0) {
                 gb->hdma_on = false;
                 gb->hdma_on_hblank = false;
                 gb->io_registers[GB_IO_HDMA5] &= 0x7F;
