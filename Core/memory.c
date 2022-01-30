@@ -1561,7 +1561,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 }
                 gb->hdma_on = (value & 0x80) == 0;
                 gb->hdma_on_hblank = (value & 0x80) != 0;
-                if (gb->hdma_on_hblank && (gb->io_registers[GB_IO_STAT] & 3) == 0) {
+                if (gb->hdma_on_hblank && (gb->io_registers[GB_IO_STAT] & 3) == 0 && gb->display_state != 7) {
                     gb->hdma_on = true;
                 }
                 gb->io_registers[GB_IO_HDMA5] = value;
