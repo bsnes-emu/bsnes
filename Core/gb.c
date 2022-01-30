@@ -121,7 +121,7 @@ static void load_default_border(GB_gameboy_t *gb)
     }
 #endif
     
-    if (gb->model == GB_MODEL_AGB) {
+    if (gb->model > GB_MODEL_CGB_E) {
         #include "graphics/agb_border.inc"
         LOAD_BORDER();
     }
@@ -1378,7 +1378,7 @@ static void reset_ram(GB_gameboy_t *gb)
     switch (gb->model) {
         case GB_MODEL_MGB:
         case GB_MODEL_CGB_E:
-        case GB_MODEL_AGB: /* Unverified */
+        case GB_MODEL_AGB_A: /* Unverified */
             for (unsigned i = 0; i < gb->ram_size; i++) {
                 gb->ram[i] = GB_random();
             }
@@ -1442,7 +1442,7 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_CGB_C:
         case GB_MODEL_CGB_D:
         case GB_MODEL_CGB_E:
-        case GB_MODEL_AGB:
+        case GB_MODEL_AGB_A:
             for (unsigned i = 0; i < sizeof(gb->hram); i++) {
                 gb->hram[i] = GB_random();
             }
@@ -1475,8 +1475,8 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_CGB_C:
         case GB_MODEL_CGB_D: 
         case GB_MODEL_CGB_E:
-        case GB_MODEL_AGB:
-            /* Zero'd out by boot ROM anyway, extra OAM no accessible */
+        case GB_MODEL_AGB_A:
+            /* Zero'd out by boot ROM anyway */
             break;
             
         case GB_MODEL_DMG_B:
@@ -1509,7 +1509,7 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_CGB_C:
         case GB_MODEL_CGB_D:
         case GB_MODEL_CGB_E:
-        case GB_MODEL_AGB:
+        case GB_MODEL_AGB_A:
             /* Initialized by CGB-A and newer, 0s in CGB-0 */
             break;
         case GB_MODEL_MGB: {
@@ -1589,7 +1589,7 @@ static void request_boot_rom(GB_gameboy_t *gb)
             case GB_MODEL_CGB_E:
                 type = GB_BOOT_ROM_CGB;
                 break;
-            case GB_MODEL_AGB:
+            case GB_MODEL_AGB_A:
                 type = GB_BOOT_ROM_AGB;
                 break;
         }

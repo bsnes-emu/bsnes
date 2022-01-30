@@ -159,7 +159,7 @@ void GB_display_vblank(GB_gameboy_t *gb)
         GB_borrow_sgb_border(gb);
         uint32_t border_colors[16 * 4];
         
-        if (!gb->has_sgb_border && GB_is_cgb(gb) && gb->model != GB_MODEL_AGB) {
+        if (!gb->has_sgb_border && GB_is_cgb(gb) && gb->model <= GB_MODEL_CGB_E) {
             uint16_t colors[] = {
                 0x2095, 0x5129, 0x1EAF, 0x1EBA, 0x4648,
                 0x30DA, 0x69AD, 0x2B57, 0x2B5D, 0x632C,
@@ -277,7 +277,7 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border)
         b = scale_channel_with_curve_sgb(b);
     }
     else {
-        bool agb = gb->model == GB_MODEL_AGB;
+        bool agb = gb->model > GB_MODEL_CGB_E;
         r = agb? scale_channel_with_curve_agb(r) : scale_channel_with_curve(r);
         g = agb? scale_channel_with_curve_agb(g) : scale_channel_with_curve(g);
         b = agb? scale_channel_with_curve_agb(b) : scale_channel_with_curve(b);

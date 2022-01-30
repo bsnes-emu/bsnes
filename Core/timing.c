@@ -113,7 +113,7 @@ void GB_timing_sync(GB_gameboy_t *gb)
 
 static void ir_run(GB_gameboy_t *gb, uint32_t cycles)
 {
-    if ((gb->model == GB_MODEL_AGB || !gb->cgb_mode) && gb->cartridge_type->mbc_type != GB_HUC1 && gb->cartridge_type->mbc_type != GB_HUC3) return;
+    if ((gb->model > GB_MODEL_CGB_E || !gb->cgb_mode) && gb->cartridge_type->mbc_type != GB_HUC1 && gb->cartridge_type->mbc_type != GB_HUC3) return;
     if (gb->infrared_input || gb->cart_ir || (gb->io_registers[GB_IO_RP] & 1)) {
         gb->ir_sensor += cycles;
         if (gb->ir_sensor > IR_MAX) {

@@ -562,7 +562,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
         
         switch (gb->model) {
             case GB_MODEL_CGB_E:
-            case GB_MODEL_AGB:
+            case GB_MODEL_AGB_A:
                 return (addr & 0xF0) | ((addr >> 4) & 0xF);
 
             case GB_MODEL_CGB_D:
@@ -694,7 +694,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 if (gb->model != GB_MODEL_CGB_E) {
                     ret |= 0x10;
                 }
-                if (((gb->io_registers[GB_IO_RP] & 0xC0) == 0xC0 && gb->effective_ir_input) && gb->model != GB_MODEL_AGB) {
+                if (((gb->io_registers[GB_IO_RP] & 0xC0) == 0xC0 && gb->effective_ir_input) && gb->model <= GB_MODEL_CGB_E) {
                     ret &= ~2;
                 }
                 return ret;
@@ -1240,7 +1240,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     gb->extra_oam[addr - 0xfea0] = value;
                     break;
                 case GB_MODEL_CGB_E:
-                case GB_MODEL_AGB:
+                case GB_MODEL_AGB_A:
                     break;
                 case GB_MODEL_DMG_B:
                 case GB_MODEL_MGB:
