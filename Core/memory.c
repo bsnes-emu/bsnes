@@ -1735,17 +1735,37 @@ void GB_hdma_run(GB_gameboy_t *gb)
     if (gb->model < GB_MODEL_CGB_D || gb->pc > 0x8000) {
         gb->hdma_open_bus = 0xFF;
     }
-    GB_advance_cycles(gb, 4);
+    gb->addr_for_hdma_conflict = 0xFFFF;
+    gb->hdma_current_dest &= 0x1FFF;
+    uint16_t vram_base = gb->cgb_vram_bank? 0x2000 : 0;
+    GB_advance_cycles(gb, cycles);
     while (gb->hdma_on) {
         uint8_t byte = gb->hdma_open_bus;
+        gb->addr_for_hdma_conflict = 0xFFFF;
+        GB_advance_cycles(gb, cycles);
+        
         if (gb->hdma_current_src < 0x8000 ||
             (gb->hdma_current_src & 0xE000) == 0xC000 ||
             (gb->hdma_current_src & 0xE000) == 0xA000) {
             byte = GB_read_memory(gb, gb->hdma_current_src);
         }
         gb->hdma_current_src++;
-        GB_write_memory(gb, 0x8000 | (gb->hdma_current_dest++ & 0x1FFF), byte);
-        GB_advance_cycles(gb, cycles);
+        if (gb->addr_for_hdma_conflict == 0xFFFF /* || gb->model == GB_MODEL_AGS */) {
+            gb->vram[vram_base + gb->hdma_current_dest++] = byte;
+        }
+        else {
+            if (gb->model == GB_MODEL_CGB_E || gb->cgb_double_speed) {
+                /*
+                    These corruptions revision (unit?) specific in single speed. They happen only on my CGB-E.
+                */
+                gb->addr_for_hdma_conflict &= 0x1FFF;
+                // Can't write to even bitmap bytes in single speed mode
+                if (gb->cgb_double_speed || gb->addr_for_hdma_conflict >= 0x1900 || (gb->addr_for_hdma_conflict & 1)) {
+                    gb->vram[vram_base + (gb->hdma_current_dest & gb->addr_for_hdma_conflict)] = byte;
+                }
+            }
+            gb->hdma_current_dest++;
+        }
         gb->hdma_open_bus = 0xFF;
         
         if ((gb->hdma_current_dest & 0xf) == 0) {
@@ -1758,5 +1778,8 @@ void GB_hdma_run(GB_gameboy_t *gb)
                 gb->hdma_on = false;
             }
         }
+    }
+    if (!gb->cgb_double_speed) {
+        GB_advance_cycles(gb, 2);
     }
 }
