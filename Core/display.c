@@ -1330,7 +1330,6 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
         GB_STATE(gb, display, 22);
         GB_STATE(gb, display, 23);
         GB_STATE(gb, display, 24);
-        GB_STATE(gb, display, 25);
         GB_STATE(gb, display, 26);
         GB_STATE(gb, display, 27);
         GB_STATE(gb, display, 28);
@@ -1776,16 +1775,14 @@ skip_slow_mode_3:
             GB_SLEEP(gb, display, 33, 2);
             gb->cgb_palettes_blocked = !gb->cgb_double_speed;
             
+            if (gb->hdma_on_hblank) {
+                gb->hdma_on = true;
+            }
+            
             gb->cycles_for_line += 2;
             GB_SLEEP(gb, display, 36, 2);
             gb->cgb_palettes_blocked = false;
             
-            gb->cycles_for_line += 8;
-            GB_SLEEP(gb, display, 25, 8);
-            
-            if (gb->hdma_on_hblank) {
-                gb->hdma_on = true;
-            }
             GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line - 2);
             /*
              TODO: Verify double speed timing
