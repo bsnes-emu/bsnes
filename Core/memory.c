@@ -1565,10 +1565,6 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 }
                 gb->io_registers[GB_IO_HDMA5] = value;
                 gb->hdma_steps_left = (gb->io_registers[GB_IO_HDMA5] & 0x7F) + 1;
-                /* Todo: Verify this. Gambatte's DMA tests require this. */
-                if (gb->hdma_current_dest + (gb->hdma_steps_left << 4) > 0xFFFF) {
-                    gb->hdma_steps_left = (0x10000 - gb->hdma_current_dest) >> 4;
-                }
                 return;
 
             /*  Todo: what happens when starting a transfer during a transfer?
@@ -1735,7 +1731,6 @@ void GB_hdma_run(GB_gameboy_t *gb)
         gb->hdma_open_bus = 0xFF;
     }
     gb->addr_for_hdma_conflict = 0xFFFF;
-    gb->hdma_current_dest &= 0x1FFF;
     uint16_t vram_base = gb->cgb_vram_bank? 0x2000 : 0;
     GB_advance_cycles(gb, cycles);
     while (gb->hdma_on) {
@@ -1768,7 +1763,7 @@ void GB_hdma_run(GB_gameboy_t *gb)
         gb->hdma_open_bus = 0xFF;
         
         if ((gb->hdma_current_dest & 0xf) == 0) {
-            if (--gb->hdma_steps_left == 0 || gb->hdma_current_dest == 0x0) {
+            if (--gb->hdma_steps_left == 0 || gb->hdma_current_dest == 0) {
                 gb->hdma_on = false;
                 gb->hdma_on_hblank = false;
                 gb->io_registers[GB_IO_HDMA5] &= 0x7F;
