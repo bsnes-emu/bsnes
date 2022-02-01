@@ -108,23 +108,32 @@ void GB_timing_sync(GB_gameboy_t *gb)
 #endif
 
 #define IR_DECAY 31500
-#define IR_THRESHOLD 19900
-#define IR_MAX IR_THRESHOLD * 2 + IR_DECAY
+#define IR_WARMUP 19900
+#define IR_THRESHOLD 240
+#define IR_MAX IR_THRESHOLD * 2 + IR_DECAY + 268
 
 static void ir_run(GB_gameboy_t *gb, uint32_t cycles)
 {
+    /* TODO: the way this thing works makes the CGB IR port behave inaccurately when used together with HUC1/3 IR ports*/
     if ((gb->model > GB_MODEL_CGB_E || !gb->cgb_mode) && gb->cartridge_type->mbc_type != GB_HUC1 && gb->cartridge_type->mbc_type != GB_HUC3) return;
-    if (gb->infrared_input || gb->cart_ir || (gb->io_registers[GB_IO_RP] & 1)) {
+    bool is_sensing = (gb->io_registers[GB_IO_RP] & 0xc0) == 0xc0 ||
+                       (gb->cartridge_type->mbc_type == GB_HUC1 && gb->huc1.ir_mode) ||
+                       (gb->cartridge_type->mbc_type == GB_HUC3 && gb->huc3.mode == 0xE);
+    if (is_sensing && (gb->infrared_input || gb->cart_ir || (gb->io_registers[GB_IO_RP] & 1))) {
         gb->ir_sensor += cycles;
         if (gb->ir_sensor > IR_MAX) {
             gb->ir_sensor = IR_MAX;
         }
         
-        gb->effective_ir_input = gb->ir_sensor >= IR_THRESHOLD && gb->ir_sensor <= IR_THRESHOLD + IR_DECAY;
+        gb->effective_ir_input = gb->ir_sensor >=  IR_WARMUP + IR_THRESHOLD && gb->ir_sensor <= IR_WARMUP + IR_THRESHOLD + IR_DECAY;
     }
     else {
-        if (gb->ir_sensor <= cycles) {
-            gb->ir_sensor = 0;
+        unsigned target = is_sensing? IR_WARMUP : 0;
+        if (gb->ir_sensor < target) {
+            gb->ir_sensor += cycles;
+        }
+        else if (gb->ir_sensor <= target + cycles) {
+            gb->ir_sensor = target;
         }
         else {
             gb->ir_sensor -= cycles;
