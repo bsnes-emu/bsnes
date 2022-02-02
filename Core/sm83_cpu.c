@@ -1617,6 +1617,9 @@ void GB_cpu_run(GB_gameboy_t *gb)
     /* Wake up from HALT mode without calling interrupt code. */
     if (gb->halted && !effective_ime && interrupt_queue) {
         gb->halted = false;
+        if (gb->hdma_on_hblank && (gb->io_registers[GB_IO_STAT] & 3) == 0) {
+            gb->hdma_on = true;
+        }
         gb->dma_cycles = 4;
         GB_dma_run(gb);
         gb->speed_switch_halt_countdown = 0;
@@ -1625,6 +1628,9 @@ void GB_cpu_run(GB_gameboy_t *gb)
     /* Call interrupt */
     else if (effective_ime && interrupt_queue) {
         gb->halted = false;
+        if (gb->hdma_on_hblank && (gb->io_registers[GB_IO_STAT] & 3) == 0) {
+            gb->hdma_on = true;
+        }
         // TODO: verify the timing!
         gb->dma_cycles = 4;
         GB_dma_run(gb);

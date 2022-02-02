@@ -1773,7 +1773,7 @@ skip_slow_mode_3:
             GB_SLEEP(gb, display, 33, 2);
             gb->cgb_palettes_blocked = !gb->cgb_double_speed;
             
-            if (gb->hdma_on_hblank) {
+            if (gb->hdma_on_hblank && !gb->halted && !gb->stopped) {
                 gb->hdma_on = true;
             }
             
