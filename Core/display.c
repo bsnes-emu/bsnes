@@ -1267,6 +1267,7 @@ static inline uint16_t mode3_batching_length(GB_gameboy_t *gb)
 {
     if (gb->model & GB_MODEL_NO_SFC_BIT) return 0;
     if (gb->hdma_on) return 0;
+    if (gb->stopped) return 0;
     if (GB_is_dma_active(gb)) return 0;
     if (gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20) && (gb->io_registers[GB_IO_WX] < 8 || gb->io_registers[GB_IO_WX] == 166)) {
         return 0;
