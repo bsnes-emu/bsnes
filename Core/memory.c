@@ -251,7 +251,7 @@ void GB_trigger_oam_bug_read(GB_gameboy_t *gb, uint16_t address)
 
 static bool is_addr_in_dma_use(GB_gameboy_t *gb, uint16_t addr)
 {
-    if (!GB_is_dma_active(gb) || addr >= 0xfe00) return false;
+    if (!GB_is_dma_active(gb) || addr >= 0xfe00 || gb->hdma_in_progress) return false;
     if (gb->dma_current_dest == 0xFF || gb->dma_current_dest == 0x0) return false; // Warm up
     if (addr >= 0xfe00) return false;
     if (gb->dma_current_src == addr) return false; // Shortcut for DMA access flow
