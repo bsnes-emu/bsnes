@@ -485,14 +485,11 @@ static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
     if (gb->n_visible_objs == 10) return;
     
     /* TODO: It appears that DMA blocks PPU access to OAM, but it needs verification. */
-    if (unlikely(GB_is_dma_active(gb))) {
-        if (!gb->halted && !gb->stopped) {
-            return;
-        }
+    if (unlikely(GB_is_dma_active(gb) && (gb->halted || gb->stopped))) {
         if (gb->model < GB_MODEL_CGB_E) {
             return;
         }
-        /* CGB-0 to CGB-D: Halted DMA still blocks Mode 2;
+        /* CGB-0 to CGB-D: Halted DMA blocks Mode 2;
            Pre-CGB: Unit specific behavior, some units read FFs, some units read using
                     several different corruption pattterns. For simplicity, we emulate
                     FFs. */
@@ -502,22 +499,24 @@ static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
         return;
     }
 
-    /* This reverse sorts the visible objects by location and priority */
-    uint8_t oam_y = oam_read(gb, index * 4);
-    uint8_t oam_x = oam_read(gb, index * 4 + 1);
+    if (likely(!GB_is_dma_active(gb) || gb->halted || gb->stopped)) {
+        gb->mode2_y_bus = oam_read(gb, index * 4);
+        gb->mode2_x_bus = oam_read(gb, index * 4 + 1);
+    }
     bool height_16 = (gb->io_registers[GB_IO_LCDC] & 4) != 0;
-    signed y = oam_y - 16;
+    signed y = gb->mode2_y_bus - 16;
+    /* This reverse sorts the visible objects by location and priority */
     if (y <= gb->current_line && y + (height_16? 16 : 8) > gb->current_line) {
         unsigned j = 0;
         for (; j < gb->n_visible_objs; j++) {
-            if (gb->objects_x[j] <= oam_x) break;
+            if (gb->objects_x[j] <= gb->mode2_x_bus) break;
         }
         memmove(gb->visible_objs + j + 1, gb->visible_objs + j, gb->n_visible_objs - j);
         memmove(gb->objects_x + j + 1, gb->objects_x + j, gb->n_visible_objs - j);
         memmove(gb->objects_y + j + 1, gb->objects_y + j, gb->n_visible_objs - j);
         gb->visible_objs[j] = index;
-        gb->objects_x[j] = oam_x;
-        gb->objects_y[j] = oam_y;
+        gb->objects_x[j] = gb->mode2_x_bus;
+        gb->objects_y[j] = gb->mode2_y_bus;
         gb->n_visible_objs++;
     }
 }

@@ -229,7 +229,7 @@ enum {
 
     /* Missing */
 
-    /* CGB Paletts */
+    /* CGB Palettes */
     GB_IO_BGPI       = 0x68, // CGB Mode Only - Background Palette Index
     GB_IO_BGPD       = 0x69, // CGB Mode Only - Background Palette Data
     GB_IO_OBPI       = 0x6a, // CGB Mode Only - Object Palette Index
@@ -621,6 +621,8 @@ struct GB_gameboy_internal_s {
         uint16_t last_tile_index_address;
         bool cgb_repeated_a_frame;
         uint8_t data_for_sel_glitch;
+        uint8_t mode2_y_bus;
+        uint8_t mode2_x_bus;
     )
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
