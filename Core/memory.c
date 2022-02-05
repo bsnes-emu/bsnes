@@ -1741,17 +1741,17 @@ void GB_hdma_run(GB_gameboy_t *gb)
     while (gb->hdma_on) {
         uint8_t byte = gb->hdma_open_bus;
         gb->addr_for_hdma_conflict = 0xFFFF;
-        GB_advance_cycles(gb, cycles);
         
         if (gb->hdma_current_src < 0x8000 ||
             (gb->hdma_current_src & 0xE000) == 0xC000 ||
             (gb->hdma_current_src & 0xE000) == 0xA000) {
             byte = GB_read_memory(gb, gb->hdma_current_src);
         }
-        if (unlikely(GB_is_dma_active(gb)) && (gb->dma_cycles_modulo == 0 || gb->cgb_double_speed)) {
+        if (unlikely(GB_is_dma_active(gb)) && (gb->dma_cycles_modulo == 2 || gb->cgb_double_speed)) {
             write_oam(gb, gb->hdma_current_src, byte);
         }
         gb->hdma_current_src++;
+        GB_advance_cycles(gb, cycles);
         if (gb->addr_for_hdma_conflict == 0xFFFF /* || (gb->model == GB_MODEL_AGB_B && gb->cgb_double_speed) */) {
             gb->vram[vram_base + (gb->hdma_current_dest++ & 0x1FFF)] = byte;
         }
