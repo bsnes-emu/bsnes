@@ -397,6 +397,9 @@ void GB_set_light_temperature(GB_gameboy_t *gb, double temperature)
 void GB_STAT_update(GB_gameboy_t *gb)
 {
     if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) return;
+    if (GB_is_dma_active(gb) && (gb->io_registers[GB_IO_STAT] & 3) == 2) {
+        gb->io_registers[GB_IO_STAT] &= ~3;
+    }
     
     bool previous_interrupt_line = gb->stat_interrupt_line;
     /* Set LY=LYC bit */

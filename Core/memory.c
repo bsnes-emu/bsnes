@@ -1471,6 +1471,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 gb->dma_current_dest = 0xFF;
                 gb->dma_current_src = value << 8;
                 gb->io_registers[GB_IO_DMA] = value;
+                GB_STAT_update(gb);
                 return;
             case GB_IO_SVBK:
                 if (gb->cgb_mode || (GB_is_cgb(gb) && !gb->boot_rom_finished)) {
@@ -1701,6 +1702,10 @@ void GB_dma_run(GB_gameboy_t *gb)
         cycles -= 4;
         if (gb->dma_current_dest >= 0xa0) {
             gb->dma_current_dest++;
+            if (gb->display_state == 8) {
+                gb->io_registers[GB_IO_STAT] |= 2;
+                GB_STAT_update(gb);
+            }
             break;
         }
         if (unlikely(gb->hdma_in_progress && (gb->hdma_steps_left > 1 || (gb->hdma_current_dest & 0xF) != 0xF))) {
