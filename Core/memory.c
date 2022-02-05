@@ -473,7 +473,7 @@ static inline void sync_ppu_if_needed(GB_gameboy_t *gb, uint8_t register_accesse
     }
 }
 
-static uint8_t read_oam(GB_gameboy_t *gb, uint8_t addr)
+internal uint8_t GB_read_oam(GB_gameboy_t *gb, uint8_t addr)
 {
     if (addr < 0xa0) {
         return gb->oam[addr];
@@ -588,7 +588,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             return 0xff;
         }
         
-        return read_oam(gb, addr);
+        return GB_read_oam(gb, addr);
     }
 
     if (addr < 0xFF80) {
