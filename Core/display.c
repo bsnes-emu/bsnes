@@ -2037,9 +2037,9 @@ uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest, uint8_t *object_h
     for (signed y = 0; y < LINES; y++) {
         object_t *object = (object_t *) &gb->oam;
         uint8_t objects_in_line = 0;
+        bool obscured = false;
         for (uint8_t i = 0; i < 40; i++, object++) {
             signed object_y = object->y - 16;
-            bool obscured = false;
             // Is object not in this line?
             if (object_y > y || object_y + *object_height <= y) continue;
             if (++objects_in_line == 11) obscured = true;
