@@ -1870,9 +1870,9 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
                                         height:oamHeight
                                          scale:16.0/oamHeight];
             case 1:
-                return @((unsigned)oamInfo[row].x - 8);
+                return @((signed)((unsigned)oamInfo[row].x - 8));
             case 2:
-                return @((unsigned)oamInfo[row].y - 16);
+                return @((signed)((unsigned)oamInfo[row].y - 16));
             case 3:
                 return [NSString stringWithFormat:@"$%02x", oamInfo[row].tile];
             case 4:
