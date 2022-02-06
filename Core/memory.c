@@ -1717,7 +1717,7 @@ void GB_dma_run(GB_gameboy_t *gb)
         }
         else {
             if (GB_is_cgb(gb)) {
-                gb->oam[gb->dma_current_dest++] = 0;
+                gb->oam[gb->dma_current_dest++] = 0xFF;
             }
             else {
                 gb->oam[gb->dma_current_dest++] = GB_read_memory(gb, gb->dma_current_src & ~0x2000);
