@@ -597,7 +597,12 @@ struct GB_gameboy_internal_s {
         uint8_t objects_x[10];
         uint8_t objects_y[10];
         uint8_t object_tile_data[2];
-        uint8_t object_flags;
+        uint8_t mode2_y_bus;
+        // They're the same bus
+        union {
+            uint8_t mode2_x_bus;
+            uint8_t object_flags;
+        };
         uint8_t n_visible_objs;
         uint8_t oam_search_index;
         uint8_t accessed_oam_row;
@@ -621,8 +626,6 @@ struct GB_gameboy_internal_s {
         uint16_t last_tile_index_address;
         bool cgb_repeated_a_frame;
         uint8_t data_for_sel_glitch;
-        uint8_t mode2_y_bus;
-        uint8_t mode2_x_bus;
     )
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */

@@ -482,6 +482,11 @@ static inline uint8_t oam_read(GB_gameboy_t *gb, uint8_t addr)
 
 static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
 {
+    if (likely(!GB_is_dma_active(gb) || gb->halted || gb->stopped)) {
+        gb->mode2_y_bus = oam_read(gb, index * 4);
+        gb->mode2_x_bus = oam_read(gb, index * 4 + 1);
+    }
+
     if (gb->n_visible_objs == 10) return;
     
     /* TODO: It appears that DMA blocks PPU access to OAM, but it needs verification. */
@@ -498,11 +503,7 @@ static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
     if (unlikely(gb->oam_ppu_blocked)) {
         return;
     }
-
-    if (likely(!GB_is_dma_active(gb) || gb->halted || gb->stopped)) {
-        gb->mode2_y_bus = oam_read(gb, index * 4);
-        gb->mode2_x_bus = oam_read(gb, index * 4 + 1);
-    }
+    
     bool height_16 = (gb->io_registers[GB_IO_LCDC] & 4) != 0;
     signed y = gb->mode2_y_bus - 16;
     /* This reverse sorts the visible objects by location and priority */
@@ -1657,7 +1658,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     dma_sync(gb, &cycles);
                     gb->object_low_line_address = get_object_line_address(gb,
                                                                           gb->objects_y[gb->n_visible_objs - 1],
-                                                                          oam_read(gb, gb->visible_objs[gb->n_visible_objs - 1] * 4 + 2),
+                                                                          gb->mode2_y_bus = oam_read(gb, gb->visible_objs[gb->n_visible_objs - 1] * 4 + 2),
                                                                           gb->object_flags = oam_read(gb, gb->visible_objs[gb->n_visible_objs - 1] * 4 + 3)
                                                                           );
                     
