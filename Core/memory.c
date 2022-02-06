@@ -507,6 +507,7 @@ internal uint8_t GB_read_oam(GB_gameboy_t *gb, uint8_t addr)
         case GB_MODEL_SGB2_NO_SFC:
             return 0;
     }
+    unreachable();
 }
 
 static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
