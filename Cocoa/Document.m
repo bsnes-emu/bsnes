@@ -1795,7 +1795,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         uint8_t *vram = GB_get_direct_access(&gb, GB_DIRECT_ACCESS_VRAM, NULL, NULL);
         
         if (map_type == GB_MAP_9C00 || (map_type == GB_MAP_AUTO && lcdc & 0x08)) {
-            map_base = 0x1c00;
+            map_base = 0x1C00;
         }
         
         if (tileset_type == GB_TILESET_AUTO) {
