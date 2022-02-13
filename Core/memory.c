@@ -255,9 +255,9 @@ static bool is_addr_in_dma_use(GB_gameboy_t *gb, uint16_t addr)
     if (gb->dma_current_dest == 0xFF || gb->dma_current_dest == 0x0) return false; // Warm up
     if (addr >= 0xfe00) return false;
     if (gb->dma_current_src == addr) return false; // Shortcut for DMA access flow
-    if (gb->dma_current_src > 0xe000 && (gb->dma_current_src & ~0x2000) == addr) return false;
+    if (gb->dma_current_src >= 0xe000 && (gb->dma_current_src & ~0x2000) == addr) return false;
     if (GB_is_cgb(gb)) {
-        if (addr >= 0xe000) {
+        if (addr >= 0xc000) {
             return bus_for_addr(gb, gb->dma_current_src) != GB_BUS_VRAM;
         }
         if (gb->dma_current_src >= 0xe000) {
@@ -485,7 +485,7 @@ internal uint8_t GB_read_oam(GB_gameboy_t *gb, uint8_t addr)
             return (addr & 0xF0) | (addr >> 4);
             
         case GB_MODEL_CGB_D:
-            if (addr > 0xc0) {
+            if (addr >= 0xc0) {
                 addr |= 0xf0;
             }
             return gb->extra_oam[addr - 0xa0];
@@ -752,7 +752,7 @@ uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
             // TODO: this should probably affect the DMA dest as well
             addr = ((gb->dma_current_src - 1) & 0x1000) | (addr & 0xFFF) | 0xC000;
         }
-        else if (GB_is_cgb(gb) && gb->dma_current_src >= 0xe000 && addr > 0xc000) {
+        else if (GB_is_cgb(gb) && gb->dma_current_src >= 0xe000 && addr >= 0xc000) {
             // TODO: this should probably affect the DMA dest as well
             addr = ((gb->dma_current_src - 1) & 0x1000) | (addr & 0xFFF) | 0xC000;
         }
@@ -1206,7 +1206,7 @@ static void write_oam(GB_gameboy_t *gb, uint8_t addr, uint8_t value)
     }
     switch (gb->model) {
         case GB_MODEL_CGB_D:
-            if (addr > 0xc0) {
+            if (addr >= 0xc0) {
                 addr |= 0xf0;
             }
             gb->extra_oam[addr - 0xa0] = value;
@@ -1661,19 +1661,20 @@ void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             return;
         }
         
-        if (GB_is_cgb(gb) && bus_for_addr(gb, gb->dma_current_src) != GB_BUS_RAM && addr >= 0xc000) {
+        if (GB_is_cgb(gb) && (gb->dma_current_src < 0xc000 || gb->dma_current_src >= 0xe000) && addr >= 0xc000) {
             // TODO: this should probably affect the DMA dest as well
             addr = ((gb->dma_current_src - 1) & 0x1000) | (addr & 0xFFF) | 0xC000;
+            goto write;
         }
-        else if (GB_is_cgb(gb) && gb->dma_current_src >= 0xe000 && addr > 0xc000) {
+        else if (GB_is_cgb(gb) && gb->dma_current_src >= 0xe000 && addr >= 0xc000) {
             // TODO: this should probably affect the DMA dest as well
             addr = ((gb->dma_current_src - 1) & 0x1000) | (addr & 0xFFF) | 0xC000;
         }
         else {
             addr = (gb->dma_current_src - 1);
         }
-        if (GB_is_cgb(gb) || addr > 0xc000) {
-            if (addr < 0xc000) {
+        if (GB_is_cgb(gb) || addr >= 0xa000) {
+            if (addr < 0xa000) {
                 gb->oam[gb->dma_current_dest - 1] = 0;
             }
             else if ((gb->model < GB_MODEL_CGB_0 || gb->model == GB_MODEL_CGB_B)) {
@@ -1682,9 +1683,10 @@ void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             else if ((gb->model < GB_MODEL_CGB_C || gb->model > GB_MODEL_CGB_E) && !oam_write) {
                 gb->oam[gb->dma_current_dest - 1] = value;
             }
-            if (gb->model < GB_MODEL_CGB_E || addr >= 0xc000) return;
+            if (gb->model < GB_MODEL_CGB_E || addr >= 0xa000) return;
         }
     }
+write:
     write_map[addr >> 12](gb, addr, value);
 }
 
