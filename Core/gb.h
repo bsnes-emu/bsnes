@@ -239,6 +239,7 @@ enum {
     /* Missing */
 
     GB_IO_SVBK       = 0x70, // CGB Mode Only - WRAM Bank
+    GB_IO_PSM        = 0x71, // Palette Selection Mode, controls the PSW and key combo
     GB_IO_PSWX       = 0x72, // X position of the palette switching window
     GB_IO_PSWY       = 0x73, // Y position of the palette switching window
     GB_IO_PSW        = 0x74, // Key combo to trigger the palette switching window
