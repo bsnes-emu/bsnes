@@ -1389,28 +1389,21 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 
 + (NSImage *) imageFromData:(NSData *)data width:(NSUInteger) width height:(NSUInteger) height scale:(double) scale
 {
-    CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef) data);
-    CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
-    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaNoneSkipLast;
-    CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
     
-    CGImageRef iref = CGImageCreate(width,
-                                    height,
-                                    8,
-                                    32,
-                                    4 * width,
-                                    colorSpaceRef,
-                                    bitmapInfo,
-                                    provider,
-                                    NULL,
-                                    true,
-                                    renderingIntent);
-    CGDataProviderRelease(provider);
-    CGColorSpaceRelease(colorSpaceRef);
-    
-    NSImage *ret = [[NSImage alloc] initWithCGImage:iref size:NSMakeSize(width * scale, height * scale)];
-    CGImageRelease(iref);
-    
+    NSImage *ret = [[NSImage alloc] initWithSize:NSMakeSize(width * scale, height * scale)];
+    NSBitmapImageRep *rep = [[NSBitmapImageRep alloc] initWithBitmapDataPlanes:NULL
+                                                                    pixelsWide:width
+                                                                    pixelsHigh:height
+                                                                 bitsPerSample:8
+                                                               samplesPerPixel:3
+                                                                      hasAlpha:false
+                                                                      isPlanar:false
+                                                                colorSpaceName:NSDeviceRGBColorSpace
+                                                                  bitmapFormat:0
+                                                                   bytesPerRow:4 * width
+                                                                  bitsPerPixel:32];
+    memcpy(rep.bitmapData, data.bytes, data.length);
+    [ret addRepresentation:rep];
     return ret;
 }
 
