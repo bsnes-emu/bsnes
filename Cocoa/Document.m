@@ -1,16 +1,18 @@
-#include <AVFoundation/AVFoundation.h>
-#include <CoreAudio/CoreAudio.h>
-#include <Core/gb.h>
-#include "GBAudioClient.h"
-#include "Document.h"
-#include "AppDelegate.h"
-#include "HexFiend/HexFiend.h"
-#include "GBMemoryByteArray.h"
-#include "GBWarningPopover.h"
-#include "GBCheatWindowController.h"
-#include "GBTerminalTextFieldCell.h"
-#include "BigSurToolbar.h"
+#import <AVFoundation/AVFoundation.h>
+#import <CoreAudio/CoreAudio.h>
+#import <Core/gb.h>
+#import "GBAudioClient.h"
+#import "Document.h"
+#import "AppDelegate.h"
+#import "HexFiend/HexFiend.h"
+#import "GBMemoryByteArray.h"
+#import "GBWarningPopover.h"
+#import "GBCheatWindowController.h"
+#import "GBTerminalTextFieldCell.h"
+#import "BigSurToolbar.h"
 #import "GBPaletteEditorController.h"
+#import "GBObjectView.h"
+
 
 #define GB_MODEL_PAL_BIT_OLD 0x1000
 
@@ -46,10 +48,7 @@ enum model {
     AVCaptureConnection *cameraConnection;
     AVCaptureStillImageOutput *cameraOutput;
     
-    GB_oam_info_t oamInfo[40];
-    uint16_t oamCount;
-    uint8_t oamHeight;
-    bool oamUpdating;
+    GB_oam_info_t _oamInfo[40];
     
     NSMutableData *currentPrinterImageData;
     enum {GBAccessoryNone, GBAccessoryPrinter, GBAccessoryWorkboy, GBAccessoryLinkCable} accessory;
@@ -1467,13 +1466,9 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
             case 2:
             /* OAM */
             {
-                oamCount = GB_get_oam_info(&gb, oamInfo, &oamHeight);
+                _oamCount = GB_get_oam_info(&gb, _oamInfo, &_oamHeight);
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    if (!oamUpdating) {
-                        oamUpdating = true;
-                        [self.objectsTableView reloadData];
-                        oamUpdating = false;
-                    }
+                    [self.objectView reloadData:self];
                 });
             }
             break;
@@ -1749,10 +1744,10 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     window_rect.origin.y += window_rect.size.height;
     switch ([sender selectedSegment]) {
         case 0:
+        case 2:
             window_rect.size.height = 384 + height_diff + 48;
             break;
         case 1:
-        case 2:
             window_rect.size.height = 512 + height_diff + 48;
             break;
         case 3:
@@ -1834,10 +1829,12 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     if (tableView == self.paletteTableView) {
         return 16; /* 8 BG palettes, 8 OBJ palettes*/
     }
-    else if (tableView == self.objectsTableView) {
-        return oamCount;
-    }
     return 0;
+}
+
+- (GB_oam_info_t *)oamInfo
+{
+    return _oamInfo;
 }
 
 - (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
@@ -1853,50 +1850,12 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         uint16_t index = columnIndex - 1 + (row & 7) * 4;
         return @((palette_data[(index << 1) + 1] << 8) | palette_data[(index << 1)]);
     }
-    else if (tableView == self.objectsTableView) {
-        switch (columnIndex) {
-            case 0:
-                return [Document imageFromData:[NSData dataWithBytesNoCopy:oamInfo[row].image
-                                                                    length:64 * 4 * 2
-                                                             freeWhenDone:false]
-                                         width:8
-                                        height:oamHeight
-                                         scale:16.0/oamHeight];
-            case 1:
-                return @((signed)((unsigned)oamInfo[row].x - 8));
-            case 2:
-                return @((signed)((unsigned)oamInfo[row].y - 16));
-            case 3:
-                return [NSString stringWithFormat:@"$%02x", oamInfo[row].tile];
-            case 4:
-                return [NSString stringWithFormat:@"$%04x", 0x8000 + oamInfo[row].tile * 0x10];
-            case 5:
-                return [NSString stringWithFormat:@"$%04x", oamInfo[row].oam_addr];
-            case 6:
-                if (GB_is_cgb(&gb)) {
-                    return [NSString stringWithFormat:@"%c%c%c%d%d",
-                            oamInfo[row].flags & 0x80? 'P' : '-',
-                            oamInfo[row].flags & 0x40? 'Y' : '-',
-                            oamInfo[row].flags & 0x20? 'X' : '-',
-                            oamInfo[row].flags & 0x08? 1 : 0,
-                            oamInfo[row].flags & 0x07];
-                }
-                return [NSString stringWithFormat:@"%c%c%c%d",
-                        oamInfo[row].flags & 0x80? 'P' : '-',
-                        oamInfo[row].flags & 0x40? 'Y' : '-',
-                        oamInfo[row].flags & 0x20? 'X' : '-',
-                        oamInfo[row].flags & 0x10? 1 : 0];
-            case 7:
-                return oamInfo[row].obscured_by_line_limit? @"Dropped: Too many objects in line": @"";
-
-        }
-    }
     return nil;
 }
 
 - (BOOL)tableView:(NSTableView *)tableView shouldSelectRow:(NSInteger)row
 {
-    return tableView == self.objectsTableView;
+    return false;
 }
 
 - (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(nullable NSTableColumn *)tableColumn row:(NSInteger)row
