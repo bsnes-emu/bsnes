@@ -12,7 +12,7 @@
 #import "BigSurToolbar.h"
 #import "GBPaletteEditorController.h"
 #import "GBObjectView.h"
-
+#import "GBPaletteView.h"
 
 #define GB_MODEL_PAL_BIT_OLD 0x1000
 
@@ -1477,7 +1477,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
             /* Palettes */
             {
                 dispatch_async(dispatch_get_main_queue(), ^{
-                    [self.paletteTableView reloadData];
+                    [self.paletteView reloadData:self];
                 });
             }
             break;
@@ -1751,7 +1751,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
             window_rect.size.height = 512 + height_diff + 48;
             break;
         case 3:
-            window_rect.size.height = 20 * 16 + height_diff + 34;
+            window_rect.size.height = 24 * 16 + height_diff;
             break;
             
         default:
@@ -1824,43 +1824,9 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     }
 }
 
-- (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
-{
-    if (tableView == self.paletteTableView) {
-        return 16; /* 8 BG palettes, 8 OBJ palettes*/
-    }
-    return 0;
-}
-
 - (GB_oam_info_t *)oamInfo
 {
     return _oamInfo;
-}
-
-- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
-{
-    NSUInteger columnIndex = [[tableView tableColumns] indexOfObject:tableColumn];
-    if (tableView == self.paletteTableView) {
-        if (columnIndex == 0) {
-            return [NSString stringWithFormat:@"%s %u", row >= 8 ? "Object" : "Background", (unsigned)(row & 7)];
-        }
-        
-        uint8_t *palette_data = GB_get_direct_access(&gb, row >= 8? GB_DIRECT_ACCESS_OBP : GB_DIRECT_ACCESS_BGP, NULL, NULL);
-
-        uint16_t index = columnIndex - 1 + (row & 7) * 4;
-        return @((palette_data[(index << 1) + 1] << 8) | palette_data[(index << 1)]);
-    }
-    return nil;
-}
-
-- (BOOL)tableView:(NSTableView *)tableView shouldSelectRow:(NSInteger)row
-{
-    return false;
-}
-
-- (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(nullable NSTableColumn *)tableColumn row:(NSInteger)row
-{
-    return false;
 }
 
 - (IBAction)showVRAMViewer:(id)sender

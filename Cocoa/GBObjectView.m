@@ -102,7 +102,7 @@
     }
     
     NSRect frame = self.frame;
-    CGFloat newHeight = MAX(68 * ((length + 3) / 4), 408);
+    CGFloat newHeight = MAX(68 * ((length + 3) / 4), self.superview.frame.size.height);
     frame.origin.y -= newHeight - frame.size.height;
     frame.size.height = newHeight;
     self.frame = frame;

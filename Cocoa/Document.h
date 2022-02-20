@@ -6,9 +6,10 @@
 #include "GBOSDView.h"
 
 @class GBCheatWindowController;
+@class GBPaletteView;
 @class GBObjectView;
 
-@interface Document : NSDocument <NSWindowDelegate, GBImageViewDelegate, NSTableViewDataSource, NSTableViewDelegate, NSSplitViewDelegate>
+@interface Document : NSDocument <NSWindowDelegate, GBImageViewDelegate, NSSplitViewDelegate>
 @property (nonatomic, readonly) GB_gameboy_t *gb;
 @property (nonatomic, strong) IBOutlet GBView *view;
 @property (nonatomic, strong) IBOutlet NSTextView *consoleOutput;
@@ -30,7 +31,7 @@
 @property (nonatomic, strong) IBOutlet NSTabView *vramTabView;
 @property (nonatomic, strong) IBOutlet NSPanel *vramWindow;
 @property (nonatomic, strong) IBOutlet NSTextField *vramStatusLabel;
-@property (nonatomic, strong) IBOutlet NSTableView *paletteTableView;
+@property (nonatomic, strong) IBOutlet GBPaletteView *paletteView;
 @property (nonatomic, strong) IBOutlet GBObjectView *objectView;
 @property (nonatomic, strong) IBOutlet NSPanel *printerFeedWindow;
 @property (nonatomic, strong) IBOutlet NSImageView *feedImageView;
