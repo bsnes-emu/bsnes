@@ -13,6 +13,11 @@
 @end
 
 @implementation GBObjectViewItem
+{
+    @public
+    uint32_t _lastImageData[128];
+    uint8_t _lastHeight;
+}
 @end
 
 @implementation GBObjectView
@@ -81,6 +86,12 @@
                                                info[i].flags & 0x20? 'X' : '-',
                                                info[i].flags & 0x10? 1 : 0];
             }
+            size_t imageSize =  8 * 4 * height;
+            if (height == item->_lastHeight && memcmp(item->_lastImageData, info[i].image, imageSize) == 0) {
+                continue;
+            }
+            memcpy(item->_lastImageData, info[i].image, imageSize);
+            item->_lastHeight = height;
             item.image.image = [Document imageFromData:[NSData dataWithBytesNoCopy:info[i].image
                                                                             length:64 * 4 * 2
                                                                       freeWhenDone:false]
