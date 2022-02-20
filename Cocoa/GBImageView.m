@@ -90,9 +90,9 @@
     return self;
 }
 
-- (void)setImage:(NSImage *)image
+-(void)viewWillDraw
 {
-    [super setImage:image];
+    [super viewWillDraw];
     for (CALayer *layer in self.layer.sublayers) {
         layer.magnificationFilter = kCAFilterNearest;
     }
