@@ -243,17 +243,13 @@ static void render(GB_gameboy_t *gb)
             unsigned left_volume = 0;
             unsigned right_volume = 0;
             unrolled for (unsigned i = GB_N_CHANNELS; i--;) {
-                if (gb->apu.is_active[i]) {
+                if (GB_apu_is_DAC_enabled(gb, i)) {
                     if (mask & 1) {
-                        left_volume += (gb->io_registers[GB_IO_NR50] & 7) * CH_STEP * 0xF;
+                        left_volume += ((gb->io_registers[GB_IO_NR50] & 7) + 1) * CH_STEP * 0xF;
                     }
                     if (mask & 0x10) {
-                        right_volume += ((gb->io_registers[GB_IO_NR50] >> 4) & 7) * CH_STEP * 0xF;
+                        right_volume += (((gb->io_registers[GB_IO_NR50] >> 4) & 7) + 1) * CH_STEP * 0xF;
                     }
-                }
-                else {
-                    left_volume += gb->apu_output.current_sample[i].left * CH_STEP;
-                    right_volume += gb->apu_output.current_sample[i].right * CH_STEP;
                 }
                 mask >>= 1;
             }
@@ -261,7 +257,8 @@ static void render(GB_gameboy_t *gb)
             {left_volume * (1 - gb->apu_output.highpass_rate) + gb->apu_output.highpass_diff.left * gb->apu_output.highpass_rate,
                 right_volume * (1 - gb->apu_output.highpass_rate) + gb->apu_output.highpass_diff.right * gb->apu_output.highpass_rate};
 
-        case GB_HIGHPASS_MAX:;
+        case GB_HIGHPASS_MAX:
+            unreachable();
         }
 
     }
