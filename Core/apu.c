@@ -257,8 +257,7 @@ static void render(GB_gameboy_t *gb)
             {left_volume * (1 - gb->apu_output.highpass_rate) + gb->apu_output.highpass_diff.left * gb->apu_output.highpass_rate,
                 right_volume * (1 - gb->apu_output.highpass_rate) + gb->apu_output.highpass_diff.right * gb->apu_output.highpass_rate};
 
-        case GB_HIGHPASS_MAX:
-            unreachable();
+        case GB_HIGHPASS_MAX:;
         }
 
     }
