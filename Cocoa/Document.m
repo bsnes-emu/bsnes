@@ -453,7 +453,6 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 - (void) run
 {
     assert(!master);
-    running = true;
     [self preRun];
     if (slave) {
         [slave preRun];
@@ -532,6 +531,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         return;
     }
     if (running) return;
+    running = true;
     [[[NSThread alloc] initWithTarget:self selector:@selector(run) object:nil] start];
 }
 
@@ -2065,6 +2065,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     bool wasRunning = self->running;
     Document *partner = master ?: slave;
     if (partner) {
+        wasRunning |= partner->running;
         [self stop];
         partner->master = nil;
         partner->slave = nil;
