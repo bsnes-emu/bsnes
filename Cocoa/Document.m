@@ -14,6 +14,30 @@
 #import "GBObjectView.h"
 #import "GBPaletteView.h"
 
+@implementation NSString (relativePath)
+
+- (NSString *)pathRelativeToDirectory:(NSString *)directory
+{
+    NSMutableArray<NSString *> *baseComponents = [[directory pathComponents] mutableCopy];
+    NSMutableArray<NSString *> *selfComponents = [[self pathComponents] mutableCopy];
+    
+    while (baseComponents.count) {
+        if (![baseComponents.firstObject isEqualToString:selfComponents.firstObject]) {
+            break;
+        }
+        
+        [baseComponents removeObjectAtIndex:0];
+        [selfComponents removeObjectAtIndex:0];
+    }
+    while (baseComponents.count) {
+        [baseComponents removeObjectAtIndex:0];
+        [selfComponents insertObject:@".." atIndex:0];
+    }
+    return [selfComponents componentsJoinedByString:@"/"];
+}
+
+@end
+
 #define GB_MODEL_PAL_BIT_OLD 0x1000
 
 /* Todo: The general Objective-C coding style conflicts with SameBoy's. This file needs a cleanup. */
@@ -499,8 +523,8 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     [_audioClient stop];
     _audioClient = nil;
     self.view.mouseHidingEnabled = false;
-    GB_save_battery(&gb, [[[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"sav"].path UTF8String]);
-    GB_save_cheats(&gb, [[[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"cht"].path UTF8String]);
+    GB_save_battery(&gb, self.savPath.UTF8String);
+    GB_save_cheats(&gb, self.chtPath.UTF8String);
     unsigned time_to_alarm = GB_time_to_alarm(&gb);
     
     if (time_to_alarm) {
@@ -943,28 +967,107 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     }
 }
 
+- (bool)isCartContainer
+{
+    return [self.fileName.pathExtension.lowercaseString isEqualToString:@"gbcart"];
+}
+
+- (NSString *)savPath
+{
+    if (self.isCartContainer) {
+        return [self.fileName stringByAppendingPathComponent:@"battery.sav"];
+    }
+    
+    return [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"sav"].path;
+}
+
+- (NSString *)chtPath
+{
+    if (self.isCartContainer) {
+        return [self.fileName stringByAppendingPathComponent:@"cheats.cht"];
+    }
+    
+    return [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"cht"].path;
+}
+
+- (NSString *)saveStatePath:(unsigned)index
+{
+    if (self.isCartContainer) {
+        return [self.fileName stringByAppendingPathComponent:[NSString stringWithFormat:@"state.s%u", index]];
+    }
+    return [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:[NSString stringWithFormat:@"s%u", index]].path;
+}
+
+- (NSString *)romPath
+{
+    NSString *fileName = self.fileName;
+    if (self.isCartContainer) {
+        NSArray *paths = [[NSString stringWithContentsOfFile:[fileName stringByAppendingPathComponent:@"rom.gbl"]
+                                                    encoding:NSUTF8StringEncoding
+                                                       error:nil] componentsSeparatedByString:@"\n"];
+        fileName = nil;
+        bool needsRebuild = false;
+        for (NSString *path in paths) {
+            NSURL *url = [NSURL URLWithString:path relativeToURL:self.fileURL];
+            if ([[NSFileManager defaultManager] fileExistsAtPath:url.path]) {
+                if (fileName && ![fileName isEqualToString:url.path]) {
+                    needsRebuild = true;
+                    break;
+                }
+                fileName = url.path;
+            }
+            else {
+                needsRebuild = true;
+            }
+        }
+        if (fileName && needsRebuild) {
+            [[NSString stringWithFormat:@"%@\n%@\n%@",
+              [fileName pathRelativeToDirectory:self.fileName],
+              fileName,
+              [[NSURL fileURLWithPath:fileName].fileReferenceURL.absoluteString substringFromIndex:strlen("file://")]]
+             writeToFile:[self.fileName stringByAppendingPathComponent:@"rom.gbl"]
+             atomically:false
+             encoding:NSUTF8StringEncoding
+             error:nil];
+        }
+    }
+    
+    return fileName;
+}
+
 - (int) loadROM
 {
     __block int ret = 0;
+    NSString *fileName = self.romPath;
+    if (!fileName) {
+        NSAlert *alert = [[NSAlert alloc] init];
+        [alert setMessageText:@"Could not locate the ROM referenced by this Game Boy Cartridge"];
+        [alert setAlertStyle:NSAlertStyleCritical];
+        [alert runModal];
+        return 1;
+    }
+    
     NSString *rom_warnings = [self captureOutputForBlock:^{
         GB_debugger_clear_symbols(&gb);
-        if ([[[self.fileType pathExtension] lowercaseString] isEqualToString:@"isx"]) {
-            ret = GB_load_isx(&gb, self.fileURL.path.UTF8String);
-            GB_load_battery(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"ram"].path.UTF8String);
+        if ([[[fileName pathExtension] lowercaseString] isEqualToString:@"isx"]) {
+            ret = GB_load_isx(&gb, fileName.UTF8String);
+            if (!self.isCartContainer) {
+                GB_load_battery(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"ram"].path.UTF8String);
+            }
         }
-        else if ([[[self.fileType pathExtension] lowercaseString] isEqualToString:@"gbs"]) {
+        else if ([[[fileName pathExtension] lowercaseString] isEqualToString:@"gbs"]) {
             __block GB_gbs_info_t info;
-            ret = GB_load_gbs(&gb, self.fileURL.path.UTF8String, &info);
+            ret = GB_load_gbs(&gb, fileName.UTF8String, &info);
             [self prepareGBSInterface:&info];
         }
         else {
-            ret = GB_load_rom(&gb, [self.fileURL.path UTF8String]);
+            ret = GB_load_rom(&gb, [fileName UTF8String]);
         }
-        GB_load_battery(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"sav"].path.UTF8String);
-        GB_load_cheats(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"cht"].path.UTF8String);
+        GB_load_battery(&gb, self.savPath.UTF8String);
+        GB_load_cheats(&gb, self.chtPath.UTF8String);
         [self.cheatWindowController cheatsUpdated];
         GB_debugger_load_symbol_file(&gb, [[[NSBundle mainBundle] pathForResource:@"registers" ofType:@"sym"] UTF8String]);
-        GB_debugger_load_symbol_file(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"sym"].path.UTF8String);
+        GB_debugger_load_symbol_file(&gb, [[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sym"].UTF8String);
     }];
     if (ret) {
         NSAlert *alert = [[NSAlert alloc] init];
@@ -1295,7 +1398,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 {
     bool __block success = false;
     [self performAtomicBlock:^{
-        success = GB_save_state(&gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag] ]].path.UTF8String) == 0;
+        success = GB_save_state(&gb, [self saveStatePath:[sender tag]].UTF8String) == 0;
     }];
     
     if (!success) {
@@ -1333,8 +1436,8 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 
 - (IBAction)loadState:(id)sender
 {
-    int ret = [self loadStateFile:[[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:[NSString stringWithFormat:@"s%ld", (long)[sender tag]]].path.UTF8String noErrorOnNotFound:true];
-    if (ret == ENOENT) {
+    int ret = [self loadStateFile:[self saveStatePath:[sender tag]].UTF8String noErrorOnNotFound:true];
+    if (ret == ENOENT && !self.isCartContainer) {
         [self loadStateFile:[[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:[NSString stringWithFormat:@"sn%ld", (long)[sender tag]]].path.UTF8String noErrorOnNotFound:false];
     }
 }
@@ -2259,5 +2362,31 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 {
     GB_set_object_rendering_disabled(&gb, !GB_is_object_rendering_disabled(&gb));
 }
+
+- (IBAction)newCartridgeInstance:(id)sender
+{
+    bool shouldResume = running;
+    [self stop];
+    NSSavePanel *savePanel = [NSSavePanel savePanel];
+    [savePanel setAllowedFileTypes:@[@"gbcart"]];
+    [savePanel beginSheetModalForWindow:self.mainWindow completionHandler:^(NSInteger result) {
+        if (result == NSModalResponseOK) {
+            [savePanel orderOut:self];
+            NSString *romPath = self.romPath;
+            [[NSFileManager defaultManager] trashItemAtURL:savePanel.URL resultingItemURL:nil error:nil];
+            [[NSFileManager defaultManager] createDirectoryAtURL:savePanel.URL withIntermediateDirectories:false attributes:nil error:nil];
+            [[NSString stringWithFormat:@"%@\n%@\n%@",
+              [romPath pathRelativeToDirectory:savePanel.URL.path],
+              romPath,
+              [[NSURL fileURLWithPath:romPath].fileReferenceURL.absoluteString substringFromIndex:strlen("file://")]
+            ] writeToURL:[savePanel.URL URLByAppendingPathComponent:@"rom.gbl"] atomically:false encoding:NSUTF8StringEncoding error:nil];
+            [[NSDocumentController sharedDocumentController] openDocumentWithContentsOfURL:savePanel.URL display:true completionHandler:nil];
+        }
+        if (shouldResume) {
+            [self start];
+        }
+    }];
+}
+
 
 @end

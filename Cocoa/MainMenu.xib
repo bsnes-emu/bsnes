@@ -91,6 +91,12 @@
                                 </menu>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="m54-Is-iLE"/>
+                            <menuItem title="New Cartridge Instance…" keyEquivalent="n" id="Vld-be-NZu">
+                                <connections>
+                                    <action selector="newCartridgeInstance:" target="-1" id="GJc-xU-ZEr"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="vQH-Yd-TH4"/>
                             <menuItem title="Close" keyEquivalent="w" id="DVo-aG-piG">
                                 <connections>
                                     <action selector="performClose:" target="-1" id="HmO-Ls-i7Q"/>
