@@ -155,12 +155,20 @@ static const char *value_to_string(GB_gameboy_t *gb, uint16_t value, bool prefer
     return output;
 }
 
+static GB_symbol_map_t *get_symbol_map(GB_gameboy_t *gb, uint16_t bank)
+{
+    if (bank >= gb->n_symbol_maps) {
+        return NULL;
+    }
+    return gb->bank_symbols[bank];
+}
+
 static const char *debugger_value_to_string(GB_gameboy_t *gb, value_t value, bool prefer_name)
 {
     if (!value.has_bank) return value_to_string(gb, value.value, prefer_name);
 
     static __thread char output[256];
-    const GB_bank_symbol_t *symbol = GB_map_find_symbol(gb->bank_symbols[value.bank], value.value);
+    const GB_bank_symbol_t *symbol = GB_map_find_symbol(get_symbol_map(gb, value.bank), value.value);
 
     if (symbol && (value.value - symbol->addr > 0x1000 || symbol->addr == 0) ) {
         symbol = NULL;
@@ -911,13 +919,14 @@ static char *symbol_completer(GB_gameboy_t *gb, const char *string, uintptr_t *_
     
     size_t length = strlen(symbol_prefix);
     while (context->bank < 0x200) {
-        if (gb->bank_symbols[context->bank] == NULL ||
-            context->symbol >= gb->bank_symbols[context->bank]->n_symbols) {
+        GB_symbol_map_t *map = get_symbol_map(gb, context->bank);
+        if (map == NULL ||
+            context->symbol >= map->n_symbols) {
             context->bank++;
             context->symbol = 0;
             continue;
         }
-        const char *candidate = gb->bank_symbols[context->bank]->symbols[context->symbol++].name;
+        const char *candidate = map->symbols[context->symbol++].name;
         if (memcmp(symbol_prefix, candidate, length) == 0) {
             return strdup(candidate + length);
         }
@@ -2445,7 +2454,12 @@ void GB_debugger_handle_async_commands(GB_gameboy_t *gb)
 
 void GB_debugger_add_symbol(GB_gameboy_t *gb, uint16_t bank, uint16_t address, const char *symbol)
 {
-    bank &= 0x1FF;
+    if (bank >= gb->n_symbol_maps) {
+        gb->bank_symbols = realloc(gb->bank_symbols, (bank + 1) * sizeof(*gb->bank_symbols));
+        while (bank >= gb->n_symbol_maps) {
+            gb->bank_symbols[gb->n_symbol_maps++] = NULL;
+        }
+    }
 
     if (!gb->bank_symbols[bank]) {
         gb->bank_symbols[bank] = GB_map_alloc();
@@ -2487,7 +2501,7 @@ void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path)
 
 void GB_debugger_clear_symbols(GB_gameboy_t *gb)
 {
-    for (unsigned i = sizeof(gb->bank_symbols) / sizeof(gb->bank_symbols[0]); i--;) {
+    for (unsigned i = gb->n_symbol_maps; i--;) {
         if (gb->bank_symbols[i]) {
             GB_map_free(gb->bank_symbols[i]);
             gb->bank_symbols[i] = 0;
@@ -2500,15 +2514,20 @@ void GB_debugger_clear_symbols(GB_gameboy_t *gb)
             gb->reversed_symbol_map.buckets[i] = next;
         }
     }
+    gb->n_symbol_maps = 0;
+    if (gb->bank_symbols) {
+        free(gb->bank_symbols);
+        gb->bank_symbols = NULL;
+    }
 }
 
 const GB_bank_symbol_t *GB_debugger_find_symbol(GB_gameboy_t *gb, uint16_t addr)
 {
     uint16_t bank = bank_for_addr(gb, addr);
 
-    const GB_bank_symbol_t *symbol = GB_map_find_symbol(gb->bank_symbols[bank], addr);
+    const GB_bank_symbol_t *symbol = GB_map_find_symbol(get_symbol_map(gb, bank), addr);
     if (symbol) return symbol;
-    if (bank != 0) return GB_map_find_symbol(gb->bank_symbols[0], addr); /* Maybe the symbol incorrectly uses bank 0? */
+    if (bank != 0) return GB_map_find_symbol(get_symbol_map(gb, 0), addr); /* Maybe the symbol incorrectly uses bank 0? */
 
     return NULL;
 }

@@ -735,7 +735,8 @@ struct GB_gameboy_internal_s {
         struct GB_watchpoint_s *watchpoints;
 
         /* Symbol tables */
-        GB_symbol_map_t *bank_symbols[0x200];
+        GB_symbol_map_t **bank_symbols;
+        size_t n_symbol_maps;
         GB_reversed_symbol_map_t reversed_symbol_map;
 
         /* Ticks command */
