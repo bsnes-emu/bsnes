@@ -1609,7 +1609,8 @@ void GB_reset(GB_gameboy_t *gb)
     gb->model = model;
     gb->version = GB_STRUCT_VERSION;
     
-    gb->mbc_rom_bank = 1;
+    GB_reset_mbc(gb);
+    
     gb->last_rtc_second = time(NULL);
     gb->cgb_ram_bank = 1;
     gb->io_registers[GB_IO_JOYP] = 0xCF;

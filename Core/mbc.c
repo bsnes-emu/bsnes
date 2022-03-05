@@ -18,9 +18,9 @@ const GB_cartridge_t GB_cart_defs[256] = {
     {  GB_NO_MBC, GB_STANDARD_MBC, true , true , false, false}, // 09h  ROM+RAM+BATTERY
     [0xB] =
     /* Todo: Not supported yet */
-    {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // 0Bh  MMM01
-    {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // 0Ch  MMM01+RAM
-    {  GB_NO_MBC, GB_STANDARD_MBC, false, false, false, false}, // 0Dh  MMM01+RAM+BATTERY
+    {  GB_MMM01 , GB_STANDARD_MBC, false, false, false, false}, // 0Bh  MMM01
+    {  GB_MMM01 , GB_STANDARD_MBC, true , false, false, false}, // 0Ch  MMM01+RAM
+    {  GB_MMM01 , GB_STANDARD_MBC, true , true , false, false}, // 0Dh  MMM01+RAM+BATTERY
     [0xF] =
     {  GB_MBC3  , GB_STANDARD_MBC, false, true,  true , false}, // 0Fh  MBC3+TIMER+BATTERY
     {  GB_MBC3  , GB_STANDARD_MBC, true , true,  true , false}, // 10h  MBC3+TIMER+RAM+BATTERY
@@ -103,6 +103,40 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
         case GB_MBC7:
             gb->mbc_rom_bank = gb->mbc7.rom_bank;
             break;
+        case GB_MMM01:
+            if (gb->mmm01.locked) {
+                if (gb->mmm01.multiplex_mode) {
+                    gb->mbc_rom0_bank = (gb->mmm01.rom_bank_low & (gb->mmm01.rom_bank_mask << 1)) |
+                        ((gb->mmm01.rom_bank_low & (gb->mmm01.mbc1_mode? -1 : gb->mmm01.ram_bank_mask)) << 5) |
+                        (gb->mmm01.rom_bank_high << 7);
+                    gb->mbc_rom_bank = gb->mmm01.rom_bank_low |
+                        (gb->mmm01.rom_bank_low << 5) |
+                        (gb->mmm01.rom_bank_high << 7);
+                    gb->mbc_ram_bank = gb->mmm01.rom_bank_mid | (gb->mmm01.ram_bank_high << 2);
+                }
+                else {
+                    gb->mbc_rom0_bank = (gb->mmm01.rom_bank_low & (gb->mmm01.rom_bank_mask << 1)) |
+                        (gb->mmm01.rom_bank_mid << 5) |
+                        (gb->mmm01.rom_bank_high << 7);
+                    gb->mbc_rom_bank = gb->mmm01.rom_bank_low |
+                        (gb->mmm01.rom_bank_mid << 5) |
+                        (gb->mmm01.rom_bank_high << 7);
+                    if (gb->mmm01.mbc1_mode) {
+                        gb->mbc_ram_bank = gb->mmm01.ram_bank_low | (gb->mmm01.ram_bank_high << 2);
+                    }
+                    else {
+                        gb->mbc_ram_bank = (gb->mmm01.ram_bank_low & gb->mmm01.ram_bank_mask) | (gb->mmm01.ram_bank_high << 2);
+                    }
+                }
+                if (gb->mbc_rom_bank == gb->mbc_rom0_bank) {
+                    gb->mbc_rom_bank++;
+                }
+            }
+            else {
+                gb->mbc_rom_bank = -1;
+                gb->mbc_rom0_bank = -2;
+            }
+            break;
         case GB_HUC1:
             if (gb->huc1.mode == 0) {
                 gb->mbc_rom_bank = gb->huc1.bank_low | (gb->mbc1.bank_high << 6);
@@ -129,6 +163,20 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
 void GB_configure_cart(GB_gameboy_t *gb)
 {
     gb->cartridge_type = &GB_cart_defs[gb->rom[0x147]];
+    if (gb->cartridge_type->mbc_type == GB_MMM01) {
+        uint8_t *temp = malloc(0x8000);
+        memcpy(temp, gb->rom, 0x8000);
+        memmove(gb->rom, gb->rom + 0x8000, gb->rom_size - 0x8000);
+        memcpy(gb->rom + gb->rom_size - 0x8000, temp, 0x8000);
+        free(temp);
+    }
+    else {
+        const GB_cartridge_t *maybe_mmm01_type = &GB_cart_defs[gb->rom[gb->rom_size - 0x8000 + 0x147]];
+        if (maybe_mmm01_type->mbc_type == GB_MMM01 && memcmp(gb->rom + 0x104, gb->rom + gb->rom_size - 0x8000 + 0x104, 0x30) == 0) {
+            gb->cartridge_type = maybe_mmm01_type;
+        }
+    }
+
     if (gb->rom[0x147] == 0xBC &&
         gb->rom[0x149] == 0xC1 &&
         gb->rom[0x14A] == 0x65) {
@@ -193,16 +241,25 @@ void GB_configure_cart(GB_gameboy_t *gb)
         }
     }
     
-    /* Set MBC5's bank to 1 correctly */
-    if (gb->cartridge_type->mbc_type == GB_MBC5) {
+    GB_reset_mbc(gb);
+}
+
+void GB_reset_mbc(GB_gameboy_t *gb)
+{
+    if (gb->cartridge_type->mbc_type == GB_MMM01) {
+        gb->mbc_rom_bank = -1;
+        gb->mbc_rom0_bank = -2;
+    }
+    else if (gb->cartridge_type->mbc_type == GB_MBC5) {
         gb->mbc5.rom_bank_low = 1;
     }
-    
-    /* Initial MBC7 state */
-    if (gb->cartridge_type->mbc_type == GB_MBC7) {
+    else if (gb->cartridge_type->mbc_type == GB_MBC7) {
         gb->mbc7.x_latch = gb->mbc7.y_latch = 0x8000;
         gb->mbc7.latch_ready = true;
         gb->mbc7.read_bits = -1;
         gb->mbc7.eeprom_do = true;
+    }
+    else {
+        gb->mbc_rom_bank = 1;
     }
 }

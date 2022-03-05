@@ -440,6 +440,7 @@ struct GB_gameboy_internal_s {
     /* MBC */
     GB_SECTION(mbc,
         uint16_t mbc_rom_bank;
+        uint16_t mbc_rom0_bank; /* For multicart mappings . */
         uint8_t mbc_ram_bank;
         uint32_t mbc_ram_size;
         bool mbc_ram_enable;
@@ -466,21 +467,38 @@ struct GB_gameboy_internal_s {
                 uint8_t ram_bank:4;
             } mbc5;
                
-           struct {
-               uint8_t rom_bank;
-               uint16_t x_latch;
-               uint16_t y_latch;
-               bool latch_ready:1;
-               bool eeprom_do:1;
-               bool eeprom_di:1;
-               bool eeprom_clk:1;
-               bool eeprom_cs:1;
-               uint16_t eeprom_command:11;
-               uint16_t read_bits;
-               uint8_t bits_countdown:5;
-               bool secondary_ram_enable:1;
-               bool eeprom_write_enabled:1;
-           } mbc7;
+            struct {
+                uint8_t rom_bank;
+                uint16_t x_latch;
+                uint16_t y_latch;
+                bool latch_ready:1;
+                bool eeprom_do:1;
+                bool eeprom_di:1;
+                bool eeprom_clk:1;
+                bool eeprom_cs:1;
+                uint16_t eeprom_command:11;
+                uint16_t read_bits;
+                uint8_t bits_countdown:5;
+                bool secondary_ram_enable:1;
+                bool eeprom_write_enabled:1;
+            } mbc7;
+               
+            struct {
+                uint8_t rom_bank_low:5;
+                uint8_t rom_bank_mid:2;
+                bool mbc1_mode:1;
+               
+                uint8_t rom_bank_mask:4;
+                uint8_t rom_bank_high:2;
+                uint8_t ram_bank_low:2;
+               
+                uint8_t ram_bank_high:2;
+                uint8_t ram_bank_mask:2;
+
+                bool locked:1;
+                bool mbc1_mode_disable:1;
+                bool multiplex_mode:1;
+            } mmm01;
             
             struct {
                 uint8_t bank_low:6;
@@ -508,7 +526,6 @@ struct GB_gameboy_internal_s {
                uint8_t mode;
            } tpp1;
         };
-        uint16_t mbc_rom0_bank; /* For some MBC1 wirings. */
         bool camera_registers_mapped;
         uint8_t camera_registers[0x36];
         uint8_t rumble_strength;

@@ -838,6 +838,42 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 case 0x4000: case 0x5000: gb->mbc7.secondary_ram_enable  = value == 0x40; break;
             }
             break;
+        case GB_MMM01:
+            switch (addr & 0xF000) {
+                case 0x0000: case 0x1000:
+                    gb->mbc_ram_enable = (value & 0xF) == 0xA;
+                    if (!gb->mmm01.locked) {
+                        gb->mmm01.ram_bank_mask = value >> 4;
+                        gb->mmm01.locked = value & 0x40;
+                    }
+                    break;
+                case 0x2000: case 0x3000:
+                    if (!gb->mmm01.locked) {
+                        gb->mmm01.rom_bank_mid = value >> 5;
+                        gb->mmm01.rom_bank_low = value;
+                    }
+                    else {
+                        gb->mmm01.rom_bank_low &= (gb->mmm01.rom_bank_mask << 1);
+                        gb->mmm01.rom_bank_low |= ~(gb->mmm01.rom_bank_mask << 1) & value;
+                    }
+                    break;
+                case 0x4000: case 0x5000:
+                    gb->mmm01.ram_bank_low = value;
+                    if (!gb->mmm01.locked) {
+                        gb->mmm01.ram_bank_high = value >> 2;
+                        gb->mmm01.rom_bank_high = value >> 4;
+                        gb->mmm01.mbc1_mode_disable = value & 0x40;
+                    }
+                    break;
+                case 0x6000: case 0x7000:
+                    gb->mmm01.mbc1_mode = (value & 1) && !gb->mmm01.mbc1_mode_disable;
+                    if (!gb->mmm01.locked) {
+                        gb->mmm01.rom_bank_mask = value >> 2;
+                        gb->mmm01.multiplex_mode = value & 0x40;
+                    }
+                    break;
+            }
+            break;
         case GB_HUC1:
             switch (addr & 0xF000) {
                 case 0x0000: case 0x1000: gb->huc1.ir_mode = (value & 0xF) == 0xE; break;

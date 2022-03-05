@@ -1546,15 +1546,19 @@ static bool mbc(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
         }
         else {
             static const char *const mapper_names[] = {
-                [GB_MBC1] = "MBC1",
-                [GB_MBC2] = "MBC2",
-                [GB_MBC3] = "MBC3",
-                [GB_MBC5] = "MBC5",
-                [GB_MBC7] = "MBC7",
-                [GB_HUC1] = "HUC-1",
-                [GB_HUC3] = "HUC-3",
+                [GB_MBC1]  = "MBC1",
+                [GB_MBC2]  = "MBC2",
+                [GB_MBC3]  = "MBC3",
+                [GB_MBC5]  = "MBC5",
+                [GB_MBC7]  = "MBC7",
+                [GB_MMM01] = "MMM01",
+                [GB_HUC1]  = "HUC-1",
+                [GB_HUC3]  = "HUC-3",
             };
             GB_log(gb, "%s\n", mapper_names[cartridge->mbc_type]);
+        }
+        if (cartridge->mbc_type == GB_MMM01 || cartridge->mbc_type == GB_MBC1) {
+            GB_log(gb, "Current mapped ROM0 bank: %x\n", gb->mbc_rom0_bank);
         }
         GB_log(gb, "Current mapped ROM bank: %x\n", gb->mbc_rom_bank);
         if (cartridge->has_ram) {
