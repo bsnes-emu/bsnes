@@ -478,6 +478,14 @@ static int save_bess_mbc_block(GB_gameboy_t *gb, virtual_file_t *file)
     return 0;
 }
 
+static const uint8_t *get_header_bank(GB_gameboy_t *gb)
+{
+    if (gb->cartridge_type->mbc_type == GB_MMM01) {
+        return gb->rom + gb->rom_size - 0x8000;
+    }
+    return gb->rom;
+}
+
 static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file, bool append_bess)
 {
     if (file->write(file, GB_GET_SECTION(gb, header), GB_SECTION_SIZE(header)) != GB_SECTION_SIZE(header)) goto error;
@@ -547,11 +555,13 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file, bool appe
         goto error;
     }
     
-    if (file->write(file, gb->rom + 0x134, 0x10) != 0x10) {
+    const uint8_t *bank = get_header_bank(gb);
+    
+    if (file->write(file, bank + 0x134, 0x10) != 0x10) {
         goto error;
     }
     
-    if (file->write(file, gb->rom + 0x14E, 2) != 2) {
+    if (file->write(file, bank + 0x14E, 2) != 2) {
         goto error;
     }
     
@@ -985,7 +995,8 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                 BESS_INFO_t bess_info = {0,};
                 if (LE32(block.size) != sizeof(bess_info) - sizeof(block)) goto parse_error;
                 if (file->read(file, &bess_info.header + 1, LE32(block.size)) != LE32(block.size)) goto error;
-                if (memcmp(bess_info.title, gb->rom + 0x134, sizeof(bess_info.title))) {
+                const uint8_t *bank = get_header_bank(gb);
+                if (memcmp(bess_info.title, bank + 0x134, sizeof(bess_info.title))) {
                     char ascii_title[0x11] = {0,};
                     for (unsigned i = 0; i < 0x10; i++) {
                         if (bess_info.title[i] < 0x20 || bess_info.title[i] > 0x7E) break;
@@ -993,7 +1004,7 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                     }
                     GB_log(gb, "Save state was made on another ROM: '%s'\n", ascii_title);
                 }
-                else if (memcmp(bess_info.checksum, gb->rom + 0x14E, 2)) {
+                else if (memcmp(bess_info.checksum, bank + 0x14E, 2)) {
                     GB_log(gb, "Save state was potentially made on another revision of the same ROM.\n");
                 }
                 break;
