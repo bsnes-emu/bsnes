@@ -17,7 +17,6 @@ const GB_cartridge_t GB_cart_defs[256] = {
     {  GB_NO_MBC, GB_STANDARD_MBC, true , false, false, false}, // 08h  ROM+RAM
     {  GB_NO_MBC, GB_STANDARD_MBC, true , true , false, false}, // 09h  ROM+RAM+BATTERY
     [0xB] =
-    /* Todo: Not supported yet */
     {  GB_MMM01 , GB_STANDARD_MBC, false, false, false, false}, // 0Bh  MMM01
     {  GB_MMM01 , GB_STANDARD_MBC, true , false, false, false}, // 0Ch  MMM01+RAM
     {  GB_MMM01 , GB_STANDARD_MBC, true , true , false, false}, // 0Dh  MMM01+RAM+BATTERY
@@ -172,8 +171,14 @@ void GB_configure_cart(GB_gameboy_t *gb)
     }
     else {
         const GB_cartridge_t *maybe_mmm01_type = &GB_cart_defs[gb->rom[gb->rom_size - 0x8000 + 0x147]];
-        if (maybe_mmm01_type->mbc_type == GB_MMM01 && memcmp(gb->rom + 0x104, gb->rom + gb->rom_size - 0x8000 + 0x104, 0x30) == 0) {
-            gb->cartridge_type = maybe_mmm01_type;
+        if (memcmp(gb->rom + 0x104, gb->rom + gb->rom_size - 0x8000 + 0x104, 0x30) == 0) {
+            if (maybe_mmm01_type->mbc_type == GB_MMM01) {
+                gb->cartridge_type = maybe_mmm01_type;
+            }
+            else if(gb->rom[gb->rom_size - 0x8000 + 0x147] == 0x11) {
+                GB_log(gb, "ROM header reports MBC3, but it appears to be an MMM01 ROM. Assuming cartridge uses MMM01.");
+                gb->cartridge_type = &GB_cart_defs[0xB];
+            }
         }
     }
 
