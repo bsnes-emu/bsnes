@@ -119,6 +119,7 @@ typedef enum {
     GB_MODEL_AGB_A = 0x207,
     GB_MODEL_AGB = GB_MODEL_AGB_A,
     //GB_MODEL_AGB_B = 0x208
+    //GB_MODEL_AGB_E = 0x209
 } GB_model_t;
 
 enum {

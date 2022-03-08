@@ -1796,8 +1796,13 @@ void GB_hdma_run(GB_gameboy_t *gb)
         }
         gb->hdma_current_src++;
         GB_advance_cycles(gb, cycles);
-        if (gb->addr_for_hdma_conflict == 0xFFFF /* || (gb->model == GB_MODEL_AGB_B && gb->cgb_double_speed) */) {
-            gb->vram[vram_base + (gb->hdma_current_dest++ & 0x1FFF)] = byte;
+        if (gb->addr_for_hdma_conflict == 0xFFFF /* || (gb->model >= GB_MODEL_AGB_B && gb->cgb_double_speed) */) {
+            uint16_t addr = (gb->hdma_current_dest++ & 0x1FFF);
+            gb->vram[vram_base + addr] = byte;
+            // TODO: vram_write_blocked might not be the correct timing
+            if (gb->vram_write_blocked /* && gb->model < GB_MODEL_AGB_B */) {
+                gb->vram[(vram_base ^ 0x2000) + addr] = byte;
+            }
         }
         else {
             if (gb->model == GB_MODEL_CGB_E || gb->cgb_double_speed) {
@@ -1805,9 +1810,12 @@ void GB_hdma_run(GB_gameboy_t *gb)
                     These corruptions revision (unit?) specific in single speed. They happen only on my CGB-E.
                 */
                 gb->addr_for_hdma_conflict &= 0x1FFF;
-                // Can't write to even bitmap bytes in single speed mode
-                if (gb->cgb_double_speed || gb->addr_for_hdma_conflict >= 0x1900 || (gb->addr_for_hdma_conflict & 1)) {
-                    gb->vram[vram_base + (gb->hdma_current_dest & gb->addr_for_hdma_conflict & 0x1FFF)] = byte;
+                // TODO: there are *some* scenarions in single speed mode where this write doesn't happen. What's the logic?
+                uint16_t addr = (gb->hdma_current_dest & gb->addr_for_hdma_conflict & 0x1FFF);
+                gb->vram[vram_base + addr] = byte;
+                // TODO: vram_write_blocked might not be the correct timing
+                if (gb->vram_write_blocked /* && gb->model < GB_MODEL_AGB_B */) {
+                    gb->vram[(vram_base ^ 0x2000) + addr] = byte;
                 }
             }
             gb->hdma_current_dest++;

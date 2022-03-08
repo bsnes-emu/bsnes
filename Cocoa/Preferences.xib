@@ -524,14 +524,15 @@
                 <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3Dl-S6-O7c">
                     <rect key="frame" x="30" y="17" width="257" height="22"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                    <popUpButtonCell key="cell" type="push" title="CPU AGB A" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="519" imageScaling="proportionallyDown" inset="2" autoenablesItems="NO" selectedItem="8bk-wP-Cbr" id="EhC-I2-5Th">
+                    <popUpButtonCell key="cell" type="push" title="CPU AGB 0 (Early GBA)" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" tag="518" imageScaling="proportionallyDown" inset="2" autoenablesItems="NO" selectedItem="75z-Yy-XaY" id="EhC-I2-5Th">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="menu"/>
                         <menu key="menu" autoenablesItems="NO" id="b2b-jo-SrI">
                             <items>
-                                <menuItem title="CPU AGB 0" tag="518" enabled="NO" id="75z-Yy-XaY"/>
-                                <menuItem title="CPU AGB A" state="on" tag="519" id="8bk-wP-Cbr"/>
-                                <menuItem title="CPU AGB B (Game Boy Advance SP)" tag="520" enabled="NO" id="jIE-v4-768"/>
+                                <menuItem title="CPU AGB 0 (Early GBA)" tag="518" enabled="NO" id="75z-Yy-XaY"/>
+                                <menuItem title="CPU AGB A (GBA, GB Player)" state="on" tag="519" id="8bk-wP-Cbr"/>
+                                <menuItem title="CPU AGB B (GBA SP)" tag="520" enabled="NO" id="jIE-v4-768"/>
+                                <menuItem title="CPU AGB E (Late GBA SP, GB Player)" tag="521" enabled="NO" id="w7s-kh-HaZ"/>
                             </items>
                         </menu>
                     </popUpButtonCell>
@@ -636,7 +637,7 @@
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <clipView key="contentView" focusRingType="none" ambiguous="YES" drawsBackground="NO" id="AMs-PO-nid">
                         <rect key="frame" x="1" y="1" width="255" height="209"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <tableView focusRingType="none" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnReordering="NO" columnResizing="NO" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" typeSelect="NO" id="UDd-IJ-fxX">
                                 <rect key="frame" x="0.0" y="0.0" width="255" height="209"/>
@@ -1112,7 +1113,7 @@
         </customObject>
     </objects>
     <resources>
-        <image name="AppIcon" width="128" height="128"/>
+        <image name="AppIcon" width="512" height="512"/>
         <image name="CPU" width="32" height="32"/>
         <image name="Display" width="32" height="32"/>
         <image name="Joypad" width="32" height="32"/>
