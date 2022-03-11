@@ -88,6 +88,8 @@ typedef struct
         uint16_t sample_length; // From NRX3, NRX4, in APU ticks
         bool length_enabled; // NRX4
         GB_envelope_clock_t envelope_clock;
+        uint8_t delay; // Hack for CGB D/E phantom step due to how sample_countdown is implemented in SameBoy
+        bool did_tick;
     } square_channels[2];
 
     struct {
