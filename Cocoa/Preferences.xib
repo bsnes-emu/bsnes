@@ -524,7 +524,7 @@
                 <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3Dl-S6-O7c">
                     <rect key="frame" x="30" y="17" width="257" height="22"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                    <popUpButtonCell key="cell" type="push" title="CPU AGB 0 (Early GBA)" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="borderAndBezel" tag="518" imageScaling="proportionallyDown" inset="2" autoenablesItems="NO" selectedItem="75z-Yy-XaY" id="EhC-I2-5Th">
+                    <popUpButtonCell key="cell" type="push" title="CPU AGB A (GBA, GB Player)" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="519" imageScaling="proportionallyDown" inset="2" autoenablesItems="NO" selectedItem="8bk-wP-Cbr" id="EhC-I2-5Th">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="menu"/>
                         <menu key="menu" autoenablesItems="NO" id="b2b-jo-SrI">
