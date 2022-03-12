@@ -816,6 +816,8 @@ void GB_apu_init(GB_gameboy_t *gb)
         gb->apu.skip_div_event = GB_SKIP_DIV_EVENT_SKIP;
         gb->apu.div_divider = 1;
     }
+    gb->apu.square_channels[GB_SQUARE_1].sample_countdown = -1;
+    gb->apu.square_channels[GB_SQUARE_2].sample_countdown = -1;
 }
 
 uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
@@ -1125,11 +1127,20 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 gb->apu.square_channels[index].envelope_clock.locked = false;
                 gb->apu.square_channels[index].envelope_clock.clock = false;
                 gb->apu.square_channels[index].did_tick = false;
+                bool force_unsurpressed = false;
                 if (!gb->apu.is_active[index]) {
+                    if (gb->model == GB_MODEL_CGB_E || gb->model == GB_MODEL_CGB_D) {
+                        if (!(value & 4) && !(((gb->apu.square_channels[index].sample_countdown - gb->apu.square_channels[index].delay) / 2) & 0x400)) {
+                            gb->apu.square_channels[index].current_sample_index++;
+                            gb->apu.square_channels[index].current_sample_index &= 0x7;
+                            force_unsurpressed = true;
+                        }
+                    }
                     gb->apu.square_channels[index].delay = 6 - gb->apu.lf_div;
                     gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + gb->apu.square_channels[index].delay;
                     if (gb->model <= GB_MODEL_CGB_C && gb->apu.lf_div) {
                         gb->apu.square_channels[index].sample_countdown += 2;
+                        gb->apu.square_channels[index].delay += 2;
                     }
                 }
                 else {
@@ -1152,6 +1163,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + gb->apu.square_channels[index].delay;
                     if (gb->model <= GB_MODEL_CGB_C && gb->apu.lf_div) {
                         gb->apu.square_channels[index].sample_countdown += 2;
+                        gb->apu.square_channels[index].delay += 2;
                     }
                 }
                 gb->apu.square_channels[index].current_volume = gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] >> 4;
@@ -1167,7 +1179,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 if ((gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] & 0xF8) != 0 && !gb->apu.is_active[index]) {
                     gb->apu.is_active[index] = true;
                     update_sample(gb, index, 0, 0);
-                    gb->apu.square_channels[index].sample_surpressed = true;
+                    gb->apu.square_channels[index].sample_surpressed = true && !force_unsurpressed;
                 }
                 if (gb->apu.square_channels[index].pulse_length == 0) {
                     gb->apu.square_channels[index].pulse_length = 0x40;
