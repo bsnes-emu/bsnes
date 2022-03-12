@@ -52,7 +52,7 @@
                             <action selector="switchPreferencesTab:" target="-2" id="Tio-D7-PaA"/>
                         </connections>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="EB7AB5BC-57B0-4639-A037-E28226866C80" label="Updates" paletteLabel="Updates" tag="4" image="AppIcon" autovalidates="NO" selectable="YES" id="lMV-68-ntz">
+                    <toolbarItem implicitItemIdentifier="EB7AB5BC-57B0-4639-A037-E28226866C80" label="Updates" paletteLabel="Updates" tag="4" image="Updates" autovalidates="NO" selectable="YES" id="lMV-68-ntz">
                         <connections>
                             <action selector="switchPreferencesTab:" target="-2" id="bfU-hc-FnN"/>
                         </connections>
@@ -1113,12 +1113,12 @@
         </customObject>
     </objects>
     <resources>
-        <image name="AppIcon" width="512" height="512"/>
         <image name="CPU" width="32" height="32"/>
         <image name="Display" width="32" height="32"/>
         <image name="Joypad" width="32" height="32"/>
         <image name="NSAddTemplate" width="11" height="11"/>
         <image name="NSRemoveTemplate" width="11" height="11"/>
         <image name="Speaker" width="32" height="32"/>
+        <image name="Updates" width="32" height="32"/>
     </resources>
 </document>

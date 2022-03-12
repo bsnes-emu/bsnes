@@ -154,6 +154,10 @@ static uint32_t color_to_int(NSColor *color)
 #ifndef UPDATE_SUPPORT
         [_preferencesWindow.toolbar removeItemAtIndex:4];
 #endif
+        if (@available(macOS 11.0, *)) {
+            [_preferencesWindow.toolbar insertItemWithItemIdentifier:NSToolbarFlexibleSpaceItemIdentifier atIndex:0];
+            [_preferencesWindow.toolbar insertItemWithItemIdentifier:NSToolbarFlexibleSpaceItemIdentifier atIndex:_preferencesWindow.toolbar.items.count];
+        }
     }
     [_preferencesWindow makeKeyAndOrderFront:self];
 }
