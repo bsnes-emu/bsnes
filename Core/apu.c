@@ -1093,6 +1093,19 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR13:
         case GB_IO_NR23: {
             unsigned index = reg == GB_IO_NR23? GB_SQUARE_2: GB_SQUARE_1;
+            if (gb->apu.is_active[index]) {
+                /* On an AGB, as well as on CGB C and earlier (TODO: Tested: 0, B and C), it behaves slightly different on
+                 double speed. */
+                if (gb->model == GB_MODEL_CGB_E || gb->model == GB_MODEL_CGB_D || gb->apu.square_channels[index].sample_countdown & 1) {
+                    if (gb->apu.square_channels[index].did_tick &&
+                        gb->apu.square_channels[index].sample_countdown >> 1 == (gb->apu.square_channels[index].sample_length ^ 0x7FF)) {
+                        gb->apu.square_channels[index].current_sample_index--;
+                        gb->apu.square_channels[index].current_sample_index &= 7;
+                        gb->apu.square_channels[index].sample_surpressed = false;
+                    }
+                }
+            }
+            
             gb->apu.square_channels[index].sample_length &= ~0xFF;
             gb->apu.square_channels[index].sample_length |= value & 0xFF;
             break;
