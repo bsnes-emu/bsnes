@@ -71,6 +71,8 @@ static uint32_t color_to_int(NSColor *color)
                                                               
                                                               @"GBMBC7JoystickOverride": @NO,
                                                               @"GBMBC7AllowMouse": @YES,
+                                                              
+                                                              @"NSToolbarItemForcesStandardSize": @YES, // Forces Monterey to resepect toolbar item sizes
                                                               }];
     
     [JOYController startOnRunLoop:[NSRunLoop currentRunLoop] withOptions:@{
