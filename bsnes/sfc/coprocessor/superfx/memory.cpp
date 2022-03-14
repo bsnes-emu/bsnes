@@ -1,29 +1,32 @@
 auto SuperFX::read(uint addr, uint8 data) -> uint8 {
   if((addr & 0xc00000) == 0x000000) {  //$00-3f:0000-7fff,:8000-ffff
+    addr =  Bus::mirror(addr, rom.size());
     while(!regs.scmr.ron) {
       step(6);
       synchronizeCPU();
       if(synchronizing()) break;
     }
-    return rom.read((((addr & 0x3f0000) >> 1) | (addr & 0x7fff)) & romMask);
+    return rom.read((((addr & 0x3f0000) >> 1) | (addr & 0x7fff)));
   }
 
   if((addr & 0xe00000) == 0x400000) {  //$40-5f:0000-ffff
+    addr =  Bus::mirror(addr, rom.size());
     while(!regs.scmr.ron) {
       step(6);
       synchronizeCPU();
       if(synchronizing()) break;
     }
-    return rom.read(addr & romMask);
+    return rom.read(addr);
   }
 
   if((addr & 0xe00000) == 0x600000) {  //$60-7f:0000-ffff
+    addr =  Bus::mirror(addr, ram.size());
     while(!regs.scmr.ran) {
       step(6);
       synchronizeCPU();
       if(synchronizing()) break;
     }
-    return ram.read(addr & ramMask);
+    return ram.read(addr);
   }
 
   return data;
@@ -31,12 +34,13 @@ auto SuperFX::read(uint addr, uint8 data) -> uint8 {
 
 auto SuperFX::write(uint addr, uint8 data) -> void {
   if((addr & 0xe00000) == 0x600000) {  //$60-7f:0000-ffff
+    addr =  Bus::mirror(addr, ram.size());
     while(!regs.scmr.ran) {
       step(6);
       synchronizeCPU();
       if(synchronizing()) break;
     }
-    return ram.write(addr & ramMask, data);
+    return ram.write(addr, data);
   }
 }
 
