@@ -346,7 +346,7 @@
                         <font key="font" metaFont="system"/>
                         <tabViewItems>
                             <tabViewItem label="Tileset" identifier="1" id="pXb-od-Wb1">
-                                <view key="view" id="lCG-Gt-XMF">
+                                <view key="view" ambiguous="YES" id="lCG-Gt-XMF">
                                     <rect key="frame" x="0.0" y="0.0" width="512" height="432"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
@@ -503,7 +503,7 @@
                                 </view>
                             </tabViewItem>
                             <tabViewItem label="Objects" identifier="" id="a08-eg-Maw">
-                                <view key="view" ambiguous="YES" id="EiO-p0-3xn">
+                                <view key="view" id="EiO-p0-3xn">
                                     <rect key="frame" x="0.0" y="0.0" width="512" height="432"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
@@ -512,7 +512,7 @@
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <clipView key="contentView" ambiguous="YES" id="JYu-CM-49p">
                                                 <rect key="frame" x="0.0" y="0.0" width="512" height="432"/>
-                                                <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                                                <autoresizingMask key="autoresizingMask"/>
                                                 <subviews>
                                                     <view ambiguous="YES" id="fIM-GT-QXJ" customClass="GBObjectView">
                                                         <rect key="frame" x="0.0" y="0.0" width="512" height="706"/>
@@ -635,7 +635,7 @@
                                 <rect key="frame" x="16" y="174" width="154" height="19"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="To value:" id="Ycx-oE-aA4">
-                                    <font key="font" usesAppearanceFont="YES"/>
+                                    <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
@@ -766,7 +766,7 @@
                                 <rect key="frame" x="16" y="204" width="152" height="19"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <textFieldCell key="cell" lineBreakMode="clipping" title="Change byte at address:" id="xwa-TF-eY1">
-                                    <font key="font" usesAppearanceFont="YES"/>
+                                    <font key="font" metaFont="system"/>
                                     <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                                     <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
                                 </textFieldCell>
@@ -778,10 +778,10 @@
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" heightSizable="YES"/>
                         <clipView key="contentView" id="mzf-yu-RID">
                             <rect key="frame" x="1" y="0.0" width="398" height="274"/>
-                            <autoresizingMask key="autoresizingMask"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" typeSelect="NO" headerView="pvX-uJ-qK5" id="tA3-8T-bxb">
-                                    <rect key="frame" x="0.0" y="0.0" width="398" height="249"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="398" height="257"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <size key="intercellSpacing" width="3" height="2"/>
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -793,7 +793,7 @@
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
                                             </tableHeaderCell>
-                                            <buttonCell key="dataCell" type="bevel" bezelStyle="regularSquare" image="NSStopProgressFreestandingTemplate" imagePosition="only" inset="2" id="5xh-hN-jHH">
+                                            <buttonCell key="dataCell" type="inline" bezelStyle="inline" image="NSStopProgressFreestandingTemplate" imagePosition="only" alignment="center" imageScaling="proportionallyDown" inset="2" id="5xh-hN-jHH">
                                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                                 <font key="font" metaFont="system"/>
                                             </buttonCell>
@@ -846,7 +846,7 @@
                             </subviews>
                         </clipView>
                         <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="3Hg-LL-VqH">
-                            <rect key="frame" x="1" y="258" width="398" height="16"/>
+                            <rect key="frame" x="1" y="119" width="223" height="15"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                         <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="zET-KH-qF4">
@@ -854,7 +854,7 @@
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                         <tableHeaderView key="headerView" id="pvX-uJ-qK5">
-                            <rect key="frame" x="0.0" y="0.0" width="398" height="25"/>
+                            <rect key="frame" x="0.0" y="0.0" width="398" height="17"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </tableHeaderView>
                     </scrollView>
