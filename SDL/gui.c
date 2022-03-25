@@ -1196,6 +1196,7 @@ void run_gui(bool is_running)
     current_selection = 0;
     scroll = 0;
     do {
+        SDL_WaitEvent(&event);
         /* Convert Joypad and mouse events (We only generate down events) */
         if (gui_state != WAITING_FOR_KEY && gui_state != WAITING_FOR_JBUTTON) {
             switch (event.type) {
@@ -1650,5 +1651,5 @@ void run_gui(bool is_running)
             render_texture(pixels, NULL);
 #endif
         }
-    } while (SDL_WaitEvent(&event));
+    } while (true);
 }
