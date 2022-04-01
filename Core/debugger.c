@@ -1978,23 +1978,23 @@ static const debugger_command_t commands[] = {
     {"next", 1, next, "Run the next instruction, skipping over function calls"},
     {"step", 1, step, "Run the next instruction, stepping into function calls"},
     {"finish", 1, finish, "Run until the current function returns"},
-    {"undo", 1, undo, "Reverts the last command"},
-    {"backtrace", 2, backtrace, "Displays the current call stack"},
+    {"undo", 1, undo, "Revert the last command"},
+    {"backtrace", 2, backtrace, "Display the current call stack"},
     {"bt", 2, }, /* Alias */
     {"sld", 3, stack_leak_detection, "Like finish, but stops if a stack leak is detected"},
-    {"ticks", 2, ticks, "Displays the number of CPU ticks since the last time 'ticks' was" HELP_NEWLINE
+    {"ticks", 2, ticks, "Display the number of CPU ticks since the last time 'ticks' was" HELP_NEWLINE
                         "used"},
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
-    {"cartridge", 2, mbc, "Displays information about the MBC and cartridge"},
+    {"cartridge", 2, mbc, "Display information about the MBC and cartridge"},
     {"mbc", 3, }, /* Alias */
-    {"apu", 3, apu, "Displays information about the current state of the audio processing unit", "[channel (1-4, 5 for NR5x)]"},
-    {"wave", 3, wave, "Prints a visual representation of the wave RAM." HELP_NEWLINE
+    {"apu", 3, apu, "Display information about the current state of the audio processing unit", "[channel (1-4, 5 for NR5x)]"},
+    {"wave", 3, wave, "Print a visual representation of the wave RAM." HELP_NEWLINE
                       "Modifiers can be used for a (f)ull print (the default)," HELP_NEWLINE
         "a more (c)ompact one, or a one-(l)iner", "", "(f|c|l)", .modifiers_completer = wave_completer},
-    {"lcd", 3, lcd, "Displays information about the current state of the LCD controller"},
-    {"palettes", 3, palettes, "Displays the current CGB palettes"},
-    {"dma", 3, dma, "Displays the current OAM DMA status"},
-    {"softbreak", 2, softbreak, "Enables or disables software breakpoints", "(on|off)", .argument_completer = on_off_completer},
+    {"lcd", 3, lcd, "Display information about the current state of the LCD controller"},
+    {"palettes", 3, palettes, "Display the current CGB palettes"},
+    {"dma", 3, dma, "Display the current OAM DMA status"},
+    {"softbreak", 2, softbreak, "Enable or disables software breakpoints", "(on|off)", .argument_completer = on_off_completer},
     {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression" HELP_NEWLINE
                                   "Can also modify the condition of existing breakpoints." HELP_NEWLINE
                                   "If the j modifier is used, the breakpoint will occur just before" HELP_NEWLINE
