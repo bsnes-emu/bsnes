@@ -86,7 +86,7 @@ static struct retro_log_callback logging;
 static retro_log_printf_t log_cb;
 
 static retro_video_refresh_t video_cb;
-static retro_audio_sample_t audio_sample_cb;
+static retro_audio_sample_batch_t audio_batch_cb;
 static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
 
@@ -101,7 +101,11 @@ static bool geometry_updated = false;
 static bool link_cable_emulation = false;
 /*static bool infrared_emulation   = false;*/
 
-signed short soundbuf[1024 * 2];
+static struct {
+    int16_t *data;
+    int32_t size;
+    int32_t capacity;
+} output_audio_buffer = {NULL, 0, 0};
 
 char retro_system_directory[4096];
 char retro_save_directory[4096];
@@ -174,12 +178,59 @@ static void rumble_callback(GB_gameboy_t *gb, double amplitude)
     }
 }
 
+static void ensure_output_audio_buffer_capacity(int32_t capacity)
+{
+    if (capacity <= output_audio_buffer.capacity) {
+        return;
+    }
+    output_audio_buffer.data = realloc(
+        output_audio_buffer.data, capacity * sizeof(*output_audio_buffer.data));
+    output_audio_buffer.capacity = capacity;
+    log_cb(RETRO_LOG_DEBUG, "Output audio buffer capacity set to %d\n", capacity);
+}
+
+static void init_output_audio_buffer(int32_t capacity)
+{
+    output_audio_buffer.data = NULL;
+    output_audio_buffer.size = 0;
+    output_audio_buffer.capacity = 0;
+    ensure_output_audio_buffer_capacity(capacity);
+}
+
+static void free_output_audio_buffer()
+{
+    free(output_audio_buffer.data);
+    output_audio_buffer.data = NULL;
+    output_audio_buffer.size = 0;
+    output_audio_buffer.capacity = 0;
+}
+
+static void upload_output_audio_buffer()
+{
+    int32_t remaining_frames = output_audio_buffer.size / 2;
+    int16_t *buf_pos = output_audio_buffer.data;
+
+    while (remaining_frames > 0) {
+        size_t uploaded_frames = audio_batch_cb(buf_pos, remaining_frames);
+        buf_pos += uploaded_frames * 2;
+        remaining_frames -= uploaded_frames;
+    }
+    output_audio_buffer.size = 0;
+}
+
 static void audio_callback(GB_gameboy_t *gb, GB_sample_t *sample)
 {
-    if ((audio_out == GB_1 && gb == &gameboy[0]) ||
-        (audio_out == GB_2 && gb == &gameboy[1])) {
-            audio_sample_cb(sample->left, sample->right);
+    if (!(audio_out == GB_1 && gb == &gameboy[0]) &&
+        !(audio_out == GB_2 && gb == &gameboy[1])) {
+        return;
     }
+
+    if (output_audio_buffer.capacity - output_audio_buffer.size < 2) {
+        ensure_output_audio_buffer_capacity(output_audio_buffer.capacity * 1.5);
+    }
+
+    output_audio_buffer.data[output_audio_buffer.size++] = sample->left;
+    output_audio_buffer.data[output_audio_buffer.size++] = sample->right;
 }
 
 static void vblank1(GB_gameboy_t *gb)
@@ -1045,6 +1096,8 @@ void retro_init(void)
     if (environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL)) {
         libretro_supports_bitmasks = true;
     }
+
+    init_output_audio_buffer(16384);
 }
 
 void retro_deinit(void)
@@ -1053,6 +1106,8 @@ void retro_deinit(void)
     free(frame_buf_copy);
     frame_buf = NULL;
     frame_buf_copy = NULL;
+
+    free_output_audio_buffer();
 
     libretro_supports_bitmasks = false;
 }
@@ -1122,11 +1177,12 @@ void retro_set_environment(retro_environment_t cb)
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
 {
-    audio_sample_cb = cb;
+    (void)cb;
 }
 
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb)
 {
+    audio_batch_cb = cb;
 }
 
 void retro_set_input_poll(retro_input_poll_t cb)
@@ -1237,7 +1293,7 @@ void retro_run(void)
                  GB_get_screen_width(&gameboy[0]) * sizeof(uint32_t));
     }
 
-
+    upload_output_audio_buffer();
     initialized = true;
 }
 
