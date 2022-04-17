@@ -545,8 +545,8 @@ struct GB_gameboy_internal_s {
         GB_UNIT(div);
         uint16_t div_counter;
         uint8_t tima_reload_state; /* After TIMA overflows, it becomes 0 for 4 cycles before actually reloading. */
-        uint16_t serial_cycles;
-        uint16_t serial_length;
+        bool serial_master_clock;
+        uint8_t serial_mask;
         uint8_t double_speed_alignment;
         uint8_t serial_count;
         int32_t speed_switch_halt_countdown;

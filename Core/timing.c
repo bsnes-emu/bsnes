@@ -163,12 +163,52 @@ static void increase_tima(GB_gameboy_t *gb)
     }
 }
 
+void GB_serial_master_edge(GB_gameboy_t *gb)
+{
+    if (unlikely(gb->printer_callback && (gb->printer.command_state || gb->printer.bits_received))) {
+        gb->printer.idle_time += 1 << gb->serial_mask;
+    }
+    
+    gb->serial_master_clock ^= true;
+    
+    if (!gb->serial_master_clock && (gb->io_registers[GB_IO_SC] & 0x81) == 0x81) {
+        gb->serial_count++;
+        if (gb->serial_count == 8) {
+            gb->serial_count = 0;
+            gb->io_registers[GB_IO_SC] &= ~0x80;
+            gb->io_registers[GB_IO_IF] |= 8;
+        }
+        
+        gb->io_registers[GB_IO_SB] <<= 1;
+        
+        if (gb->serial_transfer_bit_end_callback) {
+            gb->io_registers[GB_IO_SB] |= gb->serial_transfer_bit_end_callback(gb);
+        }
+        else {
+            gb->io_registers[GB_IO_SB] |= 1;
+        }
+        
+        if (gb->serial_count) {
+            /* Still more bits to send */
+            if (gb->serial_transfer_bit_start_callback) {
+                gb->serial_transfer_bit_start_callback(gb, gb->io_registers[GB_IO_SB] & 0x80);
+            }
+        }
+        
+    }
+}
+
+
 void GB_set_internal_div_counter(GB_gameboy_t *gb, uint16_t value)
 {
     /* TIMA increases when a specific high-bit becomes a low-bit. */
     uint16_t triggers = gb->div_counter & ~value;
     if ((gb->io_registers[GB_IO_TAC] & 4) && (triggers & TAC_TRIGGER_BITS[gb->io_registers[GB_IO_TAC] & 3])) {
         increase_tima(gb);
+    }
+    
+    if (triggers & gb->serial_mask) {
+        GB_serial_master_edge(gb);
     }
     
     /* TODO: Can switching to double speed mode trigger an event? */
@@ -206,53 +246,6 @@ static void timers_run(GB_gameboy_t *gb, uint8_t cycles)
         gb->apu.apu_cycles += 4 << !gb->cgb_double_speed;
         GB_SLEEP(gb, div, 2, 4);
     }
-}
-
-static void advance_serial(GB_gameboy_t *gb, uint8_t cycles)
-{
-    if (unlikely(gb->printer_callback && (gb->printer.command_state || gb->printer.bits_received))) {
-        gb->printer.idle_time += cycles;
-    }
-    if (likely(gb->serial_length == 0)) {
-        gb->serial_cycles += cycles;
-        return;
-    }
-    
-    while (cycles > gb->serial_length) {
-        advance_serial(gb, gb->serial_length);
-        cycles -= gb->serial_length;
-    }
-    
-    uint16_t previous_serial_cycles = gb->serial_cycles;
-    gb->serial_cycles += cycles;
-    if ((gb->serial_cycles & gb->serial_length) != (previous_serial_cycles & gb->serial_length)) {
-        gb->serial_count++;
-        if (gb->serial_count == 8) {
-            gb->serial_length = 0;
-            gb->serial_count = 0;
-            gb->io_registers[GB_IO_SC] &= ~0x80;
-            gb->io_registers[GB_IO_IF] |= 8;
-        }
-        
-        gb->io_registers[GB_IO_SB] <<= 1;
-        
-        if (gb->serial_transfer_bit_end_callback) {
-            gb->io_registers[GB_IO_SB] |= gb->serial_transfer_bit_end_callback(gb);
-        }
-        else {
-            gb->io_registers[GB_IO_SB] |= 1;
-        }
-        
-        if (gb->serial_length) {
-            /* Still more bits to send */
-            if (gb->serial_transfer_bit_start_callback) {
-                gb->serial_transfer_bit_start_callback(gb, gb->io_registers[GB_IO_SB] & 0x80);
-            }
-        }
-        
-    }
-    return;
-    
 }
 
 void GB_set_rtc_mode(GB_gameboy_t *gb, GB_rtc_mode_t mode)
@@ -396,9 +389,6 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     gb->dma_cycles = cycles;
 
     timers_run(gb, cycles);
-    if (unlikely(!gb->stopped)) {
-        advance_serial(gb, cycles); // TODO: Verify what happens in STOP mode
-    }
 
     if (unlikely(gb->speed_switch_halt_countdown)) {
         gb->speed_switch_halt_countdown -= cycles;

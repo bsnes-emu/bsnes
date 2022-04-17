@@ -19,6 +19,7 @@ internal void GB_emulate_timer_glitch(GB_gameboy_t *gb, uint8_t old_tac, uint8_t
 internal bool GB_timing_sync_turbo(GB_gameboy_t *gb); /* Returns true if should skip frame */
 internal void GB_timing_sync(GB_gameboy_t *gb);
 internal void GB_set_internal_div_counter(GB_gameboy_t *gb, uint16_t value);
+internal void GB_serial_master_edge(GB_gameboy_t *gb);
 enum {
     GB_TIMA_RUNNING = 0,
     GB_TIMA_RELOADING = 1,

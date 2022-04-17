@@ -1293,26 +1293,38 @@ void GB_set_serial_transfer_bit_end_callback(GB_gameboy_t *gb, GB_serial_transfe
 
 bool GB_serial_get_data_bit(GB_gameboy_t *gb)
 {
+    if (!(gb->io_registers[GB_IO_SC] & 0x80)) {
+        /* Disabled serial returns 0 bits */
+        return false;
+    }
+    
     if (gb->io_registers[GB_IO_SC] & 1) {
         /* Internal Clock */
         GB_log(gb, "Serial read request while using internal clock. \n");
-        return 0xFF;
+        return true;
     }
     return gb->io_registers[GB_IO_SB] & 0x80;
 }
 
 void GB_serial_set_data_bit(GB_gameboy_t *gb, bool data)
 {
+    if (!(gb->io_registers[GB_IO_SC] & 0x80)) {
+        /* Serial disabled */
+        return;
+    }
+
     if (gb->io_registers[GB_IO_SC] & 1) {
         /* Internal Clock */
         GB_log(gb, "Serial write request while using internal clock. \n");
         return;
     }
+    
     gb->io_registers[GB_IO_SB] <<= 1;
     gb->io_registers[GB_IO_SB] |= data;
     gb->serial_count++;
     if (gb->serial_count == 8) {
         gb->io_registers[GB_IO_IF] |= 8;
+        gb->io_registers[GB_IO_SC] &= ~0x80;
         gb->serial_count = 0;
     }
 }
@@ -1632,8 +1644,7 @@ void GB_reset(GB_gameboy_t *gb)
     }
     reset_ram(gb);
     
-    /* The serial interrupt always occur on the 0xF7th cycle of every 0x100 cycle since boot. */
-    gb->serial_cycles = 0x100-0xF7;
+    gb->serial_mask = 0x80;
     gb->io_registers[GB_IO_SC] = 0x7E;
     
     /* These are not deterministic, but 00 (CGB) and FF (DMG) are the most common initial values by far */

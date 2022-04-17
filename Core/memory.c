@@ -1606,26 +1606,24 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 gb->hdma_steps_left = (gb->io_registers[GB_IO_HDMA5] & 0x7F) + 1;
                 return;
 
-            /*  Todo: what happens when starting a transfer during a transfer?
-                What happens when starting a transfer during external clock? 
-            */
+            /*  TODO: What happens when starting a transfer during external clock?
+                TODO: When a cable is connected, the clock of the other side affects "zombie" serial clocking */
             case GB_IO_SC:
+                gb->serial_count = 0;
                 if (!gb->cgb_mode) {
                     value |= 2;
                 }
+                if (gb->serial_master_clock) {
+                    GB_serial_master_edge(gb);
+                }
                 gb->io_registers[GB_IO_SC] = value | (~0x83);
+                gb->serial_mask = gb->cgb_mode && (value & 2)? 4 : 0x80;
                 if ((value & 0x80) && (value & 0x1) ) {
-                    gb->serial_length = gb->cgb_mode && (value & 2)? 16 : 512;
-                    gb->serial_count = 0;
-                    /* Todo: This is probably incorrect for CGB's faster clock mode. */
-                    gb->serial_cycles &= 0xFF;
                     if (gb->serial_transfer_bit_start_callback) {
                         gb->serial_transfer_bit_start_callback(gb, gb->io_registers[GB_IO_SB] & 0x80);
                     }
                 }
-                else {
-                    gb->serial_length = 0;
-                }
+
                 return;
 
             case GB_IO_RP: {
