@@ -1,5 +1,11 @@
 ; SameBoy SGB bootstrap ROM
-; Todo: use friendly names for HW registers instead of magic numbers
+
+INCLUDE	"hardware.inc"
+
+; Registers used only by the boot ROM
+
+DEF rBANK EQU $FF50
+
 SECTION "BootCode", ROM0[$0]
 Start:
 ; Init stack pointer
@@ -15,17 +21,17 @@ Start:
 
 ; Init Audio
     ld a, $80
-    ldh [$26], a
-    ldh [$11], a
+    ldh [rNR52], a
+    ldh [rNR11], a
     ld a, $f3
-    ldh [$12], a
-    ldh [$25], a
+    ldh [rNR12], a
+    ldh [rNR51], a
     ld a, $77
-    ldh [$24], a
+    ldh [rNR50], a
 
 ; Init BG palette to white
     ld a, $0
-    ldh [$47], a
+    ldh [rBGP], a
 
 ; Load logo from ROM.
 ; A nibble represents a 4-pixels line, 2 bytes represent a 4x4 tile, scaled to 8x8.
@@ -71,10 +77,10 @@ Start:
 
     ; Turn on LCD
     ld a, $91
-    ldh [$40], a
+    ldh [rLCDC], a
 
     ld a, $f1 ; Packet magic, increases by 2 for every packet
-    ldh [$80], a
+    ldh [_HRAM], a
     ld hl, $104 ; Header start
     
     xor a
@@ -86,7 +92,7 @@ Start:
     ld a, $30
     ld [c], a
     
-    ldh a, [$80]
+    ldh a, [_HRAM]
     call SendByte
     push hl
     ld b, $e
@@ -117,9 +123,9 @@ Start:
     ld [c], a
     
     ; Update command
-    ldh a, [$80]
+    ldh a, [_HRAM]
     add 2
-    ldh [$80], a
+    ldh [_HRAM], a
     
     ld a, $58
     cp l
@@ -135,7 +141,7 @@ Start:
     
     ; Init BG palette
     ld a, $fc
-    ldh [$47], a
+    ldh [rBGP], a
     
 ; Set registers to match the original SGB boot
 IF DEF(SGB2)
@@ -210,4 +216,4 @@ db $3c,$42,$b9,$a5,$b9,$a5,$42,$3c
 
 SECTION "BootGame", ROM0[$fe]
 BootGame:
-    ldh [$50], a
+    ldh [rBANK], a

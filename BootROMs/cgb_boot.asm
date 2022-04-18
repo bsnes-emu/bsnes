@@ -1,5 +1,13 @@
 ; SameBoy CGB bootstrap ROM
-; Todo: use friendly names for HW registers instead of magic numbers
+
+INCLUDE	"hardware.inc"
+
+; Registers used only by the boot ROM
+
+DEF rKEY0 EQU $FF4C
+DEF rBANK EQU $FF50
+DEF rOPRI EQU $FF6C
+
 SECTION "BootCode", ROM0[$0]
 Start:
 ; Init stack pointer
@@ -32,18 +40,19 @@ ENDC
 ; Clear title checksum
     ldh [TitleChecksum], a
 
+; Init Audio
     ld a, $80
-    ldh [$26], a
-    ldh [$11], a
+    ldh [rNR52], a
+    ldh [rNR11], a
     ld a, $f3
-    ldh [$12], a
-    ldh [$25], a
+    ldh [rNR12], a
+    ldh [rNR51], a
     ld a, $77
-    ldh [$24], a
+    ldh [rNR50], a
 
 ; Init BG palette
     ld a, $fc
-    ldh [$47], a
+    ldh [rBGP], a
 
 ; Load logo from ROM.
 ; A nibble represents a 4-pixels line, 2 bytes represent a 4x4 tile, scaled to 8x8.
@@ -65,14 +74,14 @@ ENDC
 
 ; Clear the second VRAM bank
     ld a, 1
-    ldh [$4F], a
+    ldh [rVBK], a
     call ClearMemoryPage8000
     call LoadTileset
 
     ld b, 3
 IF DEF(FAST)
     xor a
-    ldh [$4F], a
+    ldh [rVBK], a
 ELSE
 ; Load Tilemap
     ld hl, $98C2
@@ -122,11 +131,11 @@ ELSE
     push af
     ; Switch to second VRAM Bank
     ld a, 1
-    ldh [$4F], a
+    ldh [rVBK], a
     ld [hl], 8
     ; Switch to back first VRAM Bank
     xor a
-    ldh [$4F], a
+    ldh [rVBK], a
     pop af
     ldi [hl], a
     ret
@@ -180,7 +189,7 @@ ENDC
 
     ; Turn on LCD
     ld a, $91
-    ldh [$40], a
+    ldh [rLCDC], a
 
 IF !DEF(FAST)
     call DoIntroAnimation
@@ -221,7 +230,7 @@ HDMAData:
 
 SECTION "BootGame", ROM0[$fe]
 BootGame:
-    ldh [$50], a
+    ldh [rBANK], a ; unmap boot ROM
 
 SECTION "MoreStuff", ROM0[$200]
 ; Game Palettes Data
@@ -606,9 +615,9 @@ WaitBFrames:
     ret
 
 PlaySound:
-    ldh [$13], a
+    ldh [rNR13], a
     ld a, $87
-    ldh [$14], a
+    ldh [rNR14], a
     ret
 
 ClearMemoryPage8000:
@@ -759,7 +768,7 @@ ReadTrademarkSymbol:
 DoIntroAnimation:
     ; Animate the intro
     ld a, 1
-    ldh [$4F], a
+    ldh [rVBK], a
     ld d, 26
 .animationLoop
     ld b, 2
@@ -849,7 +858,7 @@ IF !DEF(FAST)
     jr nz, .fadeLoop
 ENDC
     ld a, 2
-    ldh [$70], a
+    ldh [rSVBK], a
     ; Clear RAM Bank 2 (Like the original boot ROM)
     ld hl, $D000
     call ClearMemoryPage
@@ -858,9 +867,9 @@ ENDC
     call _ClearVRAMViaHDMA
     call ClearVRAMViaHDMA ; A = $40, so it's bank 0
     xor a
-    ldh [$70], a
+    ldh [rSVBK], a
     cpl
-    ldh [$00], a
+    ldh [rP1], a
 
     ; Final values for CGB mode
     ld d, a
@@ -872,7 +881,7 @@ ENDC
     call z, EmulateDMG
     bit 7, a
 
-    ldh [$4C], a
+    ldh [rKEY0], a ; write CGB compatibility byte, CGB mode
     ldh a, [TitleChecksum]
     ld b, a
 
@@ -902,7 +911,7 @@ ENDC
 
 .emulateDMGForCGBGame
     call EmulateDMG
-    ldh [$4C], a
+    ldh [rKEY0], a ; write $04, DMG emulation mode
     ld a, $1
     ret
 
@@ -916,7 +925,7 @@ GetKeyComboPalette:
 
 EmulateDMG:
     ld a, 1
-    ldh [$6C], a ; DMG Emulation
+    ldh [rOPRI], a ; DMG Emulation sprite priority
     call GetPaletteIndex
     bit 7, a
     call nz, LoadDMGTilemap
@@ -1068,7 +1077,7 @@ LoadPalettes:
     ret
 
 ClearVRAMViaHDMA:
-    ldh [$4F], a
+    ldh [rVBK], a
     ld hl, HDMAData
 _ClearVRAMViaHDMA:
     call WaitFrame ; Wait for vblank
@@ -1085,8 +1094,8 @@ _ClearVRAMViaHDMA:
 ; clobbers AF and HL
 GetInputPaletteIndex:
     ld a, $20 ; Select directions
-    ldh [$00], a
-    ldh a, [$00]
+    ldh [rP1], a
+    ldh a, [rP1]
     cpl
     and $F
     ret z ; No direction keys pressed, no palette
@@ -1100,8 +1109,8 @@ GetInputPaletteIndex:
     ; c = 1: Right, 2: Left, 3: Up, 4: Down
 
     ld a, $10 ; Select buttons
-    ldh [$00], a
-    ldh a, [$00]
+    ldh [rP1], a
+    ldh a, [rP1]
     cpl
     rla
     rla
