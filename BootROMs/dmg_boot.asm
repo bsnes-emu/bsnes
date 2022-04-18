@@ -1,5 +1,11 @@
 ; SameBoy DMG bootstrap ROM
-; Todo: use friendly names for HW registers instead of magic numbers
+
+INCLUDE	"hardware.inc"
+
+; Registers used only by the boot ROM
+
+DEF rBANK EQU $FF50
+
 SECTION "BootCode", ROM0[$0]
 Start:
 ; Init stack pointer
@@ -15,17 +21,17 @@ Start:
 
 ; Init Audio
     ld a, $80
-    ldh [$26], a
-    ldh [$11], a
+    ldh [rNR52], a
+    ldh [rNR11], a
     ld a, $f3
-    ldh [$12], a
-    ldh [$25], a
+    ldh [rNR12], a
+    ldh [rNR51], a
     ld a, $77
-    ldh [$24], a
+    ldh [rNR50], a
 
 ; Init BG palette
     ld a, $54
-    ldh [$47], a
+    ldh [rBGP], a
 
 ; Load logo from ROM.
 ; A nibble represents a 4-pixels line, 2 bytes represent a 4x4 tile, scaled to 8x8.
@@ -70,11 +76,11 @@ Start:
 .tilemapDone
 
     ld a, 30
-    ldh [$ff42], a
+    ldh [rSCY], a
     
     ; Turn on LCD
     ld a, $91
-    ldh [$40], a
+    ldh [rLCDC], a
 
     ld d, (-119) & $FF
     ld c, 15
@@ -84,7 +90,7 @@ Start:
     ld a, d
     sra a
     sra a
-    ldh [$ff42], a
+    ldh [rSCY], a
     ld a, d
     add c
     ld d, a
@@ -92,12 +98,12 @@ Start:
     cp 8
     jr nz, .noPaletteChange
     ld a, $A8
-    ldh [$47], a
+    ldh [rBGP], a
 .noPaletteChange
     dec c
     jr nz, .animate
     ld a, $fc
-    ldh [$47], a
+    ldh [rBGP], a
     
     ; Play first sound
     ld a, $83
@@ -167,9 +173,9 @@ WaitBFrames:
     ret
 
 PlaySound:
-    ldh [$13], a
+    ldh [rNR13], a
     ld a, $87
-    ldh [$14], a
+    ldh [rNR14], a
     ret
 
 
@@ -178,4 +184,4 @@ db $3c,$42,$b9,$a5,$b9,$a5,$42,$3c
 
 SECTION "BootGame", ROM0[$fe]
 BootGame:
-    ldh [$50], a
+    ldh [rBANK], a ; unmap boot ROM
