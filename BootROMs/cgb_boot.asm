@@ -2,12 +2,6 @@
 
 INCLUDE	"hardware.inc"
 
-; Registers used only by the boot ROM
-
-DEF rKEY0 EQU $FF4C
-DEF rBANK EQU $FF50
-DEF rOPRI EQU $FF6C
-
 SECTION "BootCode", ROM0[$0]
 Start:
 ; Init stack pointer
@@ -869,7 +863,7 @@ ENDC
     xor a
     ldh [rSVBK], a
     cpl
-    ldh [rP1], a
+    ldh [rJOYP], a
 
     ; Final values for CGB mode
     ld d, a
@@ -1062,7 +1056,7 @@ LoadPalettesFromHRAM:
 
 LoadBGPalettes:
     ld e, 0
-    ld c, $68
+    ld c, LOW(rBGPI)
 
 LoadPalettes:
     ld a, $80
@@ -1094,8 +1088,8 @@ _ClearVRAMViaHDMA:
 ; clobbers AF and HL
 GetInputPaletteIndex:
     ld a, $20 ; Select directions
-    ldh [rP1], a
-    ldh a, [rP1]
+    ldh [rJOYP], a
+    ldh a, [rJOYP]
     cpl
     and $F
     ret z ; No direction keys pressed, no palette
@@ -1109,8 +1103,8 @@ GetInputPaletteIndex:
     ; c = 1: Right, 2: Left, 3: Up, 4: Down
 
     ld a, $10 ; Select buttons
-    ldh [rP1], a
-    ldh a, [rP1]
+    ldh [rJOYP], a
+    ldh a, [rJOYP]
     cpl
     rla
     rla

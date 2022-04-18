@@ -2,10 +2,6 @@
 
 INCLUDE	"hardware.inc"
 
-; Registers used only by the boot ROM
-
-DEF rBANK EQU $FF50
-
 SECTION "BootCode", ROM0[$0]
 Start:
 ; Init stack pointer
