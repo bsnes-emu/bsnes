@@ -1195,7 +1195,7 @@ void run_gui(bool is_running)
     recalculate_menu_height();
     current_selection = 0;
     scroll = 0;
-    do {
+    while (true) {
         SDL_WaitEvent(&event);
         /* Convert Joypad and mouse events (We only generate down events) */
         if (gui_state != WAITING_FOR_KEY && gui_state != WAITING_FOR_JBUTTON) {
@@ -1651,5 +1651,5 @@ void run_gui(bool is_running)
             render_texture(pixels, NULL);
 #endif
         }
-    } while (true);
+    }
 }
