@@ -145,6 +145,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         /* The DMG STAT-write bug is basically the STAT register being read as FF for a single T-cycle */
         case GB_CONFLICT_STAT_DMG:
             GB_advance_cycles(gb, gb->pending_cycles);
+            GB_display_sync(gb);
             /* State 7 is the edge between HBlank and OAM mode, and it behaves a bit weird.
              The OAM interrupt seems to be blocked by HBlank interrupts in that case, despite
              the timing not making much sense for that.
@@ -206,7 +207,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             
             uint8_t old_value = GB_read_memory(gb, addr);
             GB_advance_cycles(gb, gb->pending_cycles - 2);
-            
+            GB_display_sync(gb);
             if (gb->model != GB_MODEL_MGB && gb->position_in_line == 0 && (old_value & 2) && !(value & 2)) {
                 old_value &= ~2;
             }
@@ -277,6 +278,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             GB_advance_cycles(gb, gb->pending_cycles);
             if (gb->model <= GB_MODEL_CGB_C) {
                 // TODO: Double speed mode? This logic is also a bit weird, it needs more tests
+                GB_apu_run(gb, true);
                 if (gb->apu.square_sweep_calculate_countdown > 3 && gb->apu.enable_zombie_calculate_stepping) {
                     gb->apu.square_sweep_calculate_countdown -= 2;
                 }
