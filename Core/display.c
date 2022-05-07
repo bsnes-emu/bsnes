@@ -9,12 +9,12 @@
 
 static inline unsigned fifo_size(GB_fifo_t *fifo)
 {
-    return (fifo->write_end - fifo->read_end) & (GB_FIFO_LENGTH - 1);
+    return fifo->size;
 }
 
 static void fifo_clear(GB_fifo_t *fifo)
 {
-    fifo->read_end = fifo->write_end = 0;
+    fifo->read_end = fifo->size = 0;
 }
 
 static GB_fifo_item_t *fifo_pop(GB_fifo_t *fifo)
@@ -22,14 +22,17 @@ static GB_fifo_item_t *fifo_pop(GB_fifo_t *fifo)
     GB_fifo_item_t *ret = &fifo->fifo[fifo->read_end];
     fifo->read_end++;
     fifo->read_end &= (GB_FIFO_LENGTH - 1);
+    fifo->size--;
     return ret;
 }
 
 static void fifo_push_bg_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint8_t palette, bool bg_priority, bool flip_x)
 {
+    assert(fifo->size == 0);
+    fifo->size = 8;
     if (!flip_x) {
-        unrolled for (unsigned i = 8; i--;) {
-            fifo->fifo[fifo->write_end] = (GB_fifo_item_t) {
+        unrolled for (unsigned i = 0; i < 8; i++) {
+            fifo->fifo[i] = (GB_fifo_item_t) {
                 (lower >> 7) | ((upper >> 7) << 1),
                 palette,
                 0,
@@ -37,14 +40,11 @@ static void fifo_push_bg_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint
             };
             lower <<= 1;
             upper <<= 1;
-            
-            fifo->write_end++;
-            fifo->write_end &= (GB_FIFO_LENGTH - 1);
         }
     }
     else {
-        unrolled for (unsigned i = 8; i--;) {
-            fifo->fifo[fifo->write_end] = (GB_fifo_item_t) {
+        unrolled for (unsigned i = 0; i < 8; i++) {
+            fifo->fifo[i] = (GB_fifo_item_t) {
                 (lower & 1) | ((upper & 1) << 1),
                 palette,
                 0,
@@ -52,19 +52,15 @@ static void fifo_push_bg_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint
             };
             lower >>= 1;
             upper >>= 1;
-            
-            fifo->write_end++;
-            fifo->write_end &= (GB_FIFO_LENGTH - 1);
         }
     }
 }
 
 static void fifo_overlay_object_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint8_t palette, bool bg_priority, uint8_t priority, bool flip_x)
 {
-    while (fifo_size(fifo) < 8) {
-        fifo->fifo[fifo->write_end] = (GB_fifo_item_t) {0,};
-        fifo->write_end++;
-        fifo->write_end &= (GB_FIFO_LENGTH - 1);
+    while (fifo->size < GB_FIFO_LENGTH) {
+        fifo->fifo[(fifo->read_end + fifo->size) & (GB_FIFO_LENGTH - 1)] = (GB_fifo_item_t) {0,};
+        fifo->size++;
     }
     
     uint8_t flip_xor = flip_x? 0: 0x7;
@@ -557,21 +553,16 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     bool draw_oam = false;
     bool bg_enabled = true, bg_priority = false;
     
-    if (fifo_size(&gb->bg_fifo)) {
-        fifo_item = fifo_pop(&gb->bg_fifo);
-        bg_priority = fifo_item->bg_priority;
-        
-        if (fifo_size(&gb->oam_fifo)) {
-            oam_fifo_item = fifo_pop(&gb->oam_fifo);
-            if (oam_fifo_item->pixel && (gb->io_registers[GB_IO_LCDC] & 2) && unlikely(!gb->objects_disabled)) {
-                draw_oam = true;
-                bg_priority |= oam_fifo_item->bg_priority;
-            }
+    fifo_item = fifo_pop(&gb->bg_fifo);
+    bg_priority = fifo_item->bg_priority;
+    
+    if (fifo_size(&gb->oam_fifo)) {
+        oam_fifo_item = fifo_pop(&gb->oam_fifo);
+        if (oam_fifo_item->pixel && (gb->io_registers[GB_IO_LCDC] & 2) && unlikely(!gb->objects_disabled)) {
+            draw_oam = true;
+            bg_priority |= oam_fifo_item->bg_priority;
         }
     }
-    
-
-    if (!fifo_item) return;
 
     /* Drop pixels for scrollings */
     if (gb->position_in_line >= 160 || (gb->disable_rendering && !gb->sgb)) {

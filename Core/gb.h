@@ -311,11 +311,11 @@ typedef struct {
     bool bg_priority; // For object FIFO – the BG priority bit. For the BG FIFO – the CGB attributes priority bit
 } GB_fifo_item_t;
 
-#define GB_FIFO_LENGTH 16
+#define GB_FIFO_LENGTH 8
 typedef struct {
     GB_fifo_item_t fifo[GB_FIFO_LENGTH];
     uint8_t read_end;
-    uint8_t write_end;
+    uint8_t size;
 } GB_fifo_t;
 
 typedef struct {

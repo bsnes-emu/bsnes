@@ -342,10 +342,8 @@ static void sanitize_state(GB_gameboy_t *gb)
         GB_palette_changed(gb, true, i * 2);
     }
     
-    gb->bg_fifo.read_end &= 0xF;
-    gb->bg_fifo.write_end &= 0xF;
-    gb->oam_fifo.read_end &= 0xF;
-    gb->oam_fifo.write_end &= 0xF;
+    gb->bg_fifo.read_end &= GB_FIFO_LENGTH - 1;
+    gb->oam_fifo.read_end &= GB_FIFO_LENGTH - 1;
     gb->last_tile_index_address &= 0x1FFF;
     gb->window_tile_x &= 0x1F;
     
