@@ -581,7 +581,6 @@ struct GB_gameboy_internal_s {
         uint8_t object_palettes_data[0x40];
         uint8_t position_in_line;
         bool stat_interrupt_line;
-        uint8_t effective_scx;
         uint8_t window_y;
         /* The LCDC will skip the first frame it renders after turning it on.
            On the CGB, a frame is not skipped if the previous frame was skipped as well.
@@ -599,7 +598,6 @@ struct GB_gameboy_internal_s {
         bool vram_read_blocked;
         bool oam_write_blocked;
         bool vram_write_blocked;
-        bool fifo_insertion_glitch;
         uint8_t current_line;
         uint16_t ly_for_comparison;
         GB_fifo_t bg_fifo, oam_fifo;
