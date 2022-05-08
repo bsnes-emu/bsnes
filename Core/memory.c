@@ -1432,6 +1432,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     gb->display_cycles = 0;
                     gb->display_state = 0;
                     gb->double_speed_alignment = 0;
+                    gb->cycles_for_line = 0;
                     if (GB_is_sgb(gb)) {
                         gb->frame_skip_state = GB_FRAMESKIP_SECOND_FRAME_RENDERED;
                     }
