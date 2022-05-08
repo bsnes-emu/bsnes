@@ -19,6 +19,7 @@ static void fifo_clear(GB_fifo_t *fifo)
 
 static GB_fifo_item_t *fifo_pop(GB_fifo_t *fifo)
 {
+    assert(fifo->size);
     GB_fifo_item_t *ret = &fifo->fifo[fifo->read_end];
     fifo->read_end++;
     fifo->read_end &= (GB_FIFO_LENGTH - 1);
@@ -552,6 +553,8 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     const GB_fifo_item_t *oam_fifo_item = NULL;
     bool draw_oam = false;
     bool bg_enabled = true, bg_priority = false;
+    
+    if (unlikely(gb->wx_triggered && !fifo_size(&gb->bg_fifo))) return;
     
     fifo_item = fifo_pop(&gb->bg_fifo);
     bg_priority = fifo_item->bg_priority;
