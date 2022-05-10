@@ -554,6 +554,13 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     const GB_fifo_item_t *oam_fifo_item = NULL;
     bool draw_oam = false;
     bool bg_enabled = true, bg_priority = false;
+ 
+    // Rendering (including scrolling adjustment) does not occur as long as an object at x=0 is pending
+    if (gb->n_visible_objs != 0 &&
+        (gb->io_registers[GB_IO_LCDC] & 2 || GB_is_cgb(gb)) &&
+        gb->objects_x[gb->n_visible_objs - 1] == 0) {
+        return;
+    }
     
     if (unlikely(gb->wx_triggered && !fifo_size(&gb->bg_fifo))) return;
     
@@ -1304,6 +1311,13 @@ static inline uint16_t mode3_batching_length(GB_gameboy_t *gb)
     return 0;
 }
 
+static inline uint8_t x_for_object_match(GB_gameboy_t *gb)
+{
+    uint8_t ret = gb->position_in_line + 8;
+    if (ret > (uint8_t)-16) return 0;
+    return ret;
+}
+
 /*
  TODO: It seems that the STAT register's mode bits are always "late" by 4 T-cycles.
        The PPU logic can be greatly simplified if that delay is simply emulated.
@@ -1326,7 +1340,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
         }
         return;
     }
-    
+        
     GB_BATCHABLE_STATE_MACHINE(gb, display, cycles, 2, !force) {
         GB_STATE(gb, display, 1);
         GB_STATE(gb, display, 2);
@@ -1353,7 +1367,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
         GB_STATE(gb, display, 24);
         GB_STATE(gb, display, 26);
         GB_STATE(gb, display, 27);
-        GB_STATE(gb, display, 28);
+        // GB_STATE(gb, display, 28);
         GB_STATE(gb, display, 29);
         GB_STATE(gb, display, 30);
         GB_STATE(gb, display, 31);
@@ -1562,11 +1576,8 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
             fifo_clear(&gb->oam_fifo);
             /* Fill the FIFO with 8 pixels of "junk", it's going to be dropped anyway. */
             fifo_push_bg_row(&gb->bg_fifo, 0, 0, 0, false, false);
-            /* Todo: find out actual access time of SCX */
             gb->position_in_line = -16;
             gb->lcd_x = 0;
-          
-            gb->extra_penalty_for_object_at_0 = MIN((gb->io_registers[GB_IO_SCX] & 7), 5);
             
             /* The actual rendering cycle */
             gb->fetcher_state = 0;
@@ -1655,17 +1666,16 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                 /* Handle objects */
                 /* When the object enabled bit is off, this proccess is skipped entirely on the DMG, but not on the CGB.
                    On the CGB, this bit is checked only when the pixel is actually popped from the FIFO. */
-                
+                                
                 while (gb->n_visible_objs != 0 &&
-                       (gb->position_in_line < 160 || gb->position_in_line >= (uint8_t)(-8)) &&
-                       gb->objects_x[gb->n_visible_objs - 1] < (uint8_t)(gb->position_in_line + 8)) {
+                       gb->objects_x[gb->n_visible_objs - 1] < x_for_object_match(gb)) {
                     gb->n_visible_objs--;
                 }
                 
                 gb->during_object_fetch = true;
                 while (gb->n_visible_objs != 0 &&
                        (gb->io_registers[GB_IO_LCDC] & 2 || GB_is_cgb(gb)) &&
-                       gb->objects_x[gb->n_visible_objs - 1] == (uint8_t)(gb->position_in_line + 8)) {
+                       gb->objects_x[gb->n_visible_objs - 1] == x_for_object_match(gb)) {
                     
                     while (gb->fetcher_state < 5 || fifo_size(&gb->bg_fifo) == 0) {
                         advance_fetcher_state_machine(gb, &cycles);
@@ -1673,18 +1683,6 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                         GB_SLEEP(gb, display, 27, 1);
                         if (gb->object_fetch_aborted) {
                             goto abort_fetching_object;
-                        }
-                    }
-                    
-                    /* Todo: Measure if penalty occurs before or after waiting for the fetcher. */
-                    if (gb->extra_penalty_for_object_at_0 != 0) {
-                        if (gb->objects_x[gb->n_visible_objs - 1] == 0) {
-                            gb->cycles_for_line += gb->extra_penalty_for_object_at_0;
-                            GB_SLEEP(gb, display, 28, gb->extra_penalty_for_object_at_0);
-                            gb->extra_penalty_for_object_at_0 = 0;
-                            if (gb->object_fetch_aborted) {
-                                goto abort_fetching_object;
-                            }
                         }
                     }
                     

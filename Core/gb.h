@@ -623,7 +623,6 @@ struct GB_gameboy_internal_s {
         uint8_t n_visible_objs;
         uint8_t oam_search_index;
         uint8_t accessed_oam_row;
-        uint8_t extra_penalty_for_object_at_0;
         uint8_t mode_for_interrupt;
         bool lyc_interrupt_line;
         bool cgb_palettes_blocked;
