@@ -1727,8 +1727,13 @@ static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
         GB_log(gb, "Glitched line 0 OAM mode (%d cycles to next event)\n", -gb->display_cycles / 2);
     }
     else if (gb->mode_for_interrupt == 3) {
-        signed pixel = gb->position_in_line > 160? (int8_t) gb->position_in_line : gb->position_in_line;
-        GB_log(gb, "Rendering pixel (%d/160)\n", pixel);
+        if (((uint8_t)(gb->position_in_line + 16) < 8)) {
+            GB_log(gb, "Adjusting for scrolling (%d/%d)\n", gb->position_in_line & 7, gb->io_registers[GB_IO_SCX] & 7);
+        }
+        else {
+            signed pixel = gb->position_in_line > 160? (int8_t) gb->position_in_line : gb->position_in_line;
+            GB_log(gb, "Rendering pixel (%d/160)\n", pixel);
+        }
     }
     else {
         GB_log(gb, "Sleeping (%d cycles to next event)\n", -gb->display_cycles / 2);
