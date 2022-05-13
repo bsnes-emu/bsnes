@@ -621,6 +621,7 @@ struct GB_gameboy_internal_s {
             uint8_t object_flags;
         };
         uint8_t n_visible_objs;
+        uint8_t orig_n_visible_objs;
         uint8_t oam_search_index;
         uint8_t accessed_oam_row;
         uint8_t mode_for_interrupt;
@@ -642,6 +643,7 @@ struct GB_gameboy_internal_s {
         uint16_t last_tile_index_address;
         bool cgb_repeated_a_frame;
         uint8_t data_for_sel_glitch;
+        bool delayed_glitch_hblank_interrupt;
     )
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */

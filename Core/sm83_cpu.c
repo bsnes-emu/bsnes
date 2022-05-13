@@ -23,6 +23,7 @@ typedef enum {
     GB_CONFLICT_WX,
     GB_CONFLICT_CGB_LCDC,
     GB_CONFLICT_NR10,
+    GB_CONFLICT_CGB_SCX,
 } conflict_t;
 
 /* Todo: How does double speed mode affect these? */
@@ -35,9 +36,7 @@ static const conflict_t cgb_conflict_map[0x80] = {
     [GB_IO_OBP0] = GB_CONFLICT_PALETTE_CGB,
     [GB_IO_OBP1] = GB_CONFLICT_PALETTE_CGB,
     [GB_IO_NR10] = GB_CONFLICT_NR10,
-    [GB_IO_SCX] = GB_CONFLICT_WRITE_CPU, // TODO: Similar to BGP, there's some time travelling involved
-
-    /* Todo: most values not verified, and probably differ between revisions */
+    [GB_IO_SCX] = GB_CONFLICT_CGB_SCX,
 };
 
 /* Todo: verify on an MGB */
@@ -290,6 +289,19 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             }
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 4;
+            break;
+            
+        case GB_CONFLICT_CGB_SCX:
+            if (gb->cgb_double_speed) {
+                GB_advance_cycles(gb, gb->pending_cycles - 2);
+                GB_write_memory(gb, addr, value);
+                gb->pending_cycles = 6;
+            }
+            else {
+                GB_advance_cycles(gb, gb->pending_cycles);
+                GB_write_memory(gb, addr, value);
+                gb->pending_cycles = 4;
+            }
             break;
     }
     gb->address_bus = addr;
