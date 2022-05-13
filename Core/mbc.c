@@ -257,6 +257,7 @@ void GB_reset_mbc(GB_gameboy_t *gb)
     }
     else if (gb->cartridge_type->mbc_type == GB_MBC5) {
         gb->mbc5.rom_bank_low = 1;
+        gb->mbc_rom_bank = 1;
     }
     else if (gb->cartridge_type->mbc_type == GB_MBC7) {
         gb->mbc7.x_latch = gb->mbc7.y_latch = 0x8000;
