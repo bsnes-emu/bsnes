@@ -78,6 +78,7 @@
 {
     NSTrackingArea *_trackingArea;
     GBGridView *_gridView;
+    NSRect _scrollRect;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)coder
@@ -147,6 +148,19 @@
         location.y *= self.image.size.height;
         [self.delegate imageView:self mouseMovedToX:(NSUInteger)location.x Y:(NSUInteger)location.y];
     }
+}
+
+- (void)setScrollRect:(NSRect)scrollRect
+{
+    if (memcmp(&scrollRect, &_scrollRect, sizeof(scrollRect)) != 0) {
+        _scrollRect = scrollRect;
+        [_gridView setNeedsDisplay:true];
+    }
+}
+
+- (NSRect)scrollRect
+{
+    return _scrollRect;
 }
 
 @end
