@@ -2,6 +2,7 @@
 #include <math.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 #include "gb.h"
 
 static const uint8_t duties[] = {
@@ -276,6 +277,19 @@ static void render(GB_gameboy_t *gb)
     }
     assert(gb->apu_output.sample_callback);
     gb->apu_output.sample_callback(gb, &filtered_output);
+    if (unlikely(gb->apu_output.output_file)) {
+#ifdef GB_BIG_ENDIAN
+        if (gb->apu_output.output_format == GB_AUDIO_FORMAT_WAV) {
+            filtered_output.left = LE16(filtered_output.left);
+            filtered_output.right = LE16(filtered_output.right);
+        }
+#endif
+        if (fwrite(&filtered_output, sizeof(filtered_output), 1, gb->apu_output.output_file) != 1) {
+            fclose(gb->apu_output.output_file);
+            gb->apu_output.output_file = NULL;
+            gb->apu_output.output_error = errno;
+        }
+    }
 }
 
 static void update_square_sample(GB_gameboy_t *gb, unsigned index)
@@ -1539,6 +1553,11 @@ void GB_set_sample_rate_by_clocks(GB_gameboy_t *gb, double cycles_per_sample)
     gb->apu_output.highpass_rate = pow(0.999958, cycles_per_sample);
 }
 
+unsigned GB_get_sample_rate(GB_gameboy_t *gb)
+{
+    return gb->apu_output.sample_rate;
+}
+
 void GB_apu_set_sample_callback(GB_gameboy_t *gb, GB_sample_callback_t callback)
 {
     gb->apu_output.sample_callback = callback;
@@ -1552,4 +1571,180 @@ void GB_set_highpass_filter_mode(GB_gameboy_t *gb, GB_highpass_mode_t mode)
 void GB_set_interference_volume(GB_gameboy_t *gb, double volume)
 {
     gb->apu_output.interference_volume = volume;
+}
+
+typedef struct __attribute__((packed)) {
+    uint32_t format_chunk; // = BE32('FORM')
+    uint32_t size; // = BE32(file size - 8)
+    uint32_t format; // = BE32('AIFC')
+    
+    uint32_t fver_chunk; // = BE32('FVER')
+    uint32_t fver_size; // = BE32(4)
+    uint32_t fver;
+    
+    uint32_t comm_chunk; // = BE32('COMM')
+    uint32_t comm_size; // = BE32(0x18)
+    
+    uint16_t channels; // = BE16(2)
+    uint32_t samples_per_channel; // = BE32(total number of samples / 2)
+    uint16_t bit_depth; // = BE16(16)
+    uint16_t frequency_exponent;
+    uint64_t frequency_significand;
+    uint32_t compression_type; // = 'NONE' (BE) or 'twos' (LE)
+    uint16_t compression_name; // = 0
+    
+    uint32_t ssnd_chunk; // = BE32('SSND')
+    uint32_t ssnd_size; // = BE32(length of samples - 8)
+    uint32_t ssnd_offset; // = 0
+    uint32_t ssnd_block; // = 0
+} aiff_header_t;
+
+typedef struct __attribute__((packed)) {
+    uint32_t marker; // = BE32('RIFF')
+    uint32_t size; // = LE32(file size - 8)
+    uint32_t type; // = BE32('WAVE')
+    
+    uint32_t fmt_chunk; // = BE32('fmt ')
+    uint32_t fmt_size; // = LE16(16)
+    uint16_t format; // = LE16(1)
+    uint16_t channels; // = LE16(2)
+    uint32_t sample_rate; // = LE32(sample_rate)
+    uint32_t byte_rate; // = LE32(sample_rate * 4)
+    uint16_t frame_size;  // = LE32(4)
+    uint16_t bit_depth; // = LE16(16)
+    
+    uint32_t data_chunk; // = BE32('data')
+    uint32_t data_size; // = LE32(length of samples)
+} wav_header_t;
+
+
+int GB_start_audio_recording(GB_gameboy_t *gb, const char *path, GB_audio_format_t format)
+{
+    if (gb->apu_output.sample_rate == 0) {
+        return EINVAL;
+    }
+    
+    if (gb->apu_output.output_file) {
+        GB_stop_audio_recording(gb);
+    }
+    gb->apu_output.output_file = fopen(path, "wb");
+    if (!gb->apu_output.output_file) return errno;
+    
+    gb->apu_output.output_format = format;
+    switch (format) {
+        case GB_AUDIO_FORMAT_RAW:
+            return 0;
+        case GB_AUDIO_FORMAT_AIFF: {
+            aiff_header_t header = {0,};
+            if (fwrite(&header, sizeof(header), 1, gb->apu_output.output_file) != 1) {
+                fclose(gb->apu_output.output_file);
+                gb->apu_output.output_file = NULL;
+                return errno;
+            }
+            return 0;
+        }
+        case GB_AUDIO_FORMAT_WAV: {
+            wav_header_t header = {0,};
+            if (fwrite(&header, sizeof(header), 1, gb->apu_output.output_file) != 1) {
+                fclose(gb->apu_output.output_file);
+                gb->apu_output.output_file = NULL;
+                return errno;
+            }
+            return 0;
+        }
+        default:
+            fclose(gb->apu_output.output_file);
+            gb->apu_output.output_file = NULL;
+            return EINVAL;
+    }
+}
+int GB_stop_audio_recording(GB_gameboy_t *gb)
+{
+    if (!gb->apu_output.output_file) {
+        int ret  = gb->apu_output.output_error ?: -1;
+        gb->apu_output.output_error = 0;
+        return ret;
+    }
+    gb->apu_output.output_error = 0;
+    switch (gb->apu_output.output_format) {
+        case GB_AUDIO_FORMAT_RAW:
+            break;
+        case GB_AUDIO_FORMAT_AIFF: {
+            size_t file_size = ftell(gb->apu_output.output_file);
+            size_t frames = (file_size - sizeof(aiff_header_t)) / sizeof(GB_sample_t);
+            aiff_header_t header = {
+                .format_chunk = BE32('FORM'),
+                .size = BE32(file_size - 8),
+                .format = BE32('AIFC'),
+                
+                .fver_chunk = BE32('FVER'),
+                .fver_size = BE32(4),
+                .fver = BE32(0xA2805140),
+                
+                .comm_chunk = BE32('COMM'),
+                .comm_size = BE32(0x18),
+                .channels = BE16(2),
+                .samples_per_channel = BE32(frames),
+                .bit_depth = BE16(16),
+#ifdef GB_BIG_ENDIAN
+                .compression_type = 'NONE',
+#else
+                .compression_type = 'twos',
+#endif
+                .compression_name = 0,
+                .ssnd_chunk = BE32('SSND'),
+                .ssnd_size = BE32(frames * sizeof(GB_sample_t) - 8),
+                .ssnd_offset = 0,
+                .ssnd_block = 0,
+            };
+            
+            uint64_t significand = gb->apu_output.sample_rate;
+            uint16_t exponent = 0x403E;
+            while ((int64_t)significand > 0) {
+                significand <<= 1;
+                exponent--;
+            }
+            header.frequency_exponent = BE16(exponent);
+            header.frequency_significand = BE64(significand);
+            
+            fseek(gb->apu_output.output_file, 0, SEEK_SET);
+            if (fwrite(&header, sizeof(header), 1, gb->apu_output.output_file) != 1) {
+                gb->apu_output.output_error = errno;
+            }
+            break;
+        }
+        case GB_AUDIO_FORMAT_WAV: {
+            size_t file_size = ftell(gb->apu_output.output_file);
+            size_t frames = (file_size - sizeof(wav_header_t)) / sizeof(GB_sample_t);
+            wav_header_t header = {
+                .marker = BE32('RIFF'),
+                .size = LE32(file_size - 8),
+                .type = BE32('WAVE'),
+                
+                .fmt_chunk = BE32('fmt '),
+                .fmt_size = LE16(16),
+                .format = LE16(1),
+                .channels = LE16(2),
+                .sample_rate = LE32(gb->apu_output.sample_rate),
+                .byte_rate = LE32(gb->apu_output.sample_rate * 4),
+                .frame_size = LE32(4),
+                .bit_depth = LE16(16),
+                
+                .data_chunk = BE32('data'),
+                .data_size = LE32(frames * sizeof(GB_sample_t)),
+            };
+            
+            fseek(gb->apu_output.output_file, 0, SEEK_SET);
+            if (fwrite(&header, sizeof(header), 1, gb->apu_output.output_file) != 1) {
+                gb->apu_output.output_error = errno;
+            }
+            break;
+        }
+    }
+    fclose(gb->apu_output.output_file);
+    gb->apu_output.output_file = NULL;
+    
+    int ret  = gb->apu_output.output_error;
+    gb->apu_output.output_error = 0;
+    return ret;
 }

@@ -216,6 +216,7 @@ void GB_free(GB_gameboy_t *gb)
         GB_remove_cheat(gb, gb->cheats[0]);
     }
 #endif
+    GB_stop_audio_recording(gb);
     memset(gb, 0, sizeof(*gb));
 }
 

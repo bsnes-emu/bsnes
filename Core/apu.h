@@ -3,6 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
+#include <stdio.h>
 #include "defs.h"
 
 #ifdef GB_INTERNAL
@@ -142,6 +143,12 @@ typedef enum {
     GB_HIGHPASS_MAX
 } GB_highpass_mode_t;
 
+typedef enum {
+    GB_AUDIO_FORMAT_RAW, // Native endian
+    GB_AUDIO_FORMAT_AIFF, // Native endian
+    GB_AUDIO_FORMAT_WAV,
+} GB_audio_format_t;
+
 typedef struct {
     unsigned sample_rate;
 
@@ -162,14 +169,20 @@ typedef struct {
     
     double interference_volume;
     double interference_highpass;
+    
+    FILE *output_file;
+    GB_audio_format_t output_format;
+    int output_error;
 } GB_apu_output_t;
 
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned sample_rate);
+unsigned GB_get_sample_rate(GB_gameboy_t *gb);
 void GB_set_sample_rate_by_clocks(GB_gameboy_t *gb, double cycles_per_sample); /* Cycles are in 8MHz units */
 void GB_set_highpass_filter_mode(GB_gameboy_t *gb, GB_highpass_mode_t mode);
 void GB_set_interference_volume(GB_gameboy_t *gb, double volume);
 void GB_apu_set_sample_callback(GB_gameboy_t *gb, GB_sample_callback_t callback);
-
+int GB_start_audio_recording(GB_gameboy_t *gb, const char *path, GB_audio_format_t format);
+int GB_stop_audio_recording(GB_gameboy_t *gb);
 #ifdef GB_INTERNAL
 internal bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, unsigned index);
 internal void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);
