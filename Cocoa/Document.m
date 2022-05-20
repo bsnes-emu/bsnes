@@ -101,6 +101,9 @@ enum model {
     Document *slave;
     signed linkOffset;
     bool linkCableBit;
+    
+    NSSavePanel *_audioSavePanel;
+    bool _isRecordingAudio;
 }
 
 @property GBAudioClient *audioClient;
@@ -1134,7 +1137,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         return !GB_debugger_is_stopped(&gb);
     }
     else if ([anItem action] == @selector(reset:) && anItem.tag != MODEL_NONE) {
-        [(NSMenuItem*)anItem setState:anItem.tag == current_model];
+        [(NSMenuItem *)anItem setState:anItem.tag == current_model];
     }
     else if ([anItem action] == @selector(interrupt:)) {
         if (![[NSUserDefaults standardUserDefaults] boolForKey:@"DeveloperMode"]) {
@@ -1142,26 +1145,29 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         }
     }
     else if ([anItem action] == @selector(disconnectAllAccessories:)) {
-        [(NSMenuItem*)anItem setState:accessory == GBAccessoryNone];
+        [(NSMenuItem *)anItem setState:accessory == GBAccessoryNone];
     }
     else if ([anItem action] == @selector(connectPrinter:)) {
-        [(NSMenuItem*)anItem setState:accessory == GBAccessoryPrinter];
+        [(NSMenuItem *)anItem setState:accessory == GBAccessoryPrinter];
     }
     else if ([anItem action] == @selector(connectWorkboy:)) {
-        [(NSMenuItem*)anItem setState:accessory == GBAccessoryWorkboy];
+        [(NSMenuItem *)anItem setState:accessory == GBAccessoryWorkboy];
     }
     else if ([anItem action] == @selector(connectLinkCable:)) {
-        [(NSMenuItem*)anItem setState:[(NSMenuItem *)anItem representedObject] == master ||
+        [(NSMenuItem *)anItem setState:[(NSMenuItem *)anItem representedObject] == master ||
                                        [(NSMenuItem *)anItem representedObject] == slave];
     }
     else if ([anItem action] == @selector(toggleCheats:)) {
-        [(NSMenuItem*)anItem setState:GB_cheats_enabled(&gb)];
+        [(NSMenuItem *)anItem setState:GB_cheats_enabled(&gb)];
     }
     else if ([anItem action] == @selector(toggleDisplayBackground:)) {
-        [(NSMenuItem*)anItem setState:!GB_is_background_rendering_disabled(&gb)];
+        [(NSMenuItem *)anItem setState:!GB_is_background_rendering_disabled(&gb)];
     }
     else if ([anItem action] == @selector(toggleDisplayObjects:)) {
-        [(NSMenuItem*)anItem setState:!GB_is_object_rendering_disabled(&gb)];
+        [(NSMenuItem *)anItem setState:!GB_is_object_rendering_disabled(&gb)];
+    }
+    else if ([anItem action] == @selector(toggleAudioRecording:)) {
+        [(NSMenuItem *)anItem setTitle:_isRecordingAudio? @"Stop Audio Recording" : @"Start Audio Recording…"];
     }
     
     return [super validateUserInterfaceItem:anItem];
@@ -2388,5 +2394,70 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     }];
 }
 
+- (IBAction)toggleAudioRecording:(id)sender
+{
+
+    bool shouldResume = running;
+    [self stop];
+    if (_isRecordingAudio) {
+        _isRecordingAudio = false;
+        int error = GB_stop_audio_recording(&gb);
+        if (error) {
+            NSAlert *alert = [[NSAlert alloc] init];
+            [alert setMessageText:[NSString stringWithFormat:@"Could not finalize recording: %s", strerror(error)]];
+            [alert setAlertStyle:NSAlertStyleCritical];
+            [alert runModal];
+        }
+        else {
+            [self.osdView displayText:@"Audio recording ended"];
+        }
+        if (shouldResume) {
+            [self start];
+        }
+        return;
+    }
+    _audioSavePanel = [NSSavePanel savePanel];
+    if (!self.audioRecordingAccessoryView) {
+        [[NSBundle mainBundle] loadNibNamed:@"AudioRecordingAccessoryView" owner:self topLevelObjects:nil];
+    }
+    _audioSavePanel.accessoryView = self.audioRecordingAccessoryView;
+    [self audioFormatChanged:self.audioFormatButton];
+    
+    [_audioSavePanel beginSheetModalForWindow:self.mainWindow completionHandler:^(NSInteger result) {
+        if (result == NSModalResponseOK) {
+            [_audioSavePanel orderOut:self];
+            int error = GB_start_audio_recording(&gb, _audioSavePanel.URL.fileSystemRepresentation, self.audioFormatButton.selectedTag);
+            if (error) {
+                NSAlert *alert = [[NSAlert alloc] init];
+                [alert setMessageText:[NSString stringWithFormat:@"Could not start recording: %s", strerror(error)]];
+                [alert setAlertStyle:NSAlertStyleCritical];
+                [alert runModal];
+            }
+            else {
+                [self.osdView displayText:@"Audio recording started"];
+                _isRecordingAudio = true;
+            }
+        }
+        if (shouldResume) {
+            [self start];
+        }
+        _audioSavePanel = nil;
+    }];
+}
+
+- (IBAction)audioFormatChanged:(NSPopUpButton *)sender
+{
+    switch ((GB_audio_format_t)sender.selectedTag) {
+        case GB_AUDIO_FORMAT_RAW:
+            _audioSavePanel.allowedFileTypes = @[@"raw", @"pcm"];
+            break;
+        case GB_AUDIO_FORMAT_AIFF:
+            _audioSavePanel.allowedFileTypes = @[@"aiff", @"aif", @"aifc"];
+            break;
+        case GB_AUDIO_FORMAT_WAV:
+            _audioSavePanel.allowedFileTypes = @[@"wav"];
+            break;
+    }
+}
 
 @end

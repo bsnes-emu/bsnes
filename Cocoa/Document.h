@@ -56,6 +56,8 @@
 @property (readonly) GB_oam_info_t *oamInfo;
 @property uint8_t oamCount;
 @property uint8_t oamHeight;
+@property (strong) IBOutlet NSView *audioRecordingAccessoryView;
+@property (strong) IBOutlet NSPopUpButton *audioFormatButton;
 
 + (NSImage *) imageFromData:(NSData *)data width:(NSUInteger) width height:(NSUInteger) height scale:(double) scale;
 -(uint8_t) readMemory:(uint16_t) addr;
