@@ -316,6 +316,7 @@ static void enter_graphics_menu(unsigned index);
 static void enter_controls_menu(unsigned index);
 static void enter_joypad_menu(unsigned index);
 static void enter_audio_menu(unsigned index);
+static void toggle_audio_recording(unsigned index);
 
 extern void set_filename(const char *new_filename, typeof(free) *new_free_function);
 static void open_rom(unsigned index)
@@ -344,14 +345,17 @@ static void recalculate_menu_height(void)
     }
 }
 
+char audio_recording_menu_item[] = "Start Audio Recording";
+
 static const struct menu_item paused_menu[] = {
     {"Resume", NULL},
     {"Open ROM", open_rom},
     {"Emulation Options", enter_emulation_menu},
     {"Graphic Options", enter_graphics_menu},
     {"Audio Options", enter_audio_menu},
-    {"Keyboard", enter_controls_menu},
-    {"Joypad", enter_joypad_menu},
+    {"Keyboard Options", enter_controls_menu},
+    {"Joypad Options", enter_joypad_menu},
+    {audio_recording_menu_item, toggle_audio_recording},
     {"Help", item_help},
     {"Quit SameBoy", item_exit},
     {NULL,}
@@ -1148,6 +1152,70 @@ void connect_joypad(void)
     }
     if (joystick) {
         haptic = SDL_HapticOpenFromJoystick(joystick);
+    }
+}
+
+static void toggle_audio_recording(unsigned index)
+{
+    if (!GB_is_inited(&gb)) {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", "Cannot start audio recording, open a ROM file first.", window);
+        return;
+    }
+    static bool is_recording = false;
+    if (is_recording) {
+        is_recording = false;
+        show_osd_text("Audio recording ended");
+        int error = GB_stop_audio_recording(&gb);
+        if (error) {
+            char *message = NULL;
+            asprintf(&message, "Could not finalize recording: %s", strerror(error));
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", message, window);
+            free(message);
+        }
+        static const char item_string[] = "Start Audio Recording";
+        memcpy(audio_recording_menu_item, item_string, sizeof(item_string));
+        return;
+    }
+    char *filename = do_save_recording_dialog(GB_get_sample_rate(&gb));
+    
+    /* Drop events as it SDL seems to catch several in-dialog events */
+    SDL_Event event;
+    while (SDL_PollEvent(&event));
+    
+    if (filename) {
+        GB_audio_format_t format = GB_AUDIO_FORMAT_RAW;
+        size_t length = strlen(filename);
+        if (length >= 5) {
+            if (strcasecmp(".aiff", filename + length - 5) == 0) {
+                format = GB_AUDIO_FORMAT_AIFF;
+            }
+            else if (strcasecmp(".aifc", filename + length - 5) == 0) {
+                format = GB_AUDIO_FORMAT_AIFF;
+            }
+            else if (length >= 4) {
+                if (strcasecmp(".aif", filename + length - 4) == 0) {
+                    format = GB_AUDIO_FORMAT_AIFF;
+                }
+                else if (strcasecmp(".wav", filename + length - 4) == 0) {
+                    format = GB_AUDIO_FORMAT_WAV;
+                }
+            }
+        }
+        
+        int error = GB_start_audio_recording(&gb, filename, format);
+        free(filename);
+        if (error) {
+            char *message = NULL;
+            asprintf(&message, "Could not finalize recording: %s", strerror(error));
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", message, window);
+            free(message);
+            return;
+        }
+        
+        is_recording = true;
+        static const char item_string[] = "Stop Audio Recording";
+        memcpy(audio_recording_menu_item, item_string, sizeof(item_string));
+        show_osd_text("Audio recording started");
     }
 }
 

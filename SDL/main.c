@@ -757,6 +757,11 @@ static void save_configuration(void)
     }
 }
 
+static void stop_recording(void)
+{
+    GB_stop_audio_recording(&gb);
+}
+
 static bool get_arg_flag(const char *flag, int *argc, char **argv)
 {
     for (unsigned i = 1; i < *argc; i++) {
@@ -847,6 +852,7 @@ int main(int argc, char **argv)
     }
     
     atexit(save_configuration);
+    atexit(stop_recording);
     
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);

@@ -1,6 +1,7 @@
 #pragma once
 #include_next <stdio.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 int access(const char *filename, int mode);
 #define R_OK 2
@@ -20,6 +21,16 @@ static inline int vasprintf(char **str, const char *fmt, va_list args)
     }
     return ret;
 }
+
+static inline int asprintf(char **strp, const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    int r = vasprintf(strp, fmt, args);
+    va_end(args);
+    return r;
+}
+
 #endif
 #endif
 
