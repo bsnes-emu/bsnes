@@ -1064,7 +1064,7 @@ static void write_mbc7_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     gb->mbc7.eeprom_do = gb->mbc7.read_bits >> 15;
                     gb->mbc7.read_bits <<= 1;
                     gb->mbc7.read_bits |= 1;
-                    if (gb->mbc7.bits_countdown == 0) {
+                    if (gb->mbc7.argument_bits_left == 0) {
                         /* Not transferring extra bits for a command*/
                         gb->mbc7.eeprom_command <<= 1;
                         gb->mbc7.eeprom_command |= gb->mbc7.eeprom_di;
@@ -1095,7 +1095,7 @@ static void write_mbc7_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                                     if (gb->mbc7.eeprom_write_enabled) {
                                         ((uint16_t *)gb->mbc_ram)[gb->mbc7.eeprom_command & 0x7F] = 0;
                                     }
-                                    gb->mbc7.bits_countdown = 16;
+                                    gb->mbc7.argument_bits_left = 16;
                                     // We still need to process this command, don't erase eeprom_command
                                     break;
                                 case 0xC:
@@ -1123,7 +1123,7 @@ static void write_mbc7_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                                     if (gb->mbc7.eeprom_write_enabled) {
                                         memset(gb->mbc_ram, 0, gb->mbc_ram_size);
                                     }
-                                    gb->mbc7.bits_countdown = 16;
+                                    gb->mbc7.argument_bits_left = 16;
                                     // We still need to process this command, don't erase eeprom_command
                                     break;
                             }
@@ -1131,10 +1131,10 @@ static void write_mbc7_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     }
                     else {
                         // We're shifting in extra bits for a WRITE/WRAL command
-                        gb->mbc7.bits_countdown--;
+                        gb->mbc7.argument_bits_left--;
                         gb->mbc7.eeprom_do = true;
                         if (gb->mbc7.eeprom_di) {
-                            uint16_t bit = LE16(1 << gb->mbc7.bits_countdown);
+                            uint16_t bit = LE16(1 << gb->mbc7.argument_bits_left);
                             if (gb->mbc7.eeprom_command & 0x100) {
                                 // WRITE
                                 ((uint16_t *)gb->mbc_ram)[gb->mbc7.eeprom_command & 0x7F] |= bit;
@@ -1146,7 +1146,7 @@ static void write_mbc7_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                                 }
                             }
                         }
-                        if (gb->mbc7.bits_countdown == 0) { // We're done
+                        if (gb->mbc7.argument_bits_left == 0) { // We're done
                             gb->mbc7.eeprom_command = 0;
                             gb->mbc7.read_bits = (gb->mbc7.eeprom_command & 0x100)? 0xFF : 0x3FFF; // Emulate some time to settle
                         }

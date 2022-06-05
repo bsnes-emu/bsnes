@@ -479,7 +479,7 @@ struct GB_gameboy_internal_s {
                 bool eeprom_cs:1;
                 uint16_t eeprom_command:11;
                 uint16_t read_bits;
-                uint8_t bits_countdown:5;
+                uint8_t argument_bits_left:5;
                 bool secondary_ram_enable:1;
                 bool eeprom_write_enabled:1;
             } mbc7;

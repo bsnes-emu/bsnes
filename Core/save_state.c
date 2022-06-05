@@ -119,6 +119,28 @@ typedef struct __attribute__((packed)){
     GB_huc3_rtc_time_t data;
 } BESS_HUC3_t;
 
+typedef struct __attribute__((packed)) {
+    BESS_block_t header;
+
+    // Flags
+    bool latch_ready:1;
+    bool eeprom_do:1;
+    bool eeprom_di:1;
+    bool eeprom_clk:1;
+    bool eeprom_cs:1;
+    bool eeprom_write_enabled:1;
+    uint8_t padding:2;
+    
+    uint8_t argument_bits_left;
+    
+    uint16_t eeprom_command;
+    uint16_t read_bits;
+    
+    uint16_t x_latch;
+    uint16_t y_latch;
+
+} BESS_MBC7_t;
+
 typedef struct __attribute__((packed)){
     BESS_block_t header;
     uint64_t last_rtc_second;
@@ -232,6 +254,8 @@ static size_t bess_size_for_cartridge(const GB_cartridge_t *cart)
             return sizeof(BESS_block_t) + 3 * sizeof(BESS_MBC_pair_t) + (cart->has_rtc? sizeof(BESS_RTC_t) : 0);
         case GB_MBC5:
             return sizeof(BESS_block_t) + 4 * sizeof(BESS_MBC_pair_t);
+        case GB_MBC7:
+            return sizeof(BESS_block_t) + 3 * sizeof(BESS_MBC_pair_t) + sizeof(BESS_MBC7_t);
         case GB_MMM01:
             return sizeof(BESS_block_t) + 8 * sizeof(BESS_MBC_pair_t);
         case GB_HUC1:
@@ -270,7 +294,7 @@ size_t GB_get_save_state_size(GB_gameboy_t *gb)
     + sizeof(BESS_CORE_t)
     + sizeof(BESS_XOAM_t)
     + (gb->sgb? sizeof(BESS_SGB_t) : 0)
-    + bess_size_for_cartridge(gb->cartridge_type) // MBC & RTC/HUC3/TPP1 block
+    + bess_size_for_cartridge(gb->cartridge_type) // MBC & RTC/HUC3/TPP1/MBC7 block
     + sizeof(BESS_block_t) // END block
     + sizeof(BESS_footer_t);
 }
@@ -434,6 +458,12 @@ static int save_bess_mbc_block(GB_gameboy_t *gb, virtual_file_t *file)
             pairs[2] = (BESS_MBC_pair_t){LE16(0x3000), gb->mbc5.rom_bank_high};
             pairs[3] = (BESS_MBC_pair_t){LE16(0x4000), gb->mbc5.ram_bank};
             mbc_block.size = 4 * sizeof(pairs[0]);
+            break;
+        case GB_MBC7:
+            pairs[0] = (BESS_MBC_pair_t){LE16(0x0000), gb->mbc_ram_enable? 0xA : 0x0};
+            pairs[1] = (BESS_MBC_pair_t){LE16(0x2000), gb->mbc7.rom_bank};
+            pairs[2] = (BESS_MBC_pair_t){LE16(0x4000), gb->mbc7.secondary_ram_enable? 0x40 : 0};
+            mbc_block.size = 3 * sizeof(pairs[0]);
             break;
         case GB_MMM01:
             pairs[0] = (BESS_MBC_pair_t){LE16(0x2000), (gb->mmm01.rom_bank_low & (gb->mmm01.rom_bank_mask << 1)) | (gb->mmm01.rom_bank_mid << 5)};
@@ -697,6 +727,30 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file, bool appe
             if (file->write(file, &bess_huc3, sizeof(bess_huc3)) != sizeof(bess_huc3)) {
                 goto error;
             }
+        }
+    }
+    
+    if (gb->cartridge_type ->mbc_type == GB_MBC7) {
+        BESS_MBC7_t bess_mbc7 = {
+            .latch_ready = gb->mbc7.latch_ready,
+            .eeprom_do = gb->mbc7.eeprom_do,
+            .eeprom_di = gb->mbc7.eeprom_di,
+            .eeprom_clk = gb->mbc7.eeprom_clk,
+            .eeprom_cs = gb->mbc7.eeprom_cs,
+            .eeprom_write_enabled = gb->mbc7.eeprom_write_enabled,
+            
+            .argument_bits_left = gb->mbc7.argument_bits_left,
+            
+            .eeprom_command = LE16(gb->mbc7.eeprom_command),
+            .read_bits = LE16(gb->mbc7.read_bits),
+            
+            .x_latch = LE16(gb->mbc7.x_latch),
+            .y_latch = LE16(gb->mbc7.y_latch),
+        };
+        bess_mbc7.header = (BESS_block_t){BE32('MBC7'), LE32(sizeof(bess_mbc7) - sizeof(bess_mbc7.header))};
+        
+        if (file->write(file, &bess_mbc7, sizeof(bess_mbc7)) != sizeof(bess_mbc7)) {
+            goto error;
         }
     }
     
@@ -1089,6 +1143,29 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                     save.rtc_latched.data[i ^ 3] = bess_tpp1.latched_rtc_data[i];
                 }
                 save.tpp1_mr4 = bess_tpp1.mr4;
+                break;
+            case BE32('MBC7'):
+                if (!found_core) goto parse_error;
+                BESS_MBC7_t bess_mbc7;
+                if (LE32(block.size) != sizeof(bess_mbc7) - sizeof(block)) goto parse_error;
+                if (file->read(file, &bess_mbc7.header + 1, LE32(block.size)) != LE32(block.size)) goto error;
+                if (gb->cartridge_type->mbc_type != GB_MBC7) break;
+                
+                save.mbc7.latch_ready = bess_mbc7.latch_ready;
+                save.mbc7.eeprom_do = bess_mbc7.eeprom_do;
+                save.mbc7.eeprom_di = bess_mbc7.eeprom_di;
+                save.mbc7.eeprom_clk = bess_mbc7.eeprom_clk;
+                save.mbc7.eeprom_cs = bess_mbc7.eeprom_cs;
+                save.mbc7.eeprom_write_enabled = bess_mbc7.eeprom_write_enabled;
+                
+                save.mbc7.argument_bits_left = bess_mbc7.argument_bits_left;
+                
+                save.mbc7.eeprom_command = LE16(bess_mbc7.eeprom_command);
+                save.mbc7.read_bits = LE16(bess_mbc7.read_bits);
+                
+                save.mbc7.x_latch = LE16(bess_mbc7.x_latch);
+                save.mbc7.y_latch = LE16(bess_mbc7.y_latch);
+                
                 break;
             case BE32('SGB '):
                 if (!found_core) goto parse_error;
