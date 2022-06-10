@@ -1155,9 +1155,20 @@ void connect_joypad(void)
     }
 }
 
+static void toggle_mouse_control(unsigned index)
+{
+    configuration.allow_mouse_controls = !configuration.allow_mouse_controls;
+}
+
+const char *mouse_control_string(unsigned index)
+{
+    return configuration.allow_mouse_controls? "Allow mouse control" : "Disallow mouse control";
+}
+
 static const struct menu_item controls_menu[] = {
     {"Keyboard Options", enter_keyboard_menu},
     {"Joypad Options", enter_joypad_menu},
+    {"Motion-controlled games:", toggle_mouse_control, mouse_control_string, toggle_mouse_control},
     {"Back", return_to_root_menu},
     {NULL,}
 };
@@ -1234,6 +1245,22 @@ static void toggle_audio_recording(unsigned index)
     }
 }
 
+void convert_mouse_coordinates(signed *x, signed *y)
+{
+    signed width = GB_get_screen_width(&gb);
+    signed height = GB_get_screen_height(&gb);
+    signed x_offset = (width - 160) / 2;
+    signed y_offset = (height - 144) / 2;
+
+    *x = (signed)(*x - rect.x / factor) * width / (signed)(rect.w / factor) - x_offset;
+    *y = (signed)(*y - rect.y / factor) * height / (signed)(rect.h / factor) - y_offset;
+
+    if (strcmp("CRT", configuration.filter) == 0) {
+        *y = *y * 8 / 7;
+        *y -= 144 / 16;
+    }
+}
+
 void run_gui(bool is_running)
 {
     SDL_ShowCursor(SDL_ENABLE);
@@ -1296,13 +1323,9 @@ void run_gui(bool is_running)
                         event.key.keysym.scancode = SDL_SCANCODE_ESCAPE;
                     }
                     else if (gui_state == SHOWING_MENU) {
-                        signed x = (event.button.x - rect.x / factor) * width / (rect.w / factor) - x_offset;
-                        signed y = (event.button.y - rect.y / factor) * height / (rect.h / factor) - y_offset;
-                        
-                        if (strcmp("CRT", configuration.filter) == 0) {
-                            y = y * 8 / 7;
-                            y -= 144 / 16;
-                        }
+                        signed x = event.button.x;
+                        signed y = event.button.y;
+                        convert_mouse_coordinates(&x, &y);
                         y += scroll;
                         
                         if (x < 0 || x >= 160 || y < 24) {

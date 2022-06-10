@@ -123,6 +123,9 @@ typedef struct {
     
     /* v0.14.4 */
     bool osd;
+    
+    /* v0.15 */
+    bool allow_mouse_controls;
 } configuration_t;
 
 extern configuration_t configuration;
@@ -149,5 +152,6 @@ void show_osd_text(const char *text);
 extern const char *osd_text;
 extern unsigned osd_countdown;
 extern unsigned osd_text_lines;
+void convert_mouse_coordinates(signed *x, signed *y);
 
 #endif

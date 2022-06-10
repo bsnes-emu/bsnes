@@ -242,6 +242,25 @@ static void handle_events(GB_gameboy_t *gb)
                 }
                 break;
             }
+            case SDL_MOUSEBUTTONDOWN:
+            case SDL_MOUSEBUTTONUP: {
+                if (GB_has_accelerometer(gb) && configuration.allow_mouse_controls) {
+                    GB_set_key_state(gb, GB_KEY_A, event.type == SDL_MOUSEBUTTONDOWN);
+                }
+                break;
+            }
+                
+            case SDL_MOUSEMOTION: {
+                if (GB_has_accelerometer(gb) && configuration.allow_mouse_controls) {
+                    signed x = event.motion.x;
+                    signed y = event.motion.y;
+                    convert_mouse_coordinates(&x, &y);
+                    x = SDL_max(SDL_min(x, 160), 0);
+                    y = SDL_max(SDL_min(y, 144), 0);
+                    GB_set_accelerometer_values(gb, (x - 80) / -80.0, (y - 72) / -72.0);
+                }
+                break;
+            }
                 
             case SDL_JOYBUTTONUP:
             case SDL_JOYBUTTONDOWN: {
