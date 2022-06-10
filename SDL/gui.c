@@ -313,9 +313,10 @@ static void item_help(unsigned index)
 
 static void enter_emulation_menu(unsigned index);
 static void enter_graphics_menu(unsigned index);
-static void enter_controls_menu(unsigned index);
+static void enter_keyboard_menu(unsigned index);
 static void enter_joypad_menu(unsigned index);
 static void enter_audio_menu(unsigned index);
+static void enter_controls_menu(unsigned index);
 static void toggle_audio_recording(unsigned index);
 
 extern void set_filename(const char *new_filename, typeof(free) *new_free_function);
@@ -353,8 +354,7 @@ static const struct menu_item paused_menu[] = {
     {"Emulation Options", enter_emulation_menu},
     {"Graphic Options", enter_graphics_menu},
     {"Audio Options", enter_audio_menu},
-    {"Keyboard Options", enter_controls_menu},
-    {"Joypad Options", enter_joypad_menu},
+    {"Control Options", enter_controls_menu},
     {audio_recording_menu_item, toggle_audio_recording},
     {"Help", item_help},
     {"Quit SameBoy", item_exit},
@@ -940,7 +940,7 @@ static void modify_key(unsigned index)
 
 static const char *key_name(unsigned index);
 
-static const struct menu_item controls_menu[] = {
+static const struct menu_item keyboard_menu[] = {
     {"Right:", modify_key, key_name,},
     {"Left:", modify_key, key_name,},
     {"Up:", modify_key, key_name,},
@@ -952,7 +952,7 @@ static const struct menu_item controls_menu[] = {
     {"Turbo:", modify_key, key_name,},
     {"Rewind:", modify_key, key_name,},
     {"Slow-Motion:", modify_key, key_name,},
-    {"Back", return_to_root_menu},
+    {"Back", enter_controls_menu},
     {NULL,}
 };
 
@@ -964,9 +964,9 @@ static const char *key_name(unsigned index)
     return SDL_GetScancodeName(configuration.keys[index]);
 }
 
-static void enter_controls_menu(unsigned index)
+static void enter_keyboard_menu(unsigned index)
 {
-    current_menu = controls_menu;
+    current_menu = keyboard_menu;
     current_selection = 0;
     scroll = 0;
     recalculate_menu_height();
@@ -1096,7 +1096,7 @@ static const struct menu_item joypad_menu[] = {
     {"Joypad:", cycle_joypads, current_joypad_name, cycle_joypads_backwards},
     {"Configure layout", detect_joypad_layout},
     {"Rumble Mode:", cycle_rumble_mode, current_rumble_mode, cycle_rumble_mode_backwards},
-    {"Back", return_to_root_menu},
+    {"Back", enter_controls_menu},
     {NULL,}
 };
 
@@ -1153,6 +1153,21 @@ void connect_joypad(void)
     if (joystick) {
         haptic = SDL_HapticOpenFromJoystick(joystick);
     }
+}
+
+static const struct menu_item controls_menu[] = {
+    {"Keyboard Options", enter_keyboard_menu},
+    {"Joypad Options", enter_joypad_menu},
+    {"Back", return_to_root_menu},
+    {NULL,}
+};
+
+static void enter_controls_menu(unsigned index)
+{
+    current_menu = controls_menu;
+    current_selection = 0;
+    scroll = 0;
+    recalculate_menu_height();
 }
 
 static void toggle_audio_recording(unsigned index)
@@ -1526,7 +1541,12 @@ void run_gui(bool is_running)
                 }
                 else if (event.key.keysym.scancode == SDL_SCANCODE_ESCAPE) {
                     if (gui_state == SHOWING_MENU && current_menu != root_menu) {
-                        return_to_root_menu(0);
+                        for (const struct menu_item *item = current_menu; item->string; item++) {
+                            if (strcmp(item->string, "Back") == 0) {
+                                item->handler(0);
+                                break;
+                            }
+                        }
                         should_render = true;
                     }
                     else if (is_running) {
