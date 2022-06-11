@@ -15,11 +15,8 @@ typedef struct {
         GB_HUC1,
         GB_HUC3,
         GB_TPP1,
-    } mbc_type;
-    enum {
-        GB_STANDARD_MBC,
         GB_CAMERA,
-    } mbc_subtype;
+    } mbc_type;
     bool has_ram;
     bool has_battery;
     bool has_rtc;

@@ -1546,14 +1546,16 @@ static bool mbc(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
         }
         else {
             static const char *const mapper_names[] = {
-                [GB_MBC1]  = "MBC1",
-                [GB_MBC2]  = "MBC2",
-                [GB_MBC3]  = "MBC3",
-                [GB_MBC5]  = "MBC5",
-                [GB_MBC7]  = "MBC7",
-                [GB_MMM01] = "MMM01",
-                [GB_HUC1]  = "HUC-1",
-                [GB_HUC3]  = "HUC-3",
+                [GB_MBC1]   = "MBC1",
+                [GB_MBC2]   = "MBC2",
+                [GB_MBC3]   = "MBC3",
+                [GB_MBC5]   = "MBC5",
+                [GB_MBC7]   = "MBC7",
+                [GB_MMM01]  = "MMM01",
+                [GB_HUC1]   = "HUC-1",
+                [GB_HUC3]   = "HUC-3",
+                [GB_CAMERA] = "MAC-GBD",
+
             };
             GB_log(gb, "%s\n", mapper_names[cartridge->mbc_type]);
         }

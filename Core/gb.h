@@ -466,7 +466,7 @@ struct GB_gameboy_internal_s {
                 uint8_t rom_bank_low;
                 uint8_t rom_bank_high:1;
                 uint8_t ram_bank:4;
-            } mbc5;
+            } mbc5; // Also used for GB_CAMERA
                
             struct {
                 uint8_t rom_bank;
