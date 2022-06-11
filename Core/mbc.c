@@ -138,14 +138,8 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
             }
             break;
         case GB_HUC1:
-            if (gb->huc1.mode == 0) {
-                gb->mbc_rom_bank = gb->huc1.bank_low | (gb->mbc1.bank_high << 6);
-                gb->mbc_ram_bank = 0;
-            }
-            else {
-                gb->mbc_rom_bank = gb->huc1.bank_low;
-                gb->mbc_ram_bank = gb->huc1.bank_high;
-            }
+            gb->mbc_rom_bank = gb->huc1.bank_low;
+            gb->mbc_ram_bank = gb->huc1.bank_high;
             break;
         case GB_HUC3:
             gb->mbc_rom_bank = gb->huc3.rom_bank;

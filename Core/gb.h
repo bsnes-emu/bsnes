@@ -504,8 +504,7 @@ struct GB_gameboy_internal_s {
             struct {
                 uint8_t bank_low:6;
                 uint8_t bank_high:3;
-                bool mode:1;
-                bool ir_mode:1;
+                bool ir_mode;
             } huc1;
 
             struct {
