@@ -185,14 +185,16 @@ void GB_configure_cart(GB_gameboy_t *gb)
         gb->tpp1.rom_bank = 1;
     }
     
-    if (gb->rom[0x147] == 0 && gb->rom_size > 0x8000) {
-        GB_log(gb, "ROM header reports no MBC, but file size is over 32Kb. Assuming cartridge uses MBC3.\n");
-        gb->cartridge_type = &GB_cart_defs[0x11];
+    if (gb->cartridge_type->mbc_type != GB_MMM01) {
+        if (gb->rom[0x147] == 0 && gb->rom_size > 0x8000) {
+            GB_log(gb, "ROM header reports no MBC, but file size is over 32Kb. Assuming cartridge uses MBC3.\n");
+            gb->cartridge_type = &GB_cart_defs[0x11];
+        }
+        else if (gb->rom[0x147] != 0 && memcmp(gb->cartridge_type, &GB_cart_defs[0], sizeof(GB_cart_defs[0])) == 0) {
+            GB_log(gb, "Cartridge type %02x is not yet supported.\n", gb->rom[0x147]);
+        }
     }
-    else if (gb->rom[0x147] != 0 && memcmp(gb->cartridge_type, &GB_cart_defs[0], sizeof(GB_cart_defs[0])) == 0) {
-        GB_log(gb, "Cartridge type %02x is not yet supported.\n", gb->rom[0x147]);
-    }
-    
+        
     if (gb->mbc_ram) {
         free(gb->mbc_ram);
         gb->mbc_ram = NULL;
@@ -213,7 +215,12 @@ void GB_configure_cart(GB_gameboy_t *gb)
         }
         else {
             static const unsigned ram_sizes[256] = {0, 0x800, 0x2000, 0x8000, 0x20000, 0x10000};
-            gb->mbc_ram_size = ram_sizes[gb->rom[0x149]];
+            if (gb->cartridge_type->mbc_type == GB_MMM01) {
+                gb->mbc_ram_size = ram_sizes[gb->rom[gb->rom_size - 0x8000 + 0x149]];
+            }
+            else {
+                gb->mbc_ram_size = ram_sizes[gb->rom[0x149]];
+            }
         }
         
         if (gb->mbc_ram_size) {
