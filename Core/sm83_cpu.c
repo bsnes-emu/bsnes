@@ -242,7 +242,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             break;
             
         case GB_CONFLICT_CGB_LCDC:
-            if ((value ^ gb->io_registers[GB_IO_LCDC]) & 0x10) {
+            if ((~value & gb->io_registers[GB_IO_LCDC]) & 0x10) {
                 // Todo: This is difference is because my timing is off in one of the models
                 if (gb->model > GB_MODEL_CGB_C) {
                     GB_advance_cycles(gb, gb->pending_cycles);
