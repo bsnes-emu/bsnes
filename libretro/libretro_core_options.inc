@@ -66,7 +66,7 @@ struct retro_core_option_v2_category option_cats_us[] = {
         "Input",
         "Configure input parameters: rumble support."
     },
-    { NULL, NULL, NULL, NULL },
+    { NULL, NULL },
 };
 
 struct retro_core_option_v2_definition option_defs_us[] = {
