@@ -436,6 +436,7 @@ struct GB_gameboy_internal_s {
         bool dma_ppu_vram_conflict;
         uint16_t dma_ppu_vram_conflict_addr;
         uint8_t hdma_open_bus; /* Required to emulate HDMA reads from Exxx */
+        bool allow_hdma_on_wake;
     )
     
     /* MBC */
