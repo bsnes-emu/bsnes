@@ -506,6 +506,14 @@ static uint32_t color_to_int(NSColor *color)
     }
 }
 
+- (void)orderFrontAboutPanel:(id)sender
+{
+    // NSAboutPanelOptionApplicationIcon is not available prior to 10.13, but the key is still there and working.
+    [[NSApplication sharedApplication] orderFrontStandardAboutPanelWithOptions:@{
+        @"ApplicationIcon": [NSImage imageNamed:@"Icon"]
+    }];
+}
+
 - (void)dealloc
 {
     if (_downloadDirectory) {
