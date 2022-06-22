@@ -17,9 +17,11 @@ ifeq ($(PLATFORM),windows32)
 _ := $(shell chcp 65001)
 EXESUFFIX:=.exe
 NATIVE_CC = clang -IWindows -Wno-deprecated-declarations --target=i386-pc-windows
+SDL_AUDIO_DRIVER ?= xaudio2
 else
 EXESUFFIX:=
 NATIVE_CC := cc
+SDL_AUDIO_DRIVER ?= sdl
 endif
 
 PB12_COMPRESS := build/pb12$(EXESUFFIX)
@@ -47,7 +49,6 @@ endif
 include version.mk
 export VERSION
 CONF ?= debug
-SDL_AUDIO_DRIVER ?= sdl
 
 BIN := build/bin
 OBJ := build/obj
