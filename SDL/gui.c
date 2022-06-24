@@ -923,7 +923,7 @@ static const char *audio_driver_string(unsigned index)
     return GB_audio_driver_name();
 }
 
-static void nop(index){}
+static void nop(unsigned index){}
 
 static const struct menu_item audio_menu[] = {
     {"Highpass Filter:", cycle_highpass_filter, highpass_filter_string, cycle_highpass_filter_backwards},
