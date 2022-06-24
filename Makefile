@@ -17,11 +17,11 @@ ifeq ($(PLATFORM),windows32)
 _ := $(shell chcp 65001)
 EXESUFFIX:=.exe
 NATIVE_CC = clang -IWindows -Wno-deprecated-declarations --target=i386-pc-windows
-SDL_AUDIO_DRIVER ?= xaudio2
+SDL_AUDIO_DRIVERS ?= xaudio2 xaudio2_7 sdl
 else
 EXESUFFIX:=
 NATIVE_CC := cc
-SDL_AUDIO_DRIVER ?= sdl
+SDL_AUDIO_DRIVERS ?= sdl
 endif
 
 PB12_COMPRESS := build/pb12$(EXESUFFIX)
@@ -212,7 +212,7 @@ all: cocoa sdl tester libretro
 # Get a list of our source files and their respective object file targets
 
 CORE_SOURCES := $(shell ls Core/*.c)
-SDL_SOURCES := $(shell ls SDL/*.c) $(OPEN_DIALOG) SDL/audio/$(SDL_AUDIO_DRIVER).c
+SDL_SOURCES := $(shell ls SDL/*.c) $(OPEN_DIALOG) $(patsubst %,SDL/audio/%.c,$(SDL_AUDIO_DRIVERS))
 TESTER_SOURCES := $(shell ls Tester/*.c)
 
 ifeq ($(PLATFORM),Darwin)

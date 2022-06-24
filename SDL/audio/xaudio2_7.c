@@ -44,17 +44,23 @@ static inline HRESULT XAudio2Create(IXAudio2 **ppXAudio2,
     return hr;
 }
 
-bool GB_audio_is_playing(void)
+static bool _audio_is_playing(void)
 {
     return playing;
 }
 
-void GB_audio_set_paused(bool paused)
+static void _audio_clear_queue(void)
+{
+    pos = 0;
+    IXAudio2SourceVoice_FlushSourceBuffers(source_voice);
+}
+
+static void _audio_set_paused(bool paused)
 {
     if (paused) {
         playing = false;
         IXAudio2SourceVoice_Stop(source_voice, 0, XAUDIO2_COMMIT_NOW);
-        GB_audio_clear_queue();
+        _audio_clear_queue();
     }
     else {
         playing = true;
@@ -63,18 +69,12 @@ void GB_audio_set_paused(bool paused)
     
 }
 
-void GB_audio_clear_queue(void)
-{
-    pos = 0;
-    IXAudio2SourceVoice_FlushSourceBuffers(source_voice);
-}
-
-unsigned GB_audio_get_frequency(void)
+static unsigned _audio_get_frequency(void)
 {
     return AUDIO_FREQUENCY;
 }
 
-size_t GB_audio_get_queue_length(void)
+static size_t _audio_get_queue_length(void)
 {
     static XAUDIO2_VOICE_STATE state;
     IXAudio2SourceVoice_GetState(source_voice, &state);
@@ -82,7 +82,7 @@ size_t GB_audio_get_queue_length(void)
     return state.BuffersQueued * BATCH_SIZE + (pos & (BATCH_SIZE - 1));
 }
 
-void GB_audio_queue_sample(GB_sample_t *sample)
+static void _audio_queue_sample(GB_sample_t *sample)
 {
     if (!playing) return;
         
@@ -96,18 +96,18 @@ void GB_audio_queue_sample(GB_sample_t *sample)
     }
 }
 
-void GB_audio_init(void)
+static bool _audio_init(void)
 {
     HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     if (FAILED(hr)) {
         fprintf(stderr, "CoInitializeEx failed: %lx\n", hr);
-        return;
+        return false;
     }
     
     hr = XAudio2Create(&xaudio2, 0, XAUDIO2_DEFAULT_PROCESSOR);
     if (FAILED(hr)) {
         fprintf(stderr, "XAudio2Create failed: %lx\n", hr);
-        return;
+        return false;
     }
     
     hr = IXAudio2_CreateMasteringVoice(xaudio2, &master_voice,
@@ -119,13 +119,17 @@ void GB_audio_init(void)
                                       );
     if (FAILED(hr)) {
         fprintf(stderr, "CreateMasteringVoice failed: %lx\n", hr);
-        return;
+        return false;
     }
     
     hr = IXAudio2_CreateSourceVoice(xaudio2, &source_voice, &wave_format, 0, XAUDIO2_DEFAULT_FREQ_RATIO, NULL, NULL, NULL);
     
     if (FAILED(hr)) {
         fprintf(stderr, "CreateSourceVoice failed: %lx\n", hr);
-        return;
+        return false;
     }
+    
+    return true;
 }
+
+GB_AUDIO_DRIVER(XAudio2_7);

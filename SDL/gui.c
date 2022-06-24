@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "gui.h"
 #include "font.h"
+#include "audio/audio.h"
 
 static const SDL_Color gui_palette[4] = {{8, 24, 16,}, {57, 97, 57,}, {132, 165, 99}, {198, 222, 140}};
 static uint32_t gui_palette_native[4];
@@ -847,13 +848,13 @@ static void enter_graphics_menu(unsigned index)
     recalculate_menu_height();
 }
 
-const char *highpass_filter_string(unsigned index)
+static const char *highpass_filter_string(unsigned index)
 {
     return (const char *[]){"None (Keep DC Offset)", "Accurate", "Preserve Waveform"}
         [configuration.highpass_mode];
 }
 
-void cycle_highpass_filter(unsigned index)
+static void cycle_highpass_filter(unsigned index)
 {
     configuration.highpass_mode++;
     if (configuration.highpass_mode == GB_HIGHPASS_MAX) {
@@ -861,7 +862,7 @@ void cycle_highpass_filter(unsigned index)
     }
 }
 
-void cycle_highpass_filter_backwards(unsigned index)
+static void cycle_highpass_filter_backwards(unsigned index)
 {
     if (configuration.highpass_mode == 0) {
         configuration.highpass_mode = GB_HIGHPASS_MAX - 1;
@@ -871,14 +872,14 @@ void cycle_highpass_filter_backwards(unsigned index)
     }
 }
 
-const char *volume_string(unsigned index)
+static const char *volume_string(unsigned index)
 {
     static char ret[5];
     sprintf(ret, "%d%%", configuration.volume);
     return ret;
 }
 
-void increase_volume(unsigned index)
+static void increase_volume(unsigned index)
 {
     configuration.volume += 5;
     if (configuration.volume > 100) {
@@ -886,7 +887,7 @@ void increase_volume(unsigned index)
     }
 }
 
-void decrease_volume(unsigned index)
+static void decrease_volume(unsigned index)
 {
     configuration.volume -= 5;
     if (configuration.volume > 100) {
@@ -894,14 +895,14 @@ void decrease_volume(unsigned index)
     }
 }
 
-const char *interference_volume_string(unsigned index)
+static const char *interference_volume_string(unsigned index)
 {
     static char ret[5];
     sprintf(ret, "%d%%", configuration.interference_volume);
     return ret;
 }
 
-void increase_interference_volume(unsigned index)
+static void increase_interference_volume(unsigned index)
 {
     configuration.interference_volume += 5;
     if (configuration.interference_volume > 100) {
@@ -909,7 +910,7 @@ void increase_interference_volume(unsigned index)
     }
 }
 
-void decrease_interference_volume(unsigned index)
+static void decrease_interference_volume(unsigned index)
 {
     configuration.interference_volume -= 5;
     if (configuration.interference_volume > 100) {
@@ -917,10 +918,18 @@ void decrease_interference_volume(unsigned index)
     }
 }
 
+static const char *audio_driver_string(unsigned index)
+{
+    return GB_audio_driver_name();
+}
+
+static void nop(index){}
+
 static const struct menu_item audio_menu[] = {
     {"Highpass Filter:", cycle_highpass_filter, highpass_filter_string, cycle_highpass_filter_backwards},
     {"Volume:", increase_volume, volume_string, decrease_volume},
     {"Interference Volume:", increase_interference_volume, interference_volume_string, decrease_interference_volume},
+    {"Audio Driver:", nop, audio_driver_string},
     {"Back", return_to_root_menu},
     {NULL,}
 };
