@@ -123,7 +123,7 @@ static void handle_buttons(GB_gameboy_t *gb)
 
 }
 
-static void vblank(GB_gameboy_t *gb)
+static void vblank(GB_gameboy_t *gb, GB_vblank_type_t type)
 {
     /* Detect common crashes and stop the test early */
     if (frames < test_length - 1) {

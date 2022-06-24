@@ -5,12 +5,18 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+typedef enum {
+    GB_VBLANK_TYPE_NORMAL_FRAME, // An actual Vblank-triggered frame
+    GB_VBLANK_TYPE_LCD_OFF, // An artificial frame pushed while the LCD was off
+    GB_VBLANK_TYPE_ARTIFICIAL, // An artificial frame pushed for some other reason
+} GB_vblank_type_t;
+
 #ifdef GB_INTERNAL
 internal void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force);
 internal void GB_palette_changed(GB_gameboy_t *gb, bool background_palette, uint8_t index);
 internal void GB_STAT_update(GB_gameboy_t *gb);
 internal void GB_lcd_off(GB_gameboy_t *gb);
-internal void GB_display_vblank(GB_gameboy_t *gb);
+internal void GB_display_vblank(GB_gameboy_t *gb, GB_vblank_type_t type);
 #define GB_display_sync(gb) GB_display_run(gb, 0, true)
 
 enum {

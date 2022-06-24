@@ -106,7 +106,7 @@ typedef struct __attribute__((packed)) {
     uint8_t flags;
 } object_t;
 
-void GB_display_vblank(GB_gameboy_t *gb)
+void GB_display_vblank(GB_gameboy_t *gb, GB_vblank_type_t type)
 {  
     gb->vblank_just_occured = true;
     gb->cycles_since_vblank_callback = 0;
@@ -211,7 +211,7 @@ void GB_display_vblank(GB_gameboy_t *gb)
     GB_handle_rumble(gb);
 
     if (gb->vblank_callback) {
-        gb->vblank_callback(gb);
+        gb->vblank_callback(gb, type);
     }
     GB_timing_sync(gb);
 }
@@ -1348,7 +1348,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
     /* The PPU does not advance while in STOP mode on the DMG */
     if (gb->stopped && !GB_is_cgb(gb)) {
         if (gb->cycles_since_vblank_callback >= LCDC_PERIOD) {
-            GB_display_vblank(gb);
+            GB_display_vblank(gb, GB_VBLANK_TYPE_ARTIFICIAL);
         }
         return;
     }
@@ -1402,7 +1402,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
             if (gb->cycles_since_vblank_callback < LCDC_PERIOD) {
                 GB_SLEEP(gb, display, 1, LCDC_PERIOD - gb->cycles_since_vblank_callback);
             }
-            GB_display_vblank(gb);
+            GB_display_vblank(gb, GB_VBLANK_TYPE_LCD_OFF);
             gb->cgb_repeated_a_frame = true;
         }
         return;
@@ -1889,7 +1889,7 @@ skip_slow_mode_3:
             // Todo: unverified timing
             gb->current_lcd_line++;
             if (gb->current_lcd_line == LINES && GB_is_sgb(gb)) {
-                GB_display_vblank(gb);
+                GB_display_vblank(gb, GB_VBLANK_TYPE_NORMAL_FRAME);
             }
             
             if (gb->icd_hreset_callback) {
@@ -1931,13 +1931,13 @@ skip_slow_mode_3:
                 
                 if (gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON) {
                     if (GB_is_cgb(gb)) {
-                        GB_display_vblank(gb);
+                        GB_display_vblank(gb, GB_VBLANK_TYPE_NORMAL_FRAME);
                         gb->frame_skip_state = GB_FRAMESKIP_FIRST_FRAME_SKIPPED;
                     }
                     else {
                         if (!GB_is_sgb(gb) || gb->current_lcd_line < LINES) {
                             gb->is_odd_frame ^= true;
-                            GB_display_vblank(gb);
+                            GB_display_vblank(gb, GB_VBLANK_TYPE_NORMAL_FRAME);
                         }
                         gb->frame_skip_state = GB_FRAMESKIP_SECOND_FRAME_RENDERED;
                     }
@@ -1945,7 +1945,7 @@ skip_slow_mode_3:
                 else {
                     if (!GB_is_sgb(gb) || gb->current_lcd_line < LINES) {
                         gb->is_odd_frame ^= true;
-                        GB_display_vblank(gb);
+                        GB_display_vblank(gb, GB_VBLANK_TYPE_NORMAL_FRAME);
                     }
                     if (gb->frame_skip_state == GB_FRAMESKIP_FIRST_FRAME_SKIPPED) {
                         gb->cgb_repeated_a_frame = true;

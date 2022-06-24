@@ -131,7 +131,7 @@ static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
     [self loadBootROM: type];
 }
 
-static void vblank(GB_gameboy_t *gb)
+static void vblank(GB_gameboy_t *gb, GB_vblank_type_t type)
 {
     Document *self = (__bridge Document *)GB_get_user_data(gb);
     [self vblank];

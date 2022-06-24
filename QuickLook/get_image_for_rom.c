@@ -25,7 +25,7 @@ static void log_callback(GB_gameboy_t *gb, const char *string, GB_log_attributes
 }
 
 
-static void vblank(GB_gameboy_t *gb)
+static void vblank(GB_gameboy_t *gb, GB_vblank_type_t type)
 {
 
     struct local_data *local_data = (struct local_data *)GB_get_user_data(gb);

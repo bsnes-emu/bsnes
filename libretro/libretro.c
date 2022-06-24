@@ -248,12 +248,12 @@ static void audio_callback(GB_gameboy_t *gb, GB_sample_t *sample)
     output_audio_buffer.data[output_audio_buffer.size++] = sample->right;
 }
 
-static void vblank1(GB_gameboy_t *gb)
+static void vblank1(GB_gameboy_t *gb, GB_vblank_type_t type)
 {
     vblank1_occurred = true;
 }
 
-static void vblank2(GB_gameboy_t *gb)
+static void vblank2(GB_gameboy_t *gb, GB_vblank_type_t type)
 {
     vblank2_occurred = true;
 }
