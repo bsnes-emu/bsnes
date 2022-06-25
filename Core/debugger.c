@@ -2001,7 +2001,7 @@ static const debugger_command_t commands[] = {
     {"lcd", 3, lcd, "Display information about the current state of the LCD controller"},
     {"palettes", 3, palettes, "Display the current CGB palettes"},
     {"dma", 3, dma, "Display the current OAM DMA status"},
-    {"softbreak", 2, softbreak, "Enable or disables software breakpoints", "(on|off)", .argument_completer = on_off_completer},
+    {"softbreak", 2, softbreak, "Enable or disable software breakpoints", "(on|off)", .argument_completer = on_off_completer},
     {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression" HELP_NEWLINE
                                   "Can also modify the condition of existing breakpoints." HELP_NEWLINE
                                   "If the j modifier is used, the breakpoint will occur just before" HELP_NEWLINE
