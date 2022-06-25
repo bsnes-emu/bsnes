@@ -1362,6 +1362,10 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 
 - (char *) getDebuggerInput
 {
+    bool isPlaying = _audioClient.isPlaying;
+    if (isPlaying) {
+        [_audioClient stop];
+    }
     [audioLock lock];
     [audioLock signal];
     [audioLock unlock];
@@ -1380,6 +1384,9 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
             [self.debuggerSideView setString:@""];
         }
     });
+    if (isPlaying) {
+        [_audioClient start];
+    }
     if ((id) input == [NSNull null]) {
         return NULL;
     }
