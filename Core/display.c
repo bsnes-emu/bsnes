@@ -473,7 +473,9 @@ static inline uint8_t oam_read(GB_gameboy_t *gb, uint8_t addr)
         if (gb->hdma_in_progress) {
             return GB_read_oam(gb, (gb->hdma_current_src & ~1) | (addr & 1));
         }
-        return gb->oam[((gb->dma_current_dest - 1 + (gb->halted || gb->stopped)) & ~1) | (addr & 1)];
+        if (gb->dma_current_dest != 0xA0) {
+            return gb->oam[(gb->dma_current_dest & ~1) | (addr & 1)];
+        }
     }
     return gb->oam[addr];
 }
