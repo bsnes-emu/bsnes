@@ -794,22 +794,6 @@ static bool finish(GB_gameboy_t *gb, char *arguments, char *modifiers, const deb
     return false;
 }
 
-static bool stack_leak_detection(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
-{
-    NO_MODIFIERS
-    STOPPED_ONLY
-
-    if (strlen(lstrip(arguments))) {
-        print_usage(gb, command);
-        return true;
-    }
-
-    gb->debug_stopped = false;
-    gb->stack_leak_detection = true;
-    gb->debug_call_depth = 0;
-    return false;
-}
-
 static bool registers(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
     NO_MODIFIERS
@@ -1986,12 +1970,35 @@ static const debugger_command_t commands[] = {
     {"step", 1, step, "Run the next instruction, stepping into function calls"},
     {"finish", 1, finish, "Run until the current function returns"},
     {"undo", 1, undo, "Revert the last command"},
+    {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"backtrace", 2, backtrace, "Display the current call stack"},
     {"bt", 2, }, /* Alias */
-    {"sld", 3, stack_leak_detection, "Like finish, but stops if a stack leak is detected"},
+    {"print", 1, print, "Evaluate and print an expression" HELP_NEWLINE
+        "Use modifier to format as an address (a, default) or as a number in" HELP_NEWLINE
+        "decimal (d), hexadecimal (x), octal (o) or binary (b).",
+        "<expression>", "format", .argument_completer = symbol_completer, .modifiers_completer = format_completer},
+    {"eval", 2, }, /* Alias */
+    {"examine", 2, examine, "Examine values at address", "<expression>", "count", .argument_completer = symbol_completer},
+    {"x", 1, }, /* Alias */
+    {"disassemble", 1, disassemble, "Disassemble instructions at address", "<expression>", "count", .argument_completer = symbol_completer},
+    {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression" HELP_NEWLINE
+        "Can also modify the condition of existing breakpoints." HELP_NEWLINE
+        "If the j modifier is used, the breakpoint will occur just before" HELP_NEWLINE
+        "jumping to the target.",
+        "<expression>[ if <condition expression>]", "j",
+        .argument_completer = symbol_completer, .modifiers_completer = j_completer},
+    {"delete", 2, delete, "Delete a breakpoint by its address, or all breakpoints", "[<expression>]", .argument_completer = symbol_completer},
+    {"watch", 1, watch, "Add a new watchpoint at the specified address/expression." HELP_NEWLINE
+        "Can also modify the condition and type of existing watchpoints." HELP_NEWLINE
+        "Default watchpoint type is write-only.",
+        "<expression>[ if <condition expression>]", "(r|w|rw)",
+        .argument_completer = symbol_completer, .modifiers_completer = rw_completer
+    },
+    {"unwatch", 3, unwatch, "Delete a watchpoint by its address, or all watchpoints", "[<expression>]", .argument_completer = symbol_completer},
+    {"softbreak", 2, softbreak, "Enable or disable software breakpoints", "(on|off)", .argument_completer = on_off_completer},
+    {"list", 1, list, "List all set breakpoints and watchpoints"},
     {"ticks", 2, ticks, "Display the number of CPU ticks since the last time 'ticks' was" HELP_NEWLINE
                         "used"},
-    {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"cartridge", 2, mbc, "Display information about the MBC and cartridge"},
     {"mbc", 3, }, /* Alias */
     {"apu", 3, apu, "Display information about the current state of the audio processing unit", "[channel (1-4, 5 for NR5x)]"},
@@ -2001,31 +2008,6 @@ static const debugger_command_t commands[] = {
     {"lcd", 3, lcd, "Display information about the current state of the LCD controller"},
     {"palettes", 3, palettes, "Display the current CGB palettes"},
     {"dma", 3, dma, "Display the current OAM DMA status"},
-    {"softbreak", 2, softbreak, "Enable or disable software breakpoints", "(on|off)", .argument_completer = on_off_completer},
-    {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression" HELP_NEWLINE
-                                  "Can also modify the condition of existing breakpoints." HELP_NEWLINE
-                                  "If the j modifier is used, the breakpoint will occur just before" HELP_NEWLINE
-                                  "jumping to the target.",
-                                  "<expression>[ if <condition expression>]", "j",
-                                  .argument_completer = symbol_completer, .modifiers_completer = j_completer},
-    {"delete", 2, delete, "Delete a breakpoint by its address, or all breakpoints", "[<expression>]", .argument_completer = symbol_completer},
-    {"watch", 1, watch, "Add a new watchpoint at the specified address/expression." HELP_NEWLINE
-                        "Can also modify the condition and type of existing watchpoints." HELP_NEWLINE
-                        "Default watchpoint type is write-only.",
-                        "<expression>[ if <condition expression>]", "(r|w|rw)",
-                        .argument_completer = symbol_completer, .modifiers_completer = rw_completer
-    },
-    {"unwatch", 3, unwatch, "Delete a watchpoint by its address, or all watchpoints", "[<expression>]", .argument_completer = symbol_completer},
-    {"list", 1, list, "List all set breakpoints and watchpoints"},
-    {"print", 1, print, "Evaluate and print an expression" HELP_NEWLINE
-                        "Use modifier to format as an address (a, default) or as a number in" HELP_NEWLINE
-                        "decimal (d), hexadecimal (x), octal (o) or binary (b).",
-                        "<expression>", "format", .argument_completer = symbol_completer, .modifiers_completer = format_completer},
-    {"eval", 2, }, /* Alias */
-    {"examine", 2, examine, "Examine values at address", "<expression>", "count", .argument_completer = symbol_completer},
-    {"x", 1, }, /* Alias */
-    {"disassemble", 1, disassemble, "Disassemble instructions at address", "<expression>", "count", .argument_completer = symbol_completer},
-
 
     {"help", 1, help, "List available commands or show help for the specified command", "[<command>]"},
     {NULL,}, /* Null terminator */
@@ -2093,19 +2075,7 @@ void GB_debugger_call_hook(GB_gameboy_t *gb, uint16_t call_addr)
 {
     /* Called just after the CPU calls a function/enters an interrupt/etc... */
 
-    if (gb->stack_leak_detection) {
-        if (gb->debug_call_depth >= sizeof(gb->sp_for_call_depth) / sizeof(gb->sp_for_call_depth[0])) {
-            GB_log(gb, "Potential stack overflow detected (Functions nest too much). \n");
-            gb->debug_stopped = true;
-        }
-        else {
-            gb->sp_for_call_depth[gb->debug_call_depth] = gb->sp;
-            gb->addr_for_call_depth[gb->debug_call_depth] = gb->pc;
-        }
-    }
-
     if (gb->backtrace_size < sizeof(gb->backtrace_sps) / sizeof(gb->backtrace_sps[0])) {
-
         while (gb->backtrace_size) {
             if (gb->backtrace_sps[gb->backtrace_size - 1] < gb->sp) {
                 gb->backtrace_size--;
@@ -2129,21 +2099,6 @@ void GB_debugger_ret_hook(GB_gameboy_t *gb)
     /* Called just before the CPU runs ret/reti */
 
     gb->debug_call_depth--;
-
-    if (gb->stack_leak_detection) {
-        if (gb->debug_call_depth < 0) {
-            GB_log(gb, "Function finished without a stack leak.\n");
-            gb->debug_stopped = true;
-        }
-        else {
-            if (gb->sp != gb->sp_for_call_depth[gb->debug_call_depth]) {
-                GB_log(gb, "Stack leak detected for function %s!\n", value_to_string(gb, gb->addr_for_call_depth[gb->debug_call_depth], true));
-                GB_log(gb, "SP is $%04x, should be $%04x.\n", gb->sp,
-                                                            gb->sp_for_call_depth[gb->debug_call_depth]);
-                gb->debug_stopped = true;
-            }
-        }
-    }
 
     while (gb->backtrace_size) {
         if (gb->backtrace_sps[gb->backtrace_size - 1] <= gb->sp) {
@@ -2445,7 +2400,6 @@ next_command:
     if (gb->debug_stopped && !gb->debug_disable) {
         gb->debug_next_command = false;
         gb->debug_fin_command = false;
-        gb->stack_leak_detection = false;
         input = gb->input_callback(gb);
 
         if (input == NULL) {

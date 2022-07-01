@@ -733,8 +733,6 @@ struct GB_gameboy_internal_s {
         void *nontrivial_jump_state;
         bool non_trivial_jump_breakpoint_occured;
 
-        /* SLD (Todo: merge with backtrace) */
-        bool stack_leak_detection;
         signed debug_call_depth;
         uint16_t sp_for_call_depth[0x200]; /* Should be much more than enough */
         uint16_t addr_for_call_depth[0x200];
