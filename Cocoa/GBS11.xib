@@ -44,9 +44,9 @@
                     </textFieldCell>
                 </textField>
                 <button focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qxJ-pH-d0y">
-                    <rect key="frame" x="63.5" y="128" width="38" height="23"/>
+                    <rect key="frame" x="57" y="124" width="50" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="roundTextured" bezelStyle="texturedRounded" image="Play" imagePosition="only" alignment="center" alternateImage="Pause" state="on" borderStyle="border" focusRingType="none" inset="2" id="3ZK-br-UrS">
+                    <buttonCell key="cell" type="push" bezelStyle="rounded" image="Play" imagePosition="only" alignment="center" alternateImage="Pause" state="on" borderStyle="border" focusRingType="none" inset="2" id="3ZK-br-UrS">
                         <behavior key="behavior" pushIn="YES" changeContents="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
@@ -54,10 +54,22 @@
                         <action selector="togglePause:" target="-2" id="AUe-I7-nOK"/>
                     </connections>
                 </button>
-                <segmentedControl verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SRS-M5-VVL">
-                    <rect key="frame" x="244.5" y="128" width="68" height="23"/>
+                <popUpButton focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="I1T-VS-Vse">
+                    <rect key="frame" x="105" y="127" width="141" height="25"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <segmentedCell key="cell" borderStyle="border" alignment="left" style="texturedRounded" trackingMode="momentary" id="cmq-I8-cFL">
+                    <popUpButtonCell key="cell" type="roundTextured" bezelStyle="texturedRounded" alignment="center" lineBreakMode="truncatingTail" borderStyle="border" focusRingType="none" imageScaling="proportionallyDown" inset="2" id="YJh-dI-A5D">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" id="Knp-Ok-Pb4"/>
+                    </popUpButtonCell>
+                    <connections>
+                        <action selector="changeGBSTrack:" target="-2" id="HET-AT-CfQ"/>
+                    </connections>
+                </popUpButton>
+                <segmentedControl verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="SRS-M5-VVL">
+                    <rect key="frame" x="247" y="129" width="68" height="24"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <segmentedCell key="cell" borderStyle="border" alignment="left" style="rounded" trackingMode="momentary" id="cmq-I8-cFL">
                         <font key="font" metaFont="system"/>
                         <segments>
                             <segment toolTip="Previous Track" image="Previous" width="31"/>
@@ -92,9 +104,9 @@
                     </textFieldCell>
                 </textField>
                 <button focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0yD-Sp-Ilo">
-                    <rect key="frame" x="20.5" y="128" width="38" height="23"/>
+                    <rect key="frame" x="13" y="124" width="50" height="32"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <buttonCell key="cell" type="roundTextured" bezelStyle="texturedRounded" image="Rewind" imagePosition="only" alignment="center" state="on" borderStyle="border" focusRingType="none" inset="2" id="ZIF-TP-Fqn">
+                    <buttonCell key="cell" type="push" bezelStyle="rounded" image="Rewind" imagePosition="only" alignment="center" state="on" borderStyle="border" focusRingType="none" inset="2" id="ZIF-TP-Fqn">
                         <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
@@ -102,18 +114,6 @@
                         <action selector="changeGBSTrack:" target="-2" id="jug-AS-bW7"/>
                     </connections>
                 </button>
-                <popUpButton focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="I1T-VS-Vse">
-                    <rect key="frame" x="107" y="127" width="131" height="25"/>
-                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                    <popUpButtonCell key="cell" type="roundTextured" bezelStyle="texturedRounded" alignment="center" lineBreakMode="truncatingTail" borderStyle="border" focusRingType="none" imageScaling="proportionallyDown" inset="2" id="YJh-dI-A5D">
-                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
-                        <font key="font" metaFont="menu"/>
-                        <menu key="menu" id="Knp-Ok-Pb4"/>
-                    </popUpButtonCell>
-                    <connections>
-                        <action selector="changeGBSTrack:" target="-2" id="HET-AT-CfQ"/>
-                    </connections>
-                </popUpButton>
             </subviews>
             <point key="canvasLocation" x="67" y="292.5"/>
         </customView>
