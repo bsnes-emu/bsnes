@@ -44,6 +44,9 @@ const GB_bank_symbol_t *GB_map_find_symbol(GB_symbol_map_t *map, uint16_t addr)
         index--;
     }
     if (index < map->n_symbols) {
+        while (index && map->symbols[index].addr == map->symbols[index - 1].addr) {
+            index--;
+        }
         return &map->symbols[index];
     }
     return NULL;
