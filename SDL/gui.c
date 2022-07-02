@@ -113,6 +113,7 @@ configuration_t configuration =
     .rumble_mode = GB_RUMBLE_ALL_GAMES,
     .default_scale = 2,
     .color_temperature = 10,
+    .cgb_revision = GB_MODEL_CGB_E - GB_MODEL_CGB_0,
 };
 
 
@@ -397,6 +398,38 @@ const char *current_model_string(unsigned index)
         [configuration.model];
 }
 
+static void cycle_cgb_revision(unsigned index)
+{
+    
+    configuration.cgb_revision++;
+    if (configuration.cgb_revision == GB_MODEL_CGB_E - GB_MODEL_CGB_0) {
+        configuration.cgb_revision = 0;
+    }
+    pending_command = GB_SDL_RESET_COMMAND;
+}
+
+static void cycle_cgb_revision_backwards(unsigned index)
+{
+    if (configuration.cgb_revision == 0) {
+        configuration.cgb_revision = GB_MODEL_CGB_E - GB_MODEL_CGB_0;
+    }
+    configuration.cgb_revision--;
+    pending_command = GB_SDL_RESET_COMMAND;
+}
+
+const char *current_cgb_revision_string(unsigned index)
+{
+    return (const char *[]){
+        "CPU CGB 0 (Exp.)",
+        "CPU CGB A (Exp.)",
+        "CPU CGB B (Exp.)",
+        "CPU CGB C (Exp.)",
+        "CPU CGB D",
+        "CPU CGB E",
+    }
+    [configuration.cgb_revision];
+}
+
 static void cycle_sgb_revision(unsigned index)
 {
     
@@ -524,6 +557,7 @@ const char *current_rtc_mode_string(unsigned index)
 
 static const struct menu_item emulation_menu[] = {
     {"Emulated Model:", cycle_model, current_model_string, cycle_model_backwards},
+    {"GBC Revision:", cycle_cgb_revision, current_cgb_revision_string, cycle_cgb_revision_backwards},
     {"SGB Revision:", cycle_sgb_revision, current_sgb_revision_string, cycle_sgb_revision_backwards},
     {"Boot ROMs Folder:", toggle_bootrom, current_bootrom_string, toggle_bootrom},
     {"Rewind Length:", cycle_rewind, current_rewind_string, cycle_rewind_backwards},

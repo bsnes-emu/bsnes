@@ -123,9 +123,14 @@ typedef struct {
     
     /* v0.14.4 */
     bool osd;
-    
+
+    struct __attribute__((packed, aligned(4))) {
+        
     /* v0.15 */
     bool allow_mouse_controls;
+    uint8_t cgb_revision;
+        
+    };
 } configuration_t;
 
 extern configuration_t configuration;

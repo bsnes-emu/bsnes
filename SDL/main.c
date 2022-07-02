@@ -649,7 +649,7 @@ restart:
     model = (GB_model_t [])
     {
         [MODEL_DMG] = GB_MODEL_DMG_B,
-        [MODEL_CGB] = GB_MODEL_CGB_E,
+        [MODEL_CGB] = GB_MODEL_CGB_0 + configuration.cgb_revision,
         [MODEL_AGB] = GB_MODEL_AGB_A,
         [MODEL_MGB] = GB_MODEL_MGB,
         [MODEL_SGB] = (GB_model_t [])
@@ -857,7 +857,7 @@ int main(int argc, char **argv)
         fclose(prefs_file);
         
         /* Sanitize for stability */
-        configuration.color_correction_mode %= GB_COLOR_CORRECTION_LOW_CONTRAST +1;
+        configuration.color_correction_mode %= GB_COLOR_CORRECTION_LOW_CONTRAST + 1;
         configuration.scaling_mode %= GB_SDL_SCALING_MAX;
         configuration.default_scale %= GB_SDL_DEFAULT_SCALE_MAX + 1;
         configuration.blending_mode %= GB_FRAME_BLENDING_MODE_ACCURATE + 1;
@@ -869,6 +869,7 @@ int main(int argc, char **argv)
         configuration.rumble_mode %= GB_RUMBLE_ALL_GAMES + 1;
         configuration.color_temperature %= 21;
         configuration.bootrom_path[sizeof(configuration.bootrom_path) - 1] = 0;
+        configuration.cgb_revision %= GB_MODEL_CGB_E - GB_MODEL_CGB_0 + 1;
     }
     
     if (configuration.model >= MODEL_MAX) {
