@@ -107,10 +107,10 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
             if (gb->mmm01.locked) {
                 if (gb->mmm01.multiplex_mode) {
                     gb->mbc_rom0_bank = (gb->mmm01.rom_bank_low & (gb->mmm01.rom_bank_mask << 1)) |
-                        ((gb->mmm01.rom_bank_low & (gb->mmm01.mbc1_mode? -1 : gb->mmm01.ram_bank_mask)) << 5) |
+                    ((gb->mmm01.mbc1_mode? 0 : gb->mmm01.ram_bank_low) << 5) |
                         (gb->mmm01.rom_bank_high << 7);
                     gb->mbc_rom_bank = gb->mmm01.rom_bank_low |
-                        (gb->mmm01.rom_bank_low << 5) |
+                        (gb->mmm01.ram_bank_low << 5) |
                         (gb->mmm01.rom_bank_high << 7);
                     gb->mbc_ram_bank = gb->mmm01.rom_bank_mid | (gb->mmm01.ram_bank_high << 2);
                 }
@@ -125,7 +125,7 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
                         gb->mbc_ram_bank = gb->mmm01.ram_bank_low | (gb->mmm01.ram_bank_high << 2);
                     }
                     else {
-                        gb->mbc_ram_bank = (gb->mmm01.ram_bank_low & gb->mmm01.ram_bank_mask) | (gb->mmm01.ram_bank_high << 2);
+                        gb->mbc_ram_bank = gb->mmm01.ram_bank_low | (gb->mmm01.ram_bank_high << 2);
                     }
                 }
                 if (gb->mbc_rom_bank == gb->mbc_rom0_bank) {
@@ -256,6 +256,7 @@ void GB_reset_mbc(GB_gameboy_t *gb)
     if (gb->cartridge_type->mbc_type == GB_MMM01) {
         gb->mbc_rom_bank = -1;
         gb->mbc_rom0_bank = -2;
+        gb->mmm01.ram_bank_mask = -1;
     }
     else if (gb->cartridge_type->mbc_type == GB_MBC5 ||
              gb->cartridge_type->mbc_type == GB_CAMERA) {
