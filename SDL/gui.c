@@ -401,9 +401,11 @@ const char *current_model_string(unsigned index)
 static void cycle_cgb_revision(unsigned index)
 {
     
-    configuration.cgb_revision++;
     if (configuration.cgb_revision == GB_MODEL_CGB_E - GB_MODEL_CGB_0) {
         configuration.cgb_revision = 0;
+    }
+    else {
+        configuration.cgb_revision++;
     }
     pending_command = GB_SDL_RESET_COMMAND;
 }
@@ -413,7 +415,9 @@ static void cycle_cgb_revision_backwards(unsigned index)
     if (configuration.cgb_revision == 0) {
         configuration.cgb_revision = GB_MODEL_CGB_E - GB_MODEL_CGB_0;
     }
-    configuration.cgb_revision--;
+    else {
+        configuration.cgb_revision--;
+    }
     pending_command = GB_SDL_RESET_COMMAND;
 }
 
