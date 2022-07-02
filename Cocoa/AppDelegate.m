@@ -35,6 +35,9 @@ static uint32_t color_to_int(NSColor *color)
 
 - (void) applicationDidFinishLaunching:(NSNotification *)notification
 {
+    // Refresh icon if launched via a software update
+    [NSApplication sharedApplication].applicationIconImage = [NSImage imageNamed:@"AppIcon"];
+    
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     for (unsigned i = 0; i < GBButtonCount; i++) {
         if ([[defaults objectForKey:button_to_preference_name(i, 0)] isKindOfClass:[NSString class]]) {
