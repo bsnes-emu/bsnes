@@ -177,9 +177,11 @@ CFLAGS += -g
 else ifeq ($(CONF), release)
 CFLAGS += -O3 -DNDEBUG
 STRIP := strip
+CODESIGN := true
 ifeq ($(PLATFORM),Darwin)
 LDFLAGS += -Wl,-exported_symbols_list,$(NULL)
 STRIP := strip -x
+CODESIGN := codesign -fs -
 endif
 ifeq ($(PLATFORM),windows32)
 LDFLAGS +=  -fuse-ld=lld
@@ -302,7 +304,7 @@ $(BIN)/SameBoy.app: $(BIN)/SameBoy.app/Contents/MacOS/SameBoy \
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Library/QuickLook/
 	cp -rf $(BIN)/SameBoy.qlgenerator $(BIN)/SameBoy.app/Contents/Library/QuickLook/
 ifeq ($(CONF), release)
-	codesign -fs - $@
+	$(CODESIGN) $@
 endif
 
 $(BIN)/SameBoy.app/Contents/MacOS/SameBoy: $(CORE_OBJECTS) $(COCOA_OBJECTS)
@@ -324,12 +326,18 @@ $(BIN)/SameBoy.qlgenerator: $(BIN)/SameBoy.qlgenerator/Contents/MacOS/SameBoyQL 
 	$(MKDIR) -p $(BIN)/SameBoy.qlgenerator/Contents/Resources
 	cp QuickLook/*.png $(BIN)/SameBoy.qlgenerator/Contents/Resources/
 	sed s/@VERSION/$(VERSION)/ < QuickLook/Info.plist > $(BIN)/SameBoy.qlgenerator/Contents/Info.plist
+ifeq ($(CONF), release)
+	$(CODESIGN) $@
+endif
 
 # Currently, SameBoy.app includes two "copies" of each Core .o file once in the app itself and
 # once in the QL Generator. It should probably become a dylib instead.
 $(BIN)/SameBoy.qlgenerator/Contents/MacOS/SameBoyQL: $(CORE_OBJECTS) $(QUICKLOOK_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) $(FAT_FLAGS) -Wl,-exported_symbols_list,QuickLook/exports.sym -bundle -framework Cocoa -framework Quicklook
+ifeq ($(CONF), release)
+	$(STRIP) $@
+endif
 
 # cgb_boot_fast.bin is not a standard boot ROM, we don't expect it to exist in the user-provided
 # boot ROM directory.
@@ -345,6 +353,7 @@ $(BIN)/SDL/sameboy: $(CORE_OBJECTS) $(SDL_OBJECTS)
 	$(CC) $^ -o $@ $(LDFLAGS) $(FAT_FLAGS) $(SDL_LDFLAGS) $(GL_LDFLAGS)
 ifeq ($(CONF), release)
 	$(STRIP) $@
+	$(CODESIGN) $@
 endif
 
 # Windows version builds two, one with a conole and one without it
@@ -381,6 +390,7 @@ $(BIN)/tester/sameboy_tester: $(CORE_OBJECTS) $(TESTER_OBJECTS)
 	$(CC) $^ -o $@ $(LDFLAGS)
 ifeq ($(CONF), release)
 	$(STRIP) $@
+	$(CODESIGN) $@
 endif
 
 $(BIN)/tester/sameboy_tester.exe: $(CORE_OBJECTS) $(SDL_OBJECTS)
@@ -472,15 +482,15 @@ endif
 $(DESTDIR)$(PREFIX)/share/icons/hicolor/%/apps/sameboy.png: FreeDesktop/AppIcon/%.png
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
-    
+
 $(DESTDIR)$(PREFIX)/share/icons/hicolor/%/mimetypes/x-gameboy-rom.png: FreeDesktop/Cartridge/%.png
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
-    
+
 $(DESTDIR)$(PREFIX)/share/icons/hicolor/%/mimetypes/x-gameboy-color-rom.png: FreeDesktop/ColorCartridge/%.png
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
-        
+
 $(DESTDIR)$(PREFIX)/share/mime/packages/sameboy.xml: FreeDesktop/sameboy.xml
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
