@@ -38,7 +38,7 @@ static inline HRESULT XAudio2Create(IXAudio2 **ppXAudio2,
     if (SUCCEEDED(hr)) {
         *ppXAudio2 = pXAudio2;
     }
-    else {
+    else if (pXAudio2) {
         pXAudio2->lpVtbl->Release(pXAudio2);
     }
     return hr;
