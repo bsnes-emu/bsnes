@@ -1,8 +1,10 @@
+#define COBJMACROS
 #include "audio.h"
 #include <Windows.h>
 #include <xaudio2.h>
+#include <Mmdeviceapi.h>
 
-#define AUDIO_FREQUENCY 96000
+static unsigned audio_frequency = 48000;
 static IXAudio2 *xaudio2 = NULL;
 static IXAudio2MasteringVoice *master_voice = NULL;
 static IXAudio2SourceVoice *source_voice = NULL;
@@ -12,11 +14,9 @@ static unsigned pos = 0;
 
 #define BATCH_SIZE 256
 
-static const WAVEFORMATEX wave_format = {
+static WAVEFORMATEX wave_format = {
     .wFormatTag = WAVE_FORMAT_PCM,
     .nChannels = 2,
-    .nSamplesPerSec = AUDIO_FREQUENCY,
-    .nAvgBytesPerSec = AUDIO_FREQUENCY * 4,
     .nBlockAlign = 4,
     .wBitsPerSample = 16,
     .cbSize = 0
@@ -47,9 +47,45 @@ static void _audio_set_paused(bool paused)
     
 }
 
+
+#define _DEFINE_PROPERTYKEY(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8, pid) static const PROPERTYKEY name = { { l, w1, w2, { b1, b2,  b3,  b4,  b5,  b6,  b7,  b8 } }, pid }
+_DEFINE_PROPERTYKEY(_PKEY_AudioEngine_DeviceFormat, 0xf19f064d, 0x82c, 0x4e27, 0xbc, 0x73, 0x68, 0x82, 0xa1, 0xbb, 0x8e, 0x4c, 0);
+
+
+static void update_frequency(void)
+{
+    HRESULT hr;
+    IMMDevice  *device = NULL;
+    IMMDeviceEnumerator *enumerator = NULL;
+    IPropertyStore *store = NULL;
+    PWAVEFORMATEX deviceFormatProperties;
+    PROPVARIANT prop;
+    
+    hr = CoCreateInstance(&CLSID_MMDeviceEnumerator, NULL, CLSCTX_ALL, &IID_IMMDeviceEnumerator, (LPVOID *)&enumerator);
+    if (FAILED(hr)) return;
+    
+    // get default audio endpoint
+    
+    hr = IMMDeviceEnumerator_GetDefaultAudioEndpoint(enumerator, eRender, eMultimedia, &device);
+    if (FAILED(hr)) return;
+    
+    hr = IMMDevice_OpenPropertyStore(device, STGM_READ, &store);
+    if (FAILED(hr)) return;
+    
+    hr = IPropertyStore_GetValue(store, &_PKEY_AudioEngine_DeviceFormat, &prop);
+    if (FAILED(hr)) return;
+    
+    deviceFormatProperties = (PWAVEFORMATEX)prop.blob.pBlobData;
+    audio_frequency = deviceFormatProperties->nSamplesPerSec;
+    if (audio_frequency < 8000 || audio_frequency > 192000) {
+        // Bogus value, revert to 48KHz
+        audio_frequency = 48000;
+    }
+}
+
 static unsigned _audio_get_frequency(void)
 {
-    return AUDIO_FREQUENCY;
+    return audio_frequency;
 }
 
 static size_t _audio_get_queue_length(void)
@@ -88,9 +124,11 @@ static bool _audio_init(void)
         return false;
     }
     
+    update_frequency();
+    
     hr = IXAudio2_CreateMasteringVoice(xaudio2, &master_voice,
                                        2, // 2 channels
-                                       AUDIO_FREQUENCY,
+                                       audio_frequency,
                                        0, // Flags
                                        0, // Device index
                                        NULL, // Effect chain
@@ -101,6 +139,8 @@ static bool _audio_init(void)
         return false;
     }
     
+    wave_format.nSamplesPerSec = audio_frequency;
+    wave_format.nAvgBytesPerSec = audio_frequency * 4;
     hr = IXAudio2_CreateSourceVoice(xaudio2, &source_voice, &wave_format, 0, XAUDIO2_DEFAULT_FREQ_RATIO, NULL, NULL, NULL);
     
     if (FAILED(hr)) {
