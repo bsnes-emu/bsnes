@@ -870,6 +870,7 @@ int main(int argc, char **argv)
         configuration.color_temperature %= 21;
         configuration.bootrom_path[sizeof(configuration.bootrom_path) - 1] = 0;
         configuration.cgb_revision %= GB_MODEL_CGB_E - GB_MODEL_CGB_0 + 1;
+        configuration.audio_driver[15] = 0;
     }
     
     if (configuration.model >= MODEL_MAX) {

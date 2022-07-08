@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <Core/gb.h>
 #include "audio/audio.h"
+#include "configuration.h"
 
 #define unlikely(x) __builtin_expect((bool)(x), 0)
 
@@ -17,6 +18,18 @@ bool GB_audio_init(void)
         GB_AUDIO_DRIVER_REF(SDL),
     };
     
+    // First try the preferred driver
+    for (unsigned i = 0; i < sizeof(drivers) / sizeof(drivers[0]); i++) {
+        driver = drivers[i];
+        if (strcmp(driver->name, configuration.audio_driver) != 0) {
+            continue;
+        }
+        if (driver->audio_init()) {
+            return true;
+        }
+    }
+    
+    // Else go by priority
     for (unsigned i = 0; i < sizeof(drivers) / sizeof(drivers[0]); i++) {
         driver = drivers[i];
         if (driver->audio_init()) {
@@ -68,4 +81,19 @@ const char *GB_audio_driver_name(void)
 {
     if (unlikely(!driver)) return "None";
     return driver->name;
+}
+
+const char *GB_audio_driver_name_at_index(unsigned index)
+{
+    const GB_audio_driver_t *drivers[] = {
+#ifdef _WIN32
+        GB_AUDIO_DRIVER_REF(XAudio2),
+        GB_AUDIO_DRIVER_REF(XAudio2_7),
+#endif
+        GB_AUDIO_DRIVER_REF(SDL),
+    };
+    if (index >= sizeof(drivers) / sizeof(drivers[0])) {
+        return "";
+    }
+    return drivers[index]->name;
 }

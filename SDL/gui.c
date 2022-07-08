@@ -68,55 +68,6 @@ void render_texture(void *pixels,  void *previous)
     }
 }
 
-configuration_t configuration =
-{
-    .keys = {
-        SDL_SCANCODE_RIGHT,
-        SDL_SCANCODE_LEFT,
-        SDL_SCANCODE_UP,
-        SDL_SCANCODE_DOWN,
-        SDL_SCANCODE_X,
-        SDL_SCANCODE_Z,
-        SDL_SCANCODE_BACKSPACE,
-        SDL_SCANCODE_RETURN,
-        SDL_SCANCODE_SPACE
-    },
-    .keys_2 = {
-        SDL_SCANCODE_TAB,
-        SDL_SCANCODE_LSHIFT,
-    },
-    .joypad_configuration = {
-        13,
-        14,
-        11,
-        12,
-        0,
-        1,
-        9,
-        8,
-        10,
-        4,
-        -1,
-        5,
-    },
-    .joypad_axises = {
-        0,
-        1,
-    },
-    .color_correction_mode = GB_COLOR_CORRECTION_EMULATE_HARDWARE,
-    .highpass_mode = GB_HIGHPASS_ACCURATE,
-    .scaling_mode = GB_SDL_SCALING_INTEGER_FACTOR,
-    .blending_mode = GB_FRAME_BLENDING_MODE_ACCURATE,
-    .rewind_length = 60 * 2,
-    .model = MODEL_CGB,
-    .volume = 100,
-    .rumble_mode = GB_RUMBLE_ALL_GAMES,
-    .default_scale = 2,
-    .color_temperature = 10,
-    .cgb_revision = GB_MODEL_CGB_E - GB_MODEL_CGB_0,
-};
-
-
 static const char *help[] = {
 "Drop a ROM to play.\n"
 "\n"
@@ -961,16 +912,85 @@ static const char *audio_driver_string(unsigned index)
     return GB_audio_driver_name();
 }
 
+static const char *preferred_audio_driver_string(unsigned index)
+{
+    if (configuration.audio_driver[0] == 0) {
+        return "Auto";
+    }
+    return configuration.audio_driver;
+}
+
+static void audio_driver_changed(void);
+
+static void cycle_prefrered_audio_driver(unsigned index)
+{
+    audio_driver_changed();
+    if (configuration.audio_driver[0] == 0) {
+        strcpy(configuration.audio_driver, GB_audio_driver_name_at_index(0));
+        return;
+    }
+    unsigned i = 0;
+    while (true) {
+        const char *name = GB_audio_driver_name_at_index(i);
+        if (name[0] == 0) { // Not a supported driver? Switch to auto
+            configuration.audio_driver[0] = 0;
+            return;
+        }
+        if (strcmp(configuration.audio_driver, name) == 0) {
+            strcpy(configuration.audio_driver, GB_audio_driver_name_at_index(i + 1));
+            return;
+        }
+        i++;
+    }
+}
+
+static void cycle_preferred_audio_driver_backwards(unsigned index)
+{
+    audio_driver_changed();
+    if (configuration.audio_driver[0] == 0) {
+        unsigned i = 0;
+        while (true) {
+            const char *name = GB_audio_driver_name_at_index(i);
+            if (name[0] == 0) {
+                strcpy(configuration.audio_driver, GB_audio_driver_name_at_index(i - 1));
+                return;
+            }
+            i++;
+        }
+        return;
+    }
+    unsigned i = 0;
+    while (true) {
+        const char *name = GB_audio_driver_name_at_index(i);
+        if (name[0] == 0) { // Not a supported driver? Switch to auto
+            configuration.audio_driver[0] = 0;
+            return;
+        }
+        if (strcmp(configuration.audio_driver, name) == 0) {
+            strcpy(configuration.audio_driver, GB_audio_driver_name_at_index(i - 1));
+            return;
+        }
+        i++;
+    }
+}
+
 static void nop(unsigned index){}
 
-static const struct menu_item audio_menu[] = {
+static struct menu_item audio_menu[] = {
     {"Highpass Filter:", cycle_highpass_filter, highpass_filter_string, cycle_highpass_filter_backwards},
     {"Volume:", increase_volume, volume_string, decrease_volume},
     {"Interference Volume:", increase_interference_volume, interference_volume_string, decrease_interference_volume},
-    {"Audio Driver:", nop, audio_driver_string},
+    {"Preferred Audio Driver:", cycle_prefrered_audio_driver, preferred_audio_driver_string, cycle_preferred_audio_driver_backwards},
+    {"Active Driver:", nop, audio_driver_string},
     {"Back", return_to_root_menu},
     {NULL,}
 };
+
+static void audio_driver_changed(void)
+{
+    audio_menu[4].value_getter = NULL;
+    audio_menu[4].string = "Relaunch to apply";
+}
 
 static void enter_audio_menu(unsigned index)
 {

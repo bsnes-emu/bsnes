@@ -13,6 +13,7 @@ size_t GB_audio_get_queue_length(void);
 void GB_audio_queue_sample(GB_sample_t *sample);
 bool GB_audio_init(void);
 const char *GB_audio_driver_name(void);
+const char *GB_audio_driver_name_at_index(unsigned index);
 
 typedef struct {
     typeof(GB_audio_is_playing) *audio_is_playing;
