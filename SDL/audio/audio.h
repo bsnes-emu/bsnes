@@ -12,6 +12,7 @@ unsigned GB_audio_get_frequency(void);
 size_t GB_audio_get_queue_length(void);
 void GB_audio_queue_sample(GB_sample_t *sample);
 bool GB_audio_init(void);
+void GB_audio_deinit(void);
 const char *GB_audio_driver_name(void);
 const char *GB_audio_driver_name_at_index(unsigned index);
 
@@ -23,6 +24,7 @@ typedef struct {
     typeof(GB_audio_get_queue_length) *audio_get_queue_length;
     typeof(GB_audio_queue_sample) *audio_queue_sample;
     typeof(GB_audio_init) *audio_init;
+    typeof(GB_audio_deinit) *audio_deinit;
     const char *name;
 } GB_audio_driver_t;
 
@@ -34,6 +36,7 @@ typedef struct {
     .audio_get_queue_length = _audio_get_queue_length, \
     .audio_queue_sample = _audio_queue_sample, \
     .audio_init = _audio_init, \
+    .audio_deinit = _audio_deinit, \
     .name = #_name, \
 }
 

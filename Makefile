@@ -24,6 +24,12 @@ NATIVE_CC := cc
 SDL_AUDIO_DRIVERS ?= sdl
 endif
 
+ifneq ($(ENABLE_OPENAL),)
+CFLAGS += -DENABLE_OPENAL
+LDFLAGS += -lopenal
+SDL_AUDIO_DRIVERS += openal
+endif
+
 PB12_COMPRESS := build/pb12$(EXESUFFIX)
 
 ifeq ($(PLATFORM),Darwin)
