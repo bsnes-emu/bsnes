@@ -17,11 +17,11 @@ static unsigned buffer_pos = 0;
 
 #define AL_ERR_STRINGIFY(x) #x
 #define AL_ERR_TOSTRING(x) AL_ERR_STRINGIFY(x)
-#define AL_ERROR(msg) check_al_error(msg, __FILE__ ":" AL_ERR_TOSTRING(__LINE__))
+#define AL_ERROR(msg) check_al_error(msg, AL_ERR_TOSTRING(__LINE__))
 
 // Check if the previous OpenAL call returned an error.
 // If an error occurred a message will be logged to stderr.
-bool check_al_error(const char *user_msg, const char *file) {
+bool check_al_error(const char *user_msg, const char *line) {
     ALCenum error = alGetError();
     char *description;
 
@@ -46,10 +46,10 @@ bool check_al_error(const char *user_msg, const char *file) {
     }
 
     if (user_msg != NULL) {
-        fprintf(stderr, "[%s] %s: %s\n", file, user_msg, description);
+        fprintf(stderr, "[OpenAL:%s] %s: %s\n", line, user_msg, description);
     }
     else {
-        fprintf(stderr, "[%s] %s\n", file, description);
+        fprintf(stderr, "[OpenAL:%s] %s\n", line, description);
     }
 
     return true;
