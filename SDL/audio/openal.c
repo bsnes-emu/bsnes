@@ -119,17 +119,6 @@ static bool _audio_is_playing(void)
     return state == AL_PLAYING;
 }
 
-static void _audio_clear_queue(void)
-{
-    alSourceStop(al_source);
-    if (AL_ERROR(NULL)) {
-        _audio_deinit();
-        return;
-    }
-
-    free_processed_buffers();
-}
-
 static void _audio_set_paused(bool paused)
 {
     if (paused) {
@@ -141,6 +130,25 @@ static void _audio_set_paused(bool paused)
 
     if (AL_ERROR(NULL)) {
         _audio_deinit();
+    }
+}
+
+static void _audio_clear_queue(void)
+{
+    bool is_playing = _audio_is_playing();
+
+    // Stopping a source clears its queue
+    alSourceStop(al_source);
+    if (AL_ERROR(NULL)) {
+        _audio_deinit();
+        return;
+    }
+
+    free_processed_buffers();
+    buffer_pos = 0;
+
+    if (is_playing) {
+        _audio_set_paused(false);
     }
 }
 
