@@ -59,13 +59,16 @@ static void _audio_deinit(void) {
     // Stop the source (this should mark all queued buffers as processed)
     alSourceStop(al_source);
 
-    // Free the processed buffers while ignoring potential errors
+    // Check if there are buffers that can be freed
     ALint processed;
     alGetSourcei(al_source, AL_BUFFERS_PROCESSED, &processed);
-    while (processed--) {
-        ALuint buffer;
-        alSourceUnqueueBuffers(al_source, 1, &buffer);
-        alDeleteBuffers(1, &buffer);
+    if (!AL_ERROR("Failed to query number of processed buffers")) {
+        // Try to free the buffers, we do not care about potential errors here
+        while (processed--) {
+            ALuint buffer;
+            alSourceUnqueueBuffers(al_source, 1, &buffer);
+            alDeleteBuffers(1, &buffer);
+        }
     }
 
     alDeleteSources(1, &al_source);
