@@ -21,7 +21,7 @@ static unsigned buffer_pos = 0;
 
 // Check if the previous OpenAL call returned an error.
 // If an error occurred a message will be logged to stderr.
-bool check_al_error(const char *user_msg, const char *line) {
+static bool check_al_error(const char *user_msg, const char *line) {
     ALCenum error = alGetError();
     char *description;
 
