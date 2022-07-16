@@ -95,6 +95,8 @@ typedef struct {
         uint8_t cgb_revision;
         /* v0.15.1 */
         char audio_driver[16];
+        /* v0.15.2 */
+        bool allow_background_controllers;
     };
 } configuration_t;
 

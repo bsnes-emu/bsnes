@@ -299,7 +299,7 @@ static void recalculate_menu_height(void)
     }
 }
 
-char audio_recording_menu_item[] = "Start Audio Recording";
+static char audio_recording_menu_item[] = "Start Audio Recording";
 
 static const struct menu_item paused_menu[] = {
     {"Resume", NULL},
@@ -343,7 +343,7 @@ static void cycle_model_backwards(unsigned index)
     pending_command = GB_SDL_RESET_COMMAND;
 }
 
-const char *current_model_string(unsigned index)
+static const char *current_model_string(unsigned index)
 {
     return (const char *[]){"Game Boy", "Game Boy Color", "Game Boy Advance", "Super Game Boy", "Game Boy Pocket"}
         [configuration.model];
@@ -372,7 +372,7 @@ static void cycle_cgb_revision_backwards(unsigned index)
     pending_command = GB_SDL_RESET_COMMAND;
 }
 
-const char *current_cgb_revision_string(unsigned index)
+static const char *current_cgb_revision_string(unsigned index)
 {
     return (const char *[]){
         "CPU CGB 0 (Exp.)",
@@ -404,7 +404,7 @@ static void cycle_sgb_revision_backwards(unsigned index)
     pending_command = GB_SDL_RESET_COMMAND;
 }
 
-const char *current_sgb_revision_string(unsigned index)
+static const char *current_sgb_revision_string(unsigned index)
 {
     return (const char *[]){"Super Game Boy NTSC", "Super Game Boy PAL", "Super Game Boy 2"}
     [configuration.sgb_revision];
@@ -446,7 +446,7 @@ static void cycle_rewind_backwards(unsigned index)
     GB_set_rewind_length(&gb, configuration.rewind_length);
 }
 
-const char *current_rewind_string(unsigned index)
+static const char *current_rewind_string(unsigned index)
 {
     for (unsigned i = 0; i < sizeof(rewind_lengths) / sizeof(rewind_lengths[0]); i++) {
         if (configuration.rewind_length == rewind_lengths[i]) {
@@ -456,7 +456,7 @@ const char *current_rewind_string(unsigned index)
     return "Custom";
 }
 
-const char *current_bootrom_string(unsigned index)
+static const char *current_bootrom_string(unsigned index)
 {
     if (!configuration.bootrom_path[0]) {
         return "Built-in Boot ROMs";
@@ -501,7 +501,7 @@ static void toggle_rtc_mode(unsigned index)
     configuration.rtc_mode = !configuration.rtc_mode;
 }
 
-const char *current_rtc_mode_string(unsigned index)
+static const char *current_rtc_mode_string(unsigned index)
 {
     switch (configuration.rtc_mode) {
         case GB_RTC_MODE_SYNC_TO_HOST: return "Sync to System Clock";
@@ -529,13 +529,13 @@ static void enter_emulation_menu(unsigned index)
     recalculate_menu_height();
 }
 
-const char *current_scaling_mode(unsigned index)
+static const char *current_scaling_mode(unsigned index)
 {
     return (const char *[]){"Fill Entire Window", "Retain Aspect Ratio", "Retain Integer Factor"}
         [configuration.scaling_mode];
 }
 
-const char *current_default_scale(unsigned index)
+static const char *current_default_scale(unsigned index)
 {
     return (const char *[]){"1x", "2x", "3x", "4x", "5x", "6x", "7x", "8x"}
         [configuration.default_scale - 1];
@@ -568,7 +568,7 @@ const char *current_border_mode(unsigned index)
         [configuration.border_mode];
 }
 
-void cycle_scaling(unsigned index)
+static void cycle_scaling(unsigned index)
 {
     configuration.scaling_mode++;
     if (configuration.scaling_mode == GB_SDL_SCALING_MAX) {
@@ -578,7 +578,7 @@ void cycle_scaling(unsigned index)
     render_texture(NULL, NULL);
 }
 
-void cycle_scaling_backwards(unsigned index)
+static void cycle_scaling_backwards(unsigned index)
 {
     if (configuration.scaling_mode == 0) {
         configuration.scaling_mode = GB_SDL_SCALING_MAX - 1;
@@ -590,7 +590,7 @@ void cycle_scaling_backwards(unsigned index)
     render_texture(NULL, NULL);
 }
 
-void cycle_default_scale(unsigned index)
+static void cycle_default_scale(unsigned index)
 {
     if (configuration.default_scale == GB_SDL_DEFAULT_SCALE_MAX) {
         configuration.default_scale = 1;
@@ -603,7 +603,7 @@ void cycle_default_scale(unsigned index)
     update_viewport();
 }
 
-void cycle_default_scale_backwards(unsigned index)
+static void cycle_default_scale_backwards(unsigned index)
 {
     if (configuration.default_scale == 1) {
         configuration.default_scale = GB_SDL_DEFAULT_SCALE_MAX;
@@ -1044,7 +1044,7 @@ static SDL_Joystick *joystick = NULL;
 static SDL_GameController *controller = NULL;
 SDL_Haptic *haptic = NULL;
 
-const char *current_joypad_name(unsigned index)
+static const char *current_joypad_name(unsigned index)
 {
     static char name[23] = {0,};
     const char *orig_name = joystick? SDL_JoystickName(joystick) : NULL;
@@ -1153,16 +1153,31 @@ static void cycle_rumble_mode_backwards(unsigned index)
     }
 }
 
-const char *current_rumble_mode(unsigned index)
+static const char *current_rumble_mode(unsigned index)
 {
     return (const char *[]){"Disabled", "Rumble Game Paks Only", "All Games"}
     [configuration.rumble_mode];
 }
 
+static void toggle_allow_background_controllers(unsigned index)
+{
+    configuration.allow_background_controllers ^= true;
+    
+    SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS,
+                configuration.allow_background_controllers? "1" : "0");
+}
+
+static const char *current_background_control_mode(unsigned index)
+{
+    return configuration.allow_background_controllers? "Always" : "During Window Focus Only";
+}
+
+
 static const struct menu_item joypad_menu[] = {
     {"Joypad:", cycle_joypads, current_joypad_name, cycle_joypads_backwards},
     {"Configure layout", detect_joypad_layout},
     {"Rumble Mode:", cycle_rumble_mode, current_rumble_mode, cycle_rumble_mode_backwards},
+    {"Enable Control:", toggle_allow_background_controllers, current_background_control_mode, toggle_allow_background_controllers},
     {"Back", enter_controls_menu},
     {NULL,}
 };
@@ -1227,7 +1242,7 @@ static void toggle_mouse_control(unsigned index)
     configuration.allow_mouse_controls = !configuration.allow_mouse_controls;
 }
 
-const char *mouse_control_string(unsigned index)
+static const char *mouse_control_string(unsigned index)
 {
     return configuration.allow_mouse_controls? "Allow mouse control" : "Disallow mouse control";
 }
