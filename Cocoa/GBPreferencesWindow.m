@@ -23,6 +23,7 @@
     NSPopUpButton *_rtcPopupButton;
     NSButton *_aspectRatioCheckbox;
     NSButton *_analogControlsCheckbox;
+    NSButton *_controllersFocusCheckbox;
     NSEventModifierFlags previousModifiers;
     
     NSPopUpButton *_dmgPopupButton, *_sgbPopupButton, *_cgbPopupButton;
@@ -345,6 +346,12 @@
                                             forKey:@"GBAnalogControls"];
 }
 
+- (IBAction)changeControllerFocus:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] == NSOnState
+                                            forKey:@"GBAllowBackgroundControllers"];
+}
+
 - (IBAction)changeAspectRatio:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] != NSOnState
@@ -618,6 +625,17 @@
 {
     _analogControlsCheckbox = analogControlsCheckbox;
     [_analogControlsCheckbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBAnalogControls"]];
+}
+
+- (NSButton *)controllersFocusCheckbox
+{
+    return _controllersFocusCheckbox;
+}
+
+- (void)setControllersFocusCheckbox:(NSButton *)controllersFocusCheckbox
+{
+    _controllersFocusCheckbox = controllersFocusCheckbox;
+    [_controllersFocusCheckbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBAllowBackgroundControllers"]];
 }
 
 - (NSButton *)aspectRatioCheckbox

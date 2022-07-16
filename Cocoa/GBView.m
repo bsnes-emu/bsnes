@@ -474,10 +474,21 @@ static const uint8_t workboy_vk_to_key[] = {
     return true;
 }
 
+- (bool)allowController
+{
+    if ([self.window isMainWindow]) return true;
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBAllowBackgroundControllers"]) {
+        if ([(Document *)[NSApplication sharedApplication].orderedDocuments.firstObject mainWindow] == self.window) {
+            return true;
+        }
+    }
+    return false;
+}
+
 - (void)controller:(JOYController *)controller movedAxis:(JOYAxis *)axis
 {
     if (!_gb) return;
-    if (![self.window isMainWindow]) return;
+    if (![self allowController]) return;
 
     NSDictionary *mapping = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"JoyKitInstanceMapping"][controller.uniqueID];
     if (!mapping) {
@@ -532,7 +543,7 @@ static const uint8_t workboy_vk_to_key[] = {
 - (void)controller:(JOYController *)controller buttonChangedState:(JOYButton *)button
 {
     if (!_gb) return;
-    if (![self.window isMainWindow]) return;
+    if (![self allowController]) return;
     _mouseControlEnabled = false;
     if (button.type == JOYButtonTypeAxes2DEmulated && [self shouldControllerUseJoystickForMotion:controller]) return;
     
