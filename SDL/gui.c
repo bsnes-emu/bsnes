@@ -21,6 +21,7 @@ enum pending_command pending_command;
 unsigned command_parameter;
 char *dropped_state_file = NULL;
 
+
 #ifdef __APPLE__
 #define MODIFIER_NAME " " CMD_STRING
 #else
@@ -30,6 +31,8 @@ char *dropped_state_file = NULL;
 shader_t shader;
 static SDL_Rect rect;
 static unsigned factor;
+
+static SDL_Surface *converted_background = NULL;
 
 void render_texture(void *pixels,  void *previous)
 {
@@ -650,6 +653,45 @@ static void increase_color_temperature(unsigned index)
     }
 }
 
+static void update_gui_palette(void)
+{
+    const GB_palette_t *palette;
+    switch (configuration.dmg_palette) {
+        case 1:
+            palette = &GB_PALETTE_DMG;
+            break;
+            
+        case 2:
+            palette = &GB_PALETTE_MGB;
+            break;
+            
+        case 3:
+            palette = &GB_PALETTE_GBL;
+            break;
+            
+        default:
+            palette = &GB_PALETTE_GREY;
+    }
+    
+    SDL_Color colors[4];
+    for (unsigned i = 4; i--; ) {
+        gui_palette_native[i] = SDL_MapRGB(pixel_format, palette->colors[i].r, palette->colors[i].g, palette->colors[i].b);
+        colors[i].r = palette->colors[i].r;
+        colors[i].g = palette->colors[i].g;
+        colors[i].b = palette->colors[i].b;
+    }
+    
+    SDL_Surface *background = SDL_LoadBMP(resource_path("background.bmp"));
+    
+    /* Create a blank background if background.bmp could not be loaded */
+    if (!background) {
+        background = SDL_CreateRGBSurface(0, 160, 144, 8, 0, 0, 0, 0);
+    }
+    SDL_SetPaletteColors(background->format->palette, colors, 0, 4);
+    converted_background = SDL_ConvertSurface(background, pixel_format, 0);
+    SDL_FreeSurface(background);
+}
+
 static void cycle_palette(unsigned index)
 {
     if (configuration.dmg_palette == 3) {
@@ -658,6 +700,8 @@ static void cycle_palette(unsigned index)
     else {
         configuration.dmg_palette++;
     }
+    configuration.gui_pallete_enabled = true;
+    update_gui_palette();
 }
 
 static void cycle_palette_backwards(unsigned index)
@@ -668,6 +712,8 @@ static void cycle_palette_backwards(unsigned index)
     else {
         configuration.dmg_palette--;
     }
+    configuration.gui_pallete_enabled = true;
+    update_gui_palette();
 }
 
 static void cycle_border_mode(unsigned index)
@@ -1349,22 +1395,24 @@ void run_gui(bool is_running)
     connect_joypad();
     
     /* Draw the background screen */
-    static SDL_Surface *converted_background = NULL;
     if (!converted_background) {
-        SDL_Surface *background = SDL_LoadBMP(resource_path("background.bmp"));
-        
-        /* Create a blank background if background.bmp could not be loaded */
-        if (!background) {
-            background = SDL_CreateRGBSurface(0, 160, 144, 8, 0, 0, 0, 0);
+        if (configuration.gui_pallete_enabled) {
+            update_gui_palette();
         }
-        
-        SDL_SetPaletteColors(background->format->palette, gui_palette, 0, 4);
-        converted_background = SDL_ConvertSurface(background, pixel_format, 0);
-        SDL_LockSurface(converted_background);
-        SDL_FreeSurface(background);
-        
-        for (unsigned i = 4; i--; ) {
-            gui_palette_native[i] = SDL_MapRGB(pixel_format, gui_palette[i].r, gui_palette[i].g, gui_palette[i].b);
+        else {
+            SDL_Surface *background = SDL_LoadBMP(resource_path("background.bmp"));
+            
+            /* Create a blank background if background.bmp could not be loaded */
+            if (!background) {
+                background = SDL_CreateRGBSurface(0, 160, 144, 8, 0, 0, 0, 0);
+            }
+            SDL_SetPaletteColors(background->format->palette, gui_palette, 0, 4);
+            converted_background = SDL_ConvertSurface(background, pixel_format, 0);
+            SDL_FreeSurface(background);
+    
+            for (unsigned i = 4; i--; ) {
+                gui_palette_native[i] = SDL_MapRGB(pixel_format, gui_palette[i].r, gui_palette[i].g, gui_palette[i].b);
+            }
         }
     }
 
@@ -1723,6 +1771,7 @@ void run_gui(bool is_running)
         if (should_render) {
             should_render = false;
             rerender:
+            SDL_LockSurface(converted_background);
             if (width == 160 && height == 144) {
                 memcpy(pixels, converted_background->pixels, sizeof(pixels));
             }
@@ -1731,6 +1780,7 @@ void run_gui(bool is_running)
                     memcpy(pixels + x_offset + width * (y + y_offset), ((uint32_t *)converted_background->pixels) + 160 * y, 160 * 4);
                 }
             }
+            SDL_UnlockSurface(converted_background);
             
             switch (gui_state) {
                 case SHOWING_DROP_MESSAGE:

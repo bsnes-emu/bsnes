@@ -867,6 +867,9 @@ int main(int argc, char **argv)
         configuration.model %= MODEL_MAX;
         configuration.sgb_revision %= SGB_MAX;
         configuration.dmg_palette %= 4;
+        if (configuration.dmg_palette) {
+            configuration.gui_pallete_enabled = true;
+        }
         configuration.border_mode %= GB_BORDER_ALWAYS + 1;
         configuration.rumble_mode %= GB_RUMBLE_ALL_GAMES + 1;
         configuration.color_temperature %= 21;

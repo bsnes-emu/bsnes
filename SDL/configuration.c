@@ -46,4 +46,5 @@ configuration_t configuration =
     .default_scale = 2,
     .color_temperature = 10,
     .cgb_revision = GB_MODEL_CGB_E - GB_MODEL_CGB_0,
+    .dmg_palette = 1, // Replacing the old default (0) as of 0.15.2
 };

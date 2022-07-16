@@ -97,6 +97,7 @@ typedef struct {
         char audio_driver[16];
         /* v0.15.2 */
         bool allow_background_controllers;
+        bool gui_pallete_enabled; // Change the GUI palette only once the user changed the DMG palette
     };
 } configuration_t;
 
