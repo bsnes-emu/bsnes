@@ -161,22 +161,7 @@ static const char *end_capturing_logs(bool show_popup, bool should_exit, uint32_
 
 static void update_palette(void)
 {
-    switch (configuration.dmg_palette) {
-        case 1:
-            GB_set_palette(&gb, &GB_PALETTE_DMG);
-            break;
-            
-        case 2:
-            GB_set_palette(&gb, &GB_PALETTE_MGB);
-            break;
-            
-        case 3:
-            GB_set_palette(&gb, &GB_PALETTE_GBL);
-            break;
-            
-        default:
-            GB_set_palette(&gb, &GB_PALETTE_GREY);
-    }
+    GB_set_palette(&gb, current_dmg_palette());
 }
 
 static void screen_size_changed(void)
@@ -866,7 +851,7 @@ int main(int argc, char **argv)
         configuration.highpass_mode %= GB_HIGHPASS_MAX;
         configuration.model %= MODEL_MAX;
         configuration.sgb_revision %= SGB_MAX;
-        configuration.dmg_palette %= 4;
+        configuration.dmg_palette %= 5;
         if (configuration.dmg_palette) {
             configuration.gui_pallete_enabled = true;
         }
@@ -876,6 +861,7 @@ int main(int argc, char **argv)
         configuration.bootrom_path[sizeof(configuration.bootrom_path) - 1] = 0;
         configuration.cgb_revision %= GB_MODEL_CGB_E - GB_MODEL_CGB_0 + 1;
         configuration.audio_driver[15] = 0;
+        configuration.dmg_palette_name[24] = 0;
     }
     
     if (configuration.model >= MODEL_MAX) {

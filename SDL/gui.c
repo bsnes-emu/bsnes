@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
 #include "utils.h"
 #include "gui.h"
 #include "font.h"
@@ -20,6 +21,9 @@ SDL_PixelFormat *pixel_format = NULL;
 enum pending_command pending_command;
 unsigned command_parameter;
 char *dropped_state_file = NULL;
+
+static char **custom_palettes;
+static unsigned n_custom_palettes;
 
 
 #ifdef __APPLE__
@@ -561,6 +565,9 @@ const char *current_color_temperature(unsigned index)
 
 const char *current_palette(unsigned index)
 {
+    if (configuration.dmg_palette == 4) {
+        return configuration.dmg_palette_name;
+    }
     return (const char *[]){"Greyscale", "Lime (Game Boy)", "Olive (Pocket)", "Teal (Light)"}
         [configuration.dmg_palette];
 }
@@ -653,25 +660,45 @@ static void increase_color_temperature(unsigned index)
     }
 }
 
+const GB_palette_t *current_dmg_palette(void)
+{
+    typedef struct __attribute__ ((packed)) {
+        uint32_t magic;
+        uint8_t flags;
+        struct GB_color_s colors[5];
+        int32_t brightness_bias;
+        uint32_t hue_bias;
+        uint32_t hue_bias_strength;
+    } theme_t;
+    
+    static theme_t theme;
+    
+    if (configuration.dmg_palette == 4) {
+        char *path = resource_path("Palettes");
+        sprintf(path + strlen(path), "/%s.sbp", configuration.dmg_palette_name);
+        FILE *file = fopen(path, "rb");
+        if (!file) return &GB_PALETTE_GREY;
+        memset(&theme, 0, sizeof(theme));
+        fread(&theme, sizeof(theme), 1, file);
+        fclose(file);
+#ifdef GB_BIG_ENDIAN
+        theme.magic = __builtin_bswap32(theme.magic);
+#endif
+        if (theme.magic != 'SBPL') return &GB_PALETTE_GREY;
+        return (GB_palette_t *)&theme.colors;
+    }
+    
+    switch (configuration.dmg_palette) {
+        case 1:  return &GB_PALETTE_DMG;
+        case 2:  return &GB_PALETTE_MGB;
+        case 3:  return &GB_PALETTE_GBL;
+        default: return &GB_PALETTE_GREY;
+    }
+}
+
 static void update_gui_palette(void)
 {
-    const GB_palette_t *palette;
-    switch (configuration.dmg_palette) {
-        case 1:
-            palette = &GB_PALETTE_DMG;
-            break;
-            
-        case 2:
-            palette = &GB_PALETTE_MGB;
-            break;
-            
-        case 3:
-            palette = &GB_PALETTE_GBL;
-            break;
-            
-        default:
-            palette = &GB_PALETTE_GREY;
-    }
+    const GB_palette_t *palette = current_dmg_palette();
     
     SDL_Color colors[4];
     for (unsigned i = 4; i--; ) {
@@ -695,7 +722,26 @@ static void update_gui_palette(void)
 static void cycle_palette(unsigned index)
 {
     if (configuration.dmg_palette == 3) {
-        configuration.dmg_palette = 0;
+        if (n_custom_palettes == 0) {
+            configuration.dmg_palette = 0;
+        }
+        else {
+            configuration.dmg_palette = 4;
+            strcpy(configuration.dmg_palette_name, custom_palettes[0]);
+        }
+    }
+    else if (configuration.dmg_palette == 4) {
+        for (unsigned i = 0; i < n_custom_palettes; i++) {
+            if (strcmp(custom_palettes[i], configuration.dmg_palette_name) == 0) {
+                if (i == n_custom_palettes - 1) {
+                    configuration.dmg_palette = 0;
+                }
+                else {
+                    strcpy(configuration.dmg_palette_name, custom_palettes[i + 1]);
+                }
+                break;
+            }
+        }
     }
     else {
         configuration.dmg_palette++;
@@ -707,7 +753,26 @@ static void cycle_palette(unsigned index)
 static void cycle_palette_backwards(unsigned index)
 {
     if (configuration.dmg_palette == 0) {
-        configuration.dmg_palette = 3;
+        if (n_custom_palettes == 0) {
+            configuration.dmg_palette = 3;
+        }
+        else {
+            configuration.dmg_palette = 4;
+            strcpy(configuration.dmg_palette_name, custom_palettes[n_custom_palettes - 1]);
+        }
+    }
+    else if (configuration.dmg_palette == 4) {
+        for (unsigned i = 0; i < n_custom_palettes; i++) {
+            if (strcmp(custom_palettes[i], configuration.dmg_palette_name) == 0) {
+                if (i == 0) {
+                    configuration.dmg_palette = 3;
+                }
+                else {
+                    strcpy(configuration.dmg_palette_name, custom_palettes[i - 1]);
+                }
+                break;
+            }
+        }
     }
     else {
         configuration.dmg_palette--;
@@ -1895,4 +1960,32 @@ void run_gui(bool is_running)
 #endif
         }
     }
+}
+
+static void __attribute__ ((constructor)) list_custom_palettes(void)
+{
+    char *path = resource_path("Palettes");
+    if (!path) return;
+    if (strlen(path) > 1024 - 30) {
+        // path too long to safely concat filenames
+        return;
+    }
+    DIR *dir = opendir(path);
+    if (!dir) return;
+    
+    struct dirent *ent;
+    
+    while ((ent = readdir(dir))) {
+        unsigned length = strlen(ent->d_name);
+        if (length < 5 || length > 28) {
+            continue;
+        }
+        if (strcmp(ent->d_name + length - 4, ".sbp")) continue;
+        ent->d_name[length - 4] = 0;
+        custom_palettes = realloc(custom_palettes,
+                                  sizeof(custom_palettes[0]) * (n_custom_palettes + 1));
+        custom_palettes[n_custom_palettes++] = strdup(ent->d_name);
+    }
+    
+    closedir(dir);
 }
