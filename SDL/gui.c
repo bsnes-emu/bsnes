@@ -1509,6 +1509,31 @@ void run_gui(bool is_running)
         /* Convert Joypad and mouse events (We only generate down events) */
         if (gui_state != WAITING_FOR_KEY && gui_state != WAITING_FOR_JBUTTON) {
             switch (event.type) {
+                case SDL_KEYDOWN:
+                    if (gui_state == WAITING_FOR_KEY) break;
+                    if (event.key.keysym.mod != 0) break;
+                    switch (event.key.keysym.scancode) {
+                        // Do not remap these keys to prevent deadlocking
+                        case SDL_SCANCODE_ESCAPE:
+                        case SDL_SCANCODE_RETURN:
+                        case SDL_SCANCODE_RIGHT:
+                        case SDL_SCANCODE_LEFT:
+                        case SDL_SCANCODE_UP:
+                        case SDL_SCANCODE_DOWN:
+                            break;
+                            
+                        default:
+                                 if (event.key.keysym.scancode == configuration.keys[GB_KEY_RIGHT]) event.key.keysym.scancode = SDL_SCANCODE_RIGHT;
+                            else if (event.key.keysym.scancode == configuration.keys[GB_KEY_LEFT]) event.key.keysym.scancode = SDL_SCANCODE_LEFT;
+                            else if (event.key.keysym.scancode == configuration.keys[GB_KEY_UP]) event.key.keysym.scancode = SDL_SCANCODE_UP;
+                            else if (event.key.keysym.scancode == configuration.keys[GB_KEY_DOWN]) event.key.keysym.scancode = SDL_SCANCODE_DOWN;
+                            else if (event.key.keysym.scancode == configuration.keys[GB_KEY_A]) event.key.keysym.scancode = SDL_SCANCODE_RETURN;
+                            else if (event.key.keysym.scancode == configuration.keys[GB_KEY_START]) event.key.keysym.scancode = SDL_SCANCODE_RETURN;
+                            else if (event.key.keysym.scancode == configuration.keys[GB_KEY_B]) event.key.keysym.scancode = SDL_SCANCODE_ESCAPE;
+                            break;
+                    }
+                    break;
+
                 case SDL_WINDOWEVENT:
                     should_render = true;
                     break;
