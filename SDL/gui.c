@@ -1500,6 +1500,10 @@ void run_gui(bool is_running)
     recalculate_menu_height();
     current_selection = 0;
     scroll = 0;
+    
+    bool scrollbar_drag = false;
+    signed scroll_mouse_start = 0;
+    signed scroll_start = 0;
     while (true) {
         SDL_WaitEvent(&event);
         /* Convert Joypad and mouse events (We only generate down events) */
@@ -1507,6 +1511,9 @@ void run_gui(bool is_running)
             switch (event.type) {
                 case SDL_WINDOWEVENT:
                     should_render = true;
+                    break;
+                case SDL_MOUSEBUTTONUP:
+                    scrollbar_drag = false;
                     break;
                 case SDL_MOUSEBUTTONDOWN:
                     if (gui_state == SHOWING_HELP) {
@@ -1521,6 +1528,23 @@ void run_gui(bool is_running)
                         signed x = event.button.x;
                         signed y = event.button.y;
                         convert_mouse_coordinates(&x, &y);
+                        if (x >= 160 - 6 && x < 160 && menu_height > 144) {
+                            unsigned scrollbar_offset = (140 - scrollbar_size) * scroll / (menu_height - 144);
+                            if (scrollbar_offset + scrollbar_size > 140) {
+                                scrollbar_offset = 140 - scrollbar_size;
+                            }
+                            
+                            if (y < scrollbar_offset || y > scrollbar_offset + scrollbar_size) {
+                                scroll = (menu_height - 144) * y / 143;
+                                should_render = true;
+                            }
+
+                            scrollbar_drag = true;
+                            mouse_scroling = true;
+                            scroll_mouse_start = y;
+                            scroll_start = scroll;
+                            break;
+                        }
                         y += scroll;
                         
                         if (x < 0 || x >= 160 || y < 24) {
@@ -1711,8 +1735,28 @@ void run_gui(bool is_running)
                 break;
             }
                 
+            case SDL_MOUSEMOTION: {
+                if (scrollbar_drag && scrollbar_size < 140 && scrollbar_size > 0) {
+                    signed x = event.motion.x;
+                    signed y = event.motion.y;
+                    convert_mouse_coordinates(&x, &y);
+                    signed delta = scroll_mouse_start - y;
+                    scroll = scroll_start - delta * (signed)(menu_height - 144) / (signed)(140 - scrollbar_size);
+                    if (scroll < 0) {
+                        scroll = 0;
+                    }
+                    if (scroll >= menu_height - 144) {
+                        scroll = menu_height - 144;
+                    }
+
+                    should_render = true;
+                }
+                break;
+            }
+                
 
             case SDL_KEYDOWN:
+                scrollbar_drag = false;
                 if (gui_state == WAITING_FOR_KEY) {
                     if (current_selection > 8) {
                         configuration.keys_2[current_selection - 9] = event.key.keysym.scancode;
@@ -1912,10 +1956,10 @@ void run_gui(bool is_running)
                         for (unsigned y = 0; y < 140; y++) {
                             uint32_t *pixel = pixels + x_offset + 156 + width * (y + y_offset + 2);
                             if (y >= scrollbar_offset && y < scrollbar_offset + scrollbar_size) {
-                                pixel[0] = pixel[1]= gui_palette_native[2];
+                                pixel[0] = pixel[1] = gui_palette_native[2];
                             }
                             else {
-                                pixel[0] = pixel[1]= gui_palette_native[1];
+                                pixel[0] = pixel[1] = gui_palette_native[1];
                             }
                             
                         }
