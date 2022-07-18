@@ -12,7 +12,7 @@
 #define GB_SECTION(name, ...) __attribute__ ((aligned (8))) __VA_ARGS__
 #else
 // GCC's handling of attributes is so awfully bad, that it is alone a good enough reason to never use that compiler
-#define SECTION(name, ...) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wpedantic\"") alignas(8) char _align_##name[0]; __VA_ARGS__ _Pragma("GCC diagnostic pop")
+#define GB_SECTION(name, ...) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wpedantic\"") alignas(8) char _align_##name[0]; __VA_ARGS__ _Pragma("GCC diagnostic pop")
 #endif
 #else
 #define GB_SECTION(name, ...) union __attribute__ ((aligned (8))) {uint8_t name##_section_start; struct {__VA_ARGS__};}; uint8_t name##_section_end[0];
