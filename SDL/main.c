@@ -523,7 +523,7 @@ static void gb_audio_callback(GB_gameboy_t *gb, GB_sample_t *sample)
         }
     }
     
-    if (GB_audio_get_queue_length() / sizeof(*sample) > GB_audio_get_frequency() / 4) {
+    if (GB_audio_get_queue_length() > GB_audio_get_frequency() / 8) { // Maximum lag of 0.125s
         return;
     }
     

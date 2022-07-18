@@ -52,7 +52,7 @@ static unsigned _audio_get_frequency(void)
 
 static size_t _audio_get_queue_length(void)
 {
-    return SDL_GetQueuedAudioSize(device_id);
+    return SDL_GetQueuedAudioSize(device_id) / sizeof(GB_sample_t);
 }
 
 static void _audio_queue_sample(GB_sample_t *sample)

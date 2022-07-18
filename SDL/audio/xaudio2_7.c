@@ -23,23 +23,23 @@ static WAVEFORMATEX wave_format = {
     .cbSize = 0
 };
 
-static inline HRESULT XAudio2Create(IXAudio2 **ppXAudio2,
+static inline HRESULT XAudio2Create(IXAudio2 **out,
                                         UINT32 Flags,
                                         XAUDIO2_PROCESSOR XAudio2Processor)
 {
-    IXAudio2 *pXAudio2;
+    IXAudio2 *xaudio2;
     LoadLibraryEx("xaudio2_7.dll", NULL, LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
     
-    HRESULT hr = CoCreateInstance(&CLSID_XAudio2, NULL, CLSCTX_INPROC_SERVER, &IID_IXAudio2, (void**)&pXAudio2);
+    HRESULT hr = CoCreateInstance(&CLSID_XAudio2, NULL, CLSCTX_INPROC_SERVER, &IID_IXAudio2, (void **)&xaudio2);
     if (SUCCEEDED(hr)) {
-        hr = pXAudio2->lpVtbl->Initialize(pXAudio2, Flags, XAudio2Processor);
+        hr = xaudio2->lpVtbl->Initialize(xaudio2, Flags, XAudio2Processor);
     }
     
     if (SUCCEEDED(hr)) {
-        *ppXAudio2 = pXAudio2;
+        *out = xaudio2;
     }
-    else if (pXAudio2) {
-        pXAudio2->lpVtbl->Release(pXAudio2);
+    else if (xaudio2) {
+        xaudio2->lpVtbl->Release(xaudio2);
     }
     return hr;
 }
