@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define BUFFER_LEN_MS 32
+#define BUFFER_LEN_MS 5
 
 static ALCdevice *al_device = NULL;
 static ALCcontext *al_context = NULL;
@@ -173,7 +173,7 @@ static size_t _audio_get_queue_length(void)
         processed = 0;
     }
 
-    return (buffers - processed) * buffer_size * sizeof(GB_sample_t);
+    return (buffers - processed) * buffer_size;
 }
 
 static void _audio_queue_sample(GB_sample_t *sample)
