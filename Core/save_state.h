@@ -8,7 +8,7 @@
 #ifdef __cplusplus
 /* For bsnes integration. C++ code does not need section information, and throws a fit over certain types such
    as anonymous enums inside unions */
-#define GB_SECTION(name, ...)  struct __attribute__ ((aligned (8))) { __VA_ARGS__}
+#define GB_SECTION(name, ...)  struct __attribute__ ((aligned (8))) { __VA_ARGS__ };
 #else
 #define GB_SECTION(name, ...) union __attribute__ ((aligned (8))) {uint8_t name##_section_start; struct {__VA_ARGS__};}; uint8_t name##_section_end[0];
 #define GB_SECTION_OFFSET(name) (offsetof(GB_gameboy_t, name##_section_start))
