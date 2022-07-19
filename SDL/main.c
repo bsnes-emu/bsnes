@@ -271,6 +271,37 @@ static void handle_events(GB_gameboy_t *gb)
                 else if (button == JOYPAD_BUTTON_MENU && event.type == SDL_JOYBUTTONDOWN) {
                     open_menu();
                 }
+                else if ((button == JOYPAD_BUTTON_HOTKEY_1 || button == JOYPAD_BUTTON_HOTKEY_2) && event.type == SDL_JOYBUTTONDOWN) {
+                    hotkey_action_t action = configuration.hotkey_actions[button - JOYPAD_BUTTON_HOTKEY_1];
+                    switch (action) {
+                        case HOTKEY_NONE:
+                            break;
+                        case HOTKEY_PAUSE:
+                            paused = !paused;
+                            break;
+                        case HOTKEY_MUTE:
+                            GB_audio_set_paused(GB_audio_is_playing());
+                            break;
+                        case HOTKEY_RESET:
+                            pending_command = GB_SDL_RESET_COMMAND;
+                            break;
+                        case HOTKEY_QUIT:
+                            pending_command = GB_SDL_QUIT_COMMAND;
+                            break;
+                        default:
+                            command_parameter = (action - HOTKEY_SAVE_STATE_1) / 2 + 1;
+                            pending_command = ((action - HOTKEY_SAVE_STATE_1) % 2)? GB_SDL_LOAD_STATE_COMMAND:GB_SDL_SAVE_STATE_COMMAND;
+                            break;
+                        case HOTKEY_SAVE_STATE_10:
+                            command_parameter = 0;
+                            pending_command = GB_SDL_SAVE_STATE_COMMAND;
+                            break;
+                        case HOTKEY_LOAD_STATE_10:
+                            command_parameter = 0;
+                            pending_command = GB_SDL_LOAD_STATE_COMMAND;
+                            break;
+                    }
+                }
             }
                 break;
                 
@@ -862,6 +893,10 @@ int main(int argc, char **argv)
         configuration.cgb_revision %= GB_MODEL_CGB_E - GB_MODEL_CGB_0 + 1;
         configuration.audio_driver[15] = 0;
         configuration.dmg_palette_name[24] = 0;
+        // Fix broken defaults, should keys 12-31 should be unmapped by default
+        if (configuration.joypad_configuration[31] == 0) {
+            memset(configuration.joypad_configuration + 12 , -1, 32 - 12);
+        }
     }
     
     if (configuration.model >= MODEL_MAX) {

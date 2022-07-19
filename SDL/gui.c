@@ -1283,10 +1283,63 @@ static const char *current_background_control_mode(unsigned index)
     return configuration.allow_background_controllers? "Always" : "During Window Focus Only";
 }
 
+static void cycle_hotkey(unsigned index)
+{
+    if (configuration.hotkey_actions[index - 2] == HOTKEY_MAX) {
+        configuration.hotkey_actions[index - 2] = 0;
+    }
+    else {
+        configuration.hotkey_actions[index - 2]++;
+    }
+}
+
+static void cycle_hotkey_backwards(unsigned index)
+{
+    if (configuration.hotkey_actions[index - 2] == 0) {
+        configuration.hotkey_actions[index - 2] = HOTKEY_MAX;
+    }
+    else {
+        configuration.hotkey_actions[index - 2]--;
+    }
+}
+
+static const char *current_hotkey(unsigned index)
+{
+    return (const char *[]){
+        "None",
+        "Toggle Pause",
+        "Toggle Mute",
+        "Reset", 
+        "Quit SameBoy",
+        "Save State Slot 1",
+        "Load State Slot 1",
+        "Save State Slot 2",
+        "Load State Slot 2",
+        "Save State Slot 3",
+        "Load State Slot 3",
+        "Save State Slot 4",
+        "Load State Slot 4",
+        "Save State Slot 5",
+        "Load State Slot 5",
+        "Save State Slot 6",
+        "Load State Slot 6",
+        "Save State Slot 7",
+        "Load State Slot 7",
+        "Save State Slot 8",
+        "Load State Slot 8",
+        "Save State Slot 9",
+        "Load State Slot 9",
+        "Save State Slot 10",
+        "Load State Slot 10",
+    }
+    [configuration.hotkey_actions[index - 2]];
+}
 
 static const struct menu_item joypad_menu[] = {
     {"Joypad:", cycle_joypads, current_joypad_name, cycle_joypads_backwards},
     {"Configure layout", detect_joypad_layout},
+    {"Hotkey 1 Action:", cycle_hotkey, current_hotkey, cycle_hotkey_backwards},
+    {"Hotkey 2 Action:", cycle_hotkey, current_hotkey, cycle_hotkey_backwards},
     {"Rumble Mode:", cycle_rumble_mode, current_rumble_mode, cycle_rumble_mode_backwards},
     {"Enable Control:", toggle_allow_background_controllers, current_background_control_mode, toggle_allow_background_controllers},
     {"Back", enter_controls_menu},
@@ -2015,6 +2068,8 @@ void run_gui(bool is_running)
                                            "Turbo",
                                            "Rewind",
                                            "Slow-Motion",
+                                           "Hotkey 1",
+                                           "Hotkey 2",
                                            "",
                                        } [joypad_configuration_progress],
                                        gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);

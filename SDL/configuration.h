@@ -25,6 +25,8 @@ typedef enum {
     JOYPAD_BUTTON_TURBO,
     JOYPAD_BUTTON_REWIND,
     JOYPAD_BUTTON_SLOW_MOTION,
+    JOYPAD_BUTTON_HOTKEY_1,
+    JOYPAD_BUTTON_HOTKEY_2,
     JOYPAD_BUTTONS_MAX
 } joypad_button_t;
 
@@ -33,6 +35,35 @@ typedef enum {
     JOYPAD_AXISES_Y,
     JOYPAD_AXISES_MAX
 } joypad_axis_t;
+
+typedef enum {
+    HOTKEY_NONE,
+    HOTKEY_PAUSE,
+    HOTKEY_MUTE,
+    HOTKEY_RESET,
+    HOTKEY_QUIT,
+    HOTKEY_SAVE_STATE_1,
+    HOTKEY_LOAD_STATE_1,
+    HOTKEY_SAVE_STATE_2,
+    HOTKEY_LOAD_STATE_2,
+    HOTKEY_SAVE_STATE_3,
+    HOTKEY_LOAD_STATE_3,
+    HOTKEY_SAVE_STATE_4,
+    HOTKEY_LOAD_STATE_4,
+    HOTKEY_SAVE_STATE_5,
+    HOTKEY_LOAD_STATE_5,
+    HOTKEY_SAVE_STATE_6,
+    HOTKEY_LOAD_STATE_6,
+    HOTKEY_SAVE_STATE_7,
+    HOTKEY_LOAD_STATE_7,
+    HOTKEY_SAVE_STATE_8,
+    HOTKEY_LOAD_STATE_8,
+    HOTKEY_SAVE_STATE_9,
+    HOTKEY_LOAD_STATE_9,
+    HOTKEY_SAVE_STATE_10,
+    HOTKEY_LOAD_STATE_10,
+    HOTKEY_MAX = HOTKEY_LOAD_STATE_10,
+} hotkey_action_t;
 
 typedef struct {
     SDL_Scancode keys[9];
@@ -59,7 +90,7 @@ typedef struct {
     /* v0.11 */
     uint32_t rewind_length;
     SDL_Scancode keys_2[32]; /* Rewind and underclock, + padding for the future */
-    uint8_t joypad_configuration[32]; /* 12 Keys + padding for the future*/;
+    uint8_t joypad_configuration[32]; /* 14 Keys + padding for the future*/;
     uint8_t joypad_axises[JOYPAD_AXISES_MAX];
     
     /* v0.12 */
@@ -99,6 +130,7 @@ typedef struct {
         bool allow_background_controllers;
         bool gui_pallete_enabled; // Change the GUI palette only once the user changed the DMG palette
         char dmg_palette_name[25];
+        hotkey_action_t hotkey_actions[2];
     };
 } configuration_t;
 

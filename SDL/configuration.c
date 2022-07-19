@@ -30,6 +30,9 @@ configuration_t configuration =
         4,
         -1,
         5,
+        // The rest are unmapped by default
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+        -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     },
     .joypad_axises = {
         0,
