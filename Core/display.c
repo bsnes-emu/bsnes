@@ -1294,8 +1294,17 @@ static inline uint16_t mode3_batching_length(GB_gameboy_t *gb)
     if (gb->hdma_on) return 0;
     if (gb->stopped) return 0;
     if (GB_is_dma_active(gb)) return 0;
-    if (gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20) && (gb->io_registers[GB_IO_WX] < 8 || gb->io_registers[GB_IO_WX] == 166)) {
-        return 0;
+    if (gb->wy_triggered) {
+        if (gb->io_registers[GB_IO_LCDC] & 0x20) {
+            if ((gb->io_registers[GB_IO_WX] < 8 || gb->io_registers[GB_IO_WX] == 166)) {
+                return 0;
+            }
+        }
+        else {
+            if (gb->io_registers[GB_IO_WX] < 167 && !GB_is_cgb(gb)) {
+                return 0;
+            }
+        }
     }
 
     // No objects or window, timing is trivial
@@ -1683,14 +1692,30 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     }
                 }
                 
-                /* TODO: What happens when WX=0? */
+                /* TODO: What happens when WX=0? When the fifo is full? */
                 if (!GB_is_cgb(gb) && gb->wx_triggered && !gb->window_is_being_fetched &&
-                    gb->fetcher_state == 0 && gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) ) {
+                    gb->fetcher_state == 0 && gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) && gb->bg_fifo.size == 8) {
                     // Insert a pixel right at the FIFO's end
                     gb->bg_fifo.read_end--;
                     gb->bg_fifo.read_end &= GB_FIFO_LENGTH - 1;
                     gb->bg_fifo.fifo[gb->bg_fifo.read_end] = (GB_fifo_item_t){0,};
+                    gb->bg_fifo.size++;
                     gb->window_is_being_fetched = false;
+                }
+                
+                /* TODO: WX=0 behaves wrong, but WX=0 behaves wrong regardless in DMG mode */
+                if (!GB_is_cgb(gb) && gb->wy_triggered && !(gb->io_registers[GB_IO_LCDC] & 0x20) && gb->bg_fifo.size == 1) {
+                    /* See https://github.com/LIJI32/SameBoy/issues/278 for documentation */
+                    uint8_t logical_position = gb->position_in_line + 8;
+                    if (logical_position >= (uint8_t)(-8)) {
+                        logical_position += 8;
+                    }
+                    if (gb->io_registers[GB_IO_WX] == logical_position) {
+                        gb->bg_fifo.read_end--;
+                        gb->bg_fifo.read_end &= GB_FIFO_LENGTH - 1;
+                        gb->bg_fifo.fifo[gb->bg_fifo.read_end] = (GB_fifo_item_t){0,};
+                        gb->bg_fifo.size = 2;
+                    }
                 }
 
                 /* Handle objects */
