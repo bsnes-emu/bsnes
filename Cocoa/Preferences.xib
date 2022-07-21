@@ -6,7 +6,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="AppDelegate">
+        <customObject id="-2" userLabel="File's Owner" customClass="GBApp">
             <connections>
                 <outlet property="audioTab" destination="Zn1-Y5-RbR" id="PCn-a5-RzH"/>
                 <outlet property="controlsTab" destination="8TU-6J-NCg" id="BFd-im-2Pw"/>
@@ -85,6 +85,8 @@
                 <outlet property="frameBlendingModePopupButton" destination="lxk-db-Sxv" id="wzt-uo-TE6"/>
                 <outlet property="graphicsFilterPopupButton" destination="6pP-kK-EEC" id="LS7-HY-kHC"/>
                 <outlet property="highpassFilterPopupButton" destination="T69-6N-dhT" id="0p6-4m-hb1"/>
+                <outlet property="hotkey1PopupButton" destination="qsH-w5-Rja" id="TFr-p8-IYo"/>
+                <outlet property="hotkey2PopupButton" destination="Ryk-mD-c0y" id="m2J-O5-dng"/>
                 <outlet property="interferenceSlider" destination="FpE-5i-j5L" id="hfH-e8-7cx"/>
                 <outlet property="joystickMBC7Checkbox" destination="i7F-1r-NkQ" id="msM-WX-w9H"/>
                 <outlet property="mouseMBC7Checkbox" destination="wUE-aB-ub1" id="mXX-mZ-sKJ"/>
@@ -612,11 +614,11 @@
             <point key="canvasLocation" x="-854" y="627"/>
         </customView>
         <customView id="8TU-6J-NCg">
-            <rect key="frame" x="0.0" y="0.0" width="320" height="560"/>
+            <rect key="frame" x="0.0" y="0.0" width="320" height="667"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Utu-t4-cLx">
-                    <rect key="frame" x="18" y="523" width="122" height="17"/>
+                    <rect key="frame" x="18" y="630" width="122" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Control settings for" id="YqW-Ds-VIC">
                         <font key="font" metaFont="system"/>
@@ -625,7 +627,7 @@
                     </textFieldCell>
                 </textField>
                 <scrollView focusRingType="none" fixedFrame="YES" autohidesScrollers="YES" horizontalLineScroll="19" horizontalPageScroll="10" verticalLineScroll="19" verticalPageScroll="10" hasHorizontalScroller="NO" hasVerticalScroller="NO" usesPredominantAxisScrolling="NO" horizontalScrollElasticity="none" verticalScrollElasticity="none" translatesAutoresizingMaskIntoConstraints="NO" id="PBp-dj-EIa">
-                    <rect key="frame" x="32" y="301" width="257" height="211"/>
+                    <rect key="frame" x="32" y="408" width="257" height="211"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <clipView key="contentView" focusRingType="none" ambiguous="YES" drawsBackground="NO" id="AMs-PO-nid">
                         <rect key="frame" x="1" y="1" width="255" height="209"/>
@@ -683,7 +685,7 @@
                     </scroller>
                 </scrollView>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fcF-wc-KwM">
-                    <rect key="frame" x="30" y="276" width="231" height="17"/>
+                    <rect key="frame" x="30" y="383" width="231" height="17"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Controller for multiplayer games:" id="AJA-9b-VKI">
                         <font key="font" metaFont="system"/>
@@ -692,7 +694,7 @@
                     </textFieldCell>
                 </textField>
                 <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0Az-0R-oNw">
-                    <rect key="frame" x="42" y="243" width="250" height="26"/>
+                    <rect key="frame" x="42" y="350" width="250" height="26"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingMiddle" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="hy8-cr-RrE" id="uEC-vN-8Jq">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -708,11 +710,11 @@
                     </connections>
                 </popUpButton>
                 <box verticalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="VEc-Ed-Z6f">
-                    <rect key="frame" x="12" y="232" width="296" height="5"/>
+                    <rect key="frame" x="12" y="339" width="296" height="5"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                 </box>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ReM-uo-H0r">
-                    <rect key="frame" x="227" y="524" width="8" height="17"/>
+                    <rect key="frame" x="227" y="631" width="8" height="17"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title=":" id="VhO-3T-glt">
                         <font key="font" metaFont="system"/>
@@ -721,7 +723,7 @@
                     </textFieldCell>
                 </textField>
                 <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gWx-7h-0xq">
-                    <rect key="frame" x="140" y="518" width="87" height="26"/>
+                    <rect key="frame" x="140" y="625" width="87" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Player 1" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="TO3-R7-9HN" id="pbt-Lr-bU1">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -801,6 +803,15 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="2SB-Bq-Exy">
+                    <rect key="frame" x="18" y="315" width="129" height="17"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Hotkey 1 Action:" id="GTq-aw-0cU">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
                 <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ogs-xG-b4b">
                     <rect key="frame" x="30" y="58" width="262" height="26"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
@@ -817,6 +828,139 @@
                     </popUpButtonCell>
                     <connections>
                         <action selector="rumbleModeChanged:" target="QvC-M9-y7g" id="AQe-vQ-mSl"/>
+                    </connections>
+                </popUpButton>
+                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qsH-w5-Rja">
+                    <rect key="frame" x="30" y="286" width="262" height="26"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                    <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="uFa-fO-lTm" id="x4X-Uv-vXf">
+                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" id="hHe-Vn-UE4">
+                            <items>
+                                <menuItem title="None" state="on" id="uFa-fO-lTm"/>
+                                <menuItem isSeparatorItem="YES" id="UoV-yr-2Eq"/>
+                                <menuItem title="Toggle Pause" keyEquivalent="p" id="WxT-Gp-rKn"/>
+                                <menuItem title="Reset" keyEquivalent="r" id="vVL-1l-e3f"/>
+                                <menuItem title="Toggle Mute" keyEquivalent="m" id="bPj-M7-WNV"/>
+                                <menuItem isSeparatorItem="YES" id="ewP-Y6-2Fx"/>
+                                <menuItem title="Save State to Slot 1" keyEquivalent="1" id="349-ay-RSZ"/>
+                                <menuItem title="Save State to Slot 2" keyEquivalent="2" id="sHb-Cv-8i8"/>
+                                <menuItem title="Save State to Slot 3" keyEquivalent="3" id="YVf-94-KpR"/>
+                                <menuItem title="Save State to Slot 4" keyEquivalent="4" id="KDs-fC-8ad"/>
+                                <menuItem title="Save State to Slot 5" keyEquivalent="5" id="iCo-oT-5Mo"/>
+                                <menuItem title="Save State to Slot 6" keyEquivalent="6" id="LTP-nk-QLs"/>
+                                <menuItem title="Save State to Slot 7" keyEquivalent="7" id="SOE-dW-uEV"/>
+                                <menuItem title="Save State to Slot 8" keyEquivalent="8" id="IRO-ko-INM"/>
+                                <menuItem title="Save State to Slot 9" keyEquivalent="9" id="nJz-iY-YQ9"/>
+                                <menuItem title="Save State to Slot 10" keyEquivalent="0" id="XIh-A2-QAg"/>
+                                <menuItem isSeparatorItem="YES" id="Nfr-cm-L2W"/>
+                                <menuItem title="Load State from Slot 1" keyEquivalent="1" id="bEy-D8-ckq">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 2" keyEquivalent="2" id="46a-Gt-mIa">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 3" keyEquivalent="3" id="9tn-pS-BDn">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 4" keyEquivalent="4" id="xsE-oe-cTS">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 5" keyEquivalent="5" id="lso-J8-dJO">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 6" keyEquivalent="6" id="nO5-pj-ba2">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 7" keyEquivalent="7" id="BhF-xL-MhS">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 8" keyEquivalent="8" id="2Qv-vX-7Qm">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 9" keyEquivalent="9" id="CBy-h9-gm8">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 10" keyEquivalent="0" id="UuH-sh-D9c">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                            </items>
+                        </menu>
+                    </popUpButtonCell>
+                    <connections>
+                        <action selector="hotkey1Changed:" target="QvC-M9-y7g" id="XMJ-vu-L6C"/>
+                    </connections>
+                </popUpButton>
+                <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8py-43-vaO">
+                    <rect key="frame" x="18" y="264" width="125" height="17"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                    <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" sendsActionOnEndEditing="YES" title="Hotkey 2 Action:" id="Gdp-S8-V3q">
+                        <font key="font" metaFont="system"/>
+                        <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
+                        <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
+                    </textFieldCell>
+                </textField>
+                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ryk-mD-c0y">
+                    <rect key="frame" x="30" y="231" width="262" height="26"/>
+                    <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                    <popUpButtonCell key="cell" type="push" title="None" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="wmV-YY-dHY" id="fS9-cS-iTD">
+                        <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="menu"/>
+                        <menu key="menu" id="vPS-8b-MAH">
+                            <items>
+                                <menuItem title="None" state="on" id="wmV-YY-dHY"/>
+                                <menuItem isSeparatorItem="YES" id="qSd-QD-gLA"/>
+                                <menuItem title="Toggle Pause" keyEquivalent="p" id="13d-2H-Cpq"/>
+                                <menuItem title="Reset" keyEquivalent="r" id="5vx-zH-TsX"/>
+                                <menuItem title="Toggle Mute" keyEquivalent="m" id="zFL-4A-plp"/>
+                                <menuItem isSeparatorItem="YES" id="8e3-z2-8gY"/>
+                                <menuItem title="Save State to Slot 1" keyEquivalent="1" id="4s2-s5-xa7"/>
+                                <menuItem title="Save State to Slot 2" keyEquivalent="2" id="sRd-sU-DHW"/>
+                                <menuItem title="Save State to Slot 3" keyEquivalent="3" id="Yqr-1y-H2o"/>
+                                <menuItem title="Save State to Slot 4" keyEquivalent="4" id="4AM-Ki-x4l"/>
+                                <menuItem title="Save State to Slot 5" keyEquivalent="5" id="q4A-0K-4py"/>
+                                <menuItem title="Save State to Slot 6" keyEquivalent="6" id="NA3-rP-ni2"/>
+                                <menuItem title="Save State to Slot 7" keyEquivalent="7" id="XF9-Ig-ZPU"/>
+                                <menuItem title="Save State to Slot 8" keyEquivalent="8" id="3cM-DC-NC9"/>
+                                <menuItem title="Save State to Slot 9" keyEquivalent="9" id="h9i-lA-TGi"/>
+                                <menuItem title="Save State to Slot 10" keyEquivalent="0" id="5eE-XE-E76"/>
+                                <menuItem isSeparatorItem="YES" id="Q57-67-3h1"/>
+                                <menuItem title="Load State from Slot 1" keyEquivalent="1" id="fdH-LH-gl1">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 2" keyEquivalent="2" id="77e-oa-0qg">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 3" keyEquivalent="3" id="LKg-oc-egx">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 4" keyEquivalent="4" id="CAi-yh-rg4">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 5" keyEquivalent="5" id="smK-o2-ZI6">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 6" keyEquivalent="6" id="SoT-kd-9M1">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 7" keyEquivalent="7" id="BCT-R6-O4Y">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 8" keyEquivalent="8" id="U64-kB-gnC">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 9" keyEquivalent="9" id="sDw-Wr-Od1">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                                <menuItem title="Load State from Slot 10" keyEquivalent="0" id="XZl-tl-CcJ">
+                                    <modifierMask key="keyEquivalentModifierMask" shift="YES" command="YES"/>
+                                </menuItem>
+                            </items>
+                        </menu>
+                    </popUpButtonCell>
+                    <connections>
+                        <action selector="hotkey2Changed:" target="QvC-M9-y7g" id="Cul-EW-jNz"/>
                     </connections>
                 </popUpButton>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Qa7-Z7-yfO">
@@ -842,7 +986,7 @@
                     </connections>
                 </button>
             </subviews>
-            <point key="canvasLocation" x="-854" y="213"/>
+            <point key="canvasLocation" x="-854" y="139.5"/>
         </customView>
         <customView id="ffn-ie-9C3">
             <rect key="frame" x="0.0" y="0.0" width="320" height="95"/>

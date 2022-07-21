@@ -1,9 +1,9 @@
 #import <Cocoa/Cocoa.h>
-#include "GBView.h"
-#include "GBImageView.h"
-#include "GBSplitView.h"
-#include "GBVisualizerView.h"
-#include "GBOSDView.h"
+#import "GBView.h"
+#import "GBImageView.h"
+#import "GBSplitView.h"
+#import "GBVisualizerView.h"
+#import "GBOSDView.h"
 
 @class GBCheatWindowController;
 @class GBPaletteView;

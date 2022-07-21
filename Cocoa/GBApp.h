@@ -1,7 +1,8 @@
 #import <Cocoa/Cocoa.h>
 #import <WebKit/WebKit.h>
+#import <JoyKit/JoyKit.h>
 
-@interface AppDelegate : NSObject <NSApplicationDelegate, NSUserNotificationCenterDelegate, NSMenuDelegate, WebUIDelegate, WebPolicyDelegate, WebFrameLoadDelegate>
+@interface GBApp : NSApplication <NSApplicationDelegate, NSUserNotificationCenterDelegate, NSMenuDelegate, WebUIDelegate, WebPolicyDelegate, WebFrameLoadDelegate, JOYListener>
 
 @property (nonatomic, strong) IBOutlet NSWindow *preferencesWindow;
 @property (nonatomic, strong) IBOutlet NSView *graphicsTab;

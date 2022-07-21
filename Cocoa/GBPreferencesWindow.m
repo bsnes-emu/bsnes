@@ -29,6 +29,8 @@
     NSPopUpButton *_dmgPopupButton, *_sgbPopupButton, *_cgbPopupButton;
     NSPopUpButton *_preferredJoypadButton;
     NSPopUpButton *_rumbleModePopupButton;
+    NSPopUpButton *_hotkey1PopupButton;
+    NSPopUpButton *_hotkey2PopupButton;
     NSSlider *_temperatureSlider;
     NSSlider *_interferenceSlider;
     NSSlider *_volumeSlider;
@@ -193,6 +195,45 @@
 - (NSPopUpButton *)rumbleModePopupButton
 {
     return _rumbleModePopupButton;
+}
+
+static inline NSString *keyEquivalentString(NSMenuItem *item)
+{
+    return [NSString stringWithFormat:@"%s%@", (item.keyEquivalentModifierMask & NSEventModifierFlagShift)? "^":"", item.keyEquivalent];
+}
+
+- (void)setHotkey1PopupButton:(NSPopUpButton *)hotkey1PopupButton
+{
+    _hotkey1PopupButton = hotkey1PopupButton;
+    NSString *keyEquivalent = [[NSUserDefaults standardUserDefaults] stringForKey:@"GBJoypadHotkey1"];
+    for (NSMenuItem *item in _hotkey1PopupButton.menu.itemArray) {
+        if ([keyEquivalent isEqualToString:keyEquivalentString(item)]) {
+            [_hotkey1PopupButton selectItem:item];
+            break;
+        }
+    }
+}
+
+- (NSPopUpButton *)hotkey1PopupButton
+{
+    return _hotkey1PopupButton;
+}
+
+- (void)setHotkey2PopupButton:(NSPopUpButton *)hotkey2PopupButton
+{
+    _hotkey2PopupButton = hotkey2PopupButton;
+    NSString *keyEquivalent = [[NSUserDefaults standardUserDefaults] stringForKey:@"GBJoypadHotkey2"];
+    for (NSMenuItem *item in _hotkey2PopupButton.menu.itemArray) {
+        if ([keyEquivalent isEqualToString:keyEquivalentString(item)]) {
+            [_hotkey2PopupButton selectItem:item];
+            break;
+        }
+    }
+}
+
+- (NSPopUpButton *)hotkey2PopupButton
+{
+    return _hotkey2PopupButton;
 }
 
 - (void)setRewindPopupButton:(NSPopUpButton *)rewindPopupButton
@@ -457,6 +498,18 @@
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBRumbleModeChanged" object:nil];
 }
 
+- (IBAction)hotkey1Changed:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:keyEquivalentString([sender selectedItem])
+                                              forKey:@"GBJoypadHotkey1"];
+}
+
+- (IBAction)hotkey2Changed:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:keyEquivalentString([sender selectedItem])
+                                              forKey:@"GBJoypadHotkey2"];
+}
+
 - (IBAction)rewindLengthChanged:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
@@ -497,7 +550,7 @@
     if (joystick_configuration_state == GBUnderclock) {
         [self.configureJoypadButton setTitle:@"Press Button for Slo-Mo"]; // Full name is too long :<
     }
-    else if (joystick_configuration_state < GBButtonCount) {
+    else if (joystick_configuration_state < GBJoypadButtonCount) {
         [self.configureJoypadButton setTitle:[NSString stringWithFormat:@"Press Button for %@", GBButtonNames[joystick_configuration_state]]];
     }
     else {
@@ -519,7 +572,7 @@
         
     if (!button.isPressed) return;
     if (joystick_configuration_state == -1) return;
-    if (joystick_configuration_state == GBButtonCount) return;
+    if (joystick_configuration_state == GBJoypadButtonCount) return;
     if (!joystick_being_configured) {
         joystick_being_configured = controller.uniqueID;
     }
@@ -561,6 +614,8 @@
     [GBTurbo] = JOYButtonUsageL1,
     [GBRewind] = JOYButtonUsageL2,
     [GBUnderclock] = JOYButtonUsageR1,
+    [GBHotkey1] = GBJoyKitHotkey1,
+    [GBHotkey2] = GBJoyKitHotkey2,
     };
     
     if (joystick_configuration_state == GBUnderclock) {

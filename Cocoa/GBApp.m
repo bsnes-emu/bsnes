@@ -1,6 +1,7 @@
-#import "AppDelegate.h"
+#import "GBApp.h"
 #include "GBButtons.h"
 #include "GBView.h"
+#include "Document.h"
 #include <Core/gb.h>
 #import <Carbon/Carbon.h>
 #import <JoyKit/JoyKit.h>
@@ -17,10 +18,9 @@ static uint32_t color_to_int(NSColor *color)
            ((unsigned)(color.blueComponent * 0xFF));
 }
 
-@implementation AppDelegate
+@implementation GBApp
 {
-    NSWindow *preferences_window;
-    NSArray<NSView *> *preferences_tabs;
+    NSArray<NSView *> *_preferencesTabs;
     NSString *_lastVersion;
     NSString *_updateURL;
     NSURLSessionDownloadTask *_updateTask;
@@ -33,6 +33,7 @@ static uint32_t color_to_int(NSColor *color)
     } _updateState;
     NSString *_downloadDirectory;
     AuthorizationRef _auth;
+    bool _simulatingMenuEvent;
 }
 
 - (void) applicationDidFinishLaunching:(NSNotification *)notification
@@ -145,6 +146,8 @@ static uint32_t color_to_int(NSColor *color)
         JOYHatsEmulateButtonsKey: @YES,
     }];
     
+    [JOYController registerListener:self];
+    
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBNotificationsUsed"]) {
         [NSUserNotificationCenter defaultUserNotificationCenter].delegate = self;
     }
@@ -168,10 +171,10 @@ static uint32_t color_to_int(NSColor *color)
 
 - (IBAction)switchPreferencesTab:(id)sender
 {
-    for (NSView *view in preferences_tabs) {
+    for (NSView *view in _preferencesTabs) {
         [view removeFromSuperview];
     }
-    NSView *tab = preferences_tabs[[sender tag]];
+    NSView *tab = _preferencesTabs[[sender tag]];
     NSRect old = [_preferencesWindow frame];
     NSRect new = [_preferencesWindow frameRectForContentRect:tab.frame];
     new.origin.x = old.origin.x;
@@ -215,7 +218,7 @@ static uint32_t color_to_int(NSColor *color)
         [[NSBundle mainBundle] loadNibNamed:@"Preferences" owner:self topLevelObjects:&objects];
         NSToolbarItem *first_toolbar_item = [_preferencesWindow.toolbar.items firstObject];
         _preferencesWindow.toolbar.selectedItemIdentifier = [first_toolbar_item itemIdentifier];
-        preferences_tabs = @[self.emulationTab, self.graphicsTab, self.audioTab, self.controlsTab, self.updatesTab];
+        _preferencesTabs = @[self.emulationTab, self.graphicsTab, self.audioTab, self.controlsTab, self.updatesTab];
         [self switchPreferencesTab:first_toolbar_item];
         [_preferencesWindow center];
 #ifndef UPDATE_SUPPORT
@@ -568,6 +571,66 @@ static uint32_t color_to_int(NSColor *color)
     [[NSApplication sharedApplication] orderFrontStandardAboutPanelWithOptions:@{
         @"ApplicationIcon": [NSImage imageNamed:@"Icon"]
     }];
+}
+
+- (void)controller:(JOYController *)controller buttonChangedState:(JOYButton *)button
+{
+    if (!button.isPressed) return;
+    NSDictionary *mapping = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"JoyKitInstanceMapping"][controller.uniqueID];
+    if (!mapping) {
+        mapping = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"JoyKitNameMapping"][controller.deviceName];
+    }
+    
+    JOYButtonUsage usage = ((JOYButtonUsage)[mapping[n2s(button.uniqueID)] unsignedIntValue]) ?: -1;
+    if (!mapping && usage >= JOYButtonUsageGeneric0) {
+        usage = (const JOYButtonUsage[]){JOYButtonUsageY, JOYButtonUsageA, JOYButtonUsageB, JOYButtonUsageX}[(usage - JOYButtonUsageGeneric0) & 3];
+    }
+    
+    if (usage == GBJoyKitHotkey1 || usage == GBJoyKitHotkey2) {
+        if (_preferencesWindow && self.keyWindow == _preferencesWindow) {
+            return;
+        }
+        if (![[NSUserDefaults standardUserDefaults] boolForKey:@"GBAllowBackgroundControllers"] && !self.keyWindow) {
+            return;
+        }
+
+        NSString *keyEquivalent = [[NSUserDefaults standardUserDefaults] stringForKey:usage == GBJoyKitHotkey1? @"GBJoypadHotkey1" : @"GBJoypadHotkey2"];
+        NSEventModifierFlags flags = NSEventModifierFlagCommand;
+        if ([keyEquivalent hasPrefix:@"^"]) {
+            flags |= NSEventModifierFlagShift;
+            [keyEquivalent substringFromIndex:1];
+        }
+        _simulatingMenuEvent = true;
+        [[NSApplication sharedApplication] sendEvent:[NSEvent keyEventWithType:NSEventTypeKeyDown
+                                                                                 location:(NSPoint){0,}
+                                                                            modifierFlags:flags
+                                                                                timestamp:0
+                                                                             windowNumber:0
+                                                                                  context:NULL
+                                                                               characters:keyEquivalent
+                                                              charactersIgnoringModifiers:keyEquivalent
+                                                                                isARepeat:false
+                                                                                  keyCode:0]];
+        _simulatingMenuEvent = false;
+    }
+}
+
+- (NSWindow *)keyWindow
+{
+    NSWindow *ret = [super keyWindow];
+    if (!ret && _simulatingMenuEvent) {
+        ret = [(Document *)self.orderedDocuments.firstObject mainWindow];
+    }
+    return ret;
+}
+
+- (NSWindow *)mainWindow
+{
+    NSWindow *ret = [super mainWindow];
+    if (!ret && _simulatingMenuEvent) {
+        ret = [(Document *)self.orderedDocuments.firstObject mainWindow];
+    }
+    return ret;
 }
 
 - (void)dealloc

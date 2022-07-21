@@ -2,6 +2,7 @@
 #include <Core/gb.h>
 #import <JoyKit/JoyKit.h>
 #import "GBOSDView.h"
+
 @class Document;
 
 typedef enum {
