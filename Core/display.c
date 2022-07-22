@@ -1707,9 +1707,6 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                 if (!GB_is_cgb(gb) && gb->wy_triggered && !(gb->io_registers[GB_IO_LCDC] & 0x20) && gb->bg_fifo.size == 1) {
                     /* See https://github.com/LIJI32/SameBoy/issues/278 for documentation */
                     uint8_t logical_position = gb->position_in_line + 8;
-                    if (logical_position >= (uint8_t)(-8)) {
-                        logical_position += 8;
-                    }
                     if (gb->io_registers[GB_IO_WX] == logical_position) {
                         gb->bg_fifo.read_end--;
                         gb->bg_fifo.read_end &= GB_FIFO_LENGTH - 1;
