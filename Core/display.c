@@ -908,6 +908,21 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
             }
             if (fifo_size(&gb->bg_fifo) > 0) break;
             
+            if (unlikely(gb->wy_triggered && !(gb->io_registers[GB_IO_LCDC] & 0x20) && !GB_is_cgb(gb))) {
+                /* See https://github.com/LIJI32/SameBoy/issues/278 for documentation */
+                uint8_t logical_position = gb->position_in_line + 7;
+                if (logical_position > 167) {
+                    logical_position = 0;
+                }
+                if (gb->io_registers[GB_IO_WX] == logical_position) {
+                    gb->bg_fifo.read_end--;
+                    gb->bg_fifo.read_end &= GB_FIFO_LENGTH - 1;
+                    gb->bg_fifo.fifo[gb->bg_fifo.read_end] = (GB_fifo_item_t){0,};
+                    gb->bg_fifo.size = 1;
+                    break;
+                }
+            }
+            
             fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1],
                              gb->current_tile_attributes & 7, gb->current_tile_attributes & 0x80, gb->current_tile_attributes & 0x20);
             gb->fetcher_state = 0;
@@ -1701,21 +1716,6 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     gb->bg_fifo.fifo[gb->bg_fifo.read_end] = (GB_fifo_item_t){0,};
                     gb->bg_fifo.size++;
                     gb->window_is_being_fetched = false;
-                }
-                
-                /* TODO: WX=0 behaves wrong, but WX=0 behaves wrong regardless in DMG mode */
-                if (!GB_is_cgb(gb) && gb->wy_triggered && !(gb->io_registers[GB_IO_LCDC] & 0x20) && gb->bg_fifo.size == 1) {
-                    /* See https://github.com/LIJI32/SameBoy/issues/278 for documentation */
-                    uint8_t logical_position = gb->position_in_line + 8;
-                    if (logical_position > 167) {
-                        logical_position = 0;
-                    }
-                    if (gb->io_registers[GB_IO_WX] == logical_position) {
-                        gb->bg_fifo.read_end--;
-                        gb->bg_fifo.read_end &= GB_FIFO_LENGTH - 1;
-                        gb->bg_fifo.fifo[gb->bg_fifo.read_end] = (GB_fifo_item_t){0,};
-                        gb->bg_fifo.size = 2;
-                    }
                 }
 
                 /* Handle objects */
