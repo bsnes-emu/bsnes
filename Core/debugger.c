@@ -1995,7 +1995,7 @@ static const debugger_command_t commands[] = {
         .argument_completer = symbol_completer, .modifiers_completer = rw_completer
     },
     {"unwatch", 3, unwatch, "Delete a watchpoint by its address, or all watchpoints", "[<expression>]", .argument_completer = symbol_completer},
-    {"softbreak", 2, softbreak, "Enable or disable software breakpoints", "(on|off)", .argument_completer = on_off_completer},
+    {"softbreak", 2, softbreak, "Enable or disable software breakpoints ('ld b, b' opcodes)", "(on|off)", .argument_completer = on_off_completer},
     {"list", 1, list, "List all set breakpoints and watchpoints"},
     {"ticks", 2, ticks, "Display the number of CPU ticks since the last time 'ticks' was" HELP_NEWLINE
                         "used"},
