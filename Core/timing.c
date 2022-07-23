@@ -365,6 +365,29 @@ static void rtc_run(GB_gameboy_t *gb, uint8_t cycles)
     }
 }
 
+static void camera_run(GB_gameboy_t *gb, uint8_t cycles)
+{
+    /* Do we have a camera? */
+    if (likely(gb->cartridge_type->mbc_type != GB_CAMERA)) return;
+
+    /* The camera mapper uses the PHI pin to clock itself */
+
+    /* PHI does not run in halt nor stop mode */
+    if (unlikely(gb->halted || gb->stopped)) return;
+
+    /* Only every other PHI is used (as the camera wants a 512KiHz clock) */
+    gb->camera_alignment += cycles;
+
+    /* Is the camera processing an image? */
+    if (likely(gb->camera_countdown == 0)) return;
+
+    gb->camera_countdown -= cycles;
+    if (gb->camera_countdown <= 0) {
+        gb->camera_countdown = 0;
+        GB_camera_updated(gb);
+    }
+}
+
 
 void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
 {
@@ -389,6 +412,7 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     gb->dma_cycles = cycles;
 
     timers_run(gb, cycles);
+    camera_run(gb, cycles);
 
     if (unlikely(gb->speed_switch_halt_countdown)) {
         gb->speed_switch_halt_countdown -= cycles;

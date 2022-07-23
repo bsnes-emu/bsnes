@@ -3,7 +3,7 @@
 #import <Core/gb.h>
 #import "GBAudioClient.h"
 #import "Document.h"
-#import "AppDelegate.h"
+#import "GBApp.h"
 #import "HexFiend/HexFiend.h"
 #import "GBMemoryByteArray.h"
 #import "GBWarningPopover.h"

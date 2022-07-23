@@ -7,7 +7,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
-        <customObject id="-2" userLabel="File's Owner" customClass="AppDelegate">
+        <customObject id="-2" userLabel="File's Owner" customClass="GBApp">
             <connections>
                 <outlet property="updateChanges" destination="ATt-VM-cb5" id="hJj-Nd-FBv"/>
                 <outlet property="updateProgressButton" destination="7nO-AA-WmG" id="wTa-9l-cOG"/>

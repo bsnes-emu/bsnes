@@ -908,6 +908,21 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
             }
             if (fifo_size(&gb->bg_fifo) > 0) break;
             
+            if (unlikely(gb->wy_triggered && !(gb->io_registers[GB_IO_LCDC] & 0x20) && !GB_is_cgb(gb))) {
+                /* See https://github.com/LIJI32/SameBoy/issues/278 for documentation */
+                uint8_t logical_position = gb->position_in_line + 7;
+                if (logical_position > 167) {
+                    logical_position = 0;
+                }
+                if (gb->io_registers[GB_IO_WX] == logical_position) {
+                    gb->bg_fifo.read_end--;
+                    gb->bg_fifo.read_end &= GB_FIFO_LENGTH - 1;
+                    gb->bg_fifo.fifo[gb->bg_fifo.read_end] = (GB_fifo_item_t){0,};
+                    gb->bg_fifo.size = 1;
+                    break;
+                }
+            }
+            
             fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1],
                              gb->current_tile_attributes & 7, gb->current_tile_attributes & 0x80, gb->current_tile_attributes & 0x20);
             gb->fetcher_state = 0;
@@ -1294,8 +1309,17 @@ static inline uint16_t mode3_batching_length(GB_gameboy_t *gb)
     if (gb->hdma_on) return 0;
     if (gb->stopped) return 0;
     if (GB_is_dma_active(gb)) return 0;
-    if (gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20) && (gb->io_registers[GB_IO_WX] < 8 || gb->io_registers[GB_IO_WX] == 166)) {
-        return 0;
+    if (gb->wy_triggered) {
+        if (gb->io_registers[GB_IO_LCDC] & 0x20) {
+            if ((gb->io_registers[GB_IO_WX] < 8 || gb->io_registers[GB_IO_WX] == 166)) {
+                return 0;
+            }
+        }
+        else {
+            if (gb->io_registers[GB_IO_WX] < 167 && !GB_is_cgb(gb)) {
+                return 0;
+            }
+        }
     }
 
     // No objects or window, timing is trivial
@@ -1638,13 +1662,13 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                 if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20)) {
                     bool should_activate_window = false;
                     if (gb->io_registers[GB_IO_WX] == 0) {
-                        static const uint8_t scx_to_wx0_comparisons[] = {-7, -9, -10, -11, -12, -13, -14, -14};
+                        static const uint8_t scx_to_wx0_comparisons[] = {-7, -1, -2, -3, -4, -5, -6, -6};
                         if (gb->position_in_line == scx_to_wx0_comparisons[gb->io_registers[GB_IO_SCX] & 7]) {
                             should_activate_window = true;
                         }
                     }
                     else if (gb->wx166_glitch) {
-                        static const uint8_t scx_to_wx166_comparisons[] = {-8, -9, -10, -11, -12, -13, -14, -15};
+                        static const uint8_t scx_to_wx166_comparisons[] = {-16, -1, -2, -3, -4, -5, -6, -7};
                         if (gb->position_in_line == scx_to_wx166_comparisons[gb->io_registers[GB_IO_SCX] & 7]) {
                             should_activate_window = true;
                         }
@@ -1683,13 +1707,14 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     }
                 }
                 
-                /* TODO: What happens when WX=0? */
+                /* TODO: What happens when WX=0? When the fifo is full? */
                 if (!GB_is_cgb(gb) && gb->wx_triggered && !gb->window_is_being_fetched &&
-                    gb->fetcher_state == 0 && gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) ) {
+                    gb->fetcher_state == 0 && gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) && gb->bg_fifo.size == 8) {
                     // Insert a pixel right at the FIFO's end
                     gb->bg_fifo.read_end--;
                     gb->bg_fifo.read_end &= GB_FIFO_LENGTH - 1;
                     gb->bg_fifo.fifo[gb->bg_fifo.read_end] = (GB_fifo_item_t){0,};
+                    gb->bg_fifo.size++;
                     gb->window_is_being_fetched = false;
                 }
 
