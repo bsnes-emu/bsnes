@@ -627,6 +627,10 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             case GB_IO_JOYP:
                 gb->joyp_accessed = true;
                 GB_timing_sync(gb);
+                if (unlikely(gb->joyp_switching_delay)) {
+                    return (gb->io_registers[addr & 0xFF] & ~0x30) | (gb->joyp_switch_value & 0x30);
+                }
+                return gb->io_registers[addr & 0xFF];
             case GB_IO_TMA:
             case GB_IO_LCDC:
             case GB_IO_SCY:
@@ -1497,6 +1501,14 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     GB_update_joyp(gb);
                 }
                 else if ((gb->io_registers[GB_IO_JOYP] & 0x30) != (value & 0x30)) {
+                    if (gb->model < GB_MODEL_SGB) { // DMG only
+                        if (gb->joyp_switching_delay) {
+                            gb->io_registers[GB_IO_JOYP] = (gb->joyp_switch_value & 0xF0) | (gb->io_registers[GB_IO_JOYP] & 0x0F);
+                        }
+                        gb->joyp_switch_value = value;
+                        gb->joyp_switching_delay = 24;
+                        value &= gb->io_registers[GB_IO_JOYP];
+                    }
                     GB_sgb_write(gb, value);
                     gb->io_registers[GB_IO_JOYP] = (value & 0xF0) | (gb->io_registers[GB_IO_JOYP] & 0x0F);
                     GB_update_joyp(gb);

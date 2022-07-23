@@ -559,6 +559,8 @@ struct GB_gameboy_internal_s {
         bool lcd_disabled_outside_of_vblank;
         int32_t allowed_pending_cycles;
         uint16_t mode3_batching_length;
+        uint8_t joyp_switching_delay;
+        uint8_t joyp_switch_value;
     )
 
     /* APU */
