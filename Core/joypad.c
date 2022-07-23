@@ -11,12 +11,12 @@ static inline uint16_t bounce_for_key(GB_gameboy_t *gb, GB_key_t key)
 {
     if (gb->model > GB_MODEL_CGB_E) {
         // AGB are less bouncy
-        return 0xC00;
+        return 0xBFF;
     }
     if (key == GB_KEY_START || key == GB_KEY_SELECT) {
-        return 0x2000;
+        return 0x1FFF;
     }
-    return 0x1000;
+    return 0xFFF;
 }
 
 static inline bool get_input(GB_gameboy_t *gb, uint8_t player, GB_key_t key)
@@ -27,6 +27,7 @@ static inline bool get_input(GB_gameboy_t *gb, uint8_t player, GB_key_t key)
     bool ret = gb->keys[player][key];
     
     if (likely(gb->key_bounce_timing[key] == 0)) return ret;
+    if (likely((gb->key_bounce_timing[key] & 0x3FF) > 0x300)) return ret;
     uint16_t semi_random = ((((key << 5) + gb->div_counter) * 17) ^ ((gb->apu.apu_cycles + gb->display_cycles) * 13));
     semi_random >>= 3;
     if (semi_random < gb->key_bounce_timing[key]) {
