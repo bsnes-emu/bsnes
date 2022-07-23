@@ -1,6 +1,12 @@
 #include "audio.h"
+#if defined(__APPLE__)
+#include <OpenAL/al.h>
+#include <OpenAL/alc.h>
+
+#else
 #include <AL/al.h>
 #include <AL/alc.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,6 +20,7 @@ static ALuint al_source = 0;
 static ALCint sample_rate = 0;
 static unsigned buffer_size = 0;
 static unsigned buffer_pos = 0;
+static bool is_paused = false;
 
 #define AL_ERR_STRINGIFY(x) #x
 #define AL_ERR_TOSTRING(x) AL_ERR_STRINGIFY(x)
@@ -21,9 +28,10 @@ static unsigned buffer_pos = 0;
 
 // Check if the previous OpenAL call returned an error.
 // If an error occurred a message will be logged to stderr.
-static bool check_al_error(const char *user_msg, const char *line) {
+static bool check_al_error(const char *user_msg, const char *line)
+{
     ALCenum error = alGetError();
-    char *description;
+    const char *description = "";
 
     switch (error) {
         case AL_NO_ERROR:
@@ -55,7 +63,8 @@ static bool check_al_error(const char *user_msg, const char *line) {
     return true;
 }
 
-static void _audio_deinit(void) {
+static void _audio_deinit(void)
+{
     // Stop the source (this should mark all queued buffers as processed)
     alSourceStop(al_source);
 
@@ -72,10 +81,17 @@ static void _audio_deinit(void) {
     }
 
     alDeleteSources(1, &al_source);
-    alcDestroyContext(al_context);
-    alcCloseDevice(al_device);
+    if (al_context) {
+        alcDestroyContext(al_context);
+        al_context = NULL;
+    }
+    
+    if (al_device) {
+        alcCloseDevice(al_device);
+        al_device = NULL;
+    }
 
-    if (audio_buffer != NULL) {
+    if (audio_buffer) {
         free(audio_buffer);
         audio_buffer = NULL;
     }
@@ -86,7 +102,6 @@ static void free_processed_buffers(void)
     ALint processed;
     alGetSourcei(al_source, AL_BUFFERS_PROCESSED, &processed);
     if (AL_ERROR("Failed to query number of processed buffers")) {
-        _audio_deinit();
         return;
     }
 
@@ -95,13 +110,11 @@ static void free_processed_buffers(void)
 
         alSourceUnqueueBuffers(al_source, 1, &buffer);
         if (AL_ERROR("Failed to unqueue buffer")) {
-            _audio_deinit();
             return;
         }
 
         alDeleteBuffers(1, &buffer);
         if (AL_ERROR("Failed to delete buffer")) {
-            _audio_deinit();
             return;
         }
     }
@@ -112,7 +125,6 @@ static bool _audio_is_playing(void)
     ALenum state;
     alGetSourcei(al_source, AL_SOURCE_STATE, &state);
     if (AL_ERROR("Failed to query source state")) {
-        _audio_deinit();
         return false;
     }
 
@@ -121,15 +133,12 @@ static bool _audio_is_playing(void)
 
 static void _audio_set_paused(bool paused)
 {
+    is_paused = paused;
     if (paused) {
         alSourcePause(al_source);
     }
     else {
         alSourcePlay(al_source);
-    }
-
-    if (AL_ERROR(NULL)) {
-        _audio_deinit();
     }
 }
 
@@ -140,7 +149,6 @@ static void _audio_clear_queue(void)
     // Stopping a source clears its queue
     alSourceStop(al_source);
     if (AL_ERROR(NULL)) {
-        _audio_deinit();
         return;
     }
 
@@ -178,6 +186,7 @@ static size_t _audio_get_queue_length(void)
 
 static void _audio_queue_sample(GB_sample_t *sample)
 {
+    if (is_paused) return;
     audio_buffer[buffer_pos++] = *sample;
 
     if (buffer_pos == buffer_size) {
@@ -186,17 +195,17 @@ static void _audio_queue_sample(GB_sample_t *sample)
         ALuint al_buffer;
         alGenBuffers(1, &al_buffer);
         if (AL_ERROR("Failed to create audio buffer")) {
-            return _audio_deinit();
+            return;
         }
 
         alBufferData(al_buffer, AL_FORMAT_STEREO16, audio_buffer, buffer_size * sizeof(GB_sample_t), sample_rate);
         if (AL_ERROR("Failed to buffer data")) {
-            return _audio_deinit();
+            return;
         }
 
         alSourceQueueBuffers(al_source, 1, &al_buffer);
         if (AL_ERROR("Failed to queue buffer")) {
-            return _audio_deinit();
+            return;
         }
 
         // In case of an audio underrun, the source might
@@ -239,6 +248,9 @@ static bool _audio_init(void)
     if (AL_ERROR("Failed to query sample rate")) {
         _audio_deinit();
         return false;
+    }
+    if (sample_rate == 0) {
+        sample_rate = 48000;
     }
 
     // Allocate our working buffer

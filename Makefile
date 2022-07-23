@@ -28,6 +28,7 @@ PB12_COMPRESS := build/pb12$(EXESUFFIX)
 
 ifeq ($(PLATFORM),Darwin)
 DEFAULT := cocoa
+ENABLE_OPENAL ?= 1
 else
 DEFAULT := sdl
 endif
@@ -138,7 +139,11 @@ SDL_LDFLAGS := $(shell sdl2-config --libs) -lpthread
 # so we must do this manually
 ifeq ($(ENABLE_OPENAL),1)
 SDL_CFLAGS += -DENABLE_OPENAL
+ifeq ($(PLATFORM),Darwin)
+SDL_LDFLAGS += -framework OpenAL
+else
 SDL_LDFLAGS += -lopenal
+endif
 SDL_AUDIO_DRIVERS += openal
 endif
 else
