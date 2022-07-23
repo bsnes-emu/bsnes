@@ -561,6 +561,7 @@ struct GB_gameboy_internal_s {
         uint16_t mode3_batching_length;
         uint8_t joyp_switching_delay;
         uint8_t joyp_switch_value;
+        uint16_t key_bounce_timing[GB_KEY_MAX];
     )
 
     /* APU */
@@ -687,6 +688,7 @@ struct GB_gameboy_internal_s {
         bool background_disabled;
         bool joyp_accessed;
         bool illegal_inputs_allowed;
+        bool no_bouncing_emulation;
 
         /* Timing */
         uint64_t last_sync;

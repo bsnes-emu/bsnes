@@ -1,6 +1,40 @@
 #include "gb.h"
 #include <assert.h>
 
+static inline bool should_bounce(GB_gameboy_t *gb)
+{
+    // Bouncing is super rare on an AGS, so don't emulate it on GB_MODEL_AGB_B (when addeed)
+    return !GB_is_sgb(gb) && !gb-> no_bouncing_emulation /*&& gb->model != GB_MODEL_AGB_B*/;
+}
+
+static inline uint16_t bounce_for_key(GB_gameboy_t *gb, GB_key_t key)
+{
+    if (gb->model > GB_MODEL_CGB_E) {
+        // AGB are less bouncy
+        return 0xC00;
+    }
+    if (key == GB_KEY_START || key == GB_KEY_SELECT) {
+        return 0x2000;
+    }
+    return 0x1000;
+}
+
+static inline bool get_input(GB_gameboy_t *gb, uint8_t player, GB_key_t key)
+{
+    if (player != 0) {
+        return gb->keys[player][key];
+    }
+    bool ret = gb->keys[player][key];
+    
+    if (likely(gb->key_bounce_timing[key] == 0)) return ret;
+    uint16_t semi_random = ((((key << 5) + gb->div_counter) * 17) ^ ((gb->apu.apu_cycles + gb->display_cycles) * 13));
+    semi_random >>= 3;
+    if (semi_random < gb->key_bounce_timing[key]) {
+        ret ^= true;
+    }
+    return ret;
+}
+
 void GB_update_joyp(GB_gameboy_t *gb)
 {
     if (gb->model & GB_MODEL_NO_SFC_BIT) return;
@@ -27,7 +61,7 @@ void GB_update_joyp(GB_gameboy_t *gb)
         case 2:
             /* Direction keys */
             for (uint8_t i = 0; i < 4; i++) {
-                gb->io_registers[GB_IO_JOYP] |= (!gb->keys[current_player][i]) << i;
+                gb->io_registers[GB_IO_JOYP] |= (!get_input(gb, current_player, i)) << i;
             }
             /* Forbid pressing two opposing keys, this breaks a lot of games; even if it's somewhat possible. */
             if (likely(!gb->illegal_inputs_allowed)) {
@@ -43,22 +77,21 @@ void GB_update_joyp(GB_gameboy_t *gb)
         case 1:
             /* Other keys */
             for (uint8_t i = 0; i < 4; i++) {
-                gb->io_registers[GB_IO_JOYP] |= (!gb->keys[current_player][i + 4]) << i;
+                gb->io_registers[GB_IO_JOYP] |= (!get_input(gb, current_player, i + 4)) << i;
             }
             break;
 
         case 0:
             for (uint8_t i = 0; i < 4; i++) {
-                gb->io_registers[GB_IO_JOYP] |= (!(gb->keys[current_player][i] || gb->keys[current_player][i + 4])) << i;
+                gb->io_registers[GB_IO_JOYP] |= (!(get_input(gb, current_player, i) || get_input(gb, current_player, i + 4))) << i;
             }
             break;
 
         nodefault;
     }
     
-    /* Todo: This assumes the keys *always* bounce, which is incorrect when emulating an SGB */
-    if (previous_state != (gb->io_registers[GB_IO_JOYP] & 0xF)) {
-        /* The joypad interrupt DOES occur on CGB (Tested on CGB-E), unlike what some documents say. */
+    // TODO: Implement the lame anti-debouncing mechanism as seen on the DMG schematics
+    if (previous_state & ~(gb->io_registers[GB_IO_JOYP] & 0xF)) {
         if (!(gb->io_registers[GB_IO_IF] & 0x10)) {
             gb->joyp_accessed = true;
             gb->io_registers[GB_IO_IF] |= 0x10;
@@ -86,6 +119,9 @@ void GB_icd_set_joyp(GB_gameboy_t *gb, uint8_t value)
 void GB_set_key_state(GB_gameboy_t *gb, GB_key_t index, bool pressed)
 {
     assert(index >= 0 && index < GB_KEY_MAX);
+    if (should_bounce(gb) && pressed != gb->keys[0][index]) {
+        gb->key_bounce_timing[index] = bounce_for_key(gb, index);
+    }
     gb->keys[0][index] = pressed;
     GB_update_joyp(gb);
 }
@@ -94,20 +130,21 @@ void GB_set_key_state_for_player(GB_gameboy_t *gb, GB_key_t index, unsigned play
 {
     assert(index >= 0 && index < GB_KEY_MAX);
     assert(player < 4);
+    if (should_bounce(gb) && pressed != gb->keys[player][index]) {
+        gb->key_bounce_timing[index] = bounce_for_key(gb, index);
+    }
     gb->keys[player][index] = pressed;
     GB_update_joyp(gb);
 }
 
 void GB_set_key_mask(GB_gameboy_t *gb, GB_key_mask_t mask)
 {
-    memset(gb->keys, 0, sizeof(gb->keys));
-    bool *key = &gb->keys[0][0];
-    while (mask) {
-        if (mask & 1) {
-            *key = true;
+    for (unsigned i = 0; i < GB_KEY_MAX; i++) {
+        bool pressed = mask & (1 << i);
+        if (should_bounce(gb) && pressed != gb->keys[0][i]) {
+            gb->key_bounce_timing[i] = bounce_for_key(gb, i);
         }
-        mask >>= 1;
-        key++;
+        gb->keys[0][i] = pressed;
     }
     
     GB_update_joyp(gb);
@@ -115,17 +152,46 @@ void GB_set_key_mask(GB_gameboy_t *gb, GB_key_mask_t mask)
 
 void GB_set_key_mask_for_player(GB_gameboy_t *gb, GB_key_mask_t mask, unsigned player)
 {
-    memset(gb->keys[player], 0, sizeof(gb->keys[player]));
-    bool *key = gb->keys[player];
-    while (mask) {
-        if (mask & 1) {
-            *key = true;
+    for (unsigned i = 0; i < GB_KEY_MAX; i++) {
+        bool pressed = mask & (1 << i);
+        if (should_bounce(gb) && pressed != gb->keys[player][i]) {
+            gb->key_bounce_timing[i] = bounce_for_key(gb, i);
         }
-        mask >>= 1;
-        key++;
+        gb->keys[player][i] = pressed;
     }
     
     GB_update_joyp(gb);
+}
+
+void GB_joypad_run(GB_gameboy_t *gb, unsigned cycles)
+{
+    bool should_update_joyp = false;
+    if (gb->joyp_switching_delay) {
+        if (gb->joyp_switching_delay > cycles) {
+            gb->joyp_switching_delay -= cycles;
+        }
+        else {
+            gb->joyp_switching_delay = 0;
+            gb->io_registers[GB_IO_JOYP] = (gb->joyp_switch_value & 0xF0) | (gb->io_registers[GB_IO_JOYP] & 0x0F);
+            should_update_joyp = true;
+        }
+    }
+    
+    for (unsigned i = 0; i < GB_KEY_MAX; i++) {
+        if (gb->key_bounce_timing[i]) {
+            should_update_joyp = true;
+            if (gb->key_bounce_timing[i] > cycles) {
+                gb->key_bounce_timing[i] -= cycles;
+            }
+            else {
+                gb->key_bounce_timing[i] = 0;
+            }
+        }
+    }
+    
+    if (should_update_joyp) {
+        GB_update_joyp(gb);
+    }
 }
 
 bool GB_get_joyp_accessed(GB_gameboy_t *gb)
@@ -141,4 +207,9 @@ void GB_clear_joyp_accessed(GB_gameboy_t *gb)
 void GB_set_allow_illegal_inputs(GB_gameboy_t *gb, bool allow)
 {
     gb->illegal_inputs_allowed = allow;
+}
+
+void GB_emulate_joypad_bouncing(GB_gameboy_t *gb, bool emulate)
+{
+    gb->no_bouncing_emulation = !emulate;
 }

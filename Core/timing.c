@@ -449,17 +449,8 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     
     gb->rumble_on_cycles += gb->rumble_strength & 3;
     gb->rumble_off_cycles += (gb->rumble_strength & 3) ^ 3;
-    if (gb->joyp_switching_delay) {
-        if (gb->joyp_switching_delay > cycles) {
-            gb->joyp_switching_delay -= cycles;
-        }
-        else {
-            gb->joyp_switching_delay = 0;
-            gb->io_registers[GB_IO_JOYP] = (gb->joyp_switch_value & 0xF0) | (gb->io_registers[GB_IO_JOYP] & 0x0F);
-            GB_update_joyp(gb);
-        }
-    }
-        
+    
+    GB_joypad_run(gb, cycles);
     GB_apu_run(gb, false);
     GB_display_run(gb, cycles, false);
     if (unlikely(!gb->stopped)) { // TODO: Verify what happens in STOP mode

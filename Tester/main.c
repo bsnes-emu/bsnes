@@ -432,6 +432,7 @@ int main(int argc, char **argv)
         GB_set_async_input_callback(&gb, async_input_callback);
         GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_EMULATE_HARDWARE);
         GB_set_rtc_mode(&gb, GB_RTC_MODE_ACCURATE);
+        GB_emulate_joypad_bouncing(&gb, false); // Adds too much noise
         
         if (GB_load_rom(&gb, filename)) {
             perror("Failed to load ROM");
