@@ -414,8 +414,15 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
         return 0xFF;
     }
 
-    if (gb->cartridge_type->mbc_type == GB_CAMERA && gb->mbc_ram_bank == 0 && addr >= 0xA100 && addr < 0xAF00) {
-        return GB_camera_read_image(gb, addr - 0xA100);
+    if (gb->cartridge_type->mbc_type == GB_CAMERA) {
+        /* Forbid reading RAM while the camera is busy. */
+        if (gb->camera_registers[GB_CAMERA_SHOOT_AND_1D_FLAGS] & 1) {
+            return 0;
+        }
+
+        if (gb->mbc_ram_bank == 0 && addr >= 0xA100 && addr < 0xAF00) {
+            return GB_camera_read_image(gb, addr - 0xA100);
+        }
     }
 
     uint8_t effective_bank = gb->mbc_ram_bank;
@@ -1220,7 +1227,12 @@ static void write_mbc_ram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     if (!gb->mbc_ram || !gb->mbc_ram_size) {
         return;
     }
-    
+
+    if (gb->cartridge_type->mbc_type == GB_CAMERA && (gb->camera_registers[GB_CAMERA_SHOOT_AND_1D_FLAGS] & 1)) {
+        /* Forbid writing to RAM while the camera is busy. */
+        return;
+    }
+
     uint8_t effective_bank = gb->mbc_ram_bank;
     if (gb->cartridge_type->mbc_type == GB_MBC3 && !gb->is_mbc30) {
         if (gb->cartridge_type->has_rtc) {
