@@ -114,9 +114,16 @@ static void free_processed_buffers(void)
         }
 
         alDeleteBuffers(1, &buffer);
+        /* Due to a limitation in Apple's OpenAL implementation, this function
+           can fail once in a few times. If it does, ignore the warning, and let
+           this buffer be freed in a later call to free_processed_buffers. */
+#if defined(__APPLE__)
+        if (alGetError()) return;
+#else
         if (AL_ERROR("Failed to delete buffer")) {
             return;
         }
+#endif
     }
 }
 
@@ -181,7 +188,7 @@ static size_t _audio_get_queue_length(void)
         processed = 0;
     }
 
-    return (buffers - processed) * buffer_size;
+    return (buffers - processed) * buffer_size + buffer_pos;
 }
 
 static void _audio_queue_sample(GB_sample_t *sample)
