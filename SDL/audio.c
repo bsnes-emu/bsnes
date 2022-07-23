@@ -40,9 +40,7 @@ bool GB_audio_init(void)
     for (unsigned i = 0; i < sizeof(drivers) / sizeof(drivers[0]); i++) {
         driver = drivers[i];
         if (driver->audio_init()) {
-            if (driver->audio_deinit) {
-                atexit(driver->audio_deinit);
-            }
+            atexit(driver->audio_deinit);
             return true;
         }
     }
