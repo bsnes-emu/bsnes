@@ -416,6 +416,9 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
         if (gb->apu.global_enable && gb->cgb_double_speed) {
             GB_log(gb, "ROM triggered an APU odd mode, which is currently not tested.\n");
         }
+        if (gb->cartridge_type->mbc_type == GB_CAMERA && (gb->camera_registers[GB_CAMERA_SHOOT_AND_1D_FLAGS] & 1) && !gb->cgb_double_speed) {
+            GB_log(gb, "ROM entered double speed mode with a camera cartridge, this could damage a real cartridge's camera.\n");
+        }
         
         if (gb->cgb_double_speed) {
             gb->cgb_double_speed = false;
