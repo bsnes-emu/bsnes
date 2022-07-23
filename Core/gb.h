@@ -529,10 +529,10 @@ struct GB_gameboy_internal_s {
         };
         bool camera_registers_mapped;
         uint8_t camera_registers[0x36];
-        uint8_t camera_alignment;
-        int32_t camera_countdown;
         uint8_t rumble_strength;
         bool cart_ir;
+        uint8_t camera_alignment;
+        int32_t camera_countdown;
     )
 
     /* HRAM and HW Registers */
