@@ -34,17 +34,18 @@
 
 - (void)copyBytes:(unsigned char *)dst range:(HFRange)range
 {
-    __block uint16_t addr = (uint16_t) range.location;
-    __block unsigned long long length = range.length;
-    if (_mode == GBMemoryEntireSpace) {
-        while (length) {
-            *(dst++) = [_document readMemory:addr++];
-            length--;
+    [_document performAtomicBlock:^{
+        uint8_t *_dst = dst;
+        uint16_t addr = (uint16_t) range.location;
+        unsigned long long length = range.length;
+        if (_mode == GBMemoryEntireSpace) {
+            while (length) {
+                *(_dst++) = [_document readMemory:addr++];
+                length--;
+            }
         }
-    }
-    else {
-        [_document performAtomicBlock:^{
-            unsigned char *_dst = dst;
+        else {
+            uint8_t *_dst = dst;
             uint16_t bank_backup = 0;
             GB_gameboy_t *gb = _document.gameboy;
             switch (_mode) {
@@ -94,8 +95,8 @@
                 default:
                     assert(false);
             }
-        }];
-    }
+        }
+    }];
 }
 
 - (NSArray *)byteSlices
