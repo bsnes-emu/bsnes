@@ -26,7 +26,7 @@
     NSButton *_controllersFocusCheckbox;
     NSEventModifierFlags previousModifiers;
     
-    NSPopUpButton *_dmgPopupButton, *_sgbPopupButton, *_cgbPopupButton;
+    NSPopUpButton *_dmgPopupButton, *_sgbPopupButton, *_cgbPopupButton, *_agbPopupButton;
     NSPopUpButton *_preferredJoypadButton;
     NSPopUpButton *_rumbleModePopupButton;
     NSPopUpButton *_hotkey1PopupButton;
@@ -796,6 +796,17 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
     return _cgbPopupButton;
 }
 
+- (void)setAgbPopupButton:(NSPopUpButton *)agbPopupButton
+{
+    _agbPopupButton = agbPopupButton;
+    [_agbPopupButton selectItemWithTag:[[NSUserDefaults standardUserDefaults] integerForKey:@"GBAGBModel"]];
+}
+
+- (NSPopUpButton *)agbPopupButton
+{
+    return _agbPopupButton;
+}
+
 - (IBAction)dmgModelChanged:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
@@ -816,6 +827,13 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
     [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
                                               forKey:@"GBCGBModel"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBCGBModelChanged" object:nil];
+}
+
+- (IBAction)agbModelChanged:(id)sender
+{
+    [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
+                                              forKey:@"GBAGBModel"];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBAGBModelChanged" object:nil];
 }
 
 - (IBAction)reloadButtonsData:(id)sender

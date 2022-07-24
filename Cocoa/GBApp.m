@@ -70,6 +70,7 @@ static uint32_t color_to_int(NSColor *color)
                                                               
                                                               @"GBDMGModel": @(GB_MODEL_DMG_B),
                                                               @"GBCGBModel": @(GB_MODEL_CGB_E),
+                                                              @"GBAGBModel": @(GB_MODEL_AGB_A),
                                                               @"GBSGBModel": @(GB_MODEL_SGB2),
                                                               @"GBRumbleMode": @(GB_RUMBLE_CARTRIDGE_ONLY),
                                                               

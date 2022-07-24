@@ -281,7 +281,7 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
             return GB_MODEL_MGB;
         
         case MODEL_AGB:
-            return GB_MODEL_AGB;
+            return (GB_model_t)[[NSUserDefaults standardUserDefaults] integerForKey:@"GBAGBModel"];
     }
 }
 
@@ -797,6 +797,12 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
                                              selector:@selector(cgbModelChanged)
                                                  name:@"GBCGBModelChanged"
                                                object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(agbModelChanged)
+                                                 name:@"GBAGBModelChanged"
+                                               object:nil];
+    
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updateVolume)
@@ -2125,6 +2131,15 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 {
     modelsChanging = true;
     if (current_model == MODEL_CGB) {
+        [self reset:nil];
+    }
+    modelsChanging = false;
+}
+
+- (void)agbModelChanged
+{
+    modelsChanging = true;
+    if (current_model == MODEL_AGB) {
         [self reset:nil];
     }
     modelsChanging = false;

@@ -27,6 +27,7 @@
 @property IBOutlet NSPopUpButton *dmgPopupButton;
 @property IBOutlet NSPopUpButton *sgbPopupButton;
 @property IBOutlet NSPopUpButton *cgbPopupButton;
+@property IBOutlet NSPopUpButton *agbPopupButton;
 @property IBOutlet NSPopUpButton *preferredJoypadButton;
 @property IBOutlet NSPopUpButton *playerListButton;
 @property IBOutlet NSButton *autoUpdatesCheckbox;
