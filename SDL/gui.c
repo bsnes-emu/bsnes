@@ -517,10 +517,26 @@ static const char *current_rtc_mode_string(unsigned index)
     return "";
 }
 
+static void cycle_agb_revision(unsigned index)
+{
+    
+    configuration.agb_revision ^= GB_MODEL_GBP_BIT;
+    pending_command = GB_SDL_RESET_COMMAND;
+}
+
+static const char *current_agb_revision_string(unsigned index)
+{
+    if (configuration.agb_revision == GB_MODEL_GBP_A) {
+        return "CPU AGB A (GBP)";
+    }
+    return "CPU AGB A (AGB)";
+}
+
 static const struct menu_item emulation_menu[] = {
     {"Emulated Model:", cycle_model, current_model_string, cycle_model_backwards},
-    {"GBC Revision:", cycle_cgb_revision, current_cgb_revision_string, cycle_cgb_revision_backwards},
     {"SGB Revision:", cycle_sgb_revision, current_sgb_revision_string, cycle_sgb_revision_backwards},
+    {"GBC Revision:", cycle_cgb_revision, current_cgb_revision_string, cycle_cgb_revision_backwards},
+    {"GBA Revision:", cycle_agb_revision, current_agb_revision_string, cycle_agb_revision},
     {"Boot ROMs Folder:", toggle_bootrom, current_bootrom_string, toggle_bootrom},
     {"Rewind Length:", cycle_rewind, current_rewind_string, cycle_rewind_backwards},
     {"Real Time Clock:", toggle_rtc_mode, current_rtc_mode_string, toggle_rtc_mode},

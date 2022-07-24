@@ -131,6 +131,7 @@ typedef struct {
         bool gui_pallete_enabled; // Change the GUI palette only once the user changed the DMG palette
         char dmg_palette_name[25];
         hotkey_action_t hotkey_actions[2];
+        uint16_t agb_revision;
     };
 } configuration_t;
 

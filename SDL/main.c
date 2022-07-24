@@ -666,7 +666,7 @@ restart:
     {
         [MODEL_DMG] = GB_MODEL_DMG_B,
         [MODEL_CGB] = GB_MODEL_CGB_0 + configuration.cgb_revision,
-        [MODEL_AGB] = GB_MODEL_AGB_A,
+        [MODEL_AGB] = configuration.agb_revision,
         [MODEL_MGB] = GB_MODEL_MGB,
         [MODEL_SGB] = (GB_model_t [])
         {
@@ -901,6 +901,9 @@ int main(int argc, char **argv)
         // Fix broken defaults, should keys 12-31 should be unmapped by default
         if (configuration.joypad_configuration[31] == 0) {
             memset(configuration.joypad_configuration + 12 , -1, 32 - 12);
+        }
+        if ((configuration.agb_revision & ~GB_MODEL_GBP_BIT) != GB_MODEL_AGB_A) {
+            configuration.agb_revision = GB_MODEL_AGB_A;
         }
     }
     
