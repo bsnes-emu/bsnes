@@ -282,7 +282,7 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border)
         if (gb->color_correction_mode != GB_COLOR_CORRECTION_CORRECT_CURVES) {
             uint8_t new_r, new_g, new_b;
             if (agb) {
-                new_g = (g * 6 + b * 1) / 7;
+                new_g = (g * 5 + b * 1) / 6;
             }
             else {
                 new_g = (g * 3 + b) / 4;
@@ -298,9 +298,16 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border)
                 new_g = new_g * 7 / 8 + (r   +   b) / 16;
                 new_b = new_b * 7 / 8 + (r + g    ) / 16;
                 
-                new_r = new_r * (224 - 32) / 255 + 32;
-                new_g = new_g * (220 - 36) / 255 + 36;
-                new_b = new_b * (216 - 40) / 255 + 40;
+                if (agb) {
+                    new_r = new_r * (224 - 40) / 255 + 20;
+                    new_g = new_g * (220 - 36) / 255 + 18;
+                    new_b = new_b * (216 - 32) / 255 + 16;
+                }
+                else {
+                    new_r = new_r * (220 - 40) / 255 + 40;
+                    new_g = new_g * (224 - 36) / 255 + 36;
+                    new_b = new_b * (216 - 32) / 255 + 32;
+                }
             }
             else if (gb->color_correction_mode == GB_COLOR_CORRECTION_LOW_CONTRAST) {
                 r = new_r;
@@ -311,9 +318,16 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border)
                 new_g = new_g * 7 / 8 + (r   +   b) / 16;
                 new_b = new_b * 7 / 8 + (r + g    ) / 16;
                 
-                new_r = new_r * (162 - 67) / 255 + 67;
-                new_g = new_g * (167 - 62) / 255 + 62;
-                new_b = new_b * (157 - 58) / 255 + 58;
+                if (agb) {
+                    new_r = new_r * (167 - 27) / 255 + 27;
+                    new_g = new_g * (165 - 24) / 255 + 24;
+                    new_b = new_b * (157 - 22) / 255 + 22;
+                }
+                else {
+                    new_r = new_r * (162 - 45) / 255 + 45;
+                    new_g = new_g * (167 - 41) / 255 + 41;
+                    new_b = new_b * (157 - 38) / 255 + 38;
+                }
             }
             else if (gb->color_correction_mode == GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS) {
                 uint8_t old_max = MAX(r, MAX(g, b));
