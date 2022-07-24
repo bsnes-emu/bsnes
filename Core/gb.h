@@ -33,6 +33,7 @@
 #define GB_MODEL_DMG_FAMILY 0x000
 #define GB_MODEL_MGB_FAMILY 0x100
 #define GB_MODEL_CGB_FAMILY 0x200
+#define GB_MODEL_GBP_BIT 0x20
 #define GB_MODEL_PAL_BIT 0x40
 #define GB_MODEL_NO_SFC_BIT 0x80
 
@@ -117,9 +118,12 @@ typedef enum {
     GB_MODEL_CGB_E = 0x205,
     // GB_MODEL_AGB_0 = 0x206,
     GB_MODEL_AGB_A = 0x207,
+    GB_MODEL_GBP_A = GB_MODEL_AGB_A | GB_MODEL_GBP_BIT, // AGB-A inside a Game Boy Player
     GB_MODEL_AGB = GB_MODEL_AGB_A,
+    GB_MODEL_GBP = GB_MODEL_GBP_A,
     //GB_MODEL_AGB_B = 0x208
     //GB_MODEL_AGB_E = 0x209
+    //GB_MODEL_GBP_E = GB_MODEL_AGB_E | GB_MODEL_GBP_BIT, // AGB-E inside a Game Boy Player
 } GB_model_t;
 
 enum {

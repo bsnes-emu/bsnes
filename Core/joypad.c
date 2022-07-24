@@ -4,7 +4,7 @@
 static inline bool should_bounce(GB_gameboy_t *gb)
 {
     // Bouncing is super rare on an AGS, so don't emulate it on GB_MODEL_AGB_B (when addeed)
-    return !GB_is_sgb(gb) && !gb-> no_bouncing_emulation /*&& gb->model != GB_MODEL_AGB_B*/;
+    return !GB_is_sgb(gb) && !gb-> no_bouncing_emulation && !(gb->model & GB_MODEL_GBP_BIT) /*&& gb->model != GB_MODEL_AGB_B*/;
 }
 
 static inline uint16_t bounce_for_key(GB_gameboy_t *gb, GB_key_t key)

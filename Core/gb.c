@@ -1392,6 +1392,7 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_MGB:
         case GB_MODEL_CGB_E:
         case GB_MODEL_AGB_A: /* Unverified */
+        case GB_MODEL_GBP_A:
             for (unsigned i = 0; i < gb->ram_size; i++) {
                 gb->ram[i] = GB_random();
             }
@@ -1456,6 +1457,7 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_CGB_D:
         case GB_MODEL_CGB_E:
         case GB_MODEL_AGB_A:
+        case GB_MODEL_GBP_A:
             for (unsigned i = 0; i < sizeof(gb->hram); i++) {
                 gb->hram[i] = GB_random();
             }
@@ -1489,6 +1491,7 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_CGB_D: 
         case GB_MODEL_CGB_E:
         case GB_MODEL_AGB_A:
+        case GB_MODEL_GBP_A:
             /* Zero'd out by boot ROM anyway */
             break;
             
@@ -1603,6 +1606,7 @@ static void request_boot_rom(GB_gameboy_t *gb)
                 type = GB_BOOT_ROM_CGB;
                 break;
             case GB_MODEL_AGB_A:
+            case GB_MODEL_GBP_A:
                 type = GB_BOOT_ROM_AGB;
                 break;
         }

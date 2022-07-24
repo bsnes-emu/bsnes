@@ -489,6 +489,7 @@ internal uint8_t GB_read_oam(GB_gameboy_t *gb, uint8_t addr)
     switch (gb->model) {
         case GB_MODEL_CGB_E:
         case GB_MODEL_AGB_A:
+        case GB_MODEL_GBP_A:
             return (addr & 0xF0) | (addr >> 4);
             
         case GB_MODEL_CGB_D:
@@ -1279,6 +1280,7 @@ static void write_oam(GB_gameboy_t *gb, uint8_t addr, uint8_t value)
             break;
         case GB_MODEL_CGB_E:
         case GB_MODEL_AGB_A:
+        case GB_MODEL_GBP_A:
         case GB_MODEL_DMG_B:
         case GB_MODEL_MGB:
         case GB_MODEL_SGB_NTSC:
@@ -1819,11 +1821,11 @@ void GB_hdma_run(GB_gameboy_t *gb)
         }
         gb->hdma_current_src++;
         GB_advance_cycles(gb, cycles);
-        if (gb->addr_for_hdma_conflict == 0xFFFF /* || (gb->model >= GB_MODEL_AGB_B && gb->cgb_double_speed) */) {
+        if (gb->addr_for_hdma_conflict == 0xFFFF /* || ((gb->model & ~GB_MODEL_GBP_BIT) >= GB_MODEL_AGB_B && gb->cgb_double_speed) */) {
             uint16_t addr = (gb->hdma_current_dest++ & 0x1FFF);
             gb->vram[vram_base + addr] = byte;
             // TODO: vram_write_blocked might not be the correct timing
-            if (gb->vram_write_blocked /* && gb->model < GB_MODEL_AGB_B */) {
+            if (gb->vram_write_blocked /* && (gb->model & ~GB_MODEL_GBP_BIT) < GB_MODEL_AGB_B */) {
                 gb->vram[(vram_base ^ 0x2000) + addr] = byte;
             }
         }
@@ -1837,7 +1839,7 @@ void GB_hdma_run(GB_gameboy_t *gb)
                 uint16_t addr = (gb->hdma_current_dest & gb->addr_for_hdma_conflict & 0x1FFF);
                 gb->vram[vram_base + addr] = byte;
                 // TODO: vram_write_blocked might not be the correct timing
-                if (gb->vram_write_blocked /* && gb->model < GB_MODEL_AGB_B */) {
+                if (gb->vram_write_blocked /* && (gb->model & ~GB_MODEL_GBP_BIT) < GB_MODEL_AGB_B */) {
                     gb->vram[(vram_base ^ 0x2000) + addr] = byte;
                 }
             }
