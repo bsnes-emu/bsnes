@@ -121,6 +121,7 @@ void GB_set_key_state(GB_gameboy_t *gb, GB_key_t index, bool pressed)
 {
     assert(index >= 0 && index < GB_KEY_MAX);
     if (should_bounce(gb) && pressed != gb->keys[0][index]) {
+        gb->joypad_is_stable = false;
         gb->key_bounce_timing[index] = bounce_for_key(gb, index);
     }
     gb->keys[0][index] = pressed;
