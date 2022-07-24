@@ -102,7 +102,7 @@ static bool _audio_init(void)
     return true;
 }
 
-void _audio_deinit(void)
+static void _audio_deinit(void)
 {
     _audio_set_paused(true);
     SDL_CloseAudioDevice(device_id);
