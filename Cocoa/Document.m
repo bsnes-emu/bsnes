@@ -1071,6 +1071,11 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         else {
             ret = GB_load_rom(&gb, [fileName UTF8String]);
         }
+        if (GB_save_battery_size(&gb)) {
+            if (access(self.savPath.UTF8String, W_OK)) {
+                GB_log(&gb, "The save path for this ROM is not writeable, progress will not be saved.\n");
+            }
+        }
         GB_load_battery(&gb, self.savPath.UTF8String);
         GB_load_cheats(&gb, self.chtPath.UTF8String);
         [self.cheatWindowController cheatsUpdated];

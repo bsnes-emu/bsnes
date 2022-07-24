@@ -737,6 +737,18 @@ restart:
     else {
         GB_load_rom(&gb, filename);
     }
+    
+    /* Configure battery */
+    char battery_save_path[path_length + 5]; /* At the worst case, size is strlen(path) + 4 bytes for .sav + NULL */
+    replace_extension(filename, path_length, battery_save_path, ".sav");
+    battery_save_path_ptr = battery_save_path;
+    GB_load_battery(&gb, battery_save_path);
+    if (GB_save_battery_size(&gb)) {
+        if (access(battery_save_path, W_OK)) {
+            GB_log(&gb, "The save path for this ROM is not writeable, progress will not be saved.\n");
+        }
+    }
+    
     end_capturing_logs(true, error, SDL_MESSAGEBOX_WARNING, "Warning");
     
     static char start_text[64];
@@ -745,13 +757,6 @@ restart:
     sprintf(start_text, "SameBoy v" GB_VERSION "\n%s\n%08X", title, GB_get_rom_crc32(&gb));
     show_osd_text(start_text);
 
-    
-    /* Configure battery */
-    char battery_save_path[path_length + 5]; /* At the worst case, size is strlen(path) + 4 bytes for .sav + NULL */
-    replace_extension(filename, path_length, battery_save_path, ".sav");
-    battery_save_path_ptr = battery_save_path;
-    GB_load_battery(&gb, battery_save_path);
-    
     /* Configure symbols */
     GB_debugger_load_symbol_file(&gb, resource_path("registers.sym"));
     
