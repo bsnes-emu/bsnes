@@ -132,6 +132,7 @@ void GB_set_key_state_for_player(GB_gameboy_t *gb, GB_key_t index, unsigned play
     assert(index >= 0 && index < GB_KEY_MAX);
     assert(player < 4);
     if (should_bounce(gb) && pressed != gb->keys[player][index]) {
+        gb->joypad_is_stable = false;
         gb->key_bounce_timing[index] = bounce_for_key(gb, index);
     }
     gb->keys[player][index] = pressed;
@@ -143,6 +144,7 @@ void GB_set_key_mask(GB_gameboy_t *gb, GB_key_mask_t mask)
     for (unsigned i = 0; i < GB_KEY_MAX; i++) {
         bool pressed = mask & (1 << i);
         if (should_bounce(gb) && pressed != gb->keys[0][i]) {
+            gb->joypad_is_stable = false;
             gb->key_bounce_timing[i] = bounce_for_key(gb, i);
         }
         gb->keys[0][i] = pressed;
@@ -156,6 +158,7 @@ void GB_set_key_mask_for_player(GB_gameboy_t *gb, GB_key_mask_t mask, unsigned p
     for (unsigned i = 0; i < GB_KEY_MAX; i++) {
         bool pressed = mask & (1 << i);
         if (should_bounce(gb) && pressed != gb->keys[player][i]) {
+            gb->joypad_is_stable = false;
             gb->key_bounce_timing[i] = bounce_for_key(gb, i);
         }
         gb->keys[player][i] = pressed;
@@ -166,8 +169,11 @@ void GB_set_key_mask_for_player(GB_gameboy_t *gb, GB_key_mask_t mask, unsigned p
 
 void GB_joypad_run(GB_gameboy_t *gb, unsigned cycles)
 {
+    if (gb->joypad_is_stable) return;
     bool should_update_joyp = false;
+    gb->joypad_is_stable = true;
     if (gb->joyp_switching_delay) {
+        gb->joypad_is_stable = false;
         if (gb->joyp_switching_delay > cycles) {
             gb->joyp_switching_delay -= cycles;
         }
@@ -180,6 +186,7 @@ void GB_joypad_run(GB_gameboy_t *gb, unsigned cycles)
     
     for (unsigned i = 0; i < GB_KEY_MAX; i++) {
         if (gb->key_bounce_timing[i]) {
+            gb->joypad_is_stable = false;
             should_update_joyp = true;
             if (gb->key_bounce_timing[i] > cycles) {
                 gb->key_bounce_timing[i] -= cycles;

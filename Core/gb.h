@@ -689,6 +689,7 @@ struct GB_gameboy_internal_s {
         bool joyp_accessed;
         bool illegal_inputs_allowed;
         bool no_bouncing_emulation;
+        bool joypad_is_stable;
 
         /* Timing */
         uint64_t last_sync;
