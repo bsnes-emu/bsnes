@@ -217,7 +217,7 @@ void GB_set_allow_illegal_inputs(GB_gameboy_t *gb, bool allow)
     gb->illegal_inputs_allowed = allow;
 }
 
-void GB_emulate_joypad_bouncing(GB_gameboy_t *gb, bool emulate)
+void GB_set_emulate_joypad_bouncing(GB_gameboy_t *gb, bool emulate)
 {
     gb->no_bouncing_emulation = !emulate;
 }
