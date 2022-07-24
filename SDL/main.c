@@ -656,6 +656,16 @@ static void load_boot_rom(GB_gameboy_t *gb, GB_boot_rom_t type)
     }
 }
 
+static bool is_path_writeable(const char *path)
+{
+    if (!access(path, W_OK)) return true;
+    int fd = creat(path, 0644);
+    if (fd == -1) return false;
+    close(fd);
+    unlink(path);
+    return true;
+}
+
 static void run(void)
 {
     SDL_ShowCursor(SDL_DISABLE);
@@ -744,7 +754,7 @@ restart:
     battery_save_path_ptr = battery_save_path;
     GB_load_battery(&gb, battery_save_path);
     if (GB_save_battery_size(&gb)) {
-        if (access(battery_save_path, W_OK)) {
+        if (!is_path_writeable(battery_save_path)) {
             GB_log(&gb, "The save path for this ROM is not writeable, progress will not be saved.\n");
         }
     }

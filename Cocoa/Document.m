@@ -1049,6 +1049,16 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     return fileName;
 }
 
+static bool is_path_writeable(const char *path)
+{
+    if (!access(path, W_OK)) return true;
+    int fd = creat(path, 0644);
+    if (fd == -1) return false;
+    close(fd);
+    unlink(path);
+    return true;
+}
+
 - (int) loadROM
 {
     __block int ret = 0;
@@ -1078,7 +1088,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
             ret = GB_load_rom(&gb, [fileName UTF8String]);
         }
         if (GB_save_battery_size(&gb)) {
-            if (access(self.savPath.UTF8String, W_OK)) {
+            if (!is_path_writeable(self.savPath.UTF8String)) {
                 GB_log(&gb, "The save path for this ROM is not writeable, progress will not be saved.\n");
             }
         }
