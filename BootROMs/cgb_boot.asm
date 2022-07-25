@@ -565,7 +565,12 @@ AnimationColors:
     dw $017D ; Orange
     dw $241D ; Red
     dw $6D38 ; Purple
-    dw $7102 ; Blue
+IF DEF(AGB)
+    dw $6D60 ; Blue
+ELSE
+    dw $5500 ; Blue
+ENDC
+    
 AnimationColorsEnd:
 
 ; Helper Functions
