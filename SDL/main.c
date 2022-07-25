@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include <ctype.h>
+#include <unistd.h>
 #include <errno.h>
 #include <OpenDialog/open_dialog.h>
 #include <SDL.h>
@@ -13,7 +14,7 @@
 #include "console.h"
 
 #ifndef _WIN32
-#include <unistd.h>
+#include <fcntl.h>
 #else
 #include <Windows.h>
 #endif

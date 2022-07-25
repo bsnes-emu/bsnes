@@ -22,3 +22,11 @@ int access(const char *filename, int mode)
     return _waccess(w_filename, mode);
 }
 
+int creat(const char *filename, int mode)
+{
+    wchar_t w_filename[MAX_PATH] = {0,};
+    MultiByteToWideChar(CP_UTF8, 0, filename, -1, w_filename, sizeof(w_filename) / sizeof(w_filename[0]));
+    
+    return _wcreat(w_filename, mode);
+}
+
