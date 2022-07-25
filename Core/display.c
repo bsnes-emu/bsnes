@@ -281,12 +281,21 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border)
         
         if (gb->color_correction_mode != GB_COLOR_CORRECTION_CORRECT_CURVES) {
             uint8_t new_r, new_g, new_b;
+            double gamma = 2.2;
+            if (gb->color_correction_mode < GB_COLOR_CORRECTION_REDUCE_CONTRAST) {
+                /* Don't use absolutely gamma-correct mixing for the high-contrast
+                   modes, to prevent the blue hues from being too washed out */
+                gamma = 1.6;
+            }
+            
+            // TODO: Optimze pow out using a LUT
             if (agb) {
-                new_g = (g * 5 + b) / 6;
+                new_g = pow((pow(g / 255.0, gamma) * 5 + pow(b / 255.0, gamma)) / 6, 1 / gamma) * 255;
             }
             else {
-                new_g = (g * 3 + b) / 4;
+                new_g = pow((pow(g / 255.0, gamma) * 3 + pow(b / 255.0, gamma)) / 4, 1 / gamma) * 255;
             }
+   
             new_r = r;
             new_b = b;
             if (gb->color_correction_mode == GB_COLOR_CORRECTION_REDUCE_CONTRAST) {
