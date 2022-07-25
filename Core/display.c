@@ -282,7 +282,7 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border)
         if (gb->color_correction_mode != GB_COLOR_CORRECTION_CORRECT_CURVES) {
             uint8_t new_r, new_g, new_b;
             if (agb) {
-                new_g = (g * 5 + b * 1) / 6;
+                new_g = (g * 5 + b) / 6;
             }
             else {
                 new_g = (g * 3 + b) / 4;
