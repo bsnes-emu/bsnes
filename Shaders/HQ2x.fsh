@@ -30,7 +30,7 @@ STATIC vec4 interp_3px(vec4 c1, float w1, vec4 c2, float w2, vec4 c3, float w3)
 STATIC vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
     // o = offset, the width of a pixel
-    vec2 o = 1.0 / input_resolution;
+    vec2 o = vec2(1, 1);
     
     /* We always calculate the top left pixel.  If we need a different pixel, we flip the image */
 
@@ -40,17 +40,15 @@ STATIC vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 ou
     if (p.x > 0.5) o.x = -o.x;
     if (p.y > 0.5) o.y = -o.y;
 
-
-
-    vec4 w0 = texture(image, position + vec2( -o.x, -o.y));
-    vec4 w1 = texture(image, position + vec2(    0, -o.y));
-    vec4 w2 = texture(image, position + vec2(  o.x, -o.y));
-    vec4 w3 = texture(image, position + vec2( -o.x,    0));
-    vec4 w4 = texture(image, position + vec2(    0,    0));
-    vec4 w5 = texture(image, position + vec2(  o.x,    0));
-    vec4 w6 = texture(image, position + vec2( -o.x,  o.y));
-    vec4 w7 = texture(image, position + vec2(    0,  o.y));
-    vec4 w8 = texture(image, position + vec2(  o.x,  o.y));
+    vec4 w0 = texture_relative(image, position, vec2( -o.x, -o.y));
+    vec4 w1 = texture_relative(image, position, vec2(    0, -o.y));
+    vec4 w2 = texture_relative(image, position, vec2(  o.x, -o.y));
+    vec4 w3 = texture_relative(image, position, vec2( -o.x,    0));
+    vec4 w4 = texture_relative(image, position, vec2(    0,    0));
+    vec4 w5 = texture_relative(image, position, vec2(  o.x,    0));
+    vec4 w6 = texture_relative(image, position, vec2( -o.x,  o.y));
+    vec4 w7 = texture_relative(image, position, vec2(    0,  o.y));
+    vec4 w8 = texture_relative(image, position, vec2(  o.x,  o.y));
 
     int pattern = 0;
     if (is_different(w0, w4)) pattern |= 1;

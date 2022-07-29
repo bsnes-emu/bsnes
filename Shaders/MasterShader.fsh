@@ -18,6 +18,12 @@ vec4 _texture(sampler2D t, vec2 pos)
     return pow(texture(t, pos), vec4(GAMMA));
 }
 
+vec4 texture_relative(sampler2D t, vec2 pos, vec2 offset)
+{
+    vec2 input_resolution = textureSize(t, 0);
+    return _texture(t, (floor(pos * input_resolution) + offset + vec2(0.5, 0.5)) / input_resolution);
+}
+
 #define texture _texture
 
 #line 1

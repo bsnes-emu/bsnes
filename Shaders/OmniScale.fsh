@@ -27,7 +27,7 @@ STATIC bool is_different(vec4 a, vec4 b)
 STATIC vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
     // o = offset, the width of a pixel
-    vec2 o = 1.0 / input_resolution;
+    vec2 o = vec2(1, 1);
     
     /* We always calculate the top left quarter.  If we need a different quarter, we flip our co-ordinates */
 
@@ -43,15 +43,15 @@ STATIC vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 ou
         p.y = 1.0 - p.y;
     }
 
-    vec4 w0 = texture(image, position + vec2( -o.x, -o.y));
-    vec4 w1 = texture(image, position + vec2(    0, -o.y));
-    vec4 w2 = texture(image, position + vec2(  o.x, -o.y));
-    vec4 w3 = texture(image, position + vec2( -o.x,    0));
-    vec4 w4 = texture(image, position + vec2(    0,    0));
-    vec4 w5 = texture(image, position + vec2(  o.x,    0));
-    vec4 w6 = texture(image, position + vec2( -o.x,  o.y));
-    vec4 w7 = texture(image, position + vec2(    0,  o.y));
-    vec4 w8 = texture(image, position + vec2(  o.x,  o.y));
+    vec4 w0 = texture_relative(image, position, vec2( -o.x, -o.y));
+    vec4 w1 = texture_relative(image, position, vec2(    0, -o.y));
+    vec4 w2 = texture_relative(image, position, vec2(  o.x, -o.y));
+    vec4 w3 = texture_relative(image, position, vec2( -o.x,    0));
+    vec4 w4 = texture_relative(image, position, vec2(    0,    0));
+    vec4 w5 = texture_relative(image, position, vec2(  o.x,    0));
+    vec4 w6 = texture_relative(image, position, vec2( -o.x,  o.y));
+    vec4 w7 = texture_relative(image, position, vec2(    0,  o.y));
+    vec4 w8 = texture_relative(image, position, vec2(  o.x,  o.y));
 
     int pattern = 0;
     if (is_different(w0, w4)) pattern |= 1 << 0;
@@ -228,13 +228,13 @@ STATIC vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 ou
     }
 
     /* We need more samples to "solve" this diagonal */
-    vec4 x0 = texture(image, position + vec2( -o.x * 2.0, -o.y * 2.0));
-    vec4 x1 = texture(image, position + vec2( -o.x      , -o.y * 2.0));
-    vec4 x2 = texture(image, position + vec2(  0.0      , -o.y * 2.0));
-    vec4 x3 = texture(image, position + vec2(  o.x      , -o.y * 2.0));
-    vec4 x4 = texture(image, position + vec2( -o.x * 2.0, -o.y      ));
-    vec4 x5 = texture(image, position + vec2( -o.x * 2.0,  0.0      ));
-    vec4 x6 = texture(image, position + vec2( -o.x * 2.0,  o.y      ));
+    vec4 x0 = texture_relative(image, position, vec2( -o.x * 2.0, -o.y * 2.0));
+    vec4 x1 = texture_relative(image, position, vec2( -o.x      , -o.y * 2.0));
+    vec4 x2 = texture_relative(image, position, vec2(  0.0      , -o.y * 2.0));
+    vec4 x3 = texture_relative(image, position, vec2(  o.x      , -o.y * 2.0));
+    vec4 x4 = texture_relative(image, position, vec2( -o.x * 2.0, -o.y      ));
+    vec4 x5 = texture_relative(image, position, vec2( -o.x * 2.0,  0.0      ));
+    vec4 x6 = texture_relative(image, position, vec2( -o.x * 2.0,  o.y      ));
 
     if (is_different(x0, w4)) pattern |= 1 << 8;
     if (is_different(x1, w4)) pattern |= 1 << 9;
