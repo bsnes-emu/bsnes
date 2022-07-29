@@ -187,11 +187,14 @@
                                 <menuItem title="Disabled" state="on" id="D2J-wV-1vu">
                                     <modifierMask key="keyEquivalentModifierMask"/>
                                 </menuItem>
-                                <menuItem title="Correct color curves" id="B3Q-x1-VRl"/>
-                                <menuItem title="Emulate hardware" id="XBL-hS-7ke"/>
-                                <menuItem title="Preserve brightness" id="tlx-WB-Bkw"/>
-                                <menuItem title="Reduce contrast" id="wuO-Xv-0mQ"/>
-                                <menuItem title="Harsh reality (low contrast)" id="98I-hs-vP2"/>
+                                <menuItem title="Correct color curves" tag="1" id="B3Q-x1-VRl"/>
+                                <menuItem isSeparatorItem="YES" id="GB2-3g-Igu"/>
+                                <menuItem title="Modern – Balanced" tag="2" id="XBL-hS-7ke"/>
+                                <menuItem title="Modern – Accurate" tag="6" id="EpK-Wq-IcU"/>
+                                <menuItem title="Modern – Boost Contrast" tag="3" id="tlx-WB-Bkw"/>
+                                <menuItem isSeparatorItem="YES" id="pcU-NR-Tno"/>
+                                <menuItem title="Reduce contrast" tag="4" id="wuO-Xv-0mQ"/>
+                                <menuItem title="Harsh reality (low contrast)" tag="5" id="98I-hs-vP2"/>
                             </items>
                         </menu>
                     </popUpButtonCell>

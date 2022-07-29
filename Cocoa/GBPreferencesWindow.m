@@ -101,7 +101,7 @@
 {
     _colorCorrectionPopupButton = colorCorrectionPopupButton;
     NSInteger mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorCorrection"];
-    [_colorCorrectionPopupButton selectItemAtIndex:mode];
+    [_colorCorrectionPopupButton selectItemWithTag:mode];
 }
 
 
@@ -402,7 +402,7 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
 
 - (IBAction)colorCorrectionChanged:(id)sender
 {
-    [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
+    [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedItem].tag)
                                               forKey:@"GBColorCorrection"];
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBColorCorrectionChanged" object:nil];
 }

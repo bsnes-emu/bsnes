@@ -38,7 +38,7 @@ configuration_t configuration =
         0,
         1,
     },
-    .color_correction_mode = GB_COLOR_CORRECTION_EMULATE_HARDWARE,
+    .color_correction_mode = GB_COLOR_CORRECTION_MODERN_BALANCED,
     .highpass_mode = GB_HIGHPASS_ACCURATE,
     .scaling_mode = GB_SDL_SCALING_INTEGER_FACTOR,
     .blending_mode = GB_FRAME_BLENDING_MODE_ACCURATE,

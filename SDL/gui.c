@@ -566,7 +566,7 @@ static const char *current_default_scale(unsigned index)
 
 const char *current_color_correction_mode(unsigned index)
 {
-    return (const char *[]){"Disabled", "Correct Color Curves", "Emulate Hardware", "Preserve Brightness", "Reduce Contrast", "Harsh Reality"}
+    return (const char *[]){"Disabled", "Correct Color Curves", "Modern - Balanced", "Modern - Boost Contrast", "Reduce Contrast", "Harsh Reality", "Modern - Accurate"}
         [configuration.color_correction_mode];
 }
 
@@ -647,6 +647,12 @@ static void cycle_color_correction(unsigned index)
     if (configuration.color_correction_mode == GB_COLOR_CORRECTION_LOW_CONTRAST) {
         configuration.color_correction_mode = GB_COLOR_CORRECTION_DISABLED;
     }
+    else if (configuration.color_correction_mode == GB_COLOR_CORRECTION_MODERN_BALANCED) {
+        configuration.color_correction_mode = GB_COLOR_CORRECTION_MODERN_ACCURATE;
+    }
+    else if (configuration.color_correction_mode == GB_COLOR_CORRECTION_MODERN_ACCURATE) {
+        configuration.color_correction_mode = GB_COLOR_CORRECTION_MODERN_BOOST_CONTRAST;
+    }
     else {
         configuration.color_correction_mode++;
     }
@@ -656,6 +662,12 @@ static void cycle_color_correction_backwards(unsigned index)
 {
     if (configuration.color_correction_mode == GB_COLOR_CORRECTION_DISABLED) {
         configuration.color_correction_mode = GB_COLOR_CORRECTION_LOW_CONTRAST;
+    }
+    else if (configuration.color_correction_mode == GB_COLOR_CORRECTION_MODERN_ACCURATE) {
+        configuration.color_correction_mode = GB_COLOR_CORRECTION_MODERN_BALANCED;
+    }
+    else if (configuration.color_correction_mode == GB_COLOR_CORRECTION_MODERN_BOOST_CONTRAST) {
+        configuration.color_correction_mode = GB_COLOR_CORRECTION_MODERN_ACCURATE;
     }
     else {
         configuration.color_correction_mode--;

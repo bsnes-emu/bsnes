@@ -768,16 +768,19 @@ static void check_variables()
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_CORRECT_CURVES);
             }
             else if (strcmp(var.value, "emulate hardware") == 0) {
-                GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
+                GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_MODERN_BALANCED);
             }
             else if (strcmp(var.value, "preserve brightness") == 0) {
-                GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+                GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_MODERN_BOOST_CONTRAST);
             }
             else if (strcmp(var.value, "reduce contrast") == 0) {
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_REDUCE_CONTRAST);
             }
             else if (strcmp(var.value, "harsh reality") == 0) {
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_LOW_CONTRAST);
+            }
+            else if (strcmp(var.value, "accurate") == 0) {
+                GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_MODERN_ACCURATE);
             }
         }
 
@@ -1049,16 +1052,19 @@ static void check_variables()
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_CORRECT_CURVES);
             }
             else if (strcmp(var.value, "emulate hardware") == 0) {
-                GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
+                GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_MODERN_BALANCED);
             }
             else if (strcmp(var.value, "preserve brightness") == 0) {
-                GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+                GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_MODERN_BOOST_CONTRAST);
             }
             else if (strcmp(var.value, "reduce contrast") == 0) {
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_REDUCE_CONTRAST);
             }
             else if (strcmp(var.value, "harsh reality") == 0) {
                 GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_LOW_CONTRAST);
+            }
+            else if (strcmp(var.value, "accurate") == 0) {
+                GB_set_color_correction_mode(&gameboy[0], GB_COLOR_CORRECTION_MODERN_ACCURATE);
             }
         }
 
@@ -1072,16 +1078,19 @@ static void check_variables()
                 GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_CORRECT_CURVES);
             }
             else if (strcmp(var.value, "emulate hardware") == 0) {
-                GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_EMULATE_HARDWARE);
+                GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_MODERN_BALANCED);
             }
             else if (strcmp(var.value, "preserve brightness") == 0) {
-                GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS);
+                GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_MODERN_BOOST_CONTRAST);
             }
             else if (strcmp(var.value, "reduce contrast") == 0) {
                 GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_REDUCE_CONTRAST);
             }
             else if (strcmp(var.value, "harsh reality") == 0) {
                 GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_LOW_CONTRAST);
+            }
+            else if (strcmp(var.value, "accurate") == 0) {
+                GB_set_color_correction_mode(&gameboy[1], GB_COLOR_CORRECTION_MODERN_ACCURATE);
             }
         }
 
