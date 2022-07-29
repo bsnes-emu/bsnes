@@ -187,7 +187,7 @@ endif
 
 CFLAGS += -F/Library/Frameworks -mmacosx-version-min=10.9 -isysroot $(SYSROOT)
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT)
-LDFLAGS += -framework AppKit -framework PreferencePanes -framework Carbon -framework QuartzCore -framework Security -weak_framework Metal -weak_framework MetalKit -mmacosx-version-min=10.9 -isysroot $(SYSROOT)
+LDFLAGS += -framework AppKit -framework PreferencePanes -framework Carbon -framework QuartzCore -framework Security -framework WebKit -weak_framework Metal -weak_framework MetalKit -mmacosx-version-min=10.9 -isysroot $(SYSROOT)
 GL_LDFLAGS := -framework OpenGL
 endif
 CFLAGS += -Wno-deprecated-declarations
