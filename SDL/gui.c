@@ -1792,11 +1792,20 @@ void run_gui(bool is_running)
                     return;
                 }
             }
-            case SDL_JOYBUTTONDOWN:
-            {
+            case SDL_JOYBUTTONDOWN: {
                 if (gui_state == WAITING_FOR_JBUTTON && joypad_configuration_progress != JOYPAD_BUTTONS_MAX) {
                     should_render = true;
                     configuration.joypad_configuration[joypad_configuration_progress++] = event.jbutton.button;
+                }
+                break;
+            }
+            case SDL_JOYHATMOTION: {
+                if (gui_state == WAITING_FOR_JBUTTON && joypad_configuration_progress == JOYPAD_BUTTON_RIGHT) {
+                    should_render = true;
+                    configuration.joypad_configuration[joypad_configuration_progress++] = -1;
+                    configuration.joypad_configuration[joypad_configuration_progress++] = -1;
+                    configuration.joypad_configuration[joypad_configuration_progress++] = -1;
+                    configuration.joypad_configuration[joypad_configuration_progress++] = -1;
                 }
                 break;
             }
