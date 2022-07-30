@@ -889,6 +889,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     [layoutView setFrame:layoutViewFrame];
     [layoutView setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable | NSViewMaxYMargin];
     [self.memoryView addSubview:layoutView];
+    self.memoryView = layoutView;
 
     self.memoryBankItem.enabled = false;
 }
@@ -1757,7 +1758,9 @@ static bool is_path_writeable(const char *path)
     }
     [self.memoryBankInput setStringValue:[NSString stringWithFormat:@"$%x", byteArray.selectedBank]];
     [hex_controller reloadData];
-    [self.memoryView setNeedsDisplay:true];
+    for (NSView *view in self.memoryView.subviews) {
+        [view setNeedsDisplay:true];
+    }
 }
 
 - (GB_gameboy_t *) gameboy
