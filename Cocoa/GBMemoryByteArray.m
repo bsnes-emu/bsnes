@@ -1,4 +1,3 @@
-#define GB_INTERNAL // Todo: Some memory accesses are being done using the struct directly
 #import "GBMemoryByteArray.h"
 #import "GBCompleteByteSlice.h"
 
@@ -32,71 +31,111 @@
     }
 }
 
+- (uint16_t)base
+{
+    switch (_mode) {
+        case GBMemoryEntireSpace: return 0;
+        case GBMemoryROM: return 0;
+        case GBMemoryVRAM: return 0x8000;
+        case GBMemoryExternalRAM: return 0xA000;
+        case GBMemoryRAM: return 0xC000;
+    }
+}
+
 - (void)copyBytes:(unsigned char *)dst range:(HFRange)range
 {
-    [_document performAtomicBlock:^{
-        uint8_t *_dst = dst;
-        uint16_t addr = (uint16_t) range.location;
-        unsigned long long length = range.length;
-        if (_mode == GBMemoryEntireSpace) {
-            while (length) {
-                *(_dst++) = [_document readMemory:addr++];
-                length--;
+    // Do everything in 0x1000 chunks, never cross a 0x1000 boundary
+    if ((range.location & 0xF000) != ((range.location + range.length) & 0xF000)) {
+        size_t partial = 0x1000 - (range.location & 0xFFF);
+        [self copyBytes:dst + partial range:HFRangeMake(range.location + partial, range.length - partial)];
+        range.length = partial;
+    }
+    range.location += self.base;
+    
+    GB_gameboy_t *gb = _document.gameboy;
+
+    switch (range.location >> 12) {
+        case 0x0:
+        case 0x1:
+        case 0x2:
+        case 0x3: {
+            uint16_t bank;
+            uint8_t *data = GB_get_direct_access(gb, GB_DIRECT_ACCESS_ROM0, NULL, &bank);
+            memcpy(dst, data + bank * 0x4000 + range.location, range.length);
+            break;
+        }
+        case 0x4:
+        case 0x5:
+        case 0x6:
+        case 0x7: {
+            uint16_t bank;
+            size_t size;
+            uint8_t *data = GB_get_direct_access(gb, GB_DIRECT_ACCESS_ROM, &size, &bank);
+            if (_mode != GBMemoryEntireSpace) {
+                bank = self.selectedBank & (size / 0x4000 - 1);
+            }
+            memcpy(dst, data + bank * 0x4000 + range.location - 0x4000, range.length);
+            break;
+        }
+        case 0x8:
+        case 0x9: {
+            uint16_t bank;
+            size_t size;
+            uint8_t *data = GB_get_direct_access(gb, GB_DIRECT_ACCESS_VRAM, &size, &bank);
+            if (_mode != GBMemoryEntireSpace) {
+                bank = self.selectedBank & (size / 0x2000 - 1);
+            }
+            memcpy(dst, data + bank * 0x2000 + range.location - 0x8000, range.length);
+            break;
+        }
+        case 0xA:
+        case 0xB: {
+            // Some carts are special, use memory read directly in full mem mode
+            if (_mode == GBMemoryEntireSpace) {
+        case 0xF:
+        slow_path:
+                [_document performAtomicBlock:^{
+                    for (unsigned i = 0; i < range.length; i++) {
+                        dst[i] = GB_safe_read_memory(gb, range.location + i);
+                    }
+                }];
+                break;
+            }
+            else {
+                uint16_t bank;
+                size_t size;
+                uint8_t *data = GB_get_direct_access(gb, GB_DIRECT_ACCESS_CART_RAM, &size, &bank);
+                bank = self.selectedBank & (size / 0x2000 - 1);
+                if (size == 0) {
+                    memset(dst, 0xFF, range.length);
+                }
+                else if (range.location + range.length - 0xA000 > size)  {
+                    goto slow_path;
+                }
+                else {
+                    memcpy(dst, data + bank * 0x2000 + range.location - 0xA000, range.length);
+                }
+                break;
             }
         }
-        else {
-            uint8_t *_dst = dst;
-            uint16_t bank_backup = 0;
-            GB_gameboy_t *gb = _document.gameboy;
-            switch (_mode) {
-                case GBMemoryROM:
-                    bank_backup = gb->mbc_rom_bank;
-                    gb->mbc_rom_bank = self.selectedBank;
-                    break;
-                case GBMemoryVRAM:
-                    bank_backup = gb->cgb_vram_bank;
-                    if (GB_is_cgb(gb)) {
-                        gb->cgb_vram_bank = self.selectedBank;
-                    }
-                    addr += 0x8000;
-                    break;
-                case GBMemoryExternalRAM:
-                    bank_backup = gb->mbc_ram_bank;
-                    gb->mbc_ram_bank = self.selectedBank;
-                    addr += 0xA000;
-                    break;
-                case GBMemoryRAM:
-                    bank_backup = gb->cgb_ram_bank;
-                    if (GB_is_cgb(gb)) {
-                        gb->cgb_ram_bank = self.selectedBank;
-                    }
-                    addr += 0xC000;
-                    break;
-                default:
-                    assert(false);
-            }
-            while (length) {
-                *(_dst++) = [_document readMemory:addr++];
-                length--;
-            }
-            switch (_mode) {
-                case GBMemoryROM:
-                    gb->mbc_rom_bank = bank_backup;
-                    break;
-                case GBMemoryVRAM:
-                    gb->cgb_vram_bank = bank_backup;
-                    break;
-                case GBMemoryExternalRAM:
-                    gb->mbc_ram_bank = bank_backup;
-                    break;
-                case GBMemoryRAM:
-                    gb->cgb_ram_bank = bank_backup;
-                    break;
-                default:
-                    assert(false);
-            }
+        case 0xC:
+        case 0xE: {
+            uint8_t *data = GB_get_direct_access(gb, GB_DIRECT_ACCESS_RAM, NULL, NULL);
+            memcpy(dst, data + (range.location & 0xFFF), range.length);
+            break;
         }
-    }];
+            
+        case 0xD: {
+            uint16_t bank;
+            size_t size;
+            uint8_t *data = GB_get_direct_access(gb, GB_DIRECT_ACCESS_RAM, &size, &bank);
+            if (_mode != GBMemoryEntireSpace) {
+                bank = self.selectedBank & (size / 0x1000 - 1);
+            }
+            memcpy(dst, data + bank * 0x1000 + range.location - 0xD000, range.length);
+            break;
+        }
+    }
 }
 
 - (NSArray *)byteSlices
@@ -114,65 +153,104 @@
     return ret;
 }
 
-- (void)insertByteSlice:(HFByteSlice *)slice inRange:(HFRange)lrange
+- (void)insertByteSlice:(HFByteSlice *)slice inRange:(HFRange)range
 {
-    if (slice.length != lrange.length) return; /* Insertion is not allowed, only overwriting. */
-    [_document performAtomicBlock:^{
-        uint16_t addr = (uint16_t) lrange.location;
-        uint16_t bank_backup = 0;
-        GB_gameboy_t *gb = _document.gameboy;
-        switch (_mode) {
-            case GBMemoryROM:
-                bank_backup = gb->mbc_rom_bank;
-                gb->mbc_rom_bank = self.selectedBank;
+    if (slice.length != range.length) return; /* Insertion is not allowed, only overwriting. */
+    // Do everything in 0x1000 chunks, never cross a 0x1000 boundary
+    if ((range.location & 0xF000) != ((range.location + range.length) & 0xF000)) {
+        size_t partial = 0x1000 - (range.location & 0xFFF);
+        if (slice.length - partial) {
+            [self insertByteSlice:[slice subsliceWithRange:HFRangeMake(partial, slice.length - partial)]
+                            inRange:HFRangeMake(range.location + partial, range.length - partial)];
+        }
+        range.length = partial;
+    }
+    range.location += self.base;
+    
+    GB_gameboy_t *gb = _document.gameboy;
+    
+    
+    switch (range.location >> 12) {
+        case 0x0:
+        case 0x1:
+        case 0x2:
+        case 0x3:
+        case 0x4:
+        case 0x5:
+        case 0x6:
+        case 0x7: {
+            return; // ROM not writeable
+        }
+        case 0x8:
+        case 0x9: {
+            uint16_t bank;
+            size_t size;
+            uint8_t *data = GB_get_direct_access(gb, GB_DIRECT_ACCESS_VRAM, &size, &bank);
+            if (_mode != GBMemoryEntireSpace) {
+                bank = self.selectedBank & (size / 0x2000 - 1);
+            }
+            uint8_t sliceData[range.length];
+            [slice copyBytes:sliceData range:HFRangeMake(0, range.length)];
+            memcpy(data + bank * 0x2000 + range.location - 0x8000, sliceData, range.length);
+            break;
+        }
+        case 0xA:
+        case 0xB: {
+            // Some carts are special, use memory write directly in full mem mode
+            if (_mode == GBMemoryEntireSpace) {
+        case 0xF:
+        slow_path:
+                [_document performAtomicBlock:^{
+                    uint8_t sliceData[range.length];
+                    [slice copyBytes:sliceData range:HFRangeMake(0, range.length)];
+                    for (unsigned i = 0; i < range.length; i++) {
+                        GB_write_memory(gb, range.location + i, sliceData[i]);
+                    }
+                }];
                 break;
-            case GBMemoryVRAM:
-                bank_backup = gb->cgb_vram_bank;
-                if (GB_is_cgb(gb)) {
-                    gb->cgb_vram_bank = self.selectedBank;
+            }
+            else {
+                uint16_t bank;
+                size_t size;
+                uint8_t *data = GB_get_direct_access(gb, GB_DIRECT_ACCESS_CART_RAM, &size, &bank);
+                bank = self.selectedBank & (size / 0x2000 - 1);
+                if (size == 0) {
+                    // Nothing to write to
                 }
-                addr += 0x8000;
-                break;
-            case GBMemoryExternalRAM:
-                bank_backup = gb->mbc_ram_bank;
-                gb->mbc_ram_bank = self.selectedBank;
-                addr += 0xA000;
-                break;
-            case GBMemoryRAM:
-                bank_backup = gb->cgb_ram_bank;
-                if (GB_is_cgb(gb)) {
-                    gb->cgb_ram_bank = self.selectedBank;
+                else if (range.location + range.length - 0xA000 > size)  {
+                    goto slow_path;
                 }
-                addr += 0xC000;
+                else {
+                    uint8_t sliceData[range.length];
+                    [slice copyBytes:sliceData range:HFRangeMake(0, range.length)];
+                    memcpy(data + bank * 0x2000 + range.location - 0xA000, sliceData, range.length);
+                }
                 break;
-            default:
-                break;
+            }
         }
-        uint8_t values[lrange.length];
-        [slice copyBytes:values range:HFRangeMake(0, lrange.length)];
-        uint8_t *src = values;
-        unsigned long long length = lrange.length;
-        while (length) {
-            [_document writeMemory:addr++ value:*(src++)];
-            length--;
+        case 0xC:
+        case 0xE: {
+            uint8_t *data = GB_get_direct_access(gb, GB_DIRECT_ACCESS_RAM, NULL, NULL);
+            uint8_t sliceData[range.length];
+            [slice copyBytes:sliceData range:HFRangeMake(0, range.length)];
+            memcpy(data + (range.location & 0xFFF), sliceData, range.length);
+            break;
         }
-        switch (_mode) {
-            case GBMemoryROM:
-                gb->mbc_rom_bank = bank_backup;
-                break;
-            case GBMemoryVRAM:
-                gb->cgb_vram_bank = bank_backup;
-                break;
-            case GBMemoryExternalRAM:
-                gb->mbc_ram_bank = bank_backup;
-                break;
-            case GBMemoryRAM:
-                gb->cgb_ram_bank = bank_backup;
-                break;
-            default:
-                break;
+            
+        case 0xD: {
+            uint16_t bank;
+            size_t size;
+            uint8_t *data = GB_get_direct_access(gb, GB_DIRECT_ACCESS_RAM, &size, &bank);
+            if (_mode != GBMemoryEntireSpace) {
+                bank = self.selectedBank & (size / 0x1000 - 1);
+            }
+            uint8_t sliceData[range.length];
+            [slice copyBytes:sliceData range:HFRangeMake(0, range.length)];
+
+            memcpy(data + bank * 0x1000 + range.location - 0xD000, sliceData, range.length);
+            break;
         }
-    }];
+    }
 }
 
 @end

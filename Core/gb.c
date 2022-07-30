@@ -1728,7 +1728,11 @@ void *GB_get_direct_access(GB_gameboy_t *gb, GB_direct_access_t access, size_t *
     switch (access) {
         case GB_DIRECT_ACCESS_ROM:
             *size = gb->rom_size;
-            *bank = gb->mbc_rom_bank;
+            *bank = gb->mbc_rom_bank & (gb->rom_size / 0x4000 - 1);
+            return gb->rom;
+        case GB_DIRECT_ACCESS_ROM0:
+            *size = gb->rom_size;
+            *bank = gb->mbc_rom0_bank & (gb->rom_size / 0x4000 - 1);
             return gb->rom;
         case GB_DIRECT_ACCESS_RAM:
             *size = gb->ram_size;
@@ -1736,7 +1740,7 @@ void *GB_get_direct_access(GB_gameboy_t *gb, GB_direct_access_t access, size_t *
             return gb->ram;
         case GB_DIRECT_ACCESS_CART_RAM:
             *size = gb->mbc_ram_size;
-            *bank = gb->mbc_ram_bank;
+            *bank = gb->mbc_ram_bank & (gb->mbc_ram_size / 0x2000 - 1);
             return gb->mbc_ram;
         case GB_DIRECT_ACCESS_VRAM:
             *size = gb->vram_size;

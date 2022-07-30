@@ -860,6 +860,7 @@ typedef enum {
     GB_DIRECT_ACCESS_BGP,
     GB_DIRECT_ACCESS_OBP,
     GB_DIRECT_ACCESS_IE,
+    GB_DIRECT_ACCESS_ROM0, // Identical to ROM, but returns the correct rom0 bank in the bank output argument
 } GB_direct_access_t;
 
 /* Returns a mutable pointer to various hardware memories. If that memory is banked, the current bank
