@@ -177,7 +177,7 @@
                     </textFieldCell>
                 </textField>
                 <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VEz-N4-uP6">
-                    <rect key="frame" x="30" y="274" width="262" height="26"/>
+                    <rect key="frame" x="30" y="274" width="229" height="26"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Disabled" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="D2J-wV-1vu" id="fNJ-Fi-yOm">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -327,6 +327,17 @@
                     </buttonCell>
                     <connections>
                         <action selector="changeOSDEnabled:" target="QvC-M9-y7g" id="xUx-iN-jl6"/>
+                    </connections>
+                </button>
+                <button horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qCy-Se-vsG">
+                    <rect key="frame" x="266" y="273" width="25" height="25"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="help" bezelStyle="helpButton" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="tAH-Lp-v24">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="displayColorCorrectionHelp:" target="QvC-M9-y7g" id="RIB-Qa-Fln"/>
                     </connections>
                 </button>
             </subviews>
@@ -566,7 +577,7 @@
                     </textFieldCell>
                 </textField>
                 <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LNs-v1-Eki">
-                    <rect key="frame" x="30" y="130" width="261" height="28"/>
+                    <rect key="frame" x="30" y="130" width="262" height="28"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="256" doubleValue="256" tickMarkPosition="below" sliderType="linear" id="Xvk-Vj-NHx"/>
                     <connections>
@@ -574,7 +585,7 @@
                     </connections>
                 </slider>
                 <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="T69-6N-dhT">
-                    <rect key="frame" x="30" y="74" width="262" height="26"/>
+                    <rect key="frame" x="30" y="74" width="229" height="26"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Disabled (Keep DC offset)" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="Fgo-0S-zUG" id="om2-Bn-43B">
                         <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
@@ -612,15 +623,26 @@
                     </textFieldCell>
                 </textField>
                 <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FpE-5i-j5L">
-                    <rect key="frame" x="30" y="18" width="261" height="28"/>
+                    <rect key="frame" x="30" y="18" width="262" height="28"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="256" tickMarkPosition="below" sliderType="linear" id="Rbx-DU-xYf"/>
                     <connections>
                         <action selector="interferenceVolumeChanged:" target="QvC-M9-y7g" id="HFU-0q-hj1"/>
                     </connections>
                 </slider>
+                <button horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8Ub-0B-W2H">
+                    <rect key="frame" x="266" y="74" width="25" height="25"/>
+                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                    <buttonCell key="cell" type="help" bezelStyle="helpButton" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="OUS-fa-Mkv">
+                        <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                        <font key="font" metaFont="system"/>
+                    </buttonCell>
+                    <connections>
+                        <action selector="displayHighPassHelp:" target="QvC-M9-y7g" id="yvN-9e-S3J"/>
+                    </connections>
+                </button>
             </subviews>
-            <point key="canvasLocation" x="-854" y="627"/>
+            <point key="canvasLocation" x="-854" y="626.5"/>
         </customView>
         <customView id="8TU-6J-NCg">
             <rect key="frame" x="0.0" y="0.0" width="320" height="667"/>

@@ -3,6 +3,7 @@
 #import "GBButtons.h"
 #import "BigSurToolbar.h"
 #import "GBViewMetal.h"
+#import "GBWarningPopover.h"
 #import <Carbon/Carbon.h>
 
 @implementation GBPreferencesWindow
@@ -964,6 +965,38 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
     else {
         [_screenshotFilterCheckbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBFilterScreenshots"]];
     }
+}
+
+- (IBAction)displayColorCorrectionHelp:(id)sender
+{
+    [GBWarningPopover popoverWithContents:
+         (NSString * const[]){
+            [GB_COLOR_CORRECTION_DISABLED] = @"Colors are directly interpreted as sRGB, resulting in unbalanced colors and inaccurate hues.",
+            [GB_COLOR_CORRECTION_CORRECT_CURVES] = @"Colors have their brightness corrected, but hues remain unbalanced.",
+            [GB_COLOR_CORRECTION_MODERN_BALANCED] = @"Emulates a modern display. Blue contrast is moderately enhanced at the cost of slight hue inaccuracy.",
+            [GB_COLOR_CORRECTION_MODERN_BOOST_CONTRAST] = @"Like Modern – Balanced, but further boosts the contrast of greens and magentas that is lacking on the original hardware.",
+            [GB_COLOR_CORRECTION_REDUCE_CONTRAST] = @"Slightly reduce the contrast to better represent the tint and contrast of the original display.",
+            [GB_COLOR_CORRECTION_LOW_CONTRAST] = @"Harshly reduce the contrast to accurately represent the tint low constrast of the original display.",
+            [GB_COLOR_CORRECTION_MODERN_ACCURATE] = @"Emulates a modern display. Colors have their hues and brightness corrected.",
+         } [self.colorCorrectionPopupButton.selectedItem.tag]
+                                   title:self.colorCorrectionPopupButton.selectedItem.title
+                                   onView:sender
+                                  timeout:6
+                            preferredEdge:NSRectEdgeMaxX];
+}
+
+- (IBAction)displayHighPassHelp:(id)sender
+{
+    [GBWarningPopover popoverWithContents:
+     (NSString * const[]){
+        [GB_HIGHPASS_OFF] = @"No high-pass filter will be applied. DC offset will be kept, pausing and resuming will trigger audio pops.",
+        [GB_HIGHPASS_ACCURATE] = @"An accurate high-pass filter will be applied, removing the DC offset while somewhat attenuating the bass.",
+        [GB_HIGHPASS_REMOVE_DC_OFFSET] = @"A high-pass filter will be applied to the DC offset itself, removing the DC offset while preserving the waveform.",
+    } [self.highpassFilterPopupButton.indexOfSelectedItem]
+                                    title:self.highpassFilterPopupButton.selectedItem.title
+                                   onView:sender
+                                  timeout:6
+                            preferredEdge:NSRectEdgeMaxX];
 }
 
 @end
