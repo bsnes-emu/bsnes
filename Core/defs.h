@@ -1,11 +1,14 @@
 #ifndef defs_h
 #define defs_h
 
+#define GB_likely(x)   __builtin_expect((bool)(x), 1)
+#define GB_unlikely(x) __builtin_expect((bool)(x), 0)
+
 #ifdef GB_INTERNAL
 
 // "Keyword" definitions
-#define likely(x)   __builtin_expect((bool)(x), 1)
-#define unlikely(x) __builtin_expect((bool)(x), 0)
+#define likely(x)   GB_likely(x)
+#define unlikely(x) GB_unlikely(x)
 
 #define internal __attribute__((visibility("internal")))
 

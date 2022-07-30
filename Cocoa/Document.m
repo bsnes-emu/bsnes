@@ -14,6 +14,9 @@
 #import "GBObjectView.h"
 #import "GBPaletteView.h"
 
+#define likely(x)   GB_likely(x)
+#define unlikely(x) GB_unlikely(x)
+
 @implementation NSString (relativePath)
 
 - (NSString *)pathRelativeToDirectory:(NSString *)directory

@@ -5,7 +5,8 @@
 #include "audio/audio.h"
 #include "configuration.h"
 
-#define unlikely(x) __builtin_expect((bool)(x), 0)
+#define likely(x)   GB_likely(x)
+#define unlikely(x) GB_unlikely(x)
 
 static const GB_audio_driver_t *driver = NULL;
 
