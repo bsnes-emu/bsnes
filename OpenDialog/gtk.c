@@ -1,4 +1,5 @@
 #include "open_dialog.h"
+#include <SDL.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <dlfcn.h>
@@ -51,8 +52,18 @@ if (symbol == NULL) goto lazy_error
 
 void nop(){}
 
+static void wait_mouse_up(void)
+{
+    while (true) {
+        if (!(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT))) break;
+        SDL_Event event;
+        SDL_PollEvent(&event);
+    }
+}
+
 char *do_open_rom_dialog(void)
 {
+    wait_mouse_up();
     static void *handle = NULL;
     
     TRY_DLOPEN("libgtk-3.so");
@@ -129,6 +140,7 @@ lazy_error:
 
 char *do_open_folder_dialog(void)
 {
+    wait_mouse_up();
     static void *handle = NULL;
     
     TRY_DLOPEN("libgtk-3.so");
@@ -261,6 +273,7 @@ lazy_error:
 
 char *do_save_recording_dialog(unsigned frequency)
 {
+    wait_mouse_up();
     static void *handle = NULL;
     
     TRY_DLOPEN("libgtk-3.so");
