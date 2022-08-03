@@ -108,7 +108,7 @@ enum model {
     NSSavePanel *_audioSavePanel;
     bool _isRecordingAudio;
     
-    volatile void (^_pendingAtomicBlock)();
+    void (^ volatile _pendingAtomicBlock)();
 }
 
 @property GBAudioClient *audioClient;
