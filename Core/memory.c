@@ -1440,6 +1440,9 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             case GB_IO_LCDC:
                 if ((value & 0x80) && !(gb->io_registers[GB_IO_LCDC] & 0x80)) {
                     // LCD turned on
+                    if (gb->lcd_status_callback) {
+                        gb->lcd_status_callback(gb, true);
+                    }
                     if (!gb->lcd_disabled_outside_of_vblank &&
                         (gb->cycles_since_vblank_callback > 10 * 456 || GB_is_sgb(gb))) {
                         // Trigger a vblank here so we don't exceed LCDC_PERIOD
@@ -1451,15 +1454,18 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     gb->double_speed_alignment = 0;
                     gb->cycles_for_line = 0;
                     if (GB_is_sgb(gb)) {
-                        gb->frame_skip_state = GB_FRAMESKIP_SECOND_FRAME_RENDERED;
+                        gb->frame_skip_state = GB_FRAMESKIP_FIRST_FRAME_RENDERED;
                     }
-                    else if (gb->frame_skip_state == GB_FRAMESKIP_SECOND_FRAME_RENDERED) {
+                    else {
                         gb->frame_skip_state = GB_FRAMESKIP_LCD_TURNED_ON;
                     }
                     GB_timing_sync(gb);
                 }
                 else if (!(value & 0x80) && (gb->io_registers[GB_IO_LCDC] & 0x80)) {
                     /* Sync after turning off LCD */
+                    if (gb->lcd_status_callback) {
+                        gb->lcd_status_callback(gb, false);
+                    }
                     gb->double_speed_alignment = 0;
                     GB_timing_sync(gb);
                     GB_lcd_off(gb);

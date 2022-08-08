@@ -107,7 +107,7 @@ typedef struct __attribute__((packed)) {
 } object_t;
 
 void GB_display_vblank(GB_gameboy_t *gb, GB_vblank_type_t type)
-{  
+{
     gb->vblank_just_occured = true;
     gb->cycles_since_vblank_callback = 0;
     gb->lcd_disabled_outside_of_vblank = false;
@@ -123,9 +123,19 @@ void GB_display_vblank(GB_gameboy_t *gb, GB_vblank_type_t type)
         }
     }
     
+    if (GB_is_cgb(gb) && type == GB_VBLANK_TYPE_NORMAL_FRAME && gb->frame_repeat_countdown > 0 && gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON) {
+        GB_handle_rumble(gb);
+        
+        if (gb->vblank_callback) {
+            gb->vblank_callback(gb, GB_VBLANK_TYPE_REPEAT);
+        }
+        GB_timing_sync(gb);
+        return;
+    }
+    
     bool is_ppu_stopped = !GB_is_cgb(gb) && gb->stopped && gb->io_registers[GB_IO_LCDC] & 0x80;
     
-    if (!gb->disable_rendering && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || is_ppu_stopped) || gb->cgb_repeated_a_frame || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
+    if (!gb->disable_rendering && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || is_ppu_stopped) || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
         /* LCD is off, set screen to white or black (if LCD is on in stop mode) */
         if (!GB_is_sgb(gb)) {
             uint32_t color = 0;
@@ -313,9 +323,9 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border)
                 new_b = new_b * 15 / 16 + (r + g    ) / 32;
                 
                 if (agb) {
-                    new_r = new_r * (224 - 40) / 255 + 20;
-                    new_g = new_g * (220 - 36) / 255 + 18;
-                    new_b = new_b * (216 - 32) / 255 + 16;
+                    new_r = new_r * (224 - 20) / 255 + 20;
+                    new_g = new_g * (220 - 18) / 255 + 18;
+                    new_b = new_b * (216 - 16) / 255 + 16;
                 }
                 else {
                     new_r = new_r * (220 - 40) / 255 + 40;
@@ -1398,6 +1408,13 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
         gb->mode_for_interrupt = 3;
     }
     gb->cycles_since_vblank_callback += cycles / 2;
+    
+    if (cycles < gb->frame_repeat_countdown) {
+        gb->frame_repeat_countdown -= cycles;
+    }
+    else {
+        gb->frame_repeat_countdown = 0;
+    }
 
     /* The PPU does not advance while in STOP mode on the DMG */
     if (gb->stopped && !GB_is_cgb(gb)) {
@@ -1457,7 +1474,6 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                 GB_SLEEP(gb, display, 1, LCDC_PERIOD - gb->cycles_since_vblank_callback);
             }
             GB_display_vblank(gb, GB_VBLANK_TYPE_LCD_OFF);
-            gb->cgb_repeated_a_frame = true;
         }
         return;
     }
@@ -1987,14 +2003,14 @@ skip_slow_mode_3:
                 if (gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON) {
                     if (GB_is_cgb(gb)) {
                         GB_display_vblank(gb, GB_VBLANK_TYPE_NORMAL_FRAME);
-                        gb->frame_skip_state = GB_FRAMESKIP_FIRST_FRAME_SKIPPED;
+                        gb->frame_skip_state = GB_FRAMESKIP_FIRST_FRAME_RENDERED;
                     }
                     else {
                         if (!GB_is_sgb(gb) || gb->current_lcd_line < LINES) {
                             gb->is_odd_frame ^= true;
                             GB_display_vblank(gb, GB_VBLANK_TYPE_NORMAL_FRAME);
                         }
-                        gb->frame_skip_state = GB_FRAMESKIP_SECOND_FRAME_RENDERED;
+                        gb->frame_skip_state = GB_FRAMESKIP_FIRST_FRAME_RENDERED;
                     }
                 }
                 else {
@@ -2002,14 +2018,17 @@ skip_slow_mode_3:
                         gb->is_odd_frame ^= true;
                         GB_display_vblank(gb, GB_VBLANK_TYPE_NORMAL_FRAME);
                     }
-                    if (gb->frame_skip_state == GB_FRAMESKIP_FIRST_FRAME_SKIPPED) {
-                        gb->cgb_repeated_a_frame = true;
-                        gb->frame_skip_state = GB_FRAMESKIP_SECOND_FRAME_RENDERED;
-                    }
-                    else {
-                        gb->cgb_repeated_a_frame = false;
-                    }
                 }
+            }
+            
+            /* 3640 is just a few cycles less than 4 lines, no clue where the
+               AGB constant comes from (These are measured and confirmed)  */
+            gb->frame_repeat_countdown = LINES * LINE_LENGTH * 2 + (gb->model > GB_MODEL_CGB_E? 5982 : 3640); // 8MHz units
+            if (gb->display_cycles < gb->frame_repeat_countdown) {
+                gb->frame_repeat_countdown -= gb->display_cycles;
+            }
+            else {
+                gb->frame_repeat_countdown = 0;
             }
             
             GB_SLEEP(gb, display, 13, LINE_LENGTH - 5);

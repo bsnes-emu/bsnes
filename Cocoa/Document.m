@@ -56,7 +56,16 @@ enum model {
 };
 
 @interface Document ()
+@property GBAudioClient *audioClient;
+@end
+
+@implementation Document
 {
+    GB_gameboy_t gb;
+    volatile bool running;
+    volatile bool stopping;
+    NSConditionLock *has_debugger_input;
+    NSMutableArray *debugger_input_queue;
     
     NSMutableAttributedString *pending_console_output;
     NSRecursiveLock *console_output_lock;
@@ -66,10 +75,10 @@ enum model {
     bool fullScreen;
     bool in_sync_input;
     HFController *hex_controller;
-
+    
     NSString *lastConsoleInput;
     HFLineCountingRepresenter *lineRep;
-
+    
     CVImageBufferRef cameraImage;
     AVCaptureSession *cameraSession;
     AVCaptureConnection *cameraConnection;
@@ -111,25 +120,6 @@ enum model {
     void (^ volatile _pendingAtomicBlock)();
 }
 
-@property GBAudioClient *audioClient;
-- (void) vblank;
-- (void) log: (const char *) log withAttributes: (GB_log_attributes) attributes;
-- (char *) getDebuggerInput;
-- (char *) getAsyncDebuggerInput;
-- (void) cameraRequestUpdate;
-- (uint8_t) cameraGetPixelAtX:(uint8_t)x andY:(uint8_t)y;
-- (void) printImage:(uint32_t *)image height:(unsigned) height
-          topMargin:(unsigned) topMargin bottomMargin: (unsigned) bottomMargin
-           exposure:(unsigned) exposure;
-- (void) gotNewSample:(GB_sample_t *)sample;
-- (void) rumbleChanged:(double)amp;
-- (void) loadBootROM:(GB_boot_rom_t)type;
-- (void)linkCableBitStart:(bool)bit;
-- (bool)linkCableBitEnd;
-- (void)infraredStateChanged:(bool)state;
-
-@end
-
 static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
 {
     Document *self = (__bridge Document *)GB_get_user_data(gb);
@@ -139,7 +129,7 @@ static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
 static void vblank(GB_gameboy_t *gb, GB_vblank_type_t type)
 {
     Document *self = (__bridge Document *)GB_get_user_data(gb);
-    [self vblank];
+    [self vblankWithType:type];
 }
 
 static void consoleLog(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes)
@@ -226,15 +216,6 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
     [self infraredStateChanged:on];
 }
 
-
-@implementation Document
-{
-    GB_gameboy_t gb;
-    volatile bool running;
-    volatile bool stopping;
-    NSConditionLock *has_debugger_input;
-    NSMutableArray *debugger_input_queue;
-}
 
 - (instancetype)init 
 {
@@ -341,26 +322,29 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
     self.osdView.usesSGBScale = GB_get_screen_width(&gb) == 256;
 }
 
-- (void) vblank
+- (void) vblankWithType:(GB_vblank_type_t)type
 {
     if (_gbsVisualizer) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [_gbsVisualizer setNeedsDisplay:true];
         });
     }
-    [self.view flip];
-    if (borderModeChanged) {
-        dispatch_sync(dispatch_get_main_queue(), ^{
-            size_t previous_width = GB_get_screen_width(&gb);
-            GB_set_border_mode(&gb, (GB_border_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBBorderMode"]);
-            if (GB_get_screen_width(&gb) != previous_width) {
-                [self.view screenSizeChanged];
-                [self updateMinSize];
-            }
-        });
-        borderModeChanged = false;
+    if (type != GB_VBLANK_TYPE_REPEAT) {
+        [self.view flip];
+        if (borderModeChanged) {
+            dispatch_sync(dispatch_get_main_queue(), ^{
+                size_t previous_width = GB_get_screen_width(&gb);
+                GB_set_border_mode(&gb, (GB_border_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBBorderMode"]);
+                if (GB_get_screen_width(&gb) != previous_width) {
+                    [self.view screenSizeChanged];
+                    [self updateMinSize];
+                }
+            });
+            borderModeChanged = false;
+        }
+        GB_set_pixels_output(&gb, self.view.pixels);
     }
-    GB_set_pixels_output(&gb, self.view.pixels);
+    
     if (self.vramWindow.isVisible) {
         dispatch_async(dispatch_get_main_queue(), ^{
             self.view.mouseHidingEnabled = (self.mainWindow.styleMask & NSWindowStyleMaskFullScreen) != 0;

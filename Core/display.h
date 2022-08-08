@@ -9,6 +9,7 @@ typedef enum {
     GB_VBLANK_TYPE_NORMAL_FRAME, // An actual Vblank-triggered frame
     GB_VBLANK_TYPE_LCD_OFF, // An artificial frame pushed while the LCD was off
     GB_VBLANK_TYPE_ARTIFICIAL, // An artificial frame pushed for some other reason
+    GB_VBLANK_TYPE_REPEAT, // A frame that would not render on actual hardware, but the screen should retain the previous frame
 } GB_vblank_type_t;
 
 #ifdef GB_INTERNAL
