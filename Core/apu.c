@@ -1292,7 +1292,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
             gb->apu.wave_channel.pulse_length = (0x100 - value);
             break;
         case GB_IO_NR32:
-            gb->apu.wave_channel.shift = (uint8_t[]){4, 0, 1, 2}[(value >> 5) & 3];
+            gb->apu.wave_channel.shift = (const uint8_t[]){4, 0, 1, 2}[(value >> 5) & 3];
             if (gb->apu.is_active[GB_WAVE]) {
                 update_wave_sample(gb, 0);
             }
@@ -1407,11 +1407,11 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 if (!divisor) divisor = 2;
                 if (gb->model > GB_MODEL_CGB_C) {
                     gb->apu.noise_channel.counter_countdown =
-                    divisor + (divisor == 2? 0 : (uint8_t[]){2, 1, 0, 3}[(gb->apu.noise_channel.alignment) & 3]);
+                    divisor + (divisor == 2? 0 : (const uint8_t[]){2, 1, 0, 3}[(gb->apu.noise_channel.alignment) & 3]);
                 }
                 else {
                     gb->apu.noise_channel.counter_countdown =
-                    divisor + (divisor == 2? 0 : (uint8_t[]){2, 1, 4, 3}[(gb->apu.noise_channel.alignment) & 3]);
+                    divisor + (divisor == 2? 0 : (const uint8_t[]){2, 1, 4, 3}[(gb->apu.noise_channel.alignment) & 3]);
                 }
                 gb->apu.noise_channel.delta = 0;
             }
@@ -1455,10 +1455,10 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     }
                     else {
                         if (gb->model <= GB_MODEL_CGB_C) {
-                            gb->apu.noise_channel.counter_countdown += (uint8_t[]){2, 1, 4, 3}[gb->apu.noise_channel.alignment & 3];
+                            gb->apu.noise_channel.counter_countdown += (const uint8_t[]){2, 1, 4, 3}[gb->apu.noise_channel.alignment & 3];
                         }
                         else {
-                            gb->apu.noise_channel.counter_countdown += (uint8_t[]){2, 1, 0, 3}[gb->apu.noise_channel.alignment & 3];
+                            gb->apu.noise_channel.counter_countdown += (const uint8_t[]){2, 1, 0, 3}[gb->apu.noise_channel.alignment & 3];
                         }
                         if (((gb->apu.noise_channel.alignment + 1) & 3) < 2) {
                             if ((gb->io_registers[GB_IO_NR43] & 0x07) == 1) {
