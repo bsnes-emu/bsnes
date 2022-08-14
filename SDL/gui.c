@@ -95,7 +95,7 @@ static const char *help[] = {
 "\n"
 "SameBoy\n"
 "Version " GB_VERSION "\n\n"
-"Copyright " COPYRIGHT_STRING " 2015-2022\n"
+"Copyright " COPYRIGHT_STRING " 2015-" GB_COPYRIGHT_YEAR "\n"
 "Lior Halphon\n\n"
 "Licensed under the MIT\n"
 "license, see LICENSE for\n"

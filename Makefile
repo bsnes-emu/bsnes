@@ -48,6 +48,7 @@ MAKECMDGOALS := $(DEFAULT)
 endif
 
 include version.mk
+COPYRIGHT_YEAR := $(shell grep -oE "20[2-9][0-9]" LICENSE)
 export VERSION
 CONF ?= debug
 
@@ -126,7 +127,7 @@ endif
 
 CFLAGS += $(WARNINGS)
 
-CFLAGS += -std=gnu11 -D_GNU_SOURCE -DGB_VERSION='"$(VERSION)"' -I. -D_USE_MATH_DEFINES
+CFLAGS += -std=gnu11 -D_GNU_SOURCE -DGB_VERSION='"$(VERSION)"' -DGB_COPYRIGHT_YEAR='"$(COPYRIGHT_YEAR)"' -I. -D_USE_MATH_DEFINES
 ifneq (,$(UPDATE_SUPPORT))
 CFLAGS += -DUPDATE_SUPPORT
 endif
@@ -330,8 +331,8 @@ $(BIN)/SameBoy.app: $(BIN)/SameBoy.app/Contents/MacOS/SameBoy \
                     Shaders
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Resources
 	cp Cocoa/*.icns Cocoa/*.png Misc/registers.sym $(BIN)/SameBoy.app/Contents/Resources/
-	sed s/@VERSION/$(VERSION)/ < Cocoa/Info.plist > $(BIN)/SameBoy.app/Contents/Info.plist
-	cp Cocoa/License.html $(BIN)/SameBoy.app/Contents/Resources/Credits.html
+	sed "s/@VERSION/$(VERSION)/;s/@COPYRIGHT_YEAR/$(COPYRIGHT_YEAR)/" < Cocoa/Info.plist > $(BIN)/SameBoy.app/Contents/Info.plist
+	sed "s/@COPYRIGHT_YEAR/$(COPYRIGHT_YEAR)/" < Cocoa/License.html > $(BIN)/SameBoy.app/Contents/Resources/Credits.html
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Resources/Shaders
 	cp Shaders/*.fsh Shaders/*.metal $(BIN)/SameBoy.app/Contents/Resources/Shaders
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Library/QuickLook/
@@ -358,7 +359,7 @@ $(BIN)/SameBoy.qlgenerator: $(BIN)/SameBoy.qlgenerator/Contents/MacOS/SameBoyQL 
                             $(BIN)/SameBoy.qlgenerator/Contents/Resources/cgb_boot_fast.bin
 	$(MKDIR) -p $(BIN)/SameBoy.qlgenerator/Contents/Resources
 	cp QuickLook/*.png $(BIN)/SameBoy.qlgenerator/Contents/Resources/
-	sed s/@VERSION/$(VERSION)/ < QuickLook/Info.plist > $(BIN)/SameBoy.qlgenerator/Contents/Info.plist
+	sed "s/@VERSION/$(VERSION)/;s/@COPYRIGHT_YEAR/$(COPYRIGHT_YEAR)/" < QuickLook/Info.plist > $(BIN)/SameBoy.qlgenerator/Contents/Info.plist
 ifeq ($(CONF), release)
 	$(CODESIGN) $@
 endif
@@ -401,11 +402,11 @@ $(BIN)/SDL/sameboy_debugger.exe: $(CORE_OBJECTS) $(SDL_OBJECTS) $(OBJ)/Windows/r
 ifneq ($(USE_WINDRES),)
 $(OBJ)/%.o: %.rc
 	-@$(MKDIR) -p $(dir $@)
-	windres --preprocessor cpp -DVERSION=\"$(VERSION)\" $^ $@
+	windres --preprocessor cpp -DVERSION=\"$(VERSION)\" -DCOPYRIGHT_YEAR=\"$(COPYRIGHT_YEAR)\" $^ $@
 else
 $(OBJ)/%.res: %.rc
 	-@$(MKDIR) -p $(dir $@)
-	rc /fo $@ /dVERSION=\"$(VERSION)\" $^ 
+	rc /fo $@ /dVERSION=\"$(VERSION)\" /dCOPYRIGHT_YEAR=\"$(COPYRIGHT_YEAR)\" $^ 
 
 %.o: %.res
 	cvtres /OUT:"$@" $^
