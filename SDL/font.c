@@ -1119,6 +1119,16 @@ uint8_t font[] = {
     _, _, X, _, _, _,
     _, _, _, _, _, _,
     _, _, _, _, _, _,
+    
+    /* Copyright symbol*/
+    _, X, X, X, X, _,
+    X, _, _, _, _, X,
+    X, _, X, X, _, X,
+    X, _, X, _, _, X,
+    X, _, X, _, _, X,
+    X, _, X, X, _, X,
+    X, _, _, _, _, X,
+    _, X, X, X, X, _,
 };
 
 const uint8_t font_max = sizeof(font) / GLYPH_HEIGHT / GLYPH_WIDTH + ' ';

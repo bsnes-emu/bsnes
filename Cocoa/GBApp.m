@@ -634,6 +634,16 @@ static uint32_t color_to_int(NSColor *color)
     return ret;
 }
 
+- (IBAction)openDebuggerHelp:(id)sender
+{
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://sameboy.github.io/debugger/"]];
+}
+
+- (IBAction)openSponsor:(id)sender
+{
+    [[NSWorkspace sharedWorkspace] openURL:[NSURL URLWithString:@"https://github.com/sponsors/LIJI32"]];
+}
+
 - (void)dealloc
 {
     if (_downloadDirectory) {

@@ -91,7 +91,15 @@ static const char *help[] = {
 #else
 " Mute/Unmute:       " MODIFIER_NAME "+M\n"
 #endif
-" Break Debugger:    " CTRL_STRING "+C"
+" Break Debugger:    " CTRL_STRING "+C",
+"\n"
+"SameBoy\n"
+"Version " GB_VERSION "\n\n"
+"Copyright " COPYRIGHT_STRING " 2015-2022\n"
+"Lior Halphon\n\n"
+"Licensed under the MIT\n"
+"license, see LICENSE for\n"
+"more details."
 };
 
 void update_viewport(void)
@@ -271,12 +279,19 @@ static void item_help(unsigned index)
     gui_state = SHOWING_HELP;
 }
 
+static void about(unsigned index)
+{
+    current_help_page = 1;
+    gui_state = SHOWING_HELP;
+}
+
 static void enter_emulation_menu(unsigned index);
 static void enter_graphics_menu(unsigned index);
 static void enter_keyboard_menu(unsigned index);
 static void enter_joypad_menu(unsigned index);
 static void enter_audio_menu(unsigned index);
 static void enter_controls_menu(unsigned index);
+static void enter_help_menu(unsigned index);
 static void toggle_audio_recording(unsigned index);
 
 extern void set_filename(const char *new_filename, typeof(free) *new_free_function);
@@ -308,6 +323,15 @@ static void recalculate_menu_height(void)
 
 static char audio_recording_menu_item[] = "Start Audio Recording";
 
+static void sponsor(unsigned index)
+{
+    SDL_OpenURL("https://github.com/sponsors/LIJI32");
+}
+
+static void debugger_help(unsigned index)
+{
+    SDL_OpenURL("https://sameboy.github.io/debugger/");
+}
 static const struct menu_item paused_menu[] = {
     {"Resume", NULL},
     {"Open ROM", open_rom},
@@ -316,7 +340,8 @@ static const struct menu_item paused_menu[] = {
     {"Audio Options", enter_audio_menu},
     {"Control Options", enter_controls_menu},
     {audio_recording_menu_item, toggle_audio_recording},
-    {"Help", item_help},
+    {"Help & About", enter_help_menu},
+    {"Sponsor SameBoy", sponsor},
     {"Quit SameBoy", item_exit},
     {NULL,}
 };
@@ -330,6 +355,23 @@ static void return_to_root_menu(unsigned index)
     scroll = 0;
     recalculate_menu_height();
 }
+
+static const struct menu_item help_menu[] = {
+    {"Shortcuts", item_help},
+    {"Debugger Help", debugger_help},
+    {"About SameBoy", about},
+    {"Back", return_to_root_menu},
+    {NULL,}
+};
+
+static void enter_help_menu(unsigned index)
+{
+    current_menu = help_menu;
+    current_selection = 0;
+    scroll = 0;
+    recalculate_menu_height();
+}
+
 
 static void cycle_model(unsigned index)
 {
@@ -1983,10 +2025,7 @@ void run_gui(bool is_running)
                     }
                 }
                 else if (gui_state == SHOWING_HELP) {
-                    current_help_page++;
-                    if (current_help_page == sizeof(help) / sizeof(help[0])) {
-                        gui_state = SHOWING_MENU;
-                    }
+                    gui_state = SHOWING_MENU;
                     should_render = true;
                 }
                 break;

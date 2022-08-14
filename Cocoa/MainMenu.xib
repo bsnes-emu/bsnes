@@ -29,6 +29,12 @@
                                     <action selector="orderFrontAboutPanel:" target="-1" id="Exp-CZ-Vem"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Sponsor SameBoy" id="nJ0-7j-VJu">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="openSponsor:" target="-3" id="HSd-eg-8JL"/>
+                                </connections>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="VOq-y0-SEH"/>
                             <menuItem title="Preferences…" keyEquivalent="," id="BOF-NM-1cW">
                                 <connections>
@@ -523,9 +529,10 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">
                         <items>
-                            <menuItem title="SameBoy Help" keyEquivalent="?" id="FKE-Sm-Kum">
+                            <menuItem title="Debugger Help" id="FKE-Sm-Kum">
+                                <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="showHelp:" target="-1" id="y7X-2Q-9no"/>
+                                    <action selector="openDebuggerHelp:" target="-3" id="8tf-lJ-Tbk"/>
                                 </connections>
                             </menuItem>
                         </items>
