@@ -834,14 +834,37 @@ struct GB_gameboy_s {
 __attribute__((__format__ (__printf__, fmtarg, firstvararg)))
 #endif
 
-void GB_init(GB_gameboy_t *gb, GB_model_t model);
+/*
+    There are two instance allocation styles – one where you manage your
+    own instance allocation, and one where you use provided allocators.
+ 
+    Managing allocations yourself:
+    GB_gameboy_t gb;
+    GB_init(&gb, model);
+    ...
+    GB_free(&gb);
+ 
+    Using the provided allocators:
+    GB_gameboy_t *gb = GB_init(GB_alloc(), model);
+    ...
+    GB_free(gb); // optional
+    GB_dealloc(gb);
+ 
+*/
+GB_gameboy_t *GB_init(GB_gameboy_t *gb, GB_model_t model);
+void GB_free(GB_gameboy_t *gb);
+GB_gameboy_t *GB_alloc(void);
+void GB_dealloc(GB_gameboy_t *gb);
+
+// For when you want to use your own malloc implementation without having to rely on the header struct
+size_t GB_allocation_size(void);
+    
 bool GB_is_inited(GB_gameboy_t *gb);
 bool GB_is_cgb(const GB_gameboy_t *gb);
 bool GB_is_cgb_in_cgb_mode(GB_gameboy_t *gb);
 bool GB_is_sgb(GB_gameboy_t *gb); // Returns true if the model is SGB or SGB2
 bool GB_is_hle_sgb(GB_gameboy_t *gb); // Returns true if the model is SGB or SGB2 and the SFC/SNES side is HLE'd
 GB_model_t GB_get_model(GB_gameboy_t *gb);
-void GB_free(GB_gameboy_t *gb);
 void GB_reset(GB_gameboy_t *gb);
 void GB_switch_model_and_reset(GB_gameboy_t *gb, GB_model_t model);
 

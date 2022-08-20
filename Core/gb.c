@@ -146,7 +146,19 @@ static void load_default_border(GB_gameboy_t *gb)
     }
 }
 
-void GB_init(GB_gameboy_t *gb, GB_model_t model)
+size_t GB_allocation_size(void)
+{
+    return sizeof(GB_gameboy_t);
+}
+
+GB_gameboy_t *GB_alloc(void)
+{
+    GB_gameboy_t *ret = malloc(sizeof(*ret));
+    ret->magic = 0;
+    return ret;
+}
+
+GB_gameboy_t *GB_init(GB_gameboy_t *gb, GB_model_t model)
 {
     memset(gb, 0, sizeof(*gb));
     gb->model = model;
@@ -173,6 +185,7 @@ void GB_init(GB_gameboy_t *gb, GB_model_t model)
     
     GB_reset(gb);
     load_default_border(gb);
+    return gb;
 }
 
 GB_model_t GB_get_model(GB_gameboy_t *gb)
@@ -217,7 +230,15 @@ void GB_free(GB_gameboy_t *gb)
     }
 #endif
     GB_stop_audio_recording(gb);
-    memset(gb, 0, sizeof(*gb));
+        memset(gb, 0, sizeof(*gb));
+}
+
+void GB_dealloc(GB_gameboy_t *gb)
+{
+    if (GB_is_inited(gb)) {
+        GB_free(gb);
+    }
+    free(gb);
 }
 
 int GB_load_boot_rom(GB_gameboy_t *gb, const char *path)
