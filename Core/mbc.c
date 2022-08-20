@@ -253,6 +253,7 @@ void GB_configure_cart(GB_gameboy_t *gb)
 
 void GB_reset_mbc(GB_gameboy_t *gb)
 {
+    memset(GB_GET_SECTION(gb, mbc), 0, GB_SECTION_SIZE(mbc));
     if (gb->cartridge_type->mbc_type == GB_MMM01) {
         gb->mbc_rom_bank = -1;
         gb->mbc_rom0_bank = -2;
