@@ -156,6 +156,7 @@ void GB_update_mbc_mappings(GB_gameboy_t *gb)
 
 void GB_configure_cart(GB_gameboy_t *gb)
 {
+    memset(GB_GET_SECTION(gb, mbc), 0, GB_SECTION_SIZE(mbc));
     gb->cartridge_type = &GB_cart_defs[gb->rom[0x147]];
     if (gb->cartridge_type->mbc_type == GB_MMM01) {
         uint8_t *temp = malloc(0x8000);
@@ -253,7 +254,7 @@ void GB_configure_cart(GB_gameboy_t *gb)
 
 void GB_reset_mbc(GB_gameboy_t *gb)
 {
-    memset(GB_GET_SECTION(gb, mbc), 0, GB_SECTION_SIZE(mbc));
+    gb->mbc_rom0_bank = 0;
     if (gb->cartridge_type->mbc_type == GB_MMM01) {
         gb->mbc_rom_bank = -1;
         gb->mbc_rom0_bank = -2;
