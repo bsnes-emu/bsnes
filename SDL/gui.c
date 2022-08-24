@@ -321,6 +321,25 @@ static void recalculate_menu_height(void)
     }
 }
 
+#if SDL_COMPILEDVERSION < 2014
+int SDL_OpenURL(const char *url)
+{
+    char *string = NULL;
+#ifdef __APPLE__
+    asprintf(&string, "open '%s'", url);
+#else
+#ifdef _WIN32
+    asprintf(&string, "explorer '%s'", url);
+#else
+    asprintf(&string, "xdg-open '%s'", url);
+#endif
+#endif
+    int ret = system(string);
+    free(string);
+    return ret;
+}
+#endif
+
 static char audio_recording_menu_item[] = "Start Audio Recording";
 
 static void sponsor(unsigned index)
