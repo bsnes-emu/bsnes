@@ -242,7 +242,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             break;
             
         case GB_CONFLICT_CGB_LCDC:
-            if ((~value & gb->io_registers[GB_IO_LCDC]) & 0x10) {
+            if ((~value & gb->io_registers[GB_IO_LCDC]) & GB_LCDC_TILE_SEL) {
                 // Todo: This is difference is because my timing is off in one of the models
                 if (gb->model > GB_MODEL_CGB_C) {
                     GB_advance_cycles(gb, gb->pending_cycles);
@@ -407,7 +407,7 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
     if (speed_switch) {
         flush_pending_cycles(gb);
         
-        if (gb->io_registers[GB_IO_LCDC] & 0x80 && gb->cgb_double_speed) {
+        if (gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE && gb->cgb_double_speed) {
             GB_log(gb, "ROM triggered a PPU odd mode, which is currently not supported. Reverting to even-mode.\n");
             if (gb->double_speed_alignment & 7) {
                 gb->speed_switch_freeze = 2;

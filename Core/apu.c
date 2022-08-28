@@ -154,7 +154,7 @@ static signed interference(GB_gameboy_t *gb)
             ret -= MAX_CH_AMP / 12;
         }
     }
-    if (gb->io_registers[GB_IO_LCDC] & 0x80) {
+    if (gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE) {
         ret += MAX_CH_AMP / 7;
         if ((gb->io_registers[GB_IO_STAT] & 3) == 3 && gb->model <= GB_MODEL_CGB_E) {
             ret += MAX_CH_AMP / 14;

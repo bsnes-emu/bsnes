@@ -440,7 +440,7 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     gb->absolute_debugger_ticks += cycles;
     
     // Not affected by speed boost
-    if (likely(gb->io_registers[GB_IO_LCDC] & 0x80)) {
+    if (likely(gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE)) {
         gb->double_speed_alignment += cycles;
     }
     gb->apu_output.sample_cycles += cycles * gb->apu_output.sample_rate;

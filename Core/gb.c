@@ -360,7 +360,7 @@ static void generate_gbs_entry(GB_gameboy_t *gb, uint8_t *data)
 void GB_gbs_switch_track(GB_gameboy_t *gb, uint8_t track)
 {
     GB_reset(gb);
-    GB_write_memory(gb, 0xFF00 + GB_IO_LCDC, 0x80);
+    GB_write_memory(gb, 0xFF00 + GB_IO_LCDC, GB_LCDC_ENABLE);
     GB_write_memory(gb, 0xFF00 + GB_IO_TAC, gb->gbs_header.TAC);
     GB_write_memory(gb, 0xFF00 + GB_IO_TMA, gb->gbs_header.TMA);
     GB_write_memory(gb, 0xFF00 + GB_IO_NR52, 0x80);

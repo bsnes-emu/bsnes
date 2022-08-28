@@ -1680,15 +1680,15 @@ static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
         return true;
     }
     GB_log(gb, "LCDC:\n");
-    GB_log(gb, "    LCD enabled: %s\n",(gb->io_registers[GB_IO_LCDC] & 128)? "Enabled" : "Disabled");
+    GB_log(gb, "    LCD enabled: %s\n",(gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE)? "Enabled" : "Disabled");
     GB_log(gb, "    %s: %s\n", (gb->cgb_mode? "Object priority flags" : "Background and Window"),
-                               (gb->io_registers[GB_IO_LCDC] & 1)? "Enabled" : "Disabled");
-    GB_log(gb, "    Objects: %s\n", (gb->io_registers[GB_IO_LCDC] & 2)? "Enabled" : "Disabled");
-    GB_log(gb, "    Object size: %s\n", (gb->io_registers[GB_IO_LCDC] & 4)? "8x16" : "8x8");
-    GB_log(gb, "    Background tilemap: %s\n", (gb->io_registers[GB_IO_LCDC] & 8)? "$9C00" : "$9800");
-    GB_log(gb, "    Background and Window Tileset: %s\n", (gb->io_registers[GB_IO_LCDC] & 16)? "$8000" : "$8800");
-    GB_log(gb, "    Window: %s\n", (gb->io_registers[GB_IO_LCDC] & 32)? "Enabled" : "Disabled");
-    GB_log(gb, "    Window tilemap: %s\n", (gb->io_registers[GB_IO_LCDC] & 64)? "$9C00" : "$9800");
+                               (gb->io_registers[GB_IO_LCDC] & GB_LCDC_BG_EN)? "Enabled" : "Disabled");
+    GB_log(gb, "    Objects: %s\n", (gb->io_registers[GB_IO_LCDC] & GB_LCDC_OBJ_EN)? "Enabled" : "Disabled");
+    GB_log(gb, "    Object size: %s\n", (gb->io_registers[GB_IO_LCDC] & GB_LCDC_OBJ_SIZE)? "8x16" : "8x8");
+    GB_log(gb, "    Background tilemap: %s\n", (gb->io_registers[GB_IO_LCDC] & GB_LCDC_BG_MAP)? "$9C00" : "$9800");
+    GB_log(gb, "    Background and Window Tileset: %s\n", (gb->io_registers[GB_IO_LCDC] & GB_LCDC_TILE_SEL)? "$8000" : "$8800");
+    GB_log(gb, "    Window: %s\n", (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE)? "Enabled" : "Disabled");
+    GB_log(gb, "    Window tilemap: %s\n", (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_MAP)? "$9C00" : "$9800");
 
     GB_log(gb, "\nSTAT:\n");
     static const char *modes[] = {"Mode 0, H-Blank", "Mode 1, V-Blank", "Mode 2, OAM", "Mode 3, Rendering"};
@@ -1703,7 +1703,7 @@ static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
 
     GB_log(gb, "\nCurrent line: %d\n", gb->current_line);
     GB_log(gb, "Current state: ");
-    if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
+    if (!(gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE)) {
         GB_log(gb, "Off\n");
     }
     else if (gb->display_state == 7 || gb->display_state == 8) {

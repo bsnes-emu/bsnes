@@ -1929,12 +1929,12 @@ static bool is_path_writeable(const char *path)
         uint8_t lcdc = ((uint8_t *)GB_get_direct_access(&gb, GB_DIRECT_ACCESS_IO, NULL, NULL))[GB_IO_LCDC];
         uint8_t *vram = GB_get_direct_access(&gb, GB_DIRECT_ACCESS_VRAM, NULL, NULL);
         
-        if (map_type == GB_MAP_9C00 || (map_type == GB_MAP_AUTO && lcdc & 0x08)) {
+        if (map_type == GB_MAP_9C00 || (map_type == GB_MAP_AUTO && lcdc & GB_LCDC_BG_MAP)) {
             map_base = 0x1C00;
         }
         
         if (tileset_type == GB_TILESET_AUTO) {
-            tileset_type = (lcdc & 0x10)? GB_TILESET_8800 : GB_TILESET_8000;
+            tileset_type = (lcdc & GB_LCDC_TILE_SEL)? GB_TILESET_8800 : GB_TILESET_8000;
         }
         
         uint8_t tile = vram[map_base + map_offset];

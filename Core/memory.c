@@ -1438,7 +1438,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 
 
             case GB_IO_LCDC:
-                if ((value & 0x80) && !(gb->io_registers[GB_IO_LCDC] & 0x80)) {
+                if ((value & GB_LCDC_ENABLE) && !(gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE)) {
                     // LCD turned on
                     if (gb->lcd_status_callback) {
                         gb->lcd_status_callback(gb, true);
@@ -1461,7 +1461,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     }
                     GB_timing_sync(gb);
                 }
-                else if (!(value & 0x80) && (gb->io_registers[GB_IO_LCDC] & 0x80)) {
+                else if (!(value & GB_LCDC_ENABLE) && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE)) {
                     /* Sync after turning off LCD */
                     if (gb->lcd_status_callback) {
                         gb->lcd_status_callback(gb, false);
@@ -1471,7 +1471,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     GB_lcd_off(gb);
                 }
                 /* Handle disabling objects while already fetching an object */
-                if ((gb->io_registers[GB_IO_LCDC] & 2) && !(value & 2)) {
+                if ((gb->io_registers[GB_IO_LCDC] & GB_LCDC_OBJ_EN) && !(value & GB_LCDC_OBJ_EN)) {
                     if (gb->during_object_fetch) {
                         gb->cycles_for_line += gb->display_cycles;
                         gb->display_cycles = 0;
@@ -1479,7 +1479,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     }
                 }
                 gb->io_registers[GB_IO_LCDC] = value;
-                if (!(value & 0x20)) {
+                if (!(value & GB_LCDC_WIN_ENABLE)) {
                     gb->wx_triggered = false;
                     gb->wx166_glitch = false;
                 }

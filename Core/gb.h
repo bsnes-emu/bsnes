@@ -138,10 +138,21 @@ enum {
 
 /* Todo: Actually use these! */
 enum {
-    GB_CARRY_FLAG = 16,
-    GB_HALF_CARRY_FLAG = 32,
-    GB_SUBTRACT_FLAG = 64,
-    GB_ZERO_FLAG = 128,
+    GB_CARRY_FLAG = 0x10,
+    GB_HALF_CARRY_FLAG = 0x20,
+    GB_SUBTRACT_FLAG = 0x40,
+    GB_ZERO_FLAG = 0x80,
+};
+
+enum {
+    GB_LCDC_BG_EN = 1,
+    GB_LCDC_OBJ_EN = 2,
+    GB_LCDC_OBJ_SIZE = 4,
+    GB_LCDC_BG_MAP = 8,
+    GB_LCDC_TILE_SEL = 0x10,
+    GB_LCDC_WIN_ENABLE = 0x20,
+    GB_LCDC_WIN_MAP = 0x40,
+    GB_LCDC_ENABLE = 0x80,
 };
 
 typedef enum {
