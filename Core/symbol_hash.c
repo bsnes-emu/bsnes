@@ -77,13 +77,13 @@ static unsigned hash_name(const char *name)
     unsigned r = 0;
     while (*name) {
         r <<= 1;
-        if (r & 0x400) {
-            r ^= 0x401;
+        if (r & 0x2000) {
+            r ^= 0x2001;
         }
-        r += (unsigned char)*(name++);
+        r ^= (unsigned char)*(name++);
     }
 
-    return r & 0x3FF;
+    return r;
 }
 
 void GB_reversed_map_add_symbol(GB_reversed_symbol_map_t *map, uint16_t bank, GB_bank_symbol_t *bank_symbol)
