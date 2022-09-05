@@ -21,13 +21,12 @@ auto SuperFX::read(uint addr, uint8 data) -> uint8 {
   }
 
   if((addr & 0xe00000) == 0x600000) {  //$60-7f:0000-ffff
-    addr =  Bus::mirror(addr, ram.size());
     while(!regs.scmr.ran) {
       step(6);
       synchronizeCPU();
       if(synchronizing()) break;
     }
-    return ram.read(addr);
+    return ram.read(addr & ramMask);
   }
 
   return data;
@@ -35,13 +34,12 @@ auto SuperFX::read(uint addr, uint8 data) -> uint8 {
 
 auto SuperFX::write(uint addr, uint8 data) -> void {
   if((addr & 0xe00000) == 0x600000) {  //$60-7f:0000-ffff
-    addr =  Bus::mirror(addr, ram.size());
     while(!regs.scmr.ran) {
       step(6);
       synchronizeCPU();
       if(synchronizing()) break;
     }
-    return ram.write(addr, data);
+    return ram.write(addr & ramMask, data);
   }
 }
 
