@@ -643,6 +643,7 @@ static void init_for_current_model(unsigned id)
     else {
         GB_init(&gameboy[i], libretro_to_internal_model[effective_model]);
     }
+    geometry_updated = true;
 
     GB_set_boot_rom_load_callback(&gameboy[i], boot_rom_load);
 
