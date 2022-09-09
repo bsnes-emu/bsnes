@@ -749,6 +749,7 @@ struct GB_gameboy_internal_s {
         /*** Debugger ***/
         volatile bool debug_stopped, debug_disable;
         bool debug_fin_command, debug_next_command;
+        bool help_shown;
 
         /* Breakpoints */
         uint16_t n_breakpoints;

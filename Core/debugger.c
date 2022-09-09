@@ -2001,7 +2001,8 @@ static const debugger_command_t commands[] = {
                         "used"},
     {"cartridge", 2, mbc, "Display information about the MBC and cartridge"},
     {"mbc", 3, }, /* Alias */
-    {"apu", 3, apu, "Display information about the current state of the audio processing unit", "[channel (1-4, 5 for NR5x)]"},
+    {"apu", 3, apu, "Display information about the current state of the audio processing" HELP_NEWLINE
+                    "unit", "[channel (1-4, 5 for NR5x)]"},
     {"wave", 3, wave, "Print a visual representation of the wave RAM." HELP_NEWLINE
                       "Modifiers can be used for a (f)ull print (the default)," HELP_NEWLINE
         "a more (c)ompact one, or a one-(l)iner", "", "(f|c|l)", .modifiers_completer = wave_completer},
@@ -2203,6 +2204,9 @@ void GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, uint16_t addr)
 /* Returns true if debugger waits for more commands */
 bool GB_debugger_execute_command(GB_gameboy_t *gb, char *input)
 {
+    while (*input == ' ') {
+        input++;
+    }
     if (!input[0]) {
         return true;
     }
@@ -2228,6 +2232,7 @@ bool GB_debugger_execute_command(GB_gameboy_t *gb, char *input)
         modifiers++;
     }
 
+    gb->help_shown = true;
     const debugger_command_t *command = find_command(command_string);
     if (command) {
         uint8_t *old_state = malloc(GB_get_save_state_size_no_bess(gb));
@@ -2256,7 +2261,7 @@ bool GB_debugger_execute_command(GB_gameboy_t *gb, char *input)
         return ret;
     }
     else {
-        GB_log(gb, "%s: no such command.\n", command_string);
+        GB_log(gb, "%s: no such command. Type 'help' to list the available debugger commands.\n", command_string);
         return true;
     }
 }
@@ -2342,6 +2347,10 @@ void GB_debugger_run(GB_gameboy_t *gb)
         gb->debug_stopped = true;
     }
     if (gb->debug_stopped) {
+        if (!gb->help_shown) {
+            gb->help_shown = true;
+            GB_log(gb, "Type 'help' to list the available debugger commands.\n");
+        }
         GB_cpu_disassemble(gb, gb->pc, 5);
     }
 next_command:
