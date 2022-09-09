@@ -18,6 +18,8 @@ SOURCES_C   := $(CORE_DIR)/Core/gb.c \
                $(CORE_DIR)/Core/rumble.c \
                $(CORE_DIR)/libretro/agb_boot.c \
                $(CORE_DIR)/libretro/cgb_boot.c \
+               $(CORE_DIR)/libretro/cgb0_boot.c \
+               $(CORE_DIR)/libretro/mgb_boot.c \
                $(CORE_DIR)/libretro/dmg_boot.c \
                $(CORE_DIR)/libretro/sgb_boot.c \
                $(CORE_DIR)/libretro/sgb2_boot.c \

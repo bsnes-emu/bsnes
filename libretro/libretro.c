@@ -48,27 +48,7 @@ enum rom_type {
     ROM_TYPE_CGB
 };
 
-enum model {
-    MODEL_DMG_B,
-    MODEL_CGB_C,
-    MODEL_CGB_E,
-    MODEL_AGB,
-    MODEL_SGB_PAL,
-    MODEL_SGB_NTSC,
-    MODEL_SGB2,
-    MODEL_AUTO
-};
-
-static const GB_model_t libretro_to_internal_model[] =
-{
-    [MODEL_DMG_B] = GB_MODEL_DMG_B,
-    [MODEL_CGB_C] = GB_MODEL_CGB_C,
-    [MODEL_CGB_E] = GB_MODEL_CGB_E,
-    [MODEL_AGB] = GB_MODEL_AGB_A,
-    [MODEL_SGB_PAL] = GB_MODEL_SGB_PAL,
-    [MODEL_SGB_NTSC] = GB_MODEL_SGB_NTSC,
-    [MODEL_SGB2] = GB_MODEL_SGB2
-};
+#define GB_MODEL_AUTO (-1)
 
 enum screen_layout {
     LAYOUT_TOP_DOWN,
@@ -80,17 +60,17 @@ enum audio_out {
     GB_2
 };
 
-static enum model model[2] = {
-    MODEL_DMG_B,
-    MODEL_DMG_B
+static GB_model_t model[2] = {
+    GB_MODEL_DMG_B,
+    GB_MODEL_DMG_B
 };
-static enum model auto_model[2] = {
-    MODEL_CGB_E,
-    MODEL_CGB_E
+static GB_model_t auto_model[2] = {
+    GB_MODEL_CGB_E,
+    GB_MODEL_CGB_E
 };
-static enum model auto_sgb_model[2] = {
-    MODEL_SGB_NTSC,
-    MODEL_SGB_NTSC
+static GB_model_t auto_sgb_model[2] = {
+    GB_MODEL_SGB_NTSC,
+    GB_MODEL_SGB_NTSC
 };
 static bool auto_sgb_enabled[2] = {
     false,
@@ -130,8 +110,8 @@ char retro_system_directory[4096];
 
 GB_gameboy_t gameboy[2];
 
-extern const unsigned char dmg_boot[], cgb_boot[], agb_boot[], sgb_boot[], sgb2_boot[];
-extern const unsigned dmg_boot_length, cgb_boot_length, agb_boot_length, sgb_boot_length, sgb2_boot_length;
+extern const unsigned char dmg_boot[], mgb_boot[], cgb0_boot[], cgb_boot[], agb_boot[], sgb_boot[], sgb2_boot[];
+extern const unsigned dmg_boot_length, mgb_boot_length, cgb0_boot_length, cgb_boot_length, agb_boot_length, sgb_boot_length, sgb2_boot_length;
 bool vblank1_occurred = false, vblank2_occurred = false;
 
 static void fallback_log(enum retro_log_level level, const char *fmt, ...)
@@ -530,10 +510,10 @@ static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
     const uint8_t *boot_code = (const unsigned char *[]) {
         [GB_BOOT_ROM_DMG_0] = dmg_boot, // DMG_0 not implemented yet
         [GB_BOOT_ROM_DMG] = dmg_boot,
-        [GB_BOOT_ROM_MGB] = dmg_boot, // mgb not implemented yet
+        [GB_BOOT_ROM_MGB] = mgb_boot,
         [GB_BOOT_ROM_SGB] = sgb_boot,
         [GB_BOOT_ROM_SGB2] = sgb2_boot,
-        [GB_BOOT_ROM_CGB_0] = cgb_boot, // CGB_0 not implemented yet
+        [GB_BOOT_ROM_CGB_0] = cgb0_boot,
         [GB_BOOT_ROM_CGB] = cgb_boot,
         [GB_BOOT_ROM_AGB] = agb_boot,
     }[type];
@@ -541,10 +521,10 @@ static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
     unsigned boot_length = (unsigned []) {
         [GB_BOOT_ROM_DMG_0] = dmg_boot_length, // DMG_0 not implemented yet
         [GB_BOOT_ROM_DMG] = dmg_boot_length,
-        [GB_BOOT_ROM_MGB] = dmg_boot_length, // mgb not implemented yet
+        [GB_BOOT_ROM_MGB] = mgb_boot_length,
         [GB_BOOT_ROM_SGB] = sgb_boot_length,
         [GB_BOOT_ROM_SGB2] = sgb2_boot_length,
-        [GB_BOOT_ROM_CGB_0] = cgb_boot_length, // CGB_0 not implemented yet
+        [GB_BOOT_ROM_CGB_0] = cgb0_boot_length,
         [GB_BOOT_ROM_CGB] = cgb_boot_length,
         [GB_BOOT_ROM_AGB] = agb_boot_length,
     }[type];
@@ -629,19 +609,19 @@ static void retro_set_memory_maps(void)
 static void init_for_current_model(unsigned id)
 {
     unsigned i = id;
-    enum model effective_model;
+    GB_model_t effective_model;
 
     effective_model = model[i];
-    if (effective_model == MODEL_AUTO) {
+    if (effective_model == GB_MODEL_AUTO) {
         effective_model = auto_model[i];
     }
 
     if (GB_is_inited(&gameboy[i])) {
-        GB_switch_model_and_reset(&gameboy[i], libretro_to_internal_model[effective_model]);
+        GB_switch_model_and_reset(&gameboy[i], effective_model);
         retro_set_memory_maps();
     }
     else {
-        GB_init(&gameboy[i], libretro_to_internal_model[effective_model]);
+        GB_init(&gameboy[i], effective_model);
     }
     geometry_updated = true;
 
@@ -668,7 +648,7 @@ static void init_for_current_model(unsigned id)
     }
 
     /* Let's be extremely nitpicky about how devices and descriptors are set */
-    if (emulated_devices == 1 && (model[0] == MODEL_SGB_PAL || model[0] == MODEL_SGB_NTSC || model[0] == MODEL_SGB2)) { 
+    if (emulated_devices == 1 && (model[0] == GB_MODEL_SGB_PAL || model[0] == GB_MODEL_SGB_NTSC || model[0] == GB_MODEL_SGB2)) {
         static const struct retro_controller_info ports[] = {
             { controllers_sgb, 1 },
             { controllers_sgb, 1 },
@@ -698,6 +678,34 @@ static void init_for_current_model(unsigned id)
     }
 }
 
+static GB_model_t string_to_model(const char *string)
+{
+    static const struct {
+        const char *name;
+        GB_model_t model;
+    } models[] = {
+        { "Game Boy",             GB_MODEL_DMG_B},
+        { "Game Boy Pocket",      GB_MODEL_MGB},
+        { "Game Boy Color 0",     GB_MODEL_CGB_0},
+        { "Game Boy Color A",     GB_MODEL_CGB_A},
+        { "Game Boy Color B",     GB_MODEL_CGB_B},
+        { "Game Boy Color C",     GB_MODEL_CGB_C},
+        { "Game Boy Color D",     GB_MODEL_CGB_D},
+        { "Game Boy Color",       GB_MODEL_CGB_E},
+        { "Game Boy Advance",     GB_MODEL_AGB_A},
+        { "Game Boy Player",      GB_MODEL_GBP_A},
+        { "Super Game Boy",       GB_MODEL_SGB_NTSC},
+        { "Super Game Boy PAL",   GB_MODEL_SGB_PAL},
+        { "Super Game Boy 2",     GB_MODEL_SGB2},
+    };
+    for (unsigned i = 0; i < sizeof(models) / sizeof(models[0]); i++) {
+        if (strcmp(models[i].name, string) == 0) {
+            return models[i].model;
+        }
+    }
+    return GB_MODEL_AUTO;
+}
+
 static void check_variables()
 {
     struct retro_variable var = {0};
@@ -706,38 +714,17 @@ static void check_variables()
         var.key = "sameboy_model";
         var.value = NULL;
 
-        model[0] = MODEL_AUTO;
+        model[0] = GB_MODEL_AUTO;
         auto_sgb_enabled[0] = false;
 
         if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-            enum model new_model = model[0];
-            if (strcmp(var.value, "Game Boy") == 0) {
-                new_model = MODEL_DMG_B;
-            }
-            else if (strcmp(var.value, "Game Boy Color C") == 0) {
-                new_model = MODEL_CGB_C;
-            }
-            else if (strcmp(var.value, "Game Boy Color") == 0) {
-                new_model = MODEL_CGB_E;
-            }
-            else if (strcmp(var.value, "Game Boy Advance") == 0) {
-                new_model = MODEL_AGB;
-            }
-            else if (strcmp(var.value, "Super Game Boy") == 0) {
-                new_model = MODEL_SGB_NTSC;
-            }
-            else if (strcmp(var.value, "Super Game Boy PAL") == 0) {
-                new_model = MODEL_SGB_PAL;
-            }
-            else if (strcmp(var.value, "Super Game Boy 2") == 0) {
-                new_model = MODEL_SGB2;
-            }
-            else if (strcmp(var.value, "Auto (SGB)") == 0) {
-                new_model = MODEL_AUTO;
-                auto_sgb_enabled[0] = true;
-            }
-            else {
-                new_model = MODEL_AUTO;
+            GB_model_t new_model = model[0];
+            new_model = string_to_model(var.value);
+            if (new_model == GB_MODEL_AUTO) {
+                if (strcmp(var.value, "Auto (SGB)") == 0) {
+                    new_model = GB_MODEL_AUTO;
+                    auto_sgb_enabled[0] = true;
+                }
             }
 
             model[0] = new_model;
@@ -746,18 +733,18 @@ static void check_variables()
         var.key = "sameboy_auto_sgb_model";
         var.value = NULL;
 
-        auto_sgb_model[0] = MODEL_SGB_NTSC;
+        auto_sgb_model[0] = GB_MODEL_SGB_NTSC;
 
         if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-            enum model new_model = auto_sgb_model[0];
+            GB_model_t new_model = auto_sgb_model[0];
             if (strcmp(var.value, "Super Game Boy PAL") == 0) {
-                new_model = MODEL_SGB_PAL;
+                new_model = GB_MODEL_SGB_PAL;
             }
             else if (strcmp(var.value, "Super Game Boy 2") == 0) {
-                new_model = MODEL_SGB2;
+                new_model = GB_MODEL_SGB2;
             }
             else {
-                new_model = MODEL_SGB_NTSC;
+                new_model = GB_MODEL_SGB_NTSC;
             }
 
             auto_sgb_model[0] = new_model;
@@ -924,58 +911,38 @@ static void check_variables()
         var.key = "sameboy_model_1";
         var.value = NULL;
 
-        model[0] = MODEL_AUTO;
+        model[0] = GB_MODEL_AUTO;
         auto_sgb_enabled[0] = false;
 
         if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-            enum model new_model = model[0];
-            if (strcmp(var.value, "Game Boy") == 0) {
-                new_model = MODEL_DMG_B;
+            GB_model_t new_model = model[0];
+            new_model = string_to_model(var.value);
+            if (new_model == GB_MODEL_AUTO) {
+                if (strcmp(var.value, "Auto (SGB)") == 0) {
+                    new_model = GB_MODEL_AUTO;
+                    auto_sgb_enabled[0] = true;
+                }
             }
-            else if (strcmp(var.value, "Game Boy Color C") == 0) {
-                new_model = MODEL_CGB_C;
-            }
-            else if (strcmp(var.value, "Game Boy Color") == 0) {
-                new_model = MODEL_CGB_E;
-            }
-            else if (strcmp(var.value, "Game Boy Advance") == 0) {
-                new_model = MODEL_AGB;
-            }
-            else if (strcmp(var.value, "Super Game Boy") == 0) {
-                new_model = MODEL_SGB_NTSC;
-            }
-            else if (strcmp(var.value, "Super Game Boy PAL") == 0) {
-                new_model = MODEL_SGB_PAL;
-            }
-            else if (strcmp(var.value, "Super Game Boy 2") == 0) {
-                new_model = MODEL_SGB2;
-            }
-            else if (strcmp(var.value, "Auto (SGB)") == 0) {
-                new_model = MODEL_AUTO;
-                auto_sgb_enabled[0] = true;
-            }
-            else {
-                new_model = MODEL_AUTO;
-            }
-
+            
             model[0] = new_model;
         }
+
 
         var.key = "sameboy_auto_sgb_model_1";
         var.value = NULL;
 
-        auto_sgb_model[0] = MODEL_SGB_NTSC;
+        auto_sgb_model[0] = GB_MODEL_SGB_NTSC;
 
         if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-            enum model new_model = auto_sgb_model[0];
+            GB_model_t new_model = auto_sgb_model[0];
             if (strcmp(var.value, "Super Game Boy PAL") == 0) {
-                new_model = MODEL_SGB_PAL;
+                new_model = GB_MODEL_SGB_PAL;
             }
             else if (strcmp(var.value, "Super Game Boy 2") == 0) {
-                new_model = MODEL_SGB2;
+                new_model = GB_MODEL_SGB2;
             }
             else {
-                new_model = MODEL_SGB_NTSC;
+                new_model = GB_MODEL_SGB_NTSC;
             }
 
             auto_sgb_model[0] = new_model;
@@ -984,58 +951,37 @@ static void check_variables()
         var.key = "sameboy_model_2";
         var.value = NULL;
 
-        model[1] = MODEL_AUTO;
+        model[1] = GB_MODEL_AUTO;
         auto_sgb_enabled[1] = false;
 
         if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-            enum model new_model = model[1];
-            if (strcmp(var.value, "Game Boy") == 0) {
-                new_model = MODEL_DMG_B;
+            GB_model_t new_model = model[1];
+            new_model = string_to_model(var.value);
+            if (new_model == GB_MODEL_AUTO) {
+                if (strcmp(var.value, "Auto (SGB)") == 0) {
+                    new_model = GB_MODEL_AUTO;
+                    auto_sgb_enabled[0] = true;
+                }
             }
-            else if (strcmp(var.value, "Game Boy Color C") == 0) {
-                new_model = MODEL_CGB_C;
-            }
-            else if (strcmp(var.value, "Game Boy Color") == 0) {
-                new_model = MODEL_CGB_E;
-            }
-            else if (strcmp(var.value, "Game Boy Advance") == 0) {
-                new_model = MODEL_AGB;
-            }
-            else if (strcmp(var.value, "Super Game Boy") == 0) {
-                new_model = MODEL_SGB_NTSC;
-            }
-            else if (strcmp(var.value, "Super Game Boy PAL") == 0) {
-                new_model = MODEL_SGB_PAL;
-            }
-            else if (strcmp(var.value, "Super Game Boy 2") == 0) {
-                new_model = MODEL_SGB2;
-            }
-            else if (strcmp(var.value, "Auto (SGB)") == 0) {
-                new_model = MODEL_AUTO;
-                auto_sgb_enabled[1] = true;
-            }
-            else {
-                new_model = MODEL_AUTO;
-            }
-
+            
             model[1] = new_model;
         }
 
         var.key = "sameboy_auto_sgb_model_2";
         var.value = NULL;
 
-        auto_sgb_model[1] = MODEL_SGB_NTSC;
+        auto_sgb_model[1] = GB_MODEL_SGB_NTSC;
 
         if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
-            enum model new_model = auto_sgb_model[1];
+            GB_model_t new_model = auto_sgb_model[1];
             if (strcmp(var.value, "Super Game Boy PAL") == 0) {
-                new_model = MODEL_SGB_PAL;
+                new_model = GB_MODEL_SGB_PAL;
             }
             else if (strcmp(var.value, "Super Game Boy 2") == 0) {
-                new_model = MODEL_SGB2;
+                new_model = GB_MODEL_SGB2;
             }
             else {
-                new_model = MODEL_SGB_NTSC;
+                new_model = GB_MODEL_SGB_NTSC;
             }
 
             auto_sgb_model[1] = new_model;
@@ -1377,7 +1323,7 @@ void retro_run(void)
         GB_update_keys_status(&gameboy[0], 0);
         GB_update_keys_status(&gameboy[1], 1);
     }
-    else if (emulated_devices == 1 && (model[0] == MODEL_SGB_PAL || model[0] == MODEL_SGB_NTSC || model[0] == MODEL_SGB2)) { 
+    else if (emulated_devices == 1 && (model[0] == GB_MODEL_SGB_PAL || model[0] == GB_MODEL_SGB_NTSC || model[0] == GB_MODEL_SGB2)) {
         for (unsigned i = 0; i < 4; i++) {
             GB_update_keys_status(&gameboy[0], i);
         }
@@ -1475,16 +1421,16 @@ bool retro_load_game(const struct retro_game_info *info)
 
     switch (content_type) {
         case ROM_TYPE_DMG:
-            auto_model[0] = MODEL_DMG_B;
-            auto_model[1] = MODEL_DMG_B;
+            auto_model[0] = GB_MODEL_DMG_B;
+            auto_model[1] = GB_MODEL_DMG_B;
             break;
         case ROM_TYPE_SGB:
-            auto_model[0] = auto_sgb_enabled[0] ? auto_sgb_model[0] : MODEL_DMG_B;
-            auto_model[1] = auto_sgb_enabled[1] ? auto_sgb_model[1] : MODEL_DMG_B;
+            auto_model[0] = auto_sgb_enabled[0] ? auto_sgb_model[0] : GB_MODEL_DMG_B;
+            auto_model[1] = auto_sgb_enabled[1] ? auto_sgb_model[1] : GB_MODEL_DMG_B;
             break;
         case ROM_TYPE_CGB:
-            auto_model[0] = MODEL_CGB_E;
-            auto_model[1] = MODEL_CGB_E;
+            auto_model[0] = GB_MODEL_CGB_E;
+            auto_model[1] = GB_MODEL_CGB_E;
             break;
         case ROM_TYPE_INVALID:
         default:
@@ -1568,13 +1514,13 @@ bool retro_load_game_special(unsigned type, const struct retro_game_info *info, 
 
         switch (content_type) {
             case ROM_TYPE_DMG:
-                auto_model[i] = MODEL_DMG_B;
+                auto_model[i] = GB_MODEL_DMG_B;
                 break;
             case ROM_TYPE_SGB:
-                auto_model[i] = auto_sgb_enabled[i] ? auto_sgb_model[i] : MODEL_DMG_B;
+                auto_model[i] = auto_sgb_enabled[i] ? auto_sgb_model[i] : GB_MODEL_DMG_B;
                 break;
             case ROM_TYPE_CGB:
-                auto_model[i] = MODEL_CGB_E;
+                auto_model[i] = GB_MODEL_CGB_E;
                 break;
             case ROM_TYPE_INVALID:
             default:
