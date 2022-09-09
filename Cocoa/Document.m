@@ -1092,7 +1092,9 @@ static bool is_path_writeable(const char *path)
         }
         GB_load_battery(&gb, self.savPath.UTF8String);
         GB_load_cheats(&gb, self.chtPath.UTF8String);
-        [self.cheatWindowController cheatsUpdated];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.cheatWindowController cheatsUpdated];
+        });
         GB_debugger_load_symbol_file(&gb, [[[NSBundle mainBundle] pathForResource:@"registers" ofType:@"sym"] UTF8String]);
         GB_debugger_load_symbol_file(&gb, [[fileName stringByDeletingPathExtension] stringByAppendingPathExtension:@"sym"].UTF8String);
     }];
@@ -1650,9 +1652,17 @@ static bool is_path_writeable(const char *path)
             GB_log(&gb, "Value $%04x is out of range.\n", addr);
             return;
         }
-        [hex_controller setSelectedContentsRanges:@[[HFRangeWrapper withRange:HFRangeMake(addr, 0)]]];
-        [hex_controller _ensureVisibilityOfLocation:addr];
-        [self.memoryWindow makeFirstResponder:self.memoryView.subviews[0].subviews[0]];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [hex_controller setSelectedContentsRanges:@[[HFRangeWrapper withRange:HFRangeMake(addr, 0)]]];
+            [hex_controller _ensureVisibilityOfLocation:addr];
+            for (HFRepresenter *representer in hex_controller.representers) {
+                if ([representer isKindOfClass:[HFHexTextRepresenter class]]) {
+                    [self.memoryWindow makeFirstResponder:representer.view];
+                    break;
+                }
+            }
+        });
     }];
     if (error) {
         NSBeep();
@@ -1700,7 +1710,9 @@ static bool is_path_writeable(const char *path)
 
         [sender setStringValue:[NSString stringWithFormat:@"$%x", bank]];
         [(GBMemoryByteArray *)(hex_controller.byteArray) setSelectedBank:bank];
-        [hex_controller reloadData];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [hex_controller reloadData];
+        });
     }];
     
     if (error && !ignore_errors) {
