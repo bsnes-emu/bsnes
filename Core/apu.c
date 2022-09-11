@@ -337,7 +337,7 @@ static void _nrx2_glitch(uint8_t *volume, uint8_t value, uint8_t old_value, uint
     }
     
     if (should_invert) {
-        // The weird way and over-the-top way clocks for this counter are connected cause
+        // The weird and over-the-top way clocks for this counter are connected cause
         // some weird ways for it to invert
         if (value & 8) {
             if (!(old_value & 7) && !lock->locked) {
@@ -385,6 +385,11 @@ static void _nrx2_glitch(uint8_t *volume, uint8_t value, uint8_t old_value, uint
 
 static void nrx2_glitch(GB_gameboy_t *gb, uint8_t *volume, uint8_t value, uint8_t old_value, uint8_t *countdown, GB_envelope_clock_t *lock)
 {
+    /* Note: on pre-CGB models *some* of these are non-deterministic. Specifically,
+       $x0 writes seem to be  non-deterministic while  $x8 always work as expected.
+       TODO: Might be useful  to find which cases are  non-deterministic, and allow
+       the debugger to issue  warnings when they're used.  I suspect writes to/from
+       $xF are guaranteed to be deterministic. */
     if (gb->model <= GB_MODEL_CGB_C) {
         _nrx2_glitch(volume, 0xFF, old_value, countdown, lock);
         _nrx2_glitch(volume, value, 0xFF, countdown, lock);
