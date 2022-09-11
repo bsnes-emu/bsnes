@@ -12,7 +12,7 @@ static const uint8_t duties[] = {
     0, 1, 1, 1, 1, 1, 1, 0,
 };
 
-static void refresh_channel(GB_gameboy_t *gb, unsigned index, unsigned cycles_offset)
+static void refresh_channel(GB_gameboy_t *gb, GB_channel_t index, unsigned cycles_offset)
 {
     unsigned multiplier = gb->apu_output.cycles_since_render + cycles_offset - gb->apu_output.last_update[index];
     gb->apu_output.summed_samples[index].left += gb->apu_output.current_sample[index].left * multiplier;
@@ -20,7 +20,7 @@ static void refresh_channel(GB_gameboy_t *gb, unsigned index, unsigned cycles_of
     gb->apu_output.last_update[index] = gb->apu_output.cycles_since_render + cycles_offset;
 }
 
-bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, unsigned index)
+bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, GB_channel_t index)
 {
     if (gb->model > GB_MODEL_CGB_E) {
         /* On the AGB, mixing is done digitally, so there are no per-channel
@@ -48,7 +48,7 @@ bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, unsigned index)
     return false;
 }
 
-static uint8_t agb_bias_for_channel(GB_gameboy_t *gb, unsigned index)
+static uint8_t agb_bias_for_channel(GB_gameboy_t *gb, GB_channel_t index)
 {
     if (!gb->apu.is_active[index]) return 0;
     
@@ -67,7 +67,7 @@ static uint8_t agb_bias_for_channel(GB_gameboy_t *gb, unsigned index)
     return 0;
 }
 
-static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsigned cycles_offset)
+static void update_sample(GB_gameboy_t *gb, GB_channel_t index, int8_t value, unsigned cycles_offset)
 {
         
     if (gb->model > GB_MODEL_CGB_E) {
@@ -102,6 +102,10 @@ static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsign
                 output.left = 0xF * left_volume;
             }
             
+            if (unlikely(gb->apu_output.channel_muted[index])) {
+                output.left = output.right = 0;
+            }
+            
             if (*(uint32_t *)&(gb->apu_output.current_sample[index]) != *(uint32_t *)&output) {
                 refresh_channel(gb, index, cycles_offset);
                 gb->apu_output.current_sample[index] = output;
@@ -129,7 +133,10 @@ static void update_sample(GB_gameboy_t *gb, unsigned index, int8_t value, unsign
         if (gb->io_registers[GB_IO_NR51] & (0x10 << index)) {
             left_volume = ((gb->io_registers[GB_IO_NR50] >> 4) & 7) + 1;
         }
-        GB_sample_t output = {(0xF - value * 2) * left_volume, (0xF - value * 2) * right_volume};
+        GB_sample_t output = {0, 0};
+        if (likely(!gb->apu_output.channel_muted[index])) {
+            output = (GB_sample_t){(0xF - value * 2) * left_volume, (0xF - value * 2) * right_volume};
+        }
         if (*(uint32_t *)&(gb->apu_output.current_sample[index]) != *(uint32_t *)&output) {
             refresh_channel(gb, index, cycles_offset);
             gb->apu_output.current_sample[index] = output;
@@ -294,7 +301,7 @@ static void render(GB_gameboy_t *gb)
     }
 }
 
-static void update_square_sample(GB_gameboy_t *gb, unsigned index)
+static void update_square_sample(GB_gameboy_t *gb, GB_channel_t index)
 {
     if (gb->apu.square_channels[index].sample_surpressed) {
         if (gb->model > GB_MODEL_CGB_E) {
@@ -399,7 +406,7 @@ static void nrx2_glitch(GB_gameboy_t *gb, uint8_t *volume, uint8_t value, uint8_
     }
 }
 
-static void tick_square_envelope(GB_gameboy_t *gb, enum GB_CHANNELS index)
+static void tick_square_envelope(GB_gameboy_t *gb, GB_channel_t index)
 {
     uint8_t nrx2 = gb->io_registers[index == GB_SQUARE_1? GB_IO_NR12 : GB_IO_NR22];
     
@@ -1086,7 +1093,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 
         case GB_IO_NR11:
         case GB_IO_NR21: {
-            unsigned index = reg == GB_IO_NR21? GB_SQUARE_2: GB_SQUARE_1;
+            GB_channel_t index = reg == GB_IO_NR21? GB_SQUARE_2: GB_SQUARE_1;
             gb->apu.square_channels[index].pulse_length = (0x40 - (value & 0x3F));
             if (!gb->apu.global_enable) {
                 value &= 0x3F;
@@ -1096,7 +1103,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 
         case GB_IO_NR12:
         case GB_IO_NR22: {
-            unsigned index = reg == GB_IO_NR22? GB_SQUARE_2: GB_SQUARE_1;
+            GB_channel_t index = reg == GB_IO_NR22? GB_SQUARE_2: GB_SQUARE_1;
             if ((value & 0xF8) == 0) {
                 /* This disables the DAC */
                 gb->io_registers[reg] = value;
@@ -1115,7 +1122,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 
         case GB_IO_NR13:
         case GB_IO_NR23: {
-            unsigned index = reg == GB_IO_NR23? GB_SQUARE_2: GB_SQUARE_1;
+            GB_channel_t index = reg == GB_IO_NR23? GB_SQUARE_2: GB_SQUARE_1;
             gb->apu.square_channels[index].sample_length &= ~0xFF;
             gb->apu.square_channels[index].sample_length |= value & 0xFF;
             break;
@@ -1123,7 +1130,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 
         case GB_IO_NR14:
         case GB_IO_NR24: {
-            unsigned index = reg == GB_IO_NR24? GB_SQUARE_2: GB_SQUARE_1;
+            GB_channel_t index = reg == GB_IO_NR24? GB_SQUARE_2: GB_SQUARE_1;
             bool was_active = gb->apu.is_active[index];
             /* TODO: When the sample length changes right before being updated from ≥$700 to <$700, the countdown
                      should change to the old length, but the current sample should not change. Because our write
@@ -1742,4 +1749,16 @@ int GB_stop_audio_recording(GB_gameboy_t *gb)
     int ret  = gb->apu_output.output_error;
     gb->apu_output.output_error = 0;
     return ret;
+}
+
+
+void GB_set_channel_muted(GB_gameboy_t *gb, GB_channel_t channel, bool muted)
+{
+    assert(channel < GB_N_CHANNELS);
+    gb->apu_output.channel_muted[channel] = muted;
+}
+
+bool GB_is_channel_muted(GB_gameboy_t *gb, GB_channel_t channel)
+{
+    return gb->apu_output.channel_muted[channel];
 }

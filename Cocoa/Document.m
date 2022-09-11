@@ -1195,6 +1195,9 @@ static bool is_path_writeable(const char *path)
     else if ([anItem action] == @selector(toggleAudioRecording:)) {
         [(NSMenuItem *)anItem setTitle:_isRecordingAudio? @"Stop Audio Recording" : @"Start Audio Recording…"];
     }
+    else if ([anItem action] == @selector(toggleAudioChannel:)) {
+        [(NSMenuItem *)anItem setState:!GB_is_channel_muted(&gb, [anItem tag])];
+    }
     
     return [super validateUserInterfaceItem:anItem];
 }
@@ -2518,5 +2521,11 @@ static bool is_path_writeable(const char *path)
             break;
     }
 }
+
+- (IBAction)toggleAudioChannel:(NSMenuItem *)sender
+{
+    GB_set_channel_muted(&gb, sender.tag, !GB_is_channel_muted(&gb, sender.tag));
+}
+
 
 @end

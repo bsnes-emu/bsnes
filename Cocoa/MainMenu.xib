@@ -472,6 +472,38 @@
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="M6n-8G-LZS"/>
+                            <menuItem title="Audio Channels" id="Cib-LN-Y4o">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="Audio Channels" id="l22-4p-yTK">
+                                    <items>
+                                        <menuItem title="Square Channel 1" state="on" keyEquivalent="1" id="dR3-oK-0N3">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                            <connections>
+                                                <action selector="toggleAudioChannel:" target="-1" id="khX-EA-oWL"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Square Channel 2" state="on" tag="1" keyEquivalent="2" id="59P-Mu-IkN">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                            <connections>
+                                                <action selector="toggleAudioChannel:" target="-1" id="20K-q3-2zV"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Wave Channel" state="on" tag="2" keyEquivalent="3" id="Jli-pT-ab1">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                            <connections>
+                                                <action selector="toggleAudioChannel:" target="-1" id="Vo0-s4-sNw"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Noise Channel" state="on" tag="3" keyEquivalent="4" id="RtM-HJ-88a">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                            <connections>
+                                                <action selector="toggleAudioChannel:" target="-1" id="HHQ-eV-bX0"/>
+                                            </connections>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="v5c-ri-BoZ"/>
                             <menuItem title="Show Background and Window" state="on" id="yfD-Qd-zoz">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>

@@ -38,13 +38,13 @@ typedef struct
     double right;
 } GB_double_sample_t;
 
-enum GB_CHANNELS {
+typedef enum {
     GB_SQUARE_1,
     GB_SQUARE_2,
     GB_WAVE,
     GB_NOISE,
     GB_N_CHANNELS
-};
+} GB_channel_t;
 
 typedef struct
 {
@@ -160,6 +160,7 @@ typedef struct {
     GB_sample_t current_sample[GB_N_CHANNELS];
     GB_sample_t summed_samples[GB_N_CHANNELS];
     double dac_discharge[GB_N_CHANNELS];
+    bool channel_muted[GB_N_CHANNELS];
 
     GB_highpass_mode_t highpass_mode;
     double highpass_rate;
@@ -173,8 +174,11 @@ typedef struct {
     FILE *output_file;
     GB_audio_format_t output_format;
     int output_error;
+    
 } GB_apu_output_t;
 
+void GB_set_channel_muted(GB_gameboy_t *gb, GB_channel_t channel, bool muted);
+bool GB_is_channel_muted(GB_gameboy_t *gb, GB_channel_t channel);
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned sample_rate);
 unsigned GB_get_sample_rate(GB_gameboy_t *gb);
 void GB_set_sample_rate_by_clocks(GB_gameboy_t *gb, double cycles_per_sample); /* Cycles are in 8MHz units */
