@@ -533,7 +533,7 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
             return 0xFF;
         }
         
-        if (GB_is_dma_active(gb)) {
+        if (GB_is_dma_active(gb) && gb->dma_current_dest != 0) {
             /* Todo: Does reading from OAM during DMA causes the OAM bug? */
             return 0xFF;
         }
