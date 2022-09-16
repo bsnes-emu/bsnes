@@ -11,6 +11,7 @@ extern const uint8_t font_max;
 #define SELECTION_STRING RIGHT_ARROW_STRING
 #define CTRL_STRING "\x80\x81\x82"
 #define SHIFT_STRING "\x83"
+#define ALT_STRING "\x91\x92"
 #define CMD_STRING "\x84\x85"
 #define ELLIPSIS_STRING "\x87"
 #define MOJIBAKE_STRING "\x88"

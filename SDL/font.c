@@ -1129,6 +1129,26 @@ uint8_t font[] = {
     X, _, X, X, _, X,
     X, _, _, _, _, X,
     _, X, X, X, X, _,
+    
+    /* Alt symbol */
+    
+    _, _, X, X, _, _,
+    _, X, _, _, X, _,
+    _, X, _, _, X, _,
+    _, X, _, _, X, _,
+    _, X, X, X, X, _,
+    _, X, _, _, X, _,
+    _, X, _, _, X, _,
+    _, _, _, _, _, _,
+    
+    X, _, _, X, X, X,
+    X, _, _, _, X, _,
+    X, _, _, _, X, _,
+    X, _, _, _, X, _,
+    X, _, _, _, X, _,
+    X, _, _, _, X, _,
+    X, X, X, _, X, _,
+    _, _, _, _, _, _,
 };
 
 const uint8_t font_max = sizeof(font) / GLYPH_HEIGHT / GLYPH_WIDTH + ' ';

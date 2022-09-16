@@ -76,8 +76,6 @@ void render_texture(void *pixels,  void *previous)
 }
 
 static const char *help[] = {
-"Drop a ROM to play.\n"
-"\n"
 "Keyboard Shortcuts:\n"
 " Open Menu:        Escape\n"
 " Open ROM:          " MODIFIER_NAME "+O\n"
@@ -91,6 +89,7 @@ static const char *help[] = {
 #else
 " Mute/Unmute:       " MODIFIER_NAME "+M\n"
 #endif
+" Toggle channel: " ALT_STRING "+(1-4)\n"
 " Break Debugger:    " CTRL_STRING "+C",
 "\n"
 "SameBoy\n"

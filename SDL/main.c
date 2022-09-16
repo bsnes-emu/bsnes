@@ -441,6 +441,16 @@ static void handle_events(GB_gameboy_t *gb)
                                     pending_command = GB_SDL_SAVE_STATE_COMMAND;
                                 }
                             }
+                            else if ((event.key.keysym.mod & KMOD_ALT) && event.key.keysym.scancode <= SDL_SCANCODE_4) {
+                                GB_channel_t channel = event.key.keysym.scancode - SDL_SCANCODE_1;
+                                bool state = !GB_is_channel_muted(gb, channel);
+                                
+                                GB_set_channel_muted(gb, channel, state);
+                                
+                                static char message[18];
+                                sprintf(message, "Channel %d %smuted", channel + 1, state? "" : "un");
+                                show_osd_text(message);
+                            }
                         }
                         break;
                 }
