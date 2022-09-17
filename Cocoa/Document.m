@@ -2527,5 +2527,35 @@ static bool is_path_writeable(const char *path)
     GB_set_channel_muted(&gb, sender.tag, !GB_is_channel_muted(&gb, sender.tag));
 }
 
+- (IBAction)cartSwap:(id)sender
+{
+    bool wasRunning = running;
+    if (wasRunning) {
+        [self stop];
+    }
+    [[NSDocumentController sharedDocumentController] beginOpenPanelWithCompletionHandler:^(NSArray<NSURL *> *urls) {
+        if (urls.count == 1) {
+            bool ok = true;
+            for (Document *document in [NSDocumentController sharedDocumentController].documents) {
+                if ([document.fileURL isEqual:urls.firstObject]) {
+                    NSAlert *alert = [[NSAlert alloc] init];
+                    [alert setMessageText:[NSString stringWithFormat:@"‘%@’ is already open in another window. Close ‘%@’ before hot swapping it into this instance.",
+                                                                     urls.firstObject.lastPathComponent, urls.firstObject.lastPathComponent]];
+                    [alert setAlertStyle:NSAlertStyleCritical];
+                    [alert runModal];
+                    ok = false;
+                    break;
+                }
+            }
+            if (ok) {
+                self.fileURL = urls.firstObject;
+                [self loadROM];
+            }
+        }
+        if (wasRunning) {
+            [self start];
+        }
+    }];
+}
 
 @end
