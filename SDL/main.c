@@ -580,6 +580,7 @@ static void gb_audio_callback(GB_gameboy_t *gb, GB_sample_t *sample)
     
 }
     
+static bool doing_hot_swap = false;
 static bool handle_pending_command(void)
 {
     switch (pending_command) {
@@ -632,6 +633,8 @@ static bool handle_pending_command(void)
         case GB_SDL_NO_COMMAND:
             return false;
             
+        case GB_SDL_CART_SWAP_COMMAND:
+            doing_hot_swap = true;
         case GB_SDL_RESET_COMMAND:
         case GB_SDL_NEW_FILE_COMMAND:
             GB_save_battery(&gb, battery_save_path_ptr);
@@ -700,7 +703,12 @@ restart:
     }[configuration.model];
     
     if (GB_is_inited(&gb)) {
-        GB_switch_model_and_reset(&gb, model);
+        if (doing_hot_swap) {
+            doing_hot_swap = false;
+        }
+        else {
+            GB_switch_model_and_reset(&gb, model);
+        }
     }
     else {
         GB_init(&gb, model);

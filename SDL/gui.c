@@ -304,6 +304,15 @@ static void open_rom(unsigned index)
     }
 }
 
+static void cart_swap(unsigned index)
+{
+    char *filename = do_open_rom_dialog();
+    if (filename) {
+        set_filename(filename, free);
+        pending_command = GB_SDL_CART_SWAP_COMMAND;
+    }
+}
+
 static void recalculate_menu_height(void)
 {
     menu_height = 24;
@@ -380,6 +389,7 @@ static void enter_options_menu(unsigned index)
 static const struct menu_item paused_menu[] = {
     {"Resume", NULL},
     {"Open ROM", open_rom},
+    {"Hot Swap Cartridge", cart_swap},
     {"Options", enter_options_menu},
     {audio_recording_menu_item, toggle_audio_recording},
     {"Help & About", enter_help_menu},
@@ -388,7 +398,22 @@ static const struct menu_item paused_menu[] = {
     {NULL,}
 };
 
-static const struct menu_item *const nonpaused_menu = &paused_menu[1];
+static struct menu_item nonpaused_menu[sizeof(paused_menu) / sizeof(paused_menu[0]) - 2];
+
+static void __attribute__((constructor)) build_nonpaused_menu(void)
+{
+    const struct menu_item *in = paused_menu;
+    struct menu_item *out = nonpaused_menu;
+    while (in->string) {
+        if (in->handler == NULL || in->handler == cart_swap) {
+            in++;
+            continue;
+        }
+        *out = *in;
+        out++;
+        in++;
+    }
+}
 
 static const struct menu_item help_menu[] = {
     {"Shortcuts", item_help},
