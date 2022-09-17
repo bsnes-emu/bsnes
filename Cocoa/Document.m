@@ -2548,6 +2548,7 @@ static bool is_path_writeable(const char *path)
                 }
             }
             if (ok) {
+                GB_save_battery(&gb, self.savPath.UTF8String);
                 self.fileURL = urls.firstObject;
                 [self loadROM];
             }
