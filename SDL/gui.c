@@ -291,6 +291,7 @@ static void enter_joypad_menu(unsigned index);
 static void enter_audio_menu(unsigned index);
 static void enter_controls_menu(unsigned index);
 static void enter_help_menu(unsigned index);
+static void enter_options_menu(unsigned index);
 static void toggle_audio_recording(unsigned index);
 
 extern void set_filename(const char *new_filename, typeof(free) *new_free_function);
@@ -350,21 +351,6 @@ static void debugger_help(unsigned index)
 {
     SDL_OpenURL("https://sameboy.github.io/debugger/");
 }
-static const struct menu_item paused_menu[] = {
-    {"Resume", NULL},
-    {"Open ROM", open_rom},
-    {"Emulation Options", enter_emulation_menu},
-    {"Graphic Options", enter_graphics_menu},
-    {"Audio Options", enter_audio_menu},
-    {"Control Options", enter_controls_menu},
-    {audio_recording_menu_item, toggle_audio_recording},
-    {"Help & About", enter_help_menu},
-    {"Sponsor SameBoy", sponsor},
-    {"Quit SameBoy", item_exit},
-    {NULL,}
-};
-
-static const struct menu_item *const nonpaused_menu = &paused_menu[1];
 
 static void return_to_root_menu(unsigned index)
 {
@@ -373,6 +359,36 @@ static void return_to_root_menu(unsigned index)
     scroll = 0;
     recalculate_menu_height();
 }
+
+static const struct menu_item options_menu[] = {
+    {"Emulation Options", enter_emulation_menu},
+    {"Graphic Options", enter_graphics_menu},
+    {"Audio Options", enter_audio_menu},
+    {"Control Options", enter_controls_menu},
+    {"Back", return_to_root_menu},
+    {NULL,}
+};
+
+static void enter_options_menu(unsigned index)
+{
+    current_menu = options_menu;
+    current_selection = 0;
+    scroll = 0;
+    recalculate_menu_height();
+}
+
+static const struct menu_item paused_menu[] = {
+    {"Resume", NULL},
+    {"Open ROM", open_rom},
+    {"Options", enter_options_menu},
+    {audio_recording_menu_item, toggle_audio_recording},
+    {"Help & About", enter_help_menu},
+    {"Sponsor SameBoy", sponsor},
+    {"Quit SameBoy", item_exit},
+    {NULL,}
+};
+
+static const struct menu_item *const nonpaused_menu = &paused_menu[1];
 
 static const struct menu_item help_menu[] = {
     {"Shortcuts", item_help},
@@ -600,7 +616,7 @@ static const struct menu_item emulation_menu[] = {
     {"Boot ROMs Folder:", toggle_bootrom, current_bootrom_string, toggle_bootrom},
     {"Rewind Length:", cycle_rewind, current_rewind_string, cycle_rewind_backwards},
     {"Real Time Clock:", toggle_rtc_mode, current_rtc_mode_string, toggle_rtc_mode},
-    {"Back", return_to_root_menu},
+    {"Back", enter_options_menu},
     {NULL,}
 };
 
@@ -1023,8 +1039,7 @@ static const struct menu_item graphics_menu[] = {
     {"Mono Palette:", cycle_palette, current_palette, cycle_palette_backwards},
     {"Display Border:", cycle_border_mode, current_border_mode, cycle_border_mode_backwards},
     {"On-Screen Display:", toggle_osd, current_osd_mode, toggle_osd},
-
-    {"Back", return_to_root_menu},
+    {"Back", enter_options_menu},
     {NULL,}
 };
 
@@ -1181,7 +1196,7 @@ static struct menu_item audio_menu[] = {
     {"Interference Volume:", increase_interference_volume, interference_volume_string, decrease_interference_volume},
     {"Preferred Audio Driver:", cycle_prefrered_audio_driver, preferred_audio_driver_string, cycle_preferred_audio_driver_backwards},
     {"Active Driver:", nop, audio_driver_string},
-    {"Back", return_to_root_menu},
+    {"Back", enter_options_menu},
     {NULL,}
 };
 
@@ -1503,7 +1518,7 @@ static const struct menu_item controls_menu[] = {
     {"Keyboard Options", enter_keyboard_menu},
     {"Joypad Options", enter_joypad_menu},
     {"Motion-controlled games:", toggle_mouse_control, mouse_control_string, toggle_mouse_control},
-    {"Back", return_to_root_menu},
+    {"Back", enter_options_menu},
     {NULL,}
 };
 
