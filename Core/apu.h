@@ -188,7 +188,7 @@ void GB_apu_set_sample_callback(GB_gameboy_t *gb, GB_sample_callback_t callback)
 int GB_start_audio_recording(GB_gameboy_t *gb, const char *path, GB_audio_format_t format);
 int GB_stop_audio_recording(GB_gameboy_t *gb);
 #ifdef GB_INTERNAL
-internal bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, unsigned index);
+internal bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, GB_channel_t index);
 internal void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);
 internal uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg);
 internal void GB_apu_div_event(GB_gameboy_t *gb);
