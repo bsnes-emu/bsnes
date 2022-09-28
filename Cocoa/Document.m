@@ -74,6 +74,7 @@ enum model {
     
     bool fullScreen;
     bool in_sync_input;
+    bool _debuggerCommandWhilePaused;
     HFController *hex_controller;
     
     NSString *lastConsoleInput;
@@ -1323,6 +1324,13 @@ static bool is_path_writeable(const char *path)
 
 - (IBAction)consoleInput:(NSTextField *)sender 
 {
+    if (!master && !running && !GB_debugger_is_stopped(&gb)) {
+        _debuggerCommandWhilePaused = true;
+        GB_debugger_break(&gb);
+        [self start];
+        return;
+    }
+    
     NSString *line = [sender stringValue];
     if ([line isEqualToString:@""] && lastConsoleInput) {
         line = lastConsoleInput;
@@ -1398,9 +1406,15 @@ static bool is_path_writeable(const char *path)
     [audioLock lock];
     [audioLock signal];
     [audioLock unlock];
+    in_sync_input = true;
     [self updateSideView];
     [self log:">"];
-    in_sync_input = true;
+    if (_debuggerCommandWhilePaused) {
+        _debuggerCommandWhilePaused = false;
+        dispatch_async(dispatch_get_main_queue(), ^{
+                [self consoleInput:self.consoleInput];
+        });
+    }
     [has_debugger_input lockWhenCondition:1];
     NSString *input = [debugger_input_queue firstObject];
     [debugger_input_queue removeObjectAtIndex:0];
