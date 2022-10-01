@@ -4,6 +4,8 @@
 #import "GBSplitView.h"
 #import "GBVisualizerView.h"
 #import "GBOSDView.h"
+#import "GBOptionalVisualEffectView.h"
+#import "GBDebuggerButton.h"
 
 @class GBCheatWindowController;
 @class GBPaletteView;
@@ -58,6 +60,13 @@
 @property uint8_t oamHeight;
 @property (strong) IBOutlet NSView *audioRecordingAccessoryView;
 @property (strong) IBOutlet NSPopUpButton *audioFormatButton;
+@property (strong) IBOutlet GBOptionalVisualEffectView *debuggerSidebarEffectView;
+
+@property (strong) IBOutlet GBDebuggerButton *debuggerContinueButton;
+@property (strong) IBOutlet GBDebuggerButton *debuggerNextButton;
+@property (strong) IBOutlet GBDebuggerButton *debuggerStepButton;
+@property (strong) IBOutlet GBDebuggerButton *debuggerFinishButton;
+
 
 + (NSImage *) imageFromData:(NSData *)data width:(NSUInteger) width height:(NSUInteger) height scale:(double) scale;
 -(uint8_t) readMemory:(uint16_t) addr;

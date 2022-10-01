@@ -710,7 +710,7 @@ static const char *lstrip(const char *str)
 
 #define STOPPED_ONLY \
 if (!gb->debug_stopped) { \
-GB_log(gb, "Program is running. \n"); \
+GB_log(gb, "Program is running, use 'interrupt' to stop execution.\n"); \
 return false; \
 }
 
@@ -747,6 +747,24 @@ static bool cont(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
 
     gb->debug_stopped = false;
     return false;
+}
+
+static bool interrupt(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
+{
+    NO_MODIFIERS
+    
+    if (strlen(lstrip(arguments))) {
+        print_usage(gb, command);
+        return true;
+    }
+    
+    if (gb->debug_stopped) {
+        GB_log(gb, "Program already stopped.\n");
+        return true;
+    }
+    
+    gb->debug_stopped = true;
+    return true;
 }
 
 static bool next(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
@@ -1966,6 +1984,7 @@ static bool help(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
 /* Commands without implementations are aliases of the previous non-alias commands */
 static const debugger_command_t commands[] = {
     {"continue", 1, cont, "Continue running until next stop"},
+    {"interrupt", 1, interrupt, "Interrupt the program execution"},
     {"next", 1, next, "Run the next instruction, skipping over function calls"},
     {"step", 1, step, "Run the next instruction, stepping into function calls"},
     {"finish", 1, finish, "Run until the current function returns"},

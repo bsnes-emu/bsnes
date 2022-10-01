@@ -74,7 +74,7 @@ enum model {
     
     bool fullScreen;
     bool in_sync_input;
-    bool _debuggerCommandWhilePaused;
+    NSString *_debuggerCommandWhilePaused;
     HFController *hex_controller;
     
     NSString *lastConsoleInput;
@@ -549,6 +549,10 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 
 - (void) start
 {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self updateDebuggerButtons];
+        [slave updateDebuggerButtons];
+    });
     self.gbsPlayPauseButton.state = true;
     self.view.mouseHidingEnabled = (self.mainWindow.styleMask & NSWindowStyleMaskFullScreen) != 0;
     if (master) {
@@ -562,6 +566,10 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 
 - (void) stop
 {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self updateDebuggerButtons];
+        [slave updateDebuggerButtons];
+    });
     self.gbsPlayPauseButton.state = false;
     if (master) {
         if (!master->running) return;
@@ -1151,16 +1159,21 @@ static bool is_path_writeable(const char *path)
     [[NSUserDefaults standardUserDefaults] setBool:!_audioClient.isPlaying forKey:@"Mute"];
 }
 
+- (bool) isPaused
+{
+    if (self.partner) {
+        return !self.partner->running || GB_debugger_is_stopped(&gb) || GB_debugger_is_stopped(&self.partner->gb);
+    }
+    return (!running) || GB_debugger_is_stopped(&gb);
+}
+
 - (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)anItem
 {
     if ([anItem action] == @selector(mute:)) {
         [(NSMenuItem *)anItem setState:!_audioClient.isPlaying];
     }
     else if ([anItem action] == @selector(togglePause:)) {
-        if (master) {
-            [(NSMenuItem *)anItem setState:(!master->running) || (GB_debugger_is_stopped(&gb)) || (GB_debugger_is_stopped(&gb))];
-        }
-        [(NSMenuItem *)anItem setState:(!running) || (GB_debugger_is_stopped(&gb))];
+        [(NSMenuItem *)anItem setState:self.isPaused];
         return !GB_debugger_is_stopped(&gb);
     }
     else if ([anItem action] == @selector(reset:) && anItem.tag != MODEL_NONE) {
@@ -1322,15 +1335,27 @@ static bool is_path_writeable(const char *path)
     [self.consoleWindow orderBack:nil];
 }
 
-- (IBAction)consoleInput:(NSTextField *)sender 
+- (void)queueDebuggerCommand:(NSString *)command
 {
     if (!master && !running && !GB_debugger_is_stopped(&gb)) {
-        _debuggerCommandWhilePaused = true;
+        _debuggerCommandWhilePaused = command;
         GB_debugger_break(&gb);
         [self start];
         return;
     }
-    
+        
+    if (!in_sync_input) {
+        [self log:">"];
+    }
+    [self log:[command UTF8String]];
+    [self log:"\n"];
+    [has_debugger_input lock];
+    [debugger_input_queue addObject:command];
+    [has_debugger_input unlockWithCondition:1];
+}
+
+- (IBAction)consoleInput:(NSTextField *)sender 
+{
     NSString *line = [sender stringValue];
     if ([line isEqualToString:@""] && lastConsoleInput) {
         line = lastConsoleInput;
@@ -1341,15 +1366,8 @@ static bool is_path_writeable(const char *path)
     else {
         line = @"";
     }
-
-    if (!in_sync_input) {
-        [self log:">"];
-    }
-    [self log:[line UTF8String]];
-    [self log:"\n"];
-    [has_debugger_input lock];
-    [debugger_input_queue addObject:line];
-    [has_debugger_input unlockWithCondition:1];
+    
+    [self queueDebuggerCommand: line];
 
     [sender setStringValue:@""];
 }
@@ -1397,7 +1415,7 @@ static bool is_path_writeable(const char *path)
     [console_output_lock unlock];
 }
 
-- (char *) getDebuggerInput
+- (char *)getDebuggerInput
 {
     bool isPlaying = _audioClient.isPlaying;
     if (isPlaying) {
@@ -1408,11 +1426,16 @@ static bool is_path_writeable(const char *path)
     [audioLock unlock];
     in_sync_input = true;
     [self updateSideView];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self updateDebuggerButtons];
+    });
+    [self.partner updateDebuggerButtons];
     [self log:">"];
     if (_debuggerCommandWhilePaused) {
-        _debuggerCommandWhilePaused = false;
+        NSString *command = _debuggerCommandWhilePaused;
+        _debuggerCommandWhilePaused = nil;
         dispatch_async(dispatch_get_main_queue(), ^{
-                [self consoleInput:self.consoleInput];
+            [self queueDebuggerCommand:command];
         });
     }
     [has_debugger_input lockWhenCondition:1];
@@ -1426,6 +1449,8 @@ static bool is_path_writeable(const char *path)
             shouldClearSideView = false;
             [self.debuggerSideView setString:@""];
         }
+        [self updateDebuggerButtons];
+        [self.partner updateDebuggerButtons];
     });
     if (isPlaying) {
         [_audioClient start];
@@ -2231,7 +2256,7 @@ static bool is_path_writeable(const char *path)
     /* NSSplitView renders its separator without the proper vibrancy, so we made it transparent and move an
        NSBox-based separator that renders properly so it acts like the split view's separator. */
     NSRect rect = self.debuggerVerticalLine.frame;
-    rect.origin.x = [[[splitview arrangedSubviews] firstObject] frame].size.width - 1;
+    rect.origin.x = [[[splitview arrangedSubviews] firstObject] frame].size.width - 2;
     self.debuggerVerticalLine.frame = rect;
 }
 
@@ -2571,6 +2596,51 @@ static bool is_path_writeable(const char *path)
             [self start];
         }
     }];
+}
+
+- (void)updateDebuggerButtons
+{
+    bool updateContinue = false;
+    if (@available(macOS 10.10, *)) {
+        if ([self.consoleInput.placeholderAttributedString.string isEqualToString:self.debuggerContinueButton.alternateTitle]) {
+            [self.debuggerContinueButton mouseExited:nil];
+            updateContinue = true;
+        }
+    }
+    if (self.isPaused) {
+        self.debuggerContinueButton.toolTip = self.debuggerContinueButton.title = @"Continue";
+        self.debuggerContinueButton.alternateTitle = @"continue";
+        self.debuggerContinueButton.imagePosition = NSImageOnly;
+        if (@available(macOS 10.14, *)) {
+            self.debuggerContinueButton.contentTintColor = nil;
+        }
+        self.debuggerContinueButton.image = [NSImage imageNamed:@"ContinueTemplate"];
+        
+        self.debuggerNextButton.enabled = true;
+        self.debuggerStepButton.enabled = true;
+        self.debuggerFinishButton.enabled = true;
+    }
+    else {
+        self.debuggerContinueButton.toolTip = self.debuggerContinueButton.title = @"Interrupt";
+        self.debuggerContinueButton.alternateTitle = @"interrupt";
+        self.debuggerContinueButton.imagePosition = NSImageOnly;
+        if (@available(macOS 10.14, *)) {
+            self.debuggerContinueButton.contentTintColor = [NSColor controlAccentColor];
+        }
+        self.debuggerContinueButton.image = [NSImage imageNamed:@"InterruptTemplate"];
+        
+        self.debuggerNextButton.enabled = false;
+        self.debuggerStepButton.enabled = false;
+        self.debuggerFinishButton.enabled = false;
+    }
+    if (updateContinue) {
+        [self.debuggerContinueButton mouseEntered:nil];
+    }
+}
+
+- (IBAction)debuggerButtonPressed:(NSButton *)sender
+{
+    [self queueDebuggerCommand:sender.alternateTitle];
 }
 
 @end
