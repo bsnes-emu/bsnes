@@ -4,7 +4,6 @@
 #import "GBSplitView.h"
 #import "GBVisualizerView.h"
 #import "GBOSDView.h"
-#import "GBOptionalVisualEffectView.h"
 #import "GBDebuggerButton.h"
 
 @class GBCheatWindowController;
@@ -60,7 +59,7 @@
 @property uint8_t oamHeight;
 @property (strong) IBOutlet NSView *audioRecordingAccessoryView;
 @property (strong) IBOutlet NSPopUpButton *audioFormatButton;
-@property (strong) IBOutlet GBOptionalVisualEffectView *debuggerSidebarEffectView;
+@property (strong) IBOutlet NSVisualEffectView *debuggerSidebarEffectView API_AVAILABLE(macos(10.10));
 
 @property (strong) IBOutlet GBDebuggerButton *debuggerContinueButton;
 @property (strong) IBOutlet GBDebuggerButton *debuggerNextButton;
