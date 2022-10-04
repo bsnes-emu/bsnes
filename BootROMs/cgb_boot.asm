@@ -329,7 +329,7 @@ FirstChecksumWithDuplicate:
 ChecksumsEnd:
 
 PalettePerChecksum:
-palette_index: MACRO ; palette, flags
+MACRO palette_index ; palette, flags
     db ((\1)) | (\2) ; | $80 means game requires DMG boot tilemap
 ENDM
     palette_index 0, 0  ; Default Palette
@@ -433,10 +433,10 @@ Dups4thLetterArray:
 ; We assume the last three arrays fit in the same $100 byte page!
 
 PaletteCombinations:
-palette_comb: MACRO ; Obj0, Obj1, Bg
+MACRO palette_comb ; Obj0, Obj1, Bg
     db (\1) * 8, (\2) * 8, (\3) *8
 ENDM
-raw_palette_comb: MACRO ; Obj0, Obj1, Bg
+MACRO raw_palette_comb ; Obj0, Obj1, Bg
     db (\1) * 2, (\2) * 2, (\3) * 2
 ENDM
     palette_comb 4, 4, 29

@@ -467,12 +467,14 @@ $(BIN)/SDL/Palettes: Misc/Palettes
 
 $(OBJ)/%.2bpp: %.png
 	-@$(MKDIR) -p $(dir $@)
-	rgbgfx -h -u -o $@ $<
+	rgbgfx $(if $(filter $(shell echo 'print __RGBDS_MAJOR__ || (!__RGBDS_MAJOR__ && __RGBDS_MINOR__ > 5)' | rgbasm -), $$0), -h -u, -Z -u -c embedded) -o $@ $<
 
 $(OBJ)/BootROMs/SameBoyLogo.pb12: $(OBJ)/BootROMs/SameBoyLogo.2bpp $(PB12_COMPRESS)
+	-@$(MKDIR) -p $(dir $@)
 	$(realpath $(PB12_COMPRESS)) < $< > $@
 	
 $(PB12_COMPRESS): BootROMs/pb12.c
+	-@$(MKDIR) -p $(dir $@)
 	$(NATIVE_CC) -std=c99 -Wall -Werror $< -o $@
 
 $(BIN)/BootROMs/cgb0_boot.bin: BootROMs/cgb_boot.asm
