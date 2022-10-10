@@ -50,7 +50,7 @@ if (symbol == NULL) symbol = dlsym(handle, #symbol);\
 if (symbol == NULL) goto lazy_error
 #define TRY_DLOPEN(name) handle = handle? handle : dlopen(name, RTLD_NOW)
 
-void nop(){}
+void nop(void){}
 
 static void wait_mouse_up(void)
 {
