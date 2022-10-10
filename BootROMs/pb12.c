@@ -25,7 +25,7 @@ void write_all(int fd, const void *buf, size_t count) {
     }
 }
 
-int main()
+int main(void)
 {
     static uint8_t source[0x4000];
     size_t size = read(STDIN_FILENO, &source, sizeof(source));
