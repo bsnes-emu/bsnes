@@ -159,7 +159,7 @@
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                     </box>
                                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="G4h-KO-Z3g" customClass="GBDebuggerButton">
-                                        <rect key="frame" x="0.0" y="26" width="26" height="26"/>
+                                        <rect key="frame" x="2" y="26" width="26" height="26"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <buttonCell key="cell" type="bevel" title="Interrupt" alternateTitle="interrupt" bezelStyle="rounded" image="InterruptTemplate" imagePosition="only" alignment="center" imageScaling="proportionallyDown" inset="2" id="wfO-32-eG5">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -172,7 +172,7 @@
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cOi-Rs-9gS" customClass="GBDebuggerButton">
-                                        <rect key="frame" x="26" y="26" width="26" height="26"/>
+                                        <rect key="frame" x="28" y="26" width="26" height="26"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <buttonCell key="cell" type="bevel" title="Step Over" alternateTitle="next" bezelStyle="rounded" image="NextTemplate" imagePosition="only" alignment="center" enabled="NO" imageScaling="proportionallyDown" inset="2" id="buW-ke-lgF">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -184,7 +184,7 @@
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DsN-Ce-QoH" customClass="GBDebuggerButton">
-                                        <rect key="frame" x="52" y="26" width="26" height="26"/>
+                                        <rect key="frame" x="54" y="26" width="26" height="26"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <buttonCell key="cell" type="bevel" title="Step Into" alternateTitle="step" bezelStyle="rounded" image="StepTemplate" imagePosition="only" alignment="center" enabled="NO" imageScaling="proportionallyDown" inset="2" id="ATJ-Vx-zbo">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -196,7 +196,7 @@
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="vtb-n5-Qlz" customClass="GBDebuggerButton">
-                                        <rect key="frame" x="76" y="26" width="26" height="26"/>
+                                        <rect key="frame" x="78" y="26" width="26" height="26"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <buttonCell key="cell" type="bevel" title="Step Out" alternateTitle="finish" bezelStyle="rounded" image="FinishTemplate" imagePosition="only" alignment="center" enabled="NO" imageScaling="proportionallyDown" inset="2" id="8mF-ii-5Hx">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -208,7 +208,7 @@
                                         </connections>
                                     </button>
                                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oCa-UH-1mi" customClass="GBDebuggerButton">
-                                        <rect key="frame" x="565" y="26" width="26" height="26"/>
+                                        <rect key="frame" x="563" y="26" width="26" height="26"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                         <buttonCell key="cell" type="bevel" title="Help" alternateTitle="help" bezelStyle="rounded" image="HelpTemplate" imagePosition="only" alignment="center" imageScaling="proportionallyDown" inset="2" id="tvn-kY-8FO">
                                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
