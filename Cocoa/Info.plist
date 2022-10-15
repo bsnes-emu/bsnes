@@ -113,6 +113,8 @@
 	<string>AppIcon.icns</string>
 	<key>CFBundleIdentifier</key>
 	<string>com.github.liji32.sameboy</string>
+	<key>LSApplicationCategoryType</key>
+	<string>public.app-category.games</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
