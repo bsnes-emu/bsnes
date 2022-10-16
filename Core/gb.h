@@ -667,6 +667,7 @@ struct GB_gameboy_internal_s {
         uint8_t data_for_sel_glitch;
         bool delayed_glitch_hblank_interrupt;
         uint32_t frame_repeat_countdown;
+        bool disable_window_pixel_insertion_glitch;
     )
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */

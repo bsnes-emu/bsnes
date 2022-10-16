@@ -214,6 +214,10 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             GB_write_memory(gb, addr, old_value | (value & GB_LCDC_BG_EN));
             GB_advance_cycles(gb, 1);
             GB_write_memory(gb, addr, value);
+            
+            if ((old_value & GB_LCDC_WIN_ENABLE) && !(value & GB_LCDC_WIN_ENABLE) && gb->window_is_being_fetched) {
+                gb->disable_window_pixel_insertion_glitch = true;
+            }
             gb->pending_cycles = 5;
             break;
         }
