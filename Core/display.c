@@ -17,7 +17,7 @@ static void fifo_clear(GB_fifo_t *fifo)
     fifo->read_end = fifo->size = 0;
 }
 
-static GB_fifo_item_t *fifo_pop(GB_fifo_t *fifo)
+static const GB_fifo_item_t *fifo_pop(GB_fifo_t *fifo)
 {
     assert(fifo->size);
     assert(fifo->size <= 8);
@@ -605,7 +605,13 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     
     if (unlikely(!fifo_size(&gb->bg_fifo))) return;
     
-    fifo_item = fifo_pop(&gb->bg_fifo);
+    if (unlikely(gb->insert_bg_pixel)) {
+        gb->insert_bg_pixel = false;
+        fifo_item = ({static const GB_fifo_item_t empty_item = {0,}; &empty_item;});
+    }
+    else {
+        fifo_item = fifo_pop(&gb->bg_fifo);
+    }
     bg_priority = fifo_item->bg_priority;
     
     if (fifo_size(&gb->oam_fifo)) {
@@ -1753,6 +1759,13 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     }
                 }
 
+                /* TODO: What happens when WX=0?*/
+                if (!GB_is_cgb(gb) && gb->wx_triggered && !gb->window_is_being_fetched &&
+                    gb->fetcher_state == 0 && gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) && gb->bg_fifo.size == 8) {
+                    // Insert a pixel right at the FIFO's end
+                    gb->insert_bg_pixel = true;
+                }
+                
                 /* Handle objects */
                 /* When the object enabled bit is off, this proccess is skipped entirely on the DMG, but not on the CGB.
                    On the CGB, this bit is checked only when the pixel is actually popped from the FIFO. */
