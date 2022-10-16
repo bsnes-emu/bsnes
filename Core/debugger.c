@@ -1746,6 +1746,17 @@ static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     GB_log(gb, "LYC: %d\n", gb->io_registers[GB_IO_LYC]);
     GB_log(gb, "Window position: %d, %d\n", (signed) gb->io_registers[GB_IO_WX] - 7, gb->io_registers[GB_IO_WY]);
     GB_log(gb, "Interrupt line: %s\n", gb->stat_interrupt_line? "On" : "Off");
+    GB_log(gb, "Background shifter size: %d\n", gb->bg_fifo.size);
+    GB_log(gb, "Background fetcher state: %s\n", (const char *[]){
+        "Tile (1/2)",
+        "Tile (2/2)",
+        "Low data (1/2)",
+        "Low data (2/2)",
+        "High data (1/2)",
+        "High data (2/2)",
+        "Push (1/2)",
+        "Push (2/2)",
+    }[gb->fetcher_state & 7]);
 
     return true;
 }
