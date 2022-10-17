@@ -196,12 +196,9 @@ void GB_configure_cart(GB_gameboy_t *gb)
         }
     }
         
-    if (gb->mbc_ram) {
-        free(gb->mbc_ram);
-        gb->mbc_ram = NULL;
-        gb->mbc_ram_size = 0;
-    }
-
+    size_t old_mbc_ram_size = gb->mbc_ram_size;
+    gb->mbc_ram_size = 0;
+    
     if (gb->cartridge_type->has_ram) {
         if (gb->cartridge_type->mbc_type == GB_MBC2) {
             gb->mbc_ram_size = 0x200;
@@ -224,12 +221,16 @@ void GB_configure_cart(GB_gameboy_t *gb)
             }
         }
         
-        if (gb->mbc_ram_size) {
-            gb->mbc_ram = malloc(gb->mbc_ram_size);
+        if (gb->mbc_ram && old_mbc_ram_size != gb->mbc_ram_size) {
+            free(gb->mbc_ram);
+            gb->mbc_ram = NULL;
         }
-
-        /* Todo: Some games assume unintialized MBC RAM is 0xFF. It this true for all cartridge types? */
-        memset(gb->mbc_ram, 0xFF, gb->mbc_ram_size);
+        
+        if (gb->mbc_ram_size && !gb->mbc_ram) {
+            gb->mbc_ram = malloc(gb->mbc_ram_size);
+            /* Todo: Some games assume unintialized MBC RAM is 0xFF. It this true for all cartridge types? */
+            memset(gb->mbc_ram, 0xFF, gb->mbc_ram_size);
+        }
     }
 
     /* MBC1 has at least 3 types of wiring (We currently support two (Standard and 4bit-MBC1M) of these).

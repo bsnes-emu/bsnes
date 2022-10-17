@@ -1604,6 +1604,10 @@ static void reset_ram(GB_gameboy_t *gb)
             GB_palette_changed(gb, false, i * 2);
         }
     }
+    
+    if (!gb->cartridge_type->has_battery) {
+        memset(gb->mbc_ram, 0xFF, gb->mbc_ram_size);
+    }
 }
 
 static void request_boot_rom(GB_gameboy_t *gb)
@@ -1646,8 +1650,29 @@ static void request_boot_rom(GB_gameboy_t *gb)
     }
 }
 
-void GB_reset(GB_gameboy_t *gb)
+static void GB_reset_internal(GB_gameboy_t *gb, bool quick)
 {
+    struct {
+        uint8_t hram[sizeof(gb->hram)];
+        uint8_t background_palettes_data[sizeof(gb->background_palettes_data)];
+        uint8_t object_palettes_data[sizeof(gb->object_palettes_data)];
+        uint8_t oam[sizeof(gb->oam)];
+        uint8_t extra_oam[sizeof(gb->extra_oam)];
+        uint8_t dma, obp0, obp1;
+    } *preserved_state = NULL;
+    
+    if (quick) {
+        preserved_state = alloca(sizeof(*preserved_state));
+        memcpy(preserved_state->hram, gb->hram, sizeof(gb->hram));
+        memcpy(preserved_state->background_palettes_data, gb->background_palettes_data, sizeof(gb->background_palettes_data));
+        memcpy(preserved_state->object_palettes_data, gb->object_palettes_data, sizeof(gb->object_palettes_data));
+        memcpy(preserved_state->oam, gb->oam, sizeof(gb->oam));
+        memcpy(preserved_state->extra_oam, gb->extra_oam, sizeof(gb->extra_oam));
+        preserved_state->dma = gb->io_registers[GB_IO_DMA];
+        preserved_state->obp0 = gb->io_registers[GB_IO_OBP0];
+        preserved_state->obp1 = gb->io_registers[GB_IO_OBP1];
+    }
+    
     uint32_t mbc_ram_size = gb->mbc_ram_size;
     GB_model_t model = gb->model;
     GB_update_clock_rate(gb);
@@ -1679,14 +1704,9 @@ void GB_reset(GB_gameboy_t *gb)
         
         update_dmg_palette(gb);
     }
-    reset_ram(gb);
     
     gb->serial_mask = 0x80;
     gb->io_registers[GB_IO_SC] = 0x7E;
-    
-    /* These are not deterministic, but 00 (CGB) and FF (DMG) are the most common initial values by far */
-    gb->io_registers[GB_IO_DMA] = gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = GB_is_cgb(gb)? 0x00 : 0xFF;
-    
     gb->accessed_oam_row = -1;
     gb->dma_current_dest = 0xA1;
 
@@ -1718,8 +1738,35 @@ void GB_reset(GB_gameboy_t *gb)
         gb->nontrivial_jump_state = NULL;
     }
     
+    if (!quick) {
+        reset_ram(gb);
+        /* These are not deterministic, but 00 (CGB) and FF (DMG) are the most common initial values by far.
+         The retain their previous values on quick resets */
+        gb->io_registers[GB_IO_DMA] = gb->io_registers[GB_IO_OBP0] = gb->io_registers[GB_IO_OBP1] = GB_is_cgb(gb)? 0x00 : 0xFF;
+    }
+    else {
+        memcpy(gb->hram, preserved_state->hram, sizeof(gb->hram));
+        memcpy(gb->background_palettes_data, preserved_state->background_palettes_data, sizeof(gb->background_palettes_data));
+        memcpy(gb->object_palettes_data, preserved_state->object_palettes_data, sizeof(gb->object_palettes_data));
+        memcpy(gb->oam, preserved_state->oam, sizeof(gb->oam));
+        memcpy(gb->extra_oam, preserved_state->extra_oam, sizeof(gb->extra_oam));
+        gb->io_registers[GB_IO_DMA] = preserved_state->dma;
+        gb->io_registers[GB_IO_OBP0] = preserved_state->obp0;
+        gb->io_registers[GB_IO_OBP1] = preserved_state->obp1;
+    }
+    
     gb->magic = state_magic();
     request_boot_rom(gb);
+}
+
+void GB_reset(GB_gameboy_t *gb)
+{
+    GB_reset_internal(gb, false);
+}
+
+void GB_quick_reset(GB_gameboy_t *gb)
+{
+    GB_reset_internal(gb, true);
 }
 
 void GB_switch_model_and_reset(GB_gameboy_t *gb, GB_model_t model)

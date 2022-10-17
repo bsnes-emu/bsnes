@@ -881,6 +881,7 @@ bool GB_is_sgb(GB_gameboy_t *gb); // Returns true if the model is SGB or SGB2
 bool GB_is_hle_sgb(GB_gameboy_t *gb); // Returns true if the model is SGB or SGB2 and the SFC/SNES side is HLE'd
 GB_model_t GB_get_model(GB_gameboy_t *gb);
 void GB_reset(GB_gameboy_t *gb);
+void GB_quick_reset(GB_gameboy_t *gb); // Similar to the cart reset line
 void GB_switch_model_and_reset(GB_gameboy_t *gb, GB_model_t model);
 
 /* Returns the time passed, in 8MHz ticks. */

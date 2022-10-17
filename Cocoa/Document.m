@@ -53,6 +53,8 @@ enum model {
     MODEL_AGB,
     MODEL_SGB,
     MODEL_MGB,
+    
+    MODEL_QUICK_RESET = -1,
 };
 
 @interface Document ()
@@ -253,6 +255,7 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
             return (GB_model_t)[[NSUserDefaults standardUserDefaults] integerForKey:@"GBDMGModel"];
             
         case MODEL_NONE:
+        case MODEL_QUICK_RESET:
         case MODEL_CGB:
             return (GB_model_t)[[NSUserDefaults standardUserDefaults] integerForKey:@"GBCGBModel"];
             
@@ -623,7 +626,12 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
         current_model = (enum model)[sender tag];
     }
     
-    GB_switch_model_and_reset(&gb, [self internalModel]);
+    if ([sender tag] == MODEL_QUICK_RESET) {
+        GB_quick_reset(&gb);
+    }
+    else {
+        GB_switch_model_and_reset(&gb, [self internalModel]);
+    }
     
     if (old_width != GB_get_screen_width(&gb)) {
         [self.view screenSizeChanged];
@@ -631,7 +639,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     
     [self updateMinSize];
     
-    if ([sender tag] != 0) {
+    if ([sender tag] > MODEL_NONE) {
         /* User explictly selected a model, save the preference */
         [[NSUserDefaults standardUserDefaults] setBool:current_model == MODEL_DMG forKey:@"EmulateDMG"];
         [[NSUserDefaults standardUserDefaults] setBool:current_model == MODEL_SGB forKey:@"EmulateSGB"];
@@ -1176,7 +1184,7 @@ static bool is_path_writeable(const char *path)
         [(NSMenuItem *)anItem setState:self.isPaused];
         return !GB_debugger_is_stopped(&gb);
     }
-    else if ([anItem action] == @selector(reset:) && anItem.tag != MODEL_NONE) {
+    else if ([anItem action] == @selector(reset:) && anItem.tag != MODEL_NONE && anItem.tag != MODEL_QUICK_RESET) {
         [(NSMenuItem *)anItem setState:anItem.tag == current_model];
     }
     else if ([anItem action] == @selector(interrupt:)) {

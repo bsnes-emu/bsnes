@@ -202,6 +202,12 @@
                                     <action selector="reset:" target="-1" id="DKW-Bd-h3v"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Quick Reset" tag="-1" alternate="YES" keyEquivalent="r" id="uPG-01-49E">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                <connections>
+                                    <action selector="reset:" target="-1" id="VV1-VP-L7g"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Pause" keyEquivalent="p" id="4K4-hw-R7Q">
                                 <connections>
                                     <action selector="togglePause:" target="-1" id="osW-wt-QAa"/>
