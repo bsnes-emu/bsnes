@@ -967,7 +967,7 @@ static void sbc_a_r(GB_gameboy_t *gb, uint8_t opcode)
     value = get_src_value(gb, opcode);
     a = gb->af >> 8;
     carry = (gb->af & GB_CARRY_FLAG) != 0;
-    gb->af = ((a - value - carry) << 8) | GB_SUBTRACT_FLAG;
+    gb->af = (((uint8_t)(a - value - carry)) << 8) | GB_SUBTRACT_FLAG;
 
     if ((uint8_t) (a - value - carry) == 0) {
         gb->af |= GB_ZERO_FLAG;
