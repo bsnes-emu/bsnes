@@ -2110,6 +2110,7 @@ void GB_debugger_call_hook(GB_gameboy_t *gb, uint16_t call_addr)
         while (gb->backtrace_size) {
             if (gb->backtrace_sps[gb->backtrace_size - 1] < gb->sp) {
                 gb->backtrace_size--;
+                gb->debug_call_depth--;
             }
             else {
                 break;
@@ -2120,20 +2121,18 @@ void GB_debugger_call_hook(GB_gameboy_t *gb, uint16_t call_addr)
         gb->backtrace_returns[gb->backtrace_size].bank = bank_for_addr(gb, call_addr);
         gb->backtrace_returns[gb->backtrace_size].addr = call_addr;
         gb->backtrace_size++;
+        gb->debug_call_depth++;
     }
-
-    gb->debug_call_depth++;
 }
 
 void GB_debugger_ret_hook(GB_gameboy_t *gb)
 {
     /* Called just before the CPU runs ret/reti */
 
-    gb->debug_call_depth--;
-
     while (gb->backtrace_size) {
         if (gb->backtrace_sps[gb->backtrace_size - 1] <= gb->sp) {
             gb->backtrace_size--;
+            gb->debug_call_depth--;
         }
         else {
             break;
@@ -2373,7 +2372,7 @@ void GB_debugger_run(GB_gameboy_t *gb)
     if (gb->debug_next_command && gb->debug_call_depth <= 0 && !gb->halted) {
         gb->debug_stopped = true;
     }
-    if (gb->debug_fin_command && gb->debug_call_depth == -1) {
+    if (gb->debug_fin_command && gb->debug_call_depth <= -1) {
         gb->debug_stopped = true;
     }
     if (gb->debug_stopped) {
