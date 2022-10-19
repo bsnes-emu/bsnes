@@ -796,7 +796,6 @@
                                     </allowedInputSourceLocales>
                                 </textFieldCell>
                                 <connections>
-                                    <action selector="consoleInput:" target="-2" id="sMf-aM-OvR"/>
                                     <outlet property="delegate" destination="v7q-gT-jHT" id="79v-33-R1X"/>
                                 </connections>
                             </textField>
@@ -812,7 +811,6 @@
                                     </allowedInputSourceLocales>
                                 </textFieldCell>
                                 <connections>
-                                    <action selector="consoleInput:" target="-2" id="SYC-cW-RjC"/>
                                     <outlet property="delegate" destination="v7q-gT-jHT" id="P69-nT-oOt"/>
                                 </connections>
                             </textField>
@@ -828,7 +826,6 @@
                                     </allowedInputSourceLocales>
                                 </textFieldCell>
                                 <connections>
-                                    <action selector="consoleInput:" target="-2" id="io6-ha-QNb"/>
                                     <outlet property="delegate" destination="v7q-gT-jHT" id="6RH-dg-SL7"/>
                                 </connections>
                             </textField>
