@@ -98,8 +98,10 @@
             [self tableViewSelectionDidChange:nil];
         }
         else {
-            NSBeep();
-            [GBWarningPopover popoverWithContents:@"This code is not a valid GameShark or GameGenie code" onView:self.importCodeField];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                NSBeep();
+                [GBWarningPopover popoverWithContents:@"This code is not a valid GameShark or GameGenie code" onView:self.importCodeField];
+            });
         }
     }];
 }
