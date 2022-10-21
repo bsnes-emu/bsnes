@@ -6,7 +6,7 @@
 
 @implementation GBCheatTextView
 
-- (bool)_insertText:(NSString *)string replacementRange:(NSRange)range
+- (bool)_internalInsertText:(NSString *)string replacementRange:(NSRange)range
 {
     if (range.location == NSNotFound) {
         range = self.selectedRange;
@@ -60,19 +60,19 @@
             return true;
         }
         if (([string isEqualToString:@"$"] || [string isEqualToString:@":"]) && range.length == 0 && range.location == 0) {
-            if ([self _insertText:@"$00:" replacementRange:range]) {
+            if ([self _internalInsertText:@"$00:" replacementRange:range]) {
                 self.selectedRange = NSMakeRange(1, 2);
                 return true;
             }
         }
         if ([string isEqualToString:@":"] && range.length + range.location == self.string.length) {
-            if ([self _insertText:@":$0" replacementRange:range]) {
+            if ([self _internalInsertText:@":$0" replacementRange:range]) {
                 self.selectedRange = NSMakeRange(self.string.length - 2, 2);
                 return true;
             }
         }
         if ([string isEqualToString:@"$"]) {
-            if ([self _insertText:@"$0" replacementRange:range]) {
+            if ([self _internalInsertText:@"$0" replacementRange:range]) {
                 self.selectedRange = NSMakeRange(range.location + 1, 1);
                 return true;
             }
@@ -88,8 +88,10 @@
 
 - (void)insertText:(id)string replacementRange:(NSRange)replacementRange
 {
-    if (![self _insertText:string replacementRange:replacementRange]) {
-        NSBeep();
+    if (![self _internalInsertText:string replacementRange:replacementRange]) {
+        if (![self _internalInsertText:[@"$" stringByAppendingString:string] replacementRange:replacementRange]) {
+            NSBeep();
+        }
     }
 }
 
