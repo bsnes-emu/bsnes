@@ -2008,7 +2008,6 @@ static bool undo(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
 
 static bool help(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command);
 
-#define HELP_NEWLINE "\n             "
 
 /* Commands without implementations are aliases of the previous non-alias commands */
 static const debugger_command_t commands[] = {
@@ -2021,40 +2020,40 @@ static const debugger_command_t commands[] = {
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"backtrace", 2, backtrace, "Display the current call stack"},
     {"bt", 2, }, /* Alias */
-    {"print", 1, print, "Evaluate and print an expression" HELP_NEWLINE
-        "Use modifier to format as an address (a, default) or as a number in" HELP_NEWLINE
-        "decimal (d), hexadecimal (x), octal (o) or binary (b).",
-        "<expression>", "format", .argument_completer = symbol_completer, .modifiers_completer = format_completer},
+    {"print", 1, print, "Evaluate and print an expression "
+                        "Use modifier to format as an address (a, default) or as a number in "
+                        "decimal (d), hexadecimal (x), octal (o) or binary (b).",
+                        "<expression>", "format", .argument_completer = symbol_completer, .modifiers_completer = format_completer},
     {"eval", 2, }, /* Alias */
     {"examine", 2, examine, "Examine values at address", "<expression>", "count", .argument_completer = symbol_completer},
     {"x", 1, }, /* Alias */
     {"disassemble", 1, disassemble, "Disassemble instructions at address", "<expression>", "count", .argument_completer = symbol_completer},
-    {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression" HELP_NEWLINE
-        "Can also modify the condition of existing breakpoints." HELP_NEWLINE
-        "If the j modifier is used, the breakpoint will occur just before" HELP_NEWLINE
-        "jumping to the target.",
-        "<expression>[ if <condition expression>]", "j",
-        .argument_completer = symbol_completer, .modifiers_completer = j_completer},
+    {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression "
+                                  "Can also modify the condition of existing breakpoints. "
+                                  "If the j modifier is used, the breakpoint will occur just before "
+                                  "jumping to the target.",
+                                  "<expression>[ if <condition expression>]", "j",
+                                  .argument_completer = symbol_completer, .modifiers_completer = j_completer},
     {"delete", 2, delete, "Delete a breakpoint by its address, or all breakpoints", "[<expression>]", .argument_completer = symbol_completer},
-    {"watch", 1, watch, "Add a new watchpoint at the specified address/expression." HELP_NEWLINE
-        "Can also modify the condition and type of existing watchpoints." HELP_NEWLINE
-        "Default watchpoint type is write-only.",
-        "<expression>[ if <condition expression>]", "(r|w|rw)",
-        .argument_completer = symbol_completer, .modifiers_completer = rw_completer
+    {"watch", 1, watch, "Add a new watchpoint at the specified address/expression. "
+                        "Can also modify the condition and type of existing watchpoints. "
+                        "Default watchpoint type is write-only.",
+                        "<expression>[ if <condition expression>]", "(r|w|rw)",
+                        .argument_completer = symbol_completer, .modifiers_completer = rw_completer
     },
     {"unwatch", 3, unwatch, "Delete a watchpoint by its address, or all watchpoints", "[<expression>]", .argument_completer = symbol_completer},
     {"softbreak", 2, softbreak, "Enable or disable software breakpoints ('ld b, b' opcodes)", "(on|off)", .argument_completer = on_off_completer},
     {"list", 1, list, "List all set breakpoints and watchpoints"},
-    {"ticks", 2, ticks, "Display the number of CPU ticks since the last time 'ticks' was" HELP_NEWLINE
-                        "used. Use 'keep' as an argument to display ticks without reseeting" HELP_NEWLINE
+    {"ticks", 2, ticks, "Display the number of CPU ticks since the last time 'ticks' was "
+                        "used. Use 'keep' as an argument to display ticks without reseeting "
                         "the count.", "(keep)", .argument_completer = keep_completer},
     {"cartridge", 2, mbc, "Display information about the MBC and cartridge"},
     {"mbc", 3, }, /* Alias */
-    {"apu", 3, apu, "Display information about the current state of the audio processing" HELP_NEWLINE
+    {"apu", 3, apu, "Display information about the current state of the audio processing "
                     "unit", "[channel (1-4, 5 for NR5x)]"},
-    {"wave", 3, wave, "Print a visual representation of the wave RAM." HELP_NEWLINE
-                      "Modifiers can be used for a (f)ull print (the default)," HELP_NEWLINE
-        "a more (c)ompact one, or a one-(l)iner", "", "(f|c|l)", .modifiers_completer = wave_completer},
+    {"wave", 3, wave, "Print a visual representation of the wave RAM. "
+                      "Modifiers can be used for a (f)ull print (the default), "
+                      "a more (c)ompact one, or a one-(l)iner", "", "(f|c|l)", .modifiers_completer = wave_completer},
     {"lcd", 3, lcd, "Display information about the current state of the LCD controller"},
     {"palettes", 3, palettes, "Display the current CGB palettes"},
     {"dma", 3, dma, "Display the current OAM DMA status"},
@@ -2090,7 +2089,24 @@ static void print_command_description(GB_gameboy_t *gb, const debugger_command_t
 {
     print_command_shortcut(gb, command);
     GB_log(gb, ": ");
-    GB_log(gb, (const char *)&"           %s\n" + strlen(command->command), command->help_string);
+    GB_log(gb, "%s", (const char *)&"           " + strlen(command->command));
+    
+    const char *string = command->help_string;
+    const unsigned width = 80 - 13;
+    while (strlen(string) > width) {
+        const char *space = string + width;
+        while (*space != ' ') {
+            space--;
+            if (space == string) {
+                // This help string has some extra long word? Abort line-breaking, it's going to break anyway.
+                GB_log(gb, "%s\n", string);
+                return;
+            }
+        }
+        GB_log(gb, "%.*s\n             ", (unsigned)(space - string), string);
+        string = space + 1;
+    }
+    GB_log(gb, "%s\n", string);
 }
 
 static bool help(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *ignored)
