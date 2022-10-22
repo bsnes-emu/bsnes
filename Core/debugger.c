@@ -1614,12 +1614,28 @@ static bool backtrace(GB_gameboy_t *gb, char *arguments, char *modifiers, const 
     return true;
 }
 
+static char *keep_completer(GB_gameboy_t *gb, const char *string, uintptr_t *context)
+{
+    size_t length = strlen(string);
+    const char *suggestions[] = {"keep"};
+    while (*context < sizeof(suggestions) / sizeof(suggestions[0])) {
+        if (memcmp(string, suggestions[*context], length) == 0) {
+            return strdup(suggestions[(*context)++] + length);
+        }
+        (*context)++;
+    }
+    return NULL;
+}
+
 static bool ticks(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
     NO_MODIFIERS
     STOPPED_ONLY
-
-    if (strlen(lstrip(arguments))) {
+    bool keep = false;
+    if (strcmp(lstrip(arguments), "keep") == 0) {
+        keep = true;
+    }
+    else if (lstrip(arguments)[0]) {
         print_usage(gb, command);
         return true;
     }
@@ -1628,8 +1644,10 @@ static bool ticks(GB_gameboy_t *gb, char *arguments, char *modifiers, const debu
     GB_log(gb, "M-cycles: %llu\n", (unsigned long long)gb->debugger_ticks / 4);
     GB_log(gb, "Absolute 8MHz ticks: %llu\n", (unsigned long long)gb->absolute_debugger_ticks);
     GB_log(gb, "Tick count reset.\n");
-    gb->debugger_ticks = 0;
-    gb->absolute_debugger_ticks = 0;
+    if (!keep) {
+        gb->debugger_ticks = 0;
+        gb->absolute_debugger_ticks = 0;
+    }
 
     return true;
 }
@@ -2028,7 +2046,8 @@ static const debugger_command_t commands[] = {
     {"softbreak", 2, softbreak, "Enable or disable software breakpoints ('ld b, b' opcodes)", "(on|off)", .argument_completer = on_off_completer},
     {"list", 1, list, "List all set breakpoints and watchpoints"},
     {"ticks", 2, ticks, "Display the number of CPU ticks since the last time 'ticks' was" HELP_NEWLINE
-                        "used"},
+                        "used. Use 'keep' as an argument to display ticks without reseeting" HELP_NEWLINE
+                        "the count.", "(keep)", .argument_completer = keep_completer},
     {"cartridge", 2, mbc, "Display information about the MBC and cartridge"},
     {"mbc", 3, }, /* Alias */
     {"apu", 3, apu, "Display information about the current state of the audio processing" HELP_NEWLINE
