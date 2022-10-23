@@ -733,7 +733,8 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     
     
     self.consoleWindow.title = [NSString stringWithFormat:@"Debug Console – %@", [self.fileURL.path lastPathComponent]];
-    self.debuggerSplitView.dividerColor = [NSColor clearColor];
+    self.debuggerSplitView.dividerColor = self.debuggerVerticalLine.borderColor;
+    [self.debuggerVerticalLine removeFromSuperview]; // No longer used, just there for the color
     if (@available(macOS 11.0, *)) {
         self.memoryWindow.toolbarStyle = NSWindowToolbarStyleExpanded;
         self.printerFeedWindow.toolbarStyle = NSWindowToolbarStyleUnifiedCompact;
@@ -2261,11 +2262,6 @@ static bool is_path_writeable(const char *path)
     if ([[[splitview arrangedSubviews] firstObject] frame].size.width < 600) {
         [splitview setPosition:600 ofDividerAtIndex:0];
     }
-    /* NSSplitView renders its separator without the proper vibrancy, so we made it transparent and move an
-       NSBox-based separator that renders properly so it acts like the split view's separator. */
-    NSRect rect = self.debuggerVerticalLine.frame;
-    rect.origin.x = [[[splitview arrangedSubviews] firstObject] frame].size.width - 2;
-    self.debuggerVerticalLine.frame = rect;
 }
 
 - (IBAction)showCheats:(id)sender
