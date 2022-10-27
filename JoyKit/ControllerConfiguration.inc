@@ -466,6 +466,123 @@ hacksByName = @{
         
         JOYIgnoredReports: @[@(0x30)], // Ignore the real 0x30 report as it's broken
     },
+    
+    @"Joy-Con (L)": @{ // Switch Pro Controller
+        JOYIsSwitch: @YES,
+        JOYJoyCon: @(JOYJoyConTypeLeft),
+        JOYAxisGroups: @{
+              @(kHIDUsage_GD_X): @(0),
+              @(kHIDUsage_GD_Y): @(0),
+              @(kHIDUsage_GD_Z): @(0),
+        },
+            
+        JOYButtonUsageMapping: @{
+            BUTTON(5): @(JOYButtonUsageL1),
+            BUTTON(7): @(JOYButtonUsageL2),
+            BUTTON(9): @(JOYButtonUsageSelect),
+            BUTTON(11): @(JOYButtonUsageLStick),
+            BUTTON(14): @(JOYButtonUsageMisc),
+            BUTTON(15): @(JOYButtonUsageL3),
+            BUTTON(16): @(JOYButtonUsageR3),
+        },
+        
+        JOYAxes2DUsageMapping: @{
+            AXES2D(1): @(JOYAxes2DUsageLeftStick),
+        },
+        
+        JOYCustomReports: @{
+            @(0x30): @[
+            @{@"reportID": @(1), @"size":@1, @"offset":@24, @"usagePage":@(kHIDPage_Button), @"usage":@9},
+            @{@"reportID": @(1), @"size":@1, @"offset":@27, @"usagePage":@(kHIDPage_Button), @"usage":@11},
+            
+            @{@"reportID": @(1), @"size":@1, @"offset":@29, @"usagePage":@(kHIDPage_Button), @"usage":@14},
+
+            @{@"reportID": @(1), @"size":@1, @"offset":@32, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_DPadDown)},
+            @{@"reportID": @(1), @"size":@1, @"offset":@33, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_DPadUp)},
+            @{@"reportID": @(1), @"size":@1, @"offset":@34, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_DPadRight)},
+            @{@"reportID": @(1), @"size":@1, @"offset":@35, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_DPadLeft)},
+            
+            @{@"reportID": @(1), @"size":@1, @"offset":@36, @"usagePage":@(kHIDPage_Button), @"usage":@16},
+            @{@"reportID": @(1), @"size":@1, @"offset":@37, @"usagePage":@(kHIDPage_Button), @"usage":@15},
+            @{@"reportID": @(1), @"size":@1, @"offset":@38, @"usagePage":@(kHIDPage_Button), @"usage":@5},
+            @{@"reportID": @(1), @"size":@1, @"offset":@39, @"usagePage":@(kHIDPage_Button), @"usage":@7},
+
+            /* Sticks */
+            @{@"reportID": @(1), @"size":@12, @"offset":@40, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_X), @"min": @0, @"max": @0xFFF},
+            @{@"reportID": @(1), @"size":@12, @"offset":@52, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Y), @"min": @0xFFF, @"max": @0},
+            
+            @{@"reportID": @(1), @"size":@16, @"offset":@96, @"usagePage":@(kHIDPage_Sensor), @"min": @0x7FFF, @"max": @-0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisZ)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@112, @"usagePage":@(kHIDPage_Sensor), @"min": @0x7FFF, @"max": @-0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisX)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@128, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisY)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@144, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityZAxis)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@160, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityXAxis)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@176, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityYAxis)},
+            ],
+        },
+        
+        JOYIgnoredReports: @[@(0x30)], // Ignore the real 0x30 report as it's broken
+    },
+    
+    @"Joy-Con (R)": @{ // Switch Pro Controller
+        JOYIsSwitch: @YES,
+        JOYJoyCon: @(JOYJoyConTypeRight),
+        JOYAxisGroups: @{
+              @(kHIDUsage_GD_Rx): @(1),
+              @(kHIDUsage_GD_Ry): @(1),
+              @(kHIDUsage_GD_Rz): @(1),
+        },
+            
+        JOYButtonUsageMapping: @{
+            BUTTON(1): @(JOYButtonUsageB),
+            BUTTON(2): @(JOYButtonUsageA),
+            BUTTON(3): @(JOYButtonUsageY),
+            BUTTON(4): @(JOYButtonUsageX),
+            BUTTON(6): @(JOYButtonUsageR1),
+            BUTTON(8): @(JOYButtonUsageR2),
+            BUTTON(10): @(JOYButtonUsageStart),
+            BUTTON(12): @(JOYButtonUsageRStick),
+            BUTTON(13): @(JOYButtonUsageHome),
+            BUTTON(15): @(JOYButtonUsageL3),
+            BUTTON(16): @(JOYButtonUsageR3),
+        },
+        
+        JOYAxes2DUsageMapping: @{
+            AXES2D(4): @(JOYAxes2DUsageRightStick),
+        },
+        
+        JOYCustomReports: @{
+            @(0x30): @[
+            
+            @{@"reportID": @(1), @"size":@1, @"offset":@16, @"usagePage":@(kHIDPage_Button), @"usage":@3},
+            @{@"reportID": @(1), @"size":@1, @"offset":@17, @"usagePage":@(kHIDPage_Button), @"usage":@4},
+            @{@"reportID": @(1), @"size":@1, @"offset":@18, @"usagePage":@(kHIDPage_Button), @"usage":@1},
+            @{@"reportID": @(1), @"size":@1, @"offset":@19, @"usagePage":@(kHIDPage_Button), @"usage":@2},
+            @{@"reportID": @(1), @"size":@1, @"offset":@20, @"usagePage":@(kHIDPage_Button), @"usage":@16},
+            @{@"reportID": @(1), @"size":@1, @"offset":@21, @"usagePage":@(kHIDPage_Button), @"usage":@15},
+            @{@"reportID": @(1), @"size":@1, @"offset":@22, @"usagePage":@(kHIDPage_Button), @"usage":@6},
+            @{@"reportID": @(1), @"size":@1, @"offset":@23, @"usagePage":@(kHIDPage_Button), @"usage":@8},
+
+            @{@"reportID": @(1), @"size":@1, @"offset":@25, @"usagePage":@(kHIDPage_Button), @"usage":@10},
+            @{@"reportID": @(1), @"size":@1, @"offset":@26, @"usagePage":@(kHIDPage_Button), @"usage":@12},
+            @{@"reportID": @(1), @"size":@1, @"offset":@28, @"usagePage":@(kHIDPage_Button), @"usage":@13},
+            
+            /* Sticks */
+            @{@"reportID": @(1), @"size":@12, @"offset":@64, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Rx), @"min": @0, @"max": @0xFFF},
+            @{@"reportID": @(1), @"size":@12, @"offset":@76, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Ry), @"min": @0xFFF, @"max": @0},
+            
+            @{@"reportID": @(1), @"size":@16, @"offset":@96, @"usagePage":@(kHIDPage_Sensor), @"min": @0x7FFF, @"max": @-0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisZ)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@112, @"usagePage":@(kHIDPage_Sensor), @"min": @0x7FFF, @"max": @-0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisX)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@128, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisY)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@144, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityZAxis)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@160, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityXAxis)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@176, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityYAxis)},
+            ],
+        },
+        
+        JOYIgnoredReports: @[@(0x30)], // Ignore the real 0x30 report as it's broken
+    },
+
+    
     @"PLAYSTATION(R)3 Controller": @{ // DualShock 3
         JOYAxisGroups: @{
             @(kHIDUsage_GD_X): @(0),

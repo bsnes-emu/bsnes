@@ -12,6 +12,13 @@ extern NSTextField *globalDebugField;
 
 #define PWM_RESOLUTION 16
 
+typedef enum {
+    JOYJoyConTypeNone,
+    JOYJoyConTypeLeft,
+    JOYJoyConTypeRight,
+    JOYJoyConTypeCombined,
+} JOYJoyConType;
+
 static NSString const *JOYAxisGroups = @"JOYAxisGroups";
 static NSString const *JOYReportIDFilters = @"JOYReportIDFilters";
 static NSString const *JOYButtonUsageMapping = @"JOYButtonUsageMapping";
@@ -19,6 +26,7 @@ static NSString const *JOYAxisUsageMapping = @"JOYAxisUsageMapping";
 static NSString const *JOYAxes2DUsageMapping = @"JOYAxes2DUsageMapping";
 static NSString const *JOYCustomReports = @"JOYCustomReports";
 static NSString const *JOYIsSwitch = @"JOYIsSwitch";
+static NSString const *JOYJoyCon = @"JOYJoyCon";
 static NSString const *JOYRumbleUsage = @"JOYRumbleUsage";
 static NSString const *JOYRumbleUsagePage = @"JOYRumbleUsagePage";
 static NSString const *JOYConnectedUsage = @"JOYConnectedUsage";
