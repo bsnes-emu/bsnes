@@ -598,6 +598,12 @@ typedef union {
         _lastVendorSpecificOutput.switchPacket.command = 0x40; // Enable/disableIMU
         _lastVendorSpecificOutput.switchPacket.commandData[0] = 1; // Enabled
         [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.switchPacket length:sizeof(_lastVendorSpecificOutput.switchPacket)]];
+        
+        _lastVendorSpecificOutput.switchPacket.sequence++;
+        _lastVendorSpecificOutput.switchPacket.sequence &= 0xF;
+        _lastVendorSpecificOutput.switchPacket.command = 0x48; // Set vibration enabled
+        _lastVendorSpecificOutput.switchPacket.commandData[0] = 1; // enabled
+        [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.switchPacket length:sizeof(_lastVendorSpecificOutput.switchPacket)]];
     }
     
     if (_isDualShock3) {
