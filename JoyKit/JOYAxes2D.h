@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import "JOYInput.h"
 
 typedef enum {
     JOYAxes2DUsageNone,
@@ -11,10 +12,8 @@ typedef enum {
     JOYAxes2DUsageGeneric0 = 0x10000,
 } JOYAxes2DUsage;
 
-@interface JOYAxes2D : NSObject
-- (NSString *)usageString;
+@interface JOYAxes2D : JOYInput
 + (NSString *)usageToString: (JOYAxes2DUsage) usage;
-- (uint64_t)uniqueID;
 - (double)distance;
 - (double)angle;
 - (NSPoint)value;

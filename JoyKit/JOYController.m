@@ -87,6 +87,10 @@ static bool hatsEmulateButtons = false;
 - (bool)updateState;
 @end
 
+@interface JOYInput ()
+@property unsigned combinedIndex;
+@end
+
 static NSDictionary *CreateHIDDeviceMatchDictionary(const UInt32 page, const UInt32 usage)
 {
     return @{
@@ -1099,6 +1103,17 @@ typedef union {
     return _logicallyConnected && _physicallyConnected;
 }
 
+- (NSArray<JOYInput *> *)allInputs
+{
+    NSMutableArray<JOYInput *> *ret = [NSMutableArray array];
+    [ret addObjectsFromArray:self.buttons];
+    [ret addObjectsFromArray:self.axes];
+    [ret addObjectsFromArray:self.axes2D];
+    [ret addObjectsFromArray:self.axes3D];
+    [ret addObjectsFromArray:self.hats];
+    return ret;
+}
+
 + (void)controllerAdded:(IOHIDDeviceRef) device
 {
     NSString *name = (__bridge NSString *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDProductKey));
@@ -1213,6 +1228,7 @@ typedef union {
         }
     }
     
+    unsigned index = 0;
     for (JOYController *child in _chidlren) {
         for (id<JOYListener> listener in listeners) {
             if ([listener respondsToSelector:@selector(controllerDisconnected:)]) {
@@ -1220,6 +1236,10 @@ typedef union {
             }
         }
         child->_parent = self;
+        for (JOYInput *input in child.allInputs) {
+            input.combinedIndex = index;
+        }
+        index++;
         [exposedControllers removeObject:child];
     }
     
@@ -1249,6 +1269,9 @@ typedef union {
 
     for (JOYController *child in _chidlren) {
         child->_parent = nil;
+        for (JOYInput *input in child.allInputs) {
+            input.combinedIndex = 0;
+        }
         [exposedControllers addObject:child];
         for (id<JOYListener> listener in listeners) {
             if ([listener respondsToSelector:@selector(controllerConnected:)]) {

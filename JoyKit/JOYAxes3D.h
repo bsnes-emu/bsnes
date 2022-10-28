@@ -1,4 +1,5 @@
 #import <Foundation/Foundation.h>
+#import "JOYInput.h"
 
 typedef enum {
     JOYAxes3DUsageNone,
@@ -14,10 +15,8 @@ typedef struct {
     double x, y, z;
 } JOYPoint3D;
 
-@interface JOYAxes3D : NSObject
-- (NSString *)usageString;
+@interface JOYAxes3D : JOYInput
 + (NSString *)usageToString: (JOYAxes3DUsage) usage;
-- (uint64_t)uniqueID;
 - (JOYPoint3D)rawValue;
 - (JOYPoint3D)normalizedValue; // For orientation
 - (JOYPoint3D)gUnitsValue; // For acceleration

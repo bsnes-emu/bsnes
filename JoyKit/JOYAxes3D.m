@@ -34,12 +34,12 @@
 
 - (uint64_t)uniqueID
 {
-    return _element1.uniqueID;
+    return _element1.uniqueID | (uint64_t)self.combinedIndex << 32;
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p, %@ (%llu); State: (%.2f, %.2f, %.2f)>", self.className, self, self.usageString, self.uniqueID, _state1, _state2, _state3];
+    return [NSString stringWithFormat:@"<%@: %p, %@ (%llx); State: (%.2f, %.2f, %.2f)>", self.className, self, self.usageString, self.uniqueID, _state1, _state2, _state3];
 }
 
 - (instancetype)initWithFirstElement:(JOYElement *)element1 secondElement:(JOYElement *)element2 thirdElement:(JOYElement *)element3

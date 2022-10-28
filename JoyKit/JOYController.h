@@ -42,6 +42,7 @@ typedef enum {
 - (NSArray<JOYAxes2D *> *) axes2D;
 - (NSArray<JOYAxes3D *> *) axes3D;
 - (NSArray<JOYHat *> *) hats;
+- (NSArray<JOYInput *> *) allInputs;
 - (void)setRumbleAmplitude:(double)amp;
 - (void)setPlayerLEDs:(uint8_t)mask;
 - (uint8_t)LEDMaskForPlayer:(unsigned)player;

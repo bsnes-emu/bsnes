@@ -8,7 +8,6 @@
     int32_t initialX, initialY;
     int32_t minX, minY;
     int32_t maxX, maxY;
-
 }
 
 + (NSString *)usageToString: (JOYAxes2DUsage) usage
@@ -36,12 +35,12 @@
 
 - (uint64_t)uniqueID
 {
-    return _element1.uniqueID;
+    return _element1.uniqueID | (uint64_t)self.combinedIndex << 32;
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p, %@ (%llu); State: %.2f%%, %.2f degrees>", self.className, self, self.usageString, self.uniqueID, self.distance * 100, self.angle];
+    return [NSString stringWithFormat:@"<%@: %p, %@ (%llx); State: %.2f%%, %.2f degrees>", self.className, self, self.usageString, self.uniqueID, self.distance * 100, self.angle];
 }
 
 - (instancetype)initWithFirstElement:(JOYElement *)element1 secondElement:(JOYElement *)element2

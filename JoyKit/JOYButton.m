@@ -51,12 +51,12 @@
 
 - (uint64_t)uniqueID
 {
-    return _element.uniqueID;
+    return _element.uniqueID | (uint64_t)self.combinedIndex << 32;
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p, %@ (%llu); State: %s>", self.className, self, self.usageString, self.uniqueID, _state? "Presssed" : "Released"];
+    return [NSString stringWithFormat:@"<%@: %p, %@ (%llx); State: %s>", self.className, self, self.usageString, self.uniqueID, _state? "Presssed" : "Released"];
 }
 
 - (instancetype)initWithElement:(JOYElement *)element
