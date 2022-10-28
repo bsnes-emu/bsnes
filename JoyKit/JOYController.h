@@ -23,6 +23,12 @@ static NSString const *JOYHatsEmulateButtonsKey = @"JOYHatsEmulateButtons";
 
 @end
 
+typedef enum {
+    JOYControllerCombinedTypeSingle,
+    JOYControllerCombinedTypeComponent,
+    JOYControllerCombinedTypeCombined,
+} JOYControllerCombinedType;
+
 @interface JOYController : NSObject
 + (void)startOnRunLoop:(NSRunLoop *)runloop withOptions: (NSDictionary *)options;
 + (NSArray<JOYController *> *) allControllers;
@@ -30,6 +36,7 @@ static NSString const *JOYHatsEmulateButtonsKey = @"JOYHatsEmulateButtons";
 + (void) unregisterListener:(id<JOYListener>)listener;
 - (NSString *)deviceName;
 - (NSString *)uniqueID;
+- (JOYControllerCombinedType)combinedControllerType;
 - (NSArray<JOYButton *> *) buttons;
 - (NSArray<JOYAxis *> *) axes;
 - (NSArray<JOYAxes2D *> *) axes2D;
@@ -40,5 +47,12 @@ static NSString const *JOYHatsEmulateButtonsKey = @"JOYHatsEmulateButtons";
 - (uint8_t)LEDMaskForPlayer:(unsigned)player;
 @property (readonly, getter=isConnected) bool connected;
 @end
+
+@interface JOYCombinedController : JOYController
+- (instancetype)initWithChildren:(NSArray<JOYController *> *)children;
+- (void)breakApart;
+@property (readonly) NSArray<JOYController *> *chidlren;
+@end
+
 
 

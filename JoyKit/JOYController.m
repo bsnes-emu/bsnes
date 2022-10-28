@@ -180,6 +180,7 @@ typedef union {
 
 @implementation JOYController
 {
+    @public // Let JOYCombinedController access everything
     IOHIDDeviceRef _device;
     NSMutableDictionary<JOYElement *, JOYButton *> *_buttons;
     NSMutableDictionary<JOYElement *, JOYAxis *> *_axes;
@@ -221,6 +222,7 @@ typedef union {
     unsigned _rumbleCounter;
     bool _deviceCantSendReports;
     dispatch_queue_t _rumbleQueue;
+    JOYCombinedController *_parent;
 }
 
 - (instancetype)initWithDevice:(IOHIDDeviceRef) device hacks:(NSDictionary *)hacks
@@ -673,6 +675,11 @@ typedef union {
     return serial;
 }
 
+- (JOYControllerCombinedType)combinedControllerType
+{
+    return _parent? JOYControllerCombinedTypeComponent : JOYControllerCombinedTypeSingle;
+}
+
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<%@: %p, %@, %@>", self.className, self, self.deviceName, self.uniqueID];
@@ -753,6 +760,7 @@ typedef union {
             }
         }
         else if (old && !self.connected) {
+            [_parent breakApart];
             for (id<JOYListener> listener in listeners) {
                 if ([listener respondsToSelector:@selector(controllerDisconnected:)]) {
                     [listener controllerDisconnected:self];
@@ -768,7 +776,7 @@ typedef union {
             if ([button updateState]) {
                 for (id<JOYListener> listener in listeners) {
                     if ([listener respondsToSelector:@selector(controller:buttonChangedState:)]) {
-                        [listener controller:self buttonChangedState:button];
+                        [listener controller:_parent ?: self buttonChangedState:button];
                     }
                 }
             }
@@ -783,14 +791,14 @@ typedef union {
             if ([axis updateState])  {
                 for (id<JOYListener> listener in listeners) {
                     if ([listener respondsToSelector:@selector(controller:movedAxis:)]) {
-                        [listener controller:self movedAxis:axis];
+                        [listener controller:_parent ?: self movedAxis:axis];
                     }
                 }
                 JOYEmulatedButton *button = _axisEmulatedButtons[@(axis.uniqueID)];
                 if ([button updateStateFromAxis:axis]) {
                     for (id<JOYListener> listener in listeners) {
                         if ([listener respondsToSelector:@selector(controller:buttonChangedState:)]) {
-                            [listener controller:self buttonChangedState:button];
+                            [listener controller:_parent ?: self buttonChangedState:button];
                         }
                     }
                 }
@@ -805,7 +813,7 @@ typedef union {
             if ([axes updateState]) {
                 for (id<JOYListener> listener in listeners) {
                     if ([listener respondsToSelector:@selector(controller:movedAxes2D:)]) {
-                        [listener controller:self movedAxes2D:axes];
+                        [listener controller:_parent ?: self movedAxes2D:axes];
                     }
                 }
                 NSArray <JOYEmulatedButton *> *buttons = _axes2DEmulatedButtons[@(axes.uniqueID)];
@@ -813,7 +821,7 @@ typedef union {
                     if ([button updateStateFromAxes2D:axes]) {
                         for (id<JOYListener> listener in listeners) {
                             if ([listener respondsToSelector:@selector(controller:buttonChangedState:)]) {
-                                [listener controller:self buttonChangedState:button];
+                                [listener controller:_parent ?: self buttonChangedState:button];
                             }
                         }
                     }
@@ -829,7 +837,7 @@ typedef union {
             if ([axes updateState]) {
                 for (id<JOYListener> listener in listeners) {
                     if ([listener respondsToSelector:@selector(controller:movedAxes3D:)]) {
-                        [listener controller:self movedAxes3D:axes];
+                        [listener controller:_parent ?: self movedAxes3D:axes];
                     }
                 }
             }
@@ -843,7 +851,7 @@ typedef union {
             if ([hat updateState]) {
                 for (id<JOYListener> listener in listeners) {
                     if ([listener respondsToSelector:@selector(controller:movedHat:)]) {
-                        [listener controller:self movedHat:hat];
+                        [listener controller:_parent ?: self movedHat:hat];
                     }
                 }
                 
@@ -852,7 +860,7 @@ typedef union {
                     if ([button updateStateFromHat:hat]) {
                         for (id<JOYListener> listener in listeners) {
                             if ([listener respondsToSelector:@selector(controller:buttonChangedState:)]) {
-                                [listener controller:self buttonChangedState:button];
+                                [listener controller:_parent ?: self buttonChangedState:button];
                             }
                         }
                     }
@@ -865,6 +873,7 @@ typedef union {
 
 - (void)disconnected
 {
+    [_parent breakApart];
     if (_logicallyConnected && [exposedControllers containsObject:self]) {
         for (id<JOYListener> listener in listeners) {
             if ([listener respondsToSelector:@selector(controllerDisconnected:)]) {
@@ -1179,4 +1188,214 @@ typedef union {
         _device = NULL;
     }
 }
+@end
+
+
+@implementation JOYCombinedController
+- (instancetype)initWithChildren:(NSArray<JOYController *> *)children
+{
+    self = [super init];
+    // Sorting makes the device name and unique id consistent
+    _chidlren = [children sortedArrayUsingComparator:^NSComparisonResult(JOYController *a, JOYController *b) {
+        return [a.uniqueID compare:b.uniqueID];
+    }];
+    
+    if (_chidlren.count == 0) return nil;
+    
+    for (JOYController *child in _chidlren) {
+        if (child.combinedControllerType != JOYControllerCombinedTypeSingle) {
+            NSLog(@"Cannot combine non-single controller %@", child);
+            return nil;
+        }
+        if (![exposedControllers containsObject:child]) {
+            NSLog(@"Cannot combine unexposed controller %@", child);
+            return nil;
+        }
+    }
+    
+    for (JOYController *child in _chidlren) {
+        for (id<JOYListener> listener in listeners) {
+            if ([listener respondsToSelector:@selector(controllerDisconnected:)]) {
+                [listener controllerDisconnected:child];
+            }
+        }
+        child->_parent = self;
+        [exposedControllers removeObject:child];
+    }
+    
+    [exposedControllers addObject:self];
+    for (id<JOYListener> listener in listeners) {
+        if ([listener respondsToSelector:@selector(controllerConnected:)]) {
+            [listener controllerConnected:self];
+        }
+    }
+    
+    return self;
+}
+
+- (void)breakApart
+{
+    if (![exposedControllers containsObject:self]) {
+        // Already broken apart
+        return;
+    }
+    
+    [exposedControllers removeObject:self];
+    for (id<JOYListener> listener in listeners) {
+        if ([listener respondsToSelector:@selector(controllerDisconnected:)]) {
+            [listener controllerDisconnected:self];
+        }
+    }
+
+    for (JOYController *child in _chidlren) {
+        child->_parent = nil;
+        [exposedControllers addObject:child];
+        for (id<JOYListener> listener in listeners) {
+            if ([listener respondsToSelector:@selector(controllerConnected:)]) {
+                [listener controllerConnected:child];
+            }
+        }
+    }
+}
+
+- (NSString *)deviceName
+{
+    NSString *ret = nil;
+    for (JOYController *child in _chidlren) {
+        if (ret) {
+            ret = [ret stringByAppendingFormat:@" + %@", child.deviceName];
+        }
+        else {
+            ret = child.deviceName;
+        }
+    }
+    return ret;
+}
+
+- (NSString *)uniqueID
+{
+    NSString *ret = nil;
+    for (JOYController *child in _chidlren) {
+        if (ret) {
+            ret = [ret stringByAppendingFormat:@"+%@", child.uniqueID];
+        }
+        else {
+            ret = child.uniqueID;
+        }
+    }
+    return ret;
+}
+
+- (JOYControllerCombinedType)combinedControllerType
+{
+    return JOYControllerCombinedTypeCombined;
+}
+
+- (NSArray<JOYButton *> *)buttons
+{
+    NSArray<JOYButton *> *ret = nil;
+    for (JOYController *child in _chidlren) {
+        if (ret) {
+            ret = [ret arrayByAddingObjectsFromArray:child.buttons];
+        }
+        else {
+            ret = child.buttons;
+        }
+    }
+    return ret;
+}
+
+- (NSArray<JOYAxis *> *)axes
+{
+    NSArray<JOYAxis *> *ret = nil;
+    for (JOYController *child in _chidlren) {
+        if (ret) {
+            ret = [ret arrayByAddingObjectsFromArray:child.axes];
+        }
+        else {
+            ret = child.axes;
+        }
+    }
+    return ret;
+}
+
+- (NSArray<JOYAxes2D *> *)axes2D
+{
+    NSArray<JOYAxes2D *> *ret = nil;
+    for (JOYController *child in _chidlren) {
+        if (ret) {
+            ret = [ret arrayByAddingObjectsFromArray:child.axes2D];
+        }
+        else {
+            ret = child.axes2D;
+        }
+    }
+    return ret;
+}
+
+- (NSArray<JOYAxes3D *> *)axes3D
+{
+    NSArray<JOYAxes3D *> *ret = nil;
+    for (JOYController *child in _chidlren) {
+        if (ret) {
+            ret = [ret arrayByAddingObjectsFromArray:child.axes3D];
+        }
+        else {
+            ret = child.axes3D;
+        }
+    }
+    return ret;
+}
+
+- (NSArray<JOYHat *> *)hats
+{
+    NSArray<JOYHat *> *ret = nil;
+    for (JOYController *child in _chidlren) {
+        if (ret) {
+            ret = [ret arrayByAddingObjectsFromArray:child.hats];
+        }
+        else {
+            ret = child.hats;
+        }
+    }
+    return ret;
+}
+
+- (void)setRumbleAmplitude:(double)amp
+{
+    for (JOYController *child in _chidlren) {
+        [child setRumbleAmplitude:amp];
+    }
+}
+
+- (void)setPlayerLEDs:(uint8_t)mask
+{
+    // Mask is actually just the player ID in a combined controller to
+    // allow combining controllers with different LED layouts
+    for (JOYController *child in _chidlren) {
+        [child setPlayerLEDs:[child LEDMaskForPlayer:mask]];
+    }
+}
+
+- (uint8_t)LEDMaskForPlayer:(unsigned int)player
+{
+    return player;
+}
+
+- (bool)isConnected
+{
+    if (![exposedControllers containsObject:self]) {
+         // Controller was broken apart
+        return false;
+    }
+    
+    for (JOYController *child in _chidlren) {
+        if (!child.isConnected) {
+            return false; // Should never happen
+        }
+    }
+    
+    return true;
+}
+
 @end
