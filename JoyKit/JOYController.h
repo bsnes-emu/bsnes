@@ -29,13 +29,18 @@ typedef enum {
     JOYControllerCombinedTypeCombined,
 } JOYControllerCombinedType;
 
+typedef enum {
+    JOYJoyConTypeNone,
+    JOYJoyConTypeLeft,
+    JOYJoyConTypeRight,
+    JOYJoyConTypeCombined,
+} JOYJoyConType;
+
 @interface JOYController : NSObject
 + (void)startOnRunLoop:(NSRunLoop *)runloop withOptions: (NSDictionary *)options;
 + (NSArray<JOYController *> *) allControllers;
 + (void) registerListener:(id<JOYListener>)listener;
 + (void) unregisterListener:(id<JOYListener>)listener;
-- (NSString *)deviceName;
-- (NSString *)uniqueID;
 - (JOYControllerCombinedType)combinedControllerType;
 - (NSArray<JOYButton *> *) buttons;
 - (NSArray<JOYAxis *> *) axes;
@@ -47,12 +52,15 @@ typedef enum {
 - (void)setPlayerLEDs:(uint8_t)mask;
 - (uint8_t)LEDMaskForPlayer:(unsigned)player;
 @property (readonly, getter=isConnected) bool connected;
+@property (readonly) JOYJoyConType joyconType;
+@property (readonly)  NSString *deviceName;
+@property (readonly)  NSString *uniqueID;
 @end
 
 @interface JOYCombinedController : JOYController
 - (instancetype)initWithChildren:(NSArray<JOYController *> *)children;
 - (void)breakApart;
-@property (readonly) NSArray<JOYController *> *chidlren;
+@property (readonly) NSArray<JOYController *> *children;
 @end
 
 

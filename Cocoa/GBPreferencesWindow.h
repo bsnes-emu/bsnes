@@ -38,4 +38,5 @@
 @property IBOutlet NSWindow *paletteEditor;
 @property IBOutlet NSButton *joystickMBC7Checkbox;
 @property IBOutlet NSButton *mouseMBC7Checkbox;
+@property IBOutlet NSWindow *joyconsSheet;
 @end

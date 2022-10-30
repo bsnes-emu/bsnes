@@ -12,13 +12,6 @@ extern NSTextField *globalDebugField;
 
 #define PWM_RESOLUTION 16
 
-typedef enum {
-    JOYJoyConTypeNone,
-    JOYJoyConTypeLeft,
-    JOYJoyConTypeRight,
-    JOYJoyConTypeCombined,
-} JOYJoyConType;
-
 static NSString const *JOYAxisGroups = @"JOYAxisGroups";
 static NSString const *JOYReportIDFilters = @"JOYReportIDFilters";
 static NSString const *JOYButtonUsageMapping = @"JOYButtonUsageMapping";
@@ -458,6 +451,7 @@ typedef union {
     _device = (IOHIDDeviceRef)CFRetain(device);
     _serialSuffix = suffix;
     _playerLEDs = -1;
+    [self obtainInfo];
 
     IOHIDDeviceRegisterInputValueCallback(device, HIDInput, (void *)self);
     IOHIDDeviceScheduleWithRunLoop(device, CFRunLoopGetCurrent(), kCFRunLoopDefaultMode);
@@ -478,6 +472,7 @@ typedef union {
     _isSwitch = [_hacks[JOYIsSwitch] boolValue];
     _isDualShock3 = [_hacks[JOYIsDualShock3] boolValue];
     _isSony = [_hacks[JOYIsSony] boolValue];
+    _joyconType = [_hacks[JOYJoyCon] unsignedIntValue];
 
     NSDictionary *customReports = hacks[JOYCustomReports];
     _lastReport = [NSMutableData dataWithLength:MAX(
@@ -657,15 +652,10 @@ typedef union {
     return self;
 }
 
-- (NSString *)deviceName
-{
-    if (!_device) return nil;
-    return IOHIDDeviceGetProperty(_device, CFSTR(kIOHIDProductKey));
-}
 
-- (NSString *)uniqueID
+- (void)obtainInfo
 {
-    if (!_device) return nil;
+    _deviceName = IOHIDDeviceGetProperty(_device, CFSTR(kIOHIDProductKey));
     NSString *serial = (__bridge NSString *)IOHIDDeviceGetProperty(_device, CFSTR(kIOHIDSerialNumberKey));
     if (!serial || [(__bridge NSString *)IOHIDDeviceGetProperty(_device, CFSTR(kIOHIDTransportKey)) isEqualToString:@"USB"]) {
         serial = [NSString stringWithFormat:@"%04x%04x%08x",
@@ -674,9 +664,10 @@ typedef union {
                   [(__bridge NSNumber *)IOHIDDeviceGetProperty(_device, CFSTR(kIOHIDLocationIDKey)) unsignedIntValue]];
     }
     if (_serialSuffix) {
-        return [NSString stringWithFormat:@"%@-%@", serial, _serialSuffix];
+        _uniqueID = [NSString stringWithFormat:@"%@-%@", serial, _serialSuffix];
+        return;
     }
-    return serial;
+    _uniqueID = serial;
 }
 
 - (JOYControllerCombinedType)combinedControllerType
@@ -798,7 +789,7 @@ typedef union {
                         [listener controller:_parent ?: self movedAxis:axis];
                     }
                 }
-                JOYEmulatedButton *button = _axisEmulatedButtons[@(axis.uniqueID)];
+                JOYEmulatedButton *button = _axisEmulatedButtons[@(axis.uniqueID & 0xFFFFFFFF)]; // Mask the combined prefix away
                 if ([button updateStateFromAxis:axis]) {
                     for (id<JOYListener> listener in listeners) {
                         if ([listener respondsToSelector:@selector(controller:buttonChangedState:)]) {
@@ -820,7 +811,7 @@ typedef union {
                         [listener controller:_parent ?: self movedAxes2D:axes];
                     }
                 }
-                NSArray <JOYEmulatedButton *> *buttons = _axes2DEmulatedButtons[@(axes.uniqueID)];
+                NSArray <JOYEmulatedButton *> *buttons = _axes2DEmulatedButtons[@(axes.uniqueID & 0xFFFFFFFF)]; // Mask the combined prefix away
                 for (JOYEmulatedButton *button in buttons) {
                     if ([button updateStateFromAxes2D:axes]) {
                         for (id<JOYListener> listener in listeners) {
@@ -859,7 +850,7 @@ typedef union {
                     }
                 }
                 
-                NSArray <JOYEmulatedButton *> *buttons = _hatEmulatedButtons[@(hat.uniqueID)];
+                NSArray <JOYEmulatedButton *> *buttons = _hatEmulatedButtons[@(hat.uniqueID & 0xFFFFFFFF)]; // Mask the combined prefix away
                 for (JOYEmulatedButton *button in buttons) {
                     if ([button updateStateFromHat:hat]) {
                         for (id<JOYListener> listener in listeners) {
@@ -877,6 +868,7 @@ typedef union {
 
 - (void)disconnected
 {
+    _physicallyConnected = false;
     [_parent breakApart];
     if (_logicallyConnected && [exposedControllers containsObject:self]) {
         for (id<JOYListener> listener in listeners) {
@@ -885,7 +877,6 @@ typedef union {
             }
         }
     }
-    _physicallyConnected = false;
     [exposedControllers removeObject:self];
     [self setRumbleAmplitude:0];
     dispatch_sync(_rumbleQueue, ^{
@@ -1211,13 +1202,13 @@ typedef union {
 {
     self = [super init];
     // Sorting makes the device name and unique id consistent
-    _chidlren = [children sortedArrayUsingComparator:^NSComparisonResult(JOYController *a, JOYController *b) {
+    _children = [children sortedArrayUsingComparator:^NSComparisonResult(JOYController *a, JOYController *b) {
         return [a.uniqueID compare:b.uniqueID];
     }];
     
-    if (_chidlren.count == 0) return nil;
+    if (_children.count == 0) return nil;
     
-    for (JOYController *child in _chidlren) {
+    for (JOYController *child in _children) {
         if (child.combinedControllerType != JOYControllerCombinedTypeSingle) {
             NSLog(@"Cannot combine non-single controller %@", child);
             return nil;
@@ -1229,7 +1220,7 @@ typedef union {
     }
     
     unsigned index = 0;
-    for (JOYController *child in _chidlren) {
+    for (JOYController *child in _children) {
         for (id<JOYListener> listener in listeners) {
             if ([listener respondsToSelector:@selector(controllerDisconnected:)]) {
                 [listener controllerDisconnected:child];
@@ -1267,11 +1258,12 @@ typedef union {
         }
     }
 
-    for (JOYController *child in _chidlren) {
+    for (JOYController *child in _children) {
         child->_parent = nil;
         for (JOYInput *input in child.allInputs) {
             input.combinedIndex = 0;
         }
+        if (!child.connected) break;
         [exposedControllers addObject:child];
         for (id<JOYListener> listener in listeners) {
             if ([listener respondsToSelector:@selector(controllerConnected:)]) {
@@ -1284,7 +1276,7 @@ typedef union {
 - (NSString *)deviceName
 {
     NSString *ret = nil;
-    for (JOYController *child in _chidlren) {
+    for (JOYController *child in _children) {
         if (ret) {
             ret = [ret stringByAppendingFormat:@" + %@", child.deviceName];
         }
@@ -1298,7 +1290,7 @@ typedef union {
 - (NSString *)uniqueID
 {
     NSString *ret = nil;
-    for (JOYController *child in _chidlren) {
+    for (JOYController *child in _children) {
         if (ret) {
             ret = [ret stringByAppendingFormat:@"+%@", child.uniqueID];
         }
@@ -1317,7 +1309,7 @@ typedef union {
 - (NSArray<JOYButton *> *)buttons
 {
     NSArray<JOYButton *> *ret = nil;
-    for (JOYController *child in _chidlren) {
+    for (JOYController *child in _children) {
         if (ret) {
             ret = [ret arrayByAddingObjectsFromArray:child.buttons];
         }
@@ -1331,7 +1323,7 @@ typedef union {
 - (NSArray<JOYAxis *> *)axes
 {
     NSArray<JOYAxis *> *ret = nil;
-    for (JOYController *child in _chidlren) {
+    for (JOYController *child in _children) {
         if (ret) {
             ret = [ret arrayByAddingObjectsFromArray:child.axes];
         }
@@ -1345,7 +1337,7 @@ typedef union {
 - (NSArray<JOYAxes2D *> *)axes2D
 {
     NSArray<JOYAxes2D *> *ret = nil;
-    for (JOYController *child in _chidlren) {
+    for (JOYController *child in _children) {
         if (ret) {
             ret = [ret arrayByAddingObjectsFromArray:child.axes2D];
         }
@@ -1359,7 +1351,7 @@ typedef union {
 - (NSArray<JOYAxes3D *> *)axes3D
 {
     NSArray<JOYAxes3D *> *ret = nil;
-    for (JOYController *child in _chidlren) {
+    for (JOYController *child in _children) {
         if (ret) {
             ret = [ret arrayByAddingObjectsFromArray:child.axes3D];
         }
@@ -1373,7 +1365,7 @@ typedef union {
 - (NSArray<JOYHat *> *)hats
 {
     NSArray<JOYHat *> *ret = nil;
-    for (JOYController *child in _chidlren) {
+    for (JOYController *child in _children) {
         if (ret) {
             ret = [ret arrayByAddingObjectsFromArray:child.hats];
         }
@@ -1386,7 +1378,7 @@ typedef union {
 
 - (void)setRumbleAmplitude:(double)amp
 {
-    for (JOYController *child in _chidlren) {
+    for (JOYController *child in _children) {
         [child setRumbleAmplitude:amp];
     }
 }
@@ -1395,7 +1387,7 @@ typedef union {
 {
     // Mask is actually just the player ID in a combined controller to
     // allow combining controllers with different LED layouts
-    for (JOYController *child in _chidlren) {
+    for (JOYController *child in _children) {
         [child setPlayerLEDs:[child LEDMaskForPlayer:mask]];
     }
 }
@@ -1412,13 +1404,28 @@ typedef union {
         return false;
     }
     
-    for (JOYController *child in _chidlren) {
+    for (JOYController *child in _children) {
         if (!child.isConnected) {
             return false; // Should never happen
         }
     }
     
     return true;
+}
+
+- (JOYJoyConType)joyconType
+{
+    if (_children.count != 2) return JOYJoyConTypeNone;
+    if (_children[0].joyconType == JOYJoyConTypeLeft &&
+        _children[1].joyconType == JOYJoyConTypeRight) {
+        return JOYJoyConTypeCombined;
+    }
+    
+    if (_children[1].joyconType == JOYJoyConTypeLeft &&
+        _children[0].joyconType == JOYJoyConTypeRight) {
+        return JOYJoyConTypeCombined;
+    }
+     return JOYJoyConTypeNone;
 }
 
 @end

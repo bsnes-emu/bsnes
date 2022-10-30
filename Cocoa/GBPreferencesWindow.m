@@ -1,4 +1,5 @@
 #import "GBPreferencesWindow.h"
+#import "GBJoyConManager.h"
 #import "NSString+StringForKey.h"
 #import "GBButtons.h"
 #import "BigSurToolbar.h"
@@ -997,6 +998,18 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
                                    onView:sender
                                   timeout:6
                             preferredEdge:NSRectEdgeMaxX];
+}
+
+- (IBAction)arrangeJoyCons:(id)sender
+{
+    [GBJoyConManager sharedInstance].arrangementMode = true;
+    [self beginSheet:self.joyconsSheet completionHandler:nil];
+}
+
+- (IBAction)closeJoyConsSheet:(id)sender
+{
+    [self endSheet:self.joyconsSheet];
+    [GBJoyConManager sharedInstance].arrangementMode = false;
 }
 
 @end

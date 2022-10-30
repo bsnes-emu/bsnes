@@ -1,8 +1,9 @@
 #import "GBApp.h"
-#include "GBButtons.h"
-#include "GBView.h"
-#include "Document.h"
-#include <Core/gb.h>
+#import "GBButtons.h"
+#import "GBView.h"
+#import "Document.h"
+#import "GBJoyConManager.h"
+#import <Core/gb.h>
 #import <Carbon/Carbon.h>
 #import <JoyKit/JoyKit.h>
 #import <WebKit/WebKit.h>
@@ -79,6 +80,8 @@ static uint32_t color_to_int(NSColor *color)
                                                               @"GBMBC7JoystickOverride": @NO,
                                                               @"GBMBC7AllowMouse": @YES,
                                                               
+                                                              @"GBJoyConAutoPair": @YES,
+                                                              
                                                               // Default themes
                                                               @"GBThemes": @{
                                                                       @"Desert": @{
@@ -146,6 +149,8 @@ static uint32_t color_to_int(NSColor *color)
         JOYAxes2DEmulateButtonsKey: @YES,
         JOYHatsEmulateButtonsKey: @YES,
     }];
+    
+    [GBJoyConManager sharedInstance]; // Starts handling Joy-Cons
     
     [JOYController registerListener:self];
     
