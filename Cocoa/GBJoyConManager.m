@@ -195,7 +195,9 @@
     if (controller.joyconType == JOYJoyConTypeLeft || controller.joyconType == JOYJoyConTypeRight) {
         [self autopair];
     }
-    [self.tableView reloadData];
+    if (_arrangementMode) {
+        [self.tableView reloadData];
+    }
 }
 
 - (void)autopair
@@ -213,12 +215,16 @@
             break;
         }
     }
-    [self.tableView reloadData];
+    if (_arrangementMode) {
+        [self.tableView reloadData];
+    }
 }
 
 - (void)controllerDisconnected:(JOYController *)controller
 {
-    [self.tableView reloadData];
+    if (_arrangementMode) {
+        [self.tableView reloadData];
+    }
 }
 
 - (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
@@ -301,7 +307,17 @@
     for (JOYController *controller in self.joycons) {
         [self updateOrientationForController:controller];
     }
-    [self.tableView reloadData];
+    if (_arrangementMode) {
+        [self.tableView reloadData];
+    }
+}
+
+- (void)setArrangementMode:(bool)arrangementMode
+{
+    _arrangementMode = arrangementMode;
+    if (arrangementMode) {
+        [self.tableView reloadData];
+    }
 }
 
 @end

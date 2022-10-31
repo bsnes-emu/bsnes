@@ -5,7 +5,7 @@
 @interface GBJoyConManager : NSObject<JOYListener, NSTableViewDataSource, NSTableViewDelegate>
 + (instancetype) sharedInstance;
 
-@property bool arrangementMode;
+@property (nonatomic) bool arrangementMode;
 @property (weak) IBOutlet NSTableView *tableView;
 @property (nonatomic) IBOutlet NSButton *autoPairCheckbox;
 @property (nonatomic) IBOutlet NSButton *horizontalCheckbox;
