@@ -570,11 +570,12 @@ hacksByName = @{
             @{@"reportID": @(1), @"size":@12, @"offset":@64, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Rx), @"min": @0, @"max": @0xFFF},
             @{@"reportID": @(1), @"size":@12, @"offset":@76, @"usagePage":@(kHIDPage_GenericDesktop), @"usage":@(kHIDUsage_GD_Ry), @"min": @0xFFF, @"max": @0},
             
+            // The X axis is inverted on the right Joy-Con
             @{@"reportID": @(1), @"size":@16, @"offset":@96, @"usagePage":@(kHIDPage_Sensor), @"min": @0x7FFF, @"max": @-0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisZ)},
-            @{@"reportID": @(1), @"size":@16, @"offset":@112, @"usagePage":@(kHIDPage_Sensor), @"min": @0x7FFF, @"max": @-0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisX)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@112, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisX)},
             @{@"reportID": @(1), @"size":@16, @"offset":@128, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AccelerationAxisY)},
             @{@"reportID": @(1), @"size":@16, @"offset":@144, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityZAxis)},
-            @{@"reportID": @(1), @"size":@16, @"offset":@160, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityXAxis)},
+            @{@"reportID": @(1), @"size":@16, @"offset":@160, @"usagePage":@(kHIDPage_Sensor), @"min": @0x7FFF, @"max": @-0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityXAxis)},
             @{@"reportID": @(1), @"size":@16, @"offset":@176, @"usagePage":@(kHIDPage_Sensor), @"min": @-0x7FFF, @"max": @0x7FFF, @"usage":@(kHIDUsage_Snsr_Data_Motion_AngularVelocityYAxis)},
             ],
         },

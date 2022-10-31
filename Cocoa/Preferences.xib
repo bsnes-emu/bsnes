@@ -1337,6 +1337,9 @@
                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
+                        <connections>
+                            <action selector="toggleHorizontalDefault:" target="fMo-Ht-Dis" id="yhh-pY-XOq"/>
+                        </connections>
                     </button>
                     <textField focusRingType="none" horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="gmw-t5-3nG">
                         <rect key="frame" x="18" y="20" width="411" height="14"/>
@@ -1439,6 +1442,7 @@ Test</string>
         <customObject id="fMo-Ht-Dis" customClass="GBJoyConManager">
             <connections>
                 <outlet property="autoPairCheckbox" destination="xhI-kr-h3J" id="CaJ-9q-dUh"/>
+                <outlet property="horizontalCheckbox" destination="DaV-H7-VVr" id="bFm-Qm-CgL"/>
                 <outlet property="tableView" destination="XQa-0K-gl3" id="fhZ-wM-dnm"/>
             </connections>
         </customObject>

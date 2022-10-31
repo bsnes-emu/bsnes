@@ -55,6 +55,7 @@ static bool hatsEmulateButtons = false;
 @interface JOYButton ()
 - (instancetype)initWithElement:(JOYElement *)element;
 - (bool)updateState;
+@property JOYButtonUsage originalUsage;
 @end
 
 @interface JOYAxis ()
@@ -70,6 +71,7 @@ static bool hatsEmulateButtons = false;
 @interface JOYAxes2D ()
 - (instancetype)initWithFirstElement:(JOYElement *)element1 secondElement:(JOYElement *)element2;
 - (bool)updateState;
+@property unsigned rotation; // in 90 degrees units, clockwise
 @end
 
 @interface JOYAxes3D ()
@@ -78,6 +80,7 @@ static bool hatsEmulateButtons = false;
 }
 - (instancetype)initWithFirstElement:(JOYElement *)element1 secondElement:(JOYElement *)element2 thirdElement:(JOYElement *)element2;
 - (bool)updateState;
+@property unsigned rotation; // in 90 degrees units, clockwise
 @end
 
 @interface JOYInput ()
@@ -336,7 +339,7 @@ typedef union {
         [_buttons setObject:button forKey:element];
         NSNumber *replacementUsage = element.usagePage == kHIDPage_Button? _hacks[JOYButtonUsageMapping][@(button.usage)] : nil;
         if (replacementUsage) {
-            button.usage = [replacementUsage unsignedIntValue];
+            button.originalUsage = button.usage = [replacementUsage unsignedIntValue];
         }
         return;
     }
@@ -596,15 +599,18 @@ typedef union {
         
         _lastVendorSpecificOutput.switchPacket.sequence++;
         _lastVendorSpecificOutput.switchPacket.sequence &= 0xF;
-        _lastVendorSpecificOutput.switchPacket.command = 0x40; // Enable/disableIMU
-        _lastVendorSpecificOutput.switchPacket.commandData[0] = 1; // Enabled
-        [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.switchPacket length:sizeof(_lastVendorSpecificOutput.switchPacket)]];
-        
-        _lastVendorSpecificOutput.switchPacket.sequence++;
-        _lastVendorSpecificOutput.switchPacket.sequence &= 0xF;
         _lastVendorSpecificOutput.switchPacket.command = 0x48; // Set vibration enabled
         _lastVendorSpecificOutput.switchPacket.commandData[0] = 1; // enabled
         [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.switchPacket length:sizeof(_lastVendorSpecificOutput.switchPacket)]];
+        
+        // The Joy-Cons don't like having their IMU enabled too quickly
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+            _lastVendorSpecificOutput.switchPacket.sequence++;
+            _lastVendorSpecificOutput.switchPacket.sequence &= 0xF;
+            _lastVendorSpecificOutput.switchPacket.command = 0x40; // Enable/disableIMU
+            _lastVendorSpecificOutput.switchPacket.commandData[0] = 1; // Enabled
+            [self sendReport:[NSData dataWithBytes:&_lastVendorSpecificOutput.switchPacket length:sizeof(_lastVendorSpecificOutput.switchPacket)]];
+        });
     }
     
     if (_isDualShock3) {
@@ -1105,6 +1111,60 @@ typedef union {
     return ret;
 }
 
+- (void)setUsesHorizontalJoyConMode:(bool)usesHorizontalJoyConMode
+{
+    if (usesHorizontalJoyConMode == _usesHorizontalJoyConMode) return; // Nothing to do
+    _usesHorizontalJoyConMode = usesHorizontalJoyConMode;
+    switch (self.joyconType) {
+        case JOYJoyConTypeLeft:
+        case JOYJoyConTypeRight: {
+            NSArray <JOYButton *> *buttons = _buttons.allValues;  // not self.buttons to skip emulated buttons
+            if (!usesHorizontalJoyConMode) {
+                for (JOYAxes2D *axes in self.axes2D) {
+                    axes.rotation = 0;
+                }
+                for (JOYAxes3D *axes in self.axes3D) {
+                    axes.rotation = 0;
+                }
+                for (JOYButton *button in buttons) {
+                    button.usage = button.originalUsage;
+                }
+                return;
+            }
+            for (JOYAxes2D *axes in self.axes2D) {
+                axes.rotation = self.joyconType == JOYJoyConTypeLeft? -1 : 1;
+            }
+            for (JOYAxes3D *axes in self.axes3D) {
+                axes.rotation = self.joyconType == JOYJoyConTypeLeft? -1 : 1;
+            }
+            if (self.joyconType == JOYJoyConTypeLeft) {
+                for (JOYButton *button in buttons) {
+                    switch (button.originalUsage) {
+                        case JOYButtonUsageDPadLeft: button.usage = JOYButtonUsageB; break;
+                        case JOYButtonUsageDPadRight: button.usage = JOYButtonUsageX; break;
+                        case JOYButtonUsageDPadUp: button.usage = JOYButtonUsageY; break;
+                        case JOYButtonUsageDPadDown: button.usage = JOYButtonUsageA; break;
+                        default: button.usage = button.originalUsage; break;
+                    }
+                }
+            }
+            else {
+                for (JOYButton *button in buttons) {
+                    switch (button.originalUsage) {
+                        case JOYButtonUsageY: button.usage = JOYButtonUsageX; break;
+                        case JOYButtonUsageA: button.usage = JOYButtonUsageB; break;
+                        case JOYButtonUsageX: button.usage = JOYButtonUsageA; break;
+                        case JOYButtonUsageB: button.usage = JOYButtonUsageY; break;
+                        default: button.usage = button.originalUsage; break;
+                    }
+                }
+            }
+        }
+        default:
+            return;
+    }
+}
+
 + (void)controllerAdded:(IOHIDDeviceRef) device
 {
     NSString *name = (__bridge NSString *)IOHIDDeviceGetProperty(device, CFSTR(kIOHIDProductKey));
@@ -1124,8 +1184,6 @@ typedef union {
     }
         
     [controllers setObject:controller forKey:[NSValue valueWithPointer:device]];
-
-
 }
 
 + (void)controllerRemoved:(IOHIDDeviceRef) device

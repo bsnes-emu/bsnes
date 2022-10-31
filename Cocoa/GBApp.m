@@ -81,6 +81,7 @@ static uint32_t color_to_int(NSColor *color)
                                                               @"GBMBC7AllowMouse": @YES,
                                                               
                                                               @"GBJoyConAutoPair": @YES,
+                                                              @"GBJoyConsDefaultsToHorizontal": @YES,
                                                               
                                                               // Default themes
                                                               @"GBThemes": @{

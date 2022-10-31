@@ -53,8 +53,9 @@ typedef enum {
 - (uint8_t)LEDMaskForPlayer:(unsigned)player;
 @property (readonly, getter=isConnected) bool connected;
 @property (readonly) JOYJoyConType joyconType;
-@property (readonly)  NSString *deviceName;
-@property (readonly)  NSString *uniqueID;
+@property (readonly) NSString *deviceName;
+@property (readonly) NSString *uniqueID;
+@property (nonatomic) bool usesHorizontalJoyConMode;
 @end
 
 @interface JOYCombinedController : JOYController

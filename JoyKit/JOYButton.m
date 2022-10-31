@@ -2,6 +2,10 @@
 #import "JOYElement.h"
 #import <AppKit/AppKit.h>
 
+@interface JOYButton ()
+@property JOYButtonUsage originalUsage;
+@end
+
 @implementation JOYButton
 {
     JOYElement *_element;
@@ -87,6 +91,8 @@
             case kHIDUsage_Csmr_ACBack: _usage = JOYButtonUsageSelect; break;
         }
     }
+    
+    _originalUsage = _usage;
     
     return self;
 }

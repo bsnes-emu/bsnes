@@ -1,6 +1,10 @@
 #import "JOYAxes3D.h"
 #import "JOYElement.h"
 
+@interface JOYAxes3D()
+@property unsigned rotation; // in 90 degrees units, clockwise
+@end
+
 @implementation JOYAxes3D
 {
     JOYElement *_element1, *_element2, *_element3;
@@ -100,6 +104,23 @@
     }
     else {
         _gApproximation = _gApproximation * 0.9999 + distance * 0.0001;
+    }
+    
+    double temp = _state1;
+    switch (_rotation & 3) {
+        case 0: break;
+        case 1:
+            _state1 = -_state3;
+            _state3 = temp;
+            break;
+        case 2:
+            _state1 = -_state1;
+            _state3 = -_state3;
+            break;
+        case 3:
+            _state1 = _state3;
+            _state3 = -temp;
+            break;
     }
 
     return old1 != _state1 || old2 != _state2 || old3 != _state3;

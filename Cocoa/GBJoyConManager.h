@@ -8,6 +8,6 @@
 @property bool arrangementMode;
 @property (weak) IBOutlet NSTableView *tableView;
 @property (nonatomic) IBOutlet NSButton *autoPairCheckbox;
-
+@property (nonatomic) IBOutlet NSButton *horizontalCheckbox;
 @end
 

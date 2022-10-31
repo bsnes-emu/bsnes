@@ -7,6 +7,7 @@
     GBTintedImageCell *_tintedImageCell;
     NSImageCell *_imageCell;
     NSMutableDictionary<NSString *, NSString *> *_pairings;
+    NSMutableDictionary<NSString *, NSNumber *> *_orientationSettings;
     NSButton *_autoPairCheckbox;
     bool _unpairing;
 }
@@ -49,7 +50,8 @@
         _tintedImageCell.tint = [NSColor selectedMenuItemColor];
     }
     _pairings = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoyConPairings"] ?: @{} mutableCopy];
-    
+    _orientationSettings  = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoyConOrientations"] ?: @{} mutableCopy];
+
     // Sanity check the pairings
     for (NSString *key in _pairings) {
         if (![_pairings[_pairings[key]] isEqualToString:key]) {
@@ -76,22 +78,21 @@
     if (row >= [self numberOfRowsInTableView:tableView]) return nil;
     
     unsigned columnIndex = [[tableView tableColumns] indexOfObject:tableColumn];
+    JOYController *controller = self.joycons[row];
     switch (columnIndex) {
         case 0: {
-            JOYController *controller = self.joycons[row];
             switch (controller.joyconType) {
                 case JOYJoyConTypeNone:
                     return nil;
                 case JOYJoyConTypeLeft:
-                    return [NSImage imageNamed:@"JoyConLeftTemplate"];
+                    return [NSImage imageNamed:[NSString stringWithFormat:@"%sJoyConLeftTemplate", controller.usesHorizontalJoyConMode? "Horizontal" :""]];
                 case JOYJoyConTypeRight:
-                    return [NSImage imageNamed:@"JoyConRightTemplate"];
+                    return [NSImage imageNamed:[NSString stringWithFormat:@"%sJoyConRightTemplate", controller.usesHorizontalJoyConMode? "Horizontal" :""]];
                 case JOYJoyConTypeCombined:
                     return [NSImage imageNamed:@"JoyConCombinedTemplate"];
             }
         }
         case 1: {
-            JOYController *controller = self.joycons[row];
             NSMutableAttributedString *ret = [[NSMutableAttributedString alloc] initWithString:controller.deviceName
                                                                                     attributes:@{NSFontAttributeName:
                                                                                                      [NSFont systemFontOfSize:[NSFont systemFontSize]]}];
@@ -103,12 +104,46 @@
             return ret;
         }
         case 2:
-            return @(rand() % 3);
+            return @([(_orientationSettings[controller.uniqueID] ?: @(-1)) unsignedIntValue] + 1);
     }
     return nil;
 }
 
--(NSCell *)tableView:(NSTableView *)tableView dataCellForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
+- (void)updateOrientationForController:(JOYController *)controller
+{
+    NSNumber *orientation = _orientationSettings[controller.uniqueID];
+    if (!orientation) {
+        controller.usesHorizontalJoyConMode = [[NSUserDefaults standardUserDefaults] boolForKey:@"GBJoyConsDefaultsToHorizontal"];
+        return;
+    }
+    controller.usesHorizontalJoyConMode = [orientation unsignedIntValue] == 1;
+}
+
+- (void)tableView:(NSTableView *)tableView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
+{
+    unsigned columnIndex = [[tableView tableColumns] indexOfObject:tableColumn];
+    if (columnIndex != 2) return;
+    if (row >= [self numberOfRowsInTableView:tableView]) return;
+    JOYController *controller = self.joycons[row];
+    if (controller.joyconType == JOYJoyConTypeCombined) {
+        return;
+    }
+    switch ([object unsignedIntValue]) {
+        case 0:
+            [_orientationSettings removeObjectForKey:controller.uniqueID];
+            break;
+        case 1:
+            _orientationSettings[controller.uniqueID] = @(0);
+            break;
+        case 2:
+            _orientationSettings[controller.uniqueID] = @(1);
+            break;
+    }
+    [[NSUserDefaults standardUserDefaults] setObject:_orientationSettings forKey:@"GBJoyConOrientations"];
+    [self updateOrientationForController:controller];
+}
+
+- (NSCell *)tableView:(NSTableView *)tableView dataCellForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
     if (row >= [self numberOfRowsInTableView:tableView]) return [[NSCell alloc] init];
 
@@ -120,13 +155,15 @@
             cell.bezelStyle = NSBezelStyleRounded;
             cell.action = @selector(invoke);
             id block = ^(void) {
-                for (JOYController *child in controller.children) {
-                    [_pairings removeObjectForKey:child.uniqueID];
-                }
-                [[NSUserDefaults standardUserDefaults] setObject:_pairings forKey:@"GBJoyConPairings"];
-                _unpairing = true;
-                [controller breakApart];
-                _unpairing = false;
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    for (JOYController *child in controller.children) {
+                        [_pairings removeObjectForKey:child.uniqueID];
+                    }
+                    [[NSUserDefaults standardUserDefaults] setObject:_pairings forKey:@"GBJoyConPairings"];
+                    _unpairing = true;
+                    [controller breakApart];
+                    _unpairing = false;
+                });
             };
             // To retain the block
             objc_setAssociatedObject(cell, @selector(breakApart), block, OBJC_ASSOCIATION_RETAIN);
@@ -148,6 +185,7 @@
 
 - (void)controllerConnected:(JOYController *)controller
 {
+    [self updateOrientationForController:controller];
     for (JOYController *partner in [JOYController allControllers]) {
         if ([partner.uniqueID isEqualToString:_pairings[controller.uniqueID]]) {
             [self pairJoyCon:controller withJoyCon:partner];
@@ -185,7 +223,8 @@
 
 - (BOOL)tableView:(NSTableView *)tableView shouldEditTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
-    return false;
+    unsigned columnIndex = [[tableView tableColumns] indexOfObject:tableColumn];
+    return columnIndex == 2;
 }
 
 - (JOYCombinedController *)pairJoyCon:(JOYController *)first withJoyCon:(JOYController *)second
@@ -196,6 +235,8 @@
     
     _pairings[first.uniqueID] = second.uniqueID;
     _pairings[second.uniqueID] = first.uniqueID;
+    first.usesHorizontalJoyConMode = false;
+    second.usesHorizontalJoyConMode = false;
     [[NSUserDefaults standardUserDefaults] setObject:_pairings forKey:@"GBJoyConPairings"];
     return [[JOYCombinedController alloc] initWithChildren:@[first, second]];
 }
@@ -246,6 +287,21 @@
 {
     [[NSUserDefaults standardUserDefaults] setBool:sender.state forKey:@"GBJoyConAutoPair"];
     [self autopair];
+}
+
+- (void)setHorizontalCheckbox:(NSButton *)horizontalCheckbox
+{
+    _horizontalCheckbox = horizontalCheckbox;
+    [_horizontalCheckbox setState:[[NSUserDefaults standardUserDefaults] boolForKey:@"GBJoyConsDefaultsToHorizontal"]];
+}
+
+- (IBAction)toggleHorizontalDefault:(NSButton *)sender
+{
+    [[NSUserDefaults standardUserDefaults] setBool:sender.state forKey:@"GBJoyConsDefaultsToHorizontal"];
+    for (JOYController *controller in self.joycons) {
+        [self updateOrientationForController:controller];
+    }
+    [self.tableView reloadData];
 }
 
 @end
