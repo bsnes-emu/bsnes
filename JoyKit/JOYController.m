@@ -1111,15 +1111,15 @@ typedef union {
     return ret;
 }
 
-- (void)setUsesHorizontalJoyConMode:(bool)usesHorizontalJoyConMode
+- (void)setusesHorizontalJoyConGrip:(bool)usesHorizontalJoyConGrip
 {
-    if (usesHorizontalJoyConMode == _usesHorizontalJoyConMode) return; // Nothing to do
-    _usesHorizontalJoyConMode = usesHorizontalJoyConMode;
+    if (usesHorizontalJoyConGrip == _usesHorizontalJoyConGrip) return; // Nothing to do
+    _usesHorizontalJoyConGrip = usesHorizontalJoyConGrip;
     switch (self.joyconType) {
         case JOYJoyConTypeLeft:
         case JOYJoyConTypeRight: {
             NSArray <JOYButton *> *buttons = _buttons.allValues;  // not self.buttons to skip emulated buttons
-            if (!usesHorizontalJoyConMode) {
+            if (!usesHorizontalJoyConGrip) {
                 for (JOYAxes2D *axes in self.axes2D) {
                     axes.rotation = 0;
                 }
@@ -1476,12 +1476,12 @@ typedef union {
     if (_children.count != 2) return JOYJoyConTypeNone;
     if (_children[0].joyconType == JOYJoyConTypeLeft &&
         _children[1].joyconType == JOYJoyConTypeRight) {
-        return JOYJoyConTypeCombined;
+        return JOYJoyConTypeDual;
     }
     
     if (_children[1].joyconType == JOYJoyConTypeLeft &&
         _children[0].joyconType == JOYJoyConTypeRight) {
-        return JOYJoyConTypeCombined;
+        return JOYJoyConTypeDual;
     }
      return JOYJoyConTypeNone;
 }

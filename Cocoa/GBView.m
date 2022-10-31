@@ -524,8 +524,8 @@ static const uint8_t workboy_vk_to_key[] = {
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBMBC7JoystickOverride"]) return;
     if (self.mouseControlsActive) return;
     if (controller != lastController) return;
-    // When using a combined two Joy-Cons, ignore motion data from the left Joy-Con
-    if (controller.joyconType == JOYJoyConTypeCombined) {
+    // When using Joy-Cons in dual-controller grip, ignore motion data from the left Joy-Con
+    if (controller.joyconType == JOYJoyConTypeDual) {
         for (JOYController *child in [(JOYCombinedController *)controller children]) {
             if (child.joyconType != JOYJoyConTypeRight && [child.axes3D containsObject:axes]) {
                 return;

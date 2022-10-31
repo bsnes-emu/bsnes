@@ -7,7 +7,7 @@
     GBTintedImageCell *_tintedImageCell;
     NSImageCell *_imageCell;
     NSMutableDictionary<NSString *, NSString *> *_pairings;
-    NSMutableDictionary<NSString *, NSNumber *> *_orientationSettings;
+    NSMutableDictionary<NSString *, NSNumber *> *_gripSettings;
     NSButton *_autoPairCheckbox;
     bool _unpairing;
 }
@@ -50,7 +50,7 @@
         _tintedImageCell.tint = [NSColor selectedMenuItemColor];
     }
     _pairings = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoyConPairings"] ?: @{} mutableCopy];
-    _orientationSettings  = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoyConOrientations"] ?: @{} mutableCopy];
+    _gripSettings  = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBJoyConGrips"] ?: @{} mutableCopy];
 
     // Sanity check the pairings
     for (NSString *key in _pairings) {
@@ -85,11 +85,11 @@
                 case JOYJoyConTypeNone:
                     return nil;
                 case JOYJoyConTypeLeft:
-                    return [NSImage imageNamed:[NSString stringWithFormat:@"%sJoyConLeftTemplate", controller.usesHorizontalJoyConMode? "Horizontal" :""]];
+                    return [NSImage imageNamed:[NSString stringWithFormat:@"%sJoyConLeftTemplate", controller.usesHorizontalJoyConGrip? "Horizontal" :""]];
                 case JOYJoyConTypeRight:
-                    return [NSImage imageNamed:[NSString stringWithFormat:@"%sJoyConRightTemplate", controller.usesHorizontalJoyConMode? "Horizontal" :""]];
-                case JOYJoyConTypeCombined:
-                    return [NSImage imageNamed:@"JoyConCombinedTemplate"];
+                    return [NSImage imageNamed:[NSString stringWithFormat:@"%sJoyConRightTemplate", controller.usesHorizontalJoyConGrip? "Horizontal" :""]];
+                case JOYJoyConTypeDual:
+                    return [NSImage imageNamed:@"JoyConDualTemplate"];
             }
         }
         case 1: {
@@ -104,19 +104,19 @@
             return ret;
         }
         case 2:
-            return @([(_orientationSettings[controller.uniqueID] ?: @(-1)) unsignedIntValue] + 1);
+            return @([(_gripSettings[controller.uniqueID] ?: @(-1)) unsignedIntValue] + 1);
     }
     return nil;
 }
 
-- (void)updateOrientationForController:(JOYController *)controller
+- (void)updateGripForController:(JOYController *)controller
 {
-    NSNumber *orientation = _orientationSettings[controller.uniqueID];
-    if (!orientation) {
-        controller.usesHorizontalJoyConMode = [[NSUserDefaults standardUserDefaults] boolForKey:@"GBJoyConsDefaultsToHorizontal"];
+    NSNumber *grip = _gripSettings[controller.uniqueID];
+    if (!grip) {
+        controller.usesHorizontalJoyConGrip = [[NSUserDefaults standardUserDefaults] boolForKey:@"GBJoyConsDefaultsToHorizontal"];
         return;
     }
-    controller.usesHorizontalJoyConMode = [orientation unsignedIntValue] == 1;
+    controller.usesHorizontalJoyConGrip = [grip unsignedIntValue] == 1;
 }
 
 - (void)tableView:(NSTableView *)tableView setObjectValue:(id)object forTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
@@ -125,22 +125,22 @@
     if (columnIndex != 2) return;
     if (row >= [self numberOfRowsInTableView:tableView]) return;
     JOYController *controller = self.joycons[row];
-    if (controller.joyconType == JOYJoyConTypeCombined) {
+    if (controller.joyconType == JOYJoyConTypeDual) {
         return;
     }
     switch ([object unsignedIntValue]) {
         case 0:
-            [_orientationSettings removeObjectForKey:controller.uniqueID];
+            [_gripSettings removeObjectForKey:controller.uniqueID];
             break;
         case 1:
-            _orientationSettings[controller.uniqueID] = @(0);
+            _gripSettings[controller.uniqueID] = @(0);
             break;
         case 2:
-            _orientationSettings[controller.uniqueID] = @(1);
+            _gripSettings[controller.uniqueID] = @(1);
             break;
     }
-    [[NSUserDefaults standardUserDefaults] setObject:_orientationSettings forKey:@"GBJoyConOrientations"];
-    [self updateOrientationForController:controller];
+    [[NSUserDefaults standardUserDefaults] setObject:_gripSettings forKey:@"GBJoyConGrips"];
+    [self updateGripForController:controller];
 }
 
 - (NSCell *)tableView:(NSTableView *)tableView dataCellForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
@@ -150,7 +150,7 @@
     unsigned columnIndex = [[tableView tableColumns] indexOfObject:tableColumn];
     if (columnIndex == 2) {
         JOYCombinedController *controller = (JOYCombinedController *)self.joycons[row];
-        if (controller.joyconType == JOYJoyConTypeCombined) {
+        if (controller.joyconType == JOYJoyConTypeDual) {
             NSButtonCell *cell = [[NSButtonCell alloc] initTextCell:@"Separate Joy-Cons"];
             cell.bezelStyle = NSBezelStyleRounded;
             cell.action = @selector(invoke);
@@ -185,7 +185,7 @@
 
 - (void)controllerConnected:(JOYController *)controller
 {
-    [self updateOrientationForController:controller];
+    [self updateGripForController:controller];
     for (JOYController *partner in [JOYController allControllers]) {
         if ([partner.uniqueID isEqualToString:_pairings[controller.uniqueID]]) {
             [self pairJoyCon:controller withJoyCon:partner];
@@ -241,8 +241,8 @@
     
     _pairings[first.uniqueID] = second.uniqueID;
     _pairings[second.uniqueID] = first.uniqueID;
-    first.usesHorizontalJoyConMode = false;
-    second.usesHorizontalJoyConMode = false;
+    first.usesHorizontalJoyConGrip = false;
+    second.usesHorizontalJoyConGrip = false;
     [[NSUserDefaults standardUserDefaults] setObject:_pairings forKey:@"GBJoyConPairings"];
     return [[JOYCombinedController alloc] initWithChildren:@[first, second]];
 }
@@ -305,7 +305,7 @@
 {
     [[NSUserDefaults standardUserDefaults] setBool:sender.state forKey:@"GBJoyConsDefaultsToHorizontal"];
     for (JOYController *controller in self.joycons) {
-        [self updateOrientationForController:controller];
+        [self updateGripForController:controller];
     }
     if (_arrangementMode) {
         [self.tableView reloadData];

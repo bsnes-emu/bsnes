@@ -33,7 +33,7 @@ typedef enum {
     JOYJoyConTypeNone,
     JOYJoyConTypeLeft,
     JOYJoyConTypeRight,
-    JOYJoyConTypeCombined,
+    JOYJoyConTypeDual,
 } JOYJoyConType;
 
 @interface JOYController : NSObject
@@ -55,7 +55,7 @@ typedef enum {
 @property (readonly) JOYJoyConType joyconType;
 @property (readonly) NSString *deviceName;
 @property (readonly) NSString *uniqueID;
-@property (nonatomic) bool usesHorizontalJoyConMode;
+@property (nonatomic) bool usesHorizontalJoyConGrip;
 @end
 
 @interface JOYCombinedController : JOYController
