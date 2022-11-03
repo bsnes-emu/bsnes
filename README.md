@@ -62,7 +62,7 @@ Links
 Nightly Builds
 --------------
 
-  - [Download](https://cirrus-ci.com/github/bsnes-emu/bsnes/master)
+  - [Download](https://github.com/bsnes-emu/bsnes/releases/tag/nightly)
   - ![Build status](https://api.cirrus-ci.com/github/bsnes-emu/bsnes.svg?task=windows-x86_64-binaries)
   - ![Build status](https://api.cirrus-ci.com/github/bsnes-emu/bsnes.svg?task=macOS-x86_64-binaries)
   - ![Build status](https://api.cirrus-ci.com/github/bsnes-emu/bsnes.svg?task=linux-x86_64-binaries)
