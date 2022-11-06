@@ -8,6 +8,7 @@
 {
     self = [super initWithCoder:coder];
     self.toolTip = self.title;
+    self.imagePosition = NSImageOnly; // Newer versions of AppKit refuse to respect the value from the nib file
     return self;
 }
 
@@ -32,7 +33,7 @@
     }
 }
 
--(void)updateTrackingAreas
+- (void)updateTrackingAreas
 {
     [super updateTrackingAreas];
     if (_trackingArea) {
