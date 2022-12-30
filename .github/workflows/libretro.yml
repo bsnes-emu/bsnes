@@ -1,0 +1,31 @@
+name: "libretro branch update"
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  libretro-prebuilt-update:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+        name: Checkout
+        with:
+          repository: LIJI32/SameBoy
+          token: ${{ secrets.WEBSITETOKEN }}
+          submodules: false
+      - name: Install Deps
+        shell: bash
+        run: |
+          ./.github/actions/install_deps.sh ${{ matrix.os }}
+      - name: Build Boot ROMs
+        run: |
+          make -j bootroms && mv build/bin/BootROMs BootROMs/prebuilt
+      - name: Push changes
+        run: |
+           git config --global --add --bool push.autoSetupRemote true && git config --global user.name 'Libretro Updater' &&  (git branch --delete libretro || true) && git checkout -b libretro && git config --global user.email '<>' && git add BootROMs/prebuilt/* && git commit -m 'Update prebuilt boot ROMs' && git push --force
