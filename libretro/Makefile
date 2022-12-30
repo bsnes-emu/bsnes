@@ -49,7 +49,7 @@ ifeq ($(platform), win)
 	INCFLAGS += -I Windows
 endif
 
-CORE_DIR     = ../
+CORE_DIR     = ..
 
 TARGET_NAME  = sameboy
 LIBM		    = -lm
@@ -335,7 +335,7 @@ CFLAGS   += -D__LIBRETRO__ $(fpic) $(INCFLAGS) -std=gnu11 -D_GNU_SOURCE -D_USE_M
 
 all: $(TARGET)
 
-$(CORE_DIR)/libretro/%_boot.c: $(CORE_DIR)/build/bin/BootROMs/%_boot.bin
+$(CORE_DIR)/libretro/%_boot.c: $(BOOTROMS_DIR)/%_boot.bin
 	echo "/* AUTO-GENERATED */" > $@
 	echo "const unsigned char $(notdir $(@:%.c=%))[] = {" >> $@
 ifneq ($(findstring Haiku,$(shell uname -s)),)
@@ -348,8 +348,8 @@ endif
 	echo "};" >> $@
 	echo "const unsigned $(notdir $(@:%.c=%))_length = sizeof($(notdir $(@:%.c=%)));" >> $@
 
-$(CORE_DIR)/build/bin/BootROMs/%_boot.bin:
-	$(MAKE) -C $(CORE_DIR) $(patsubst $(CORE_DIR)/%,%,$@)
+$(abspath $(CORE_DIR))/build/bin/BootROMs/%_boot.bin:
+	$(MAKE) -C $(CORE_DIR) $(patsubst $(abspath $(CORE_DIR))/%,%,$@)
 
 $(TARGET): $(OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
