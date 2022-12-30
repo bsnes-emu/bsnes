@@ -36,14 +36,14 @@ void GB_apply_cheat(GB_gameboy_t *gb, uint16_t address, uint8_t *value)
     if (likely(gb->cheat_count == 0)) return; // Optimization
     if (unlikely(!gb->boot_rom_finished)) return;
     const GB_cheat_hash_t *hash = gb->cheat_hash[hash_addr(address)];
-    if (unlikely(hash)) {
-        for (unsigned i = 0; i < hash->size; i++) {
-            GB_cheat_t *cheat = hash->cheats[i];
-            if (cheat->address == address && cheat->enabled && (!cheat->use_old_value || cheat->old_value == *value)) {
-                if (cheat->bank == GB_CHEAT_ANY_BANK || cheat->bank == bank_for_addr(gb, address)) {
-                    *value = cheat->value;
-                    break;
-                }
+    if (likely(!hash)) return;
+    
+    for (unsigned i = 0; i < hash->size; i++) {
+        GB_cheat_t *cheat = hash->cheats[i];
+        if (cheat->address == address && cheat->enabled && (!cheat->use_old_value || cheat->old_value == *value)) {
+            if (cheat->bank == GB_CHEAT_ANY_BANK || cheat->bank == bank_for_addr(gb, address)) {
+                *value = cheat->value;
+                break;
             }
         }
     }
