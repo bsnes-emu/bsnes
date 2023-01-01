@@ -777,6 +777,9 @@ uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
     if (unlikely(gb->read_memory_callback)) {
         data = gb->read_memory_callback(gb, addr, data);
     }
+    
+    /* TODO: this is very naïve due to my lack of a cart that properly handles open-bus scnenarios,
+             but should be good enough */
     if ((addr & 0xE000) != 0xA000 && bus_for_addr(gb, addr) == GB_BUS_MAIN && addr < 0xFF00) {
         gb->data_bus = data;
     }
