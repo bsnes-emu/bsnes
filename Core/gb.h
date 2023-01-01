@@ -435,6 +435,7 @@ struct GB_gameboy_internal_s {
        int32_t ir_sensor;
        bool effective_ir_input;
        uint16_t address_bus;
+       uint8_t data_bus; // cart data bus
     )
 
     /* DMA and HDMA */

@@ -379,14 +379,14 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
             case 5:
                 return gb->rtc_latched.data[(addr & 3) ^ 3];
             default:
-                return 0xFF;
+                return gb->data_bus;
         }
     }
     else if ((!gb->mbc_ram_enable) &&
         gb->cartridge_type->mbc_type != GB_CAMERA &&
         gb->cartridge_type->mbc_type != GB_HUC1 &&
         gb->cartridge_type->mbc_type != GB_HUC3) {
-        return 0xFF;
+        return gb->data_bus;
     }
     
     if (gb->cartridge_type->mbc_type == GB_HUC1 && gb->huc1.ir_mode) {
@@ -403,7 +403,7 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
             gb->rtc_latched.high &= 0xC1;
             return gb->rtc_latched.data[gb->mbc_ram_bank];
         }
-        return 0xFF;
+        return gb->data_bus;
     }
 
     if (gb->camera_registers_mapped) {
@@ -411,7 +411,7 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
     }
 
     if (!gb->mbc_ram || !gb->mbc_ram_size) {
-        return 0xFF;
+        return gb->data_bus;
     }
 
     if (gb->cartridge_type->mbc_type == GB_CAMERA) {
@@ -776,6 +776,12 @@ uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
     GB_apply_cheat(gb, addr, &data);
     if (unlikely(gb->read_memory_callback)) {
         data = gb->read_memory_callback(gb, addr, data);
+    }
+    if ((addr & 0xE000) != 0xA000 && bus_for_addr(gb, addr) == GB_BUS_MAIN && addr < 0xFF00) {
+        gb->data_bus = data;
+    }
+    else {
+        gb->data_bus = 0xFF;
     }
     return data;
 }
