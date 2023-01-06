@@ -452,7 +452,7 @@ struct GB_gameboy_internal_s {
         int8_t dma_cycles_modulo;
         bool dma_ppu_vram_conflict;
         uint16_t dma_ppu_vram_conflict_addr;
-        uint8_t hdma_open_bus; /* Required to emulate HDMA reads from Exxx */
+        GB_PADDING(uint8_t, hdma_open_bus);
         bool allow_hdma_on_wake;
         bool dma_restarting;
     )
@@ -831,6 +831,7 @@ struct GB_gameboy_internal_s {
         bool disable_oam_corruption; // For safe memory reads
         bool in_dma_read;
         bool hdma_in_progress;
+        bool returned_open_bus;
         uint16_t addr_for_hdma_conflict;
                
         GB_gbs_header_t gbs_header;

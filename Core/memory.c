@@ -379,6 +379,7 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
             case 5:
                 return gb->rtc_latched.data[(addr & 3) ^ 3];
             default:
+                gb->returned_open_bus = true;
                 return gb->data_bus;
         }
     }
@@ -386,6 +387,7 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
         gb->cartridge_type->mbc_type != GB_CAMERA &&
         gb->cartridge_type->mbc_type != GB_HUC1 &&
         gb->cartridge_type->mbc_type != GB_HUC3) {
+        gb->returned_open_bus = true;
         return gb->data_bus;
     }
     
@@ -403,6 +405,7 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
             gb->rtc_latched.high &= 0xC1;
             return gb->rtc_latched.data[gb->mbc_ram_bank];
         }
+        gb->returned_open_bus = true;
         return gb->data_bus;
     }
 
@@ -411,6 +414,7 @@ static uint8_t read_mbc_ram(GB_gameboy_t *gb, uint16_t addr)
     }
 
     if (!gb->mbc_ram || !gb->mbc_ram_size) {
+        gb->returned_open_bus = true;
         return gb->data_bus;
     }
 
@@ -780,8 +784,14 @@ uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
     
     /* TODO: this is very naïve due to my lack of a cart that properly handles open-bus scnenarios,
              but should be good enough */
-    if ((addr & 0xE000) != 0xA000 && bus_for_addr(gb, addr) == GB_BUS_MAIN && addr < 0xFF00) {
-        gb->data_bus = data;
+    if (bus_for_addr(gb, addr) == GB_BUS_MAIN && addr < 0xFF00) {
+        if (unlikely(gb->returned_open_bus)) {
+            gb->data_bus = 0xFF;
+            gb->returned_open_bus = false;
+        }
+        else {
+            gb->data_bus = data;
+        }
     }
     else {
         gb->data_bus = 0xFF;
@@ -1817,14 +1827,14 @@ void GB_hdma_run(GB_gameboy_t *gb)
     unsigned cycles = gb->cgb_double_speed? 4 : 2;
     /* This is a bit cart, revision and unit specific. TODO: what if PC is in cart RAM? */
     if (gb->model < GB_MODEL_CGB_D || gb->pc > 0x8000) {
-        gb->hdma_open_bus = 0xFF;
+        gb->data_bus = 0xFF;
     }
     gb->addr_for_hdma_conflict = 0xFFFF;
     uint16_t vram_base = gb->cgb_vram_bank? 0x2000 : 0;
     gb->hdma_in_progress = true;
     GB_advance_cycles(gb, cycles);
     while (gb->hdma_on) {
-        uint8_t byte = gb->hdma_open_bus;
+        uint8_t byte = gb->data_bus;
         gb->addr_for_hdma_conflict = 0xFFFF;
         
         if (gb->hdma_current_src < 0x8000 ||
@@ -1861,7 +1871,7 @@ void GB_hdma_run(GB_gameboy_t *gb)
             }
             gb->hdma_current_dest++;
         }
-        gb->hdma_open_bus = 0xFF;
+        gb->data_bus = 0xFF;
         
         if ((gb->hdma_current_dest & 0xF) == 0) {
             if (--gb->hdma_steps_left == 0 || gb->hdma_current_dest == 0) {

@@ -1703,7 +1703,7 @@ void GB_cpu_run(GB_gameboy_t *gb)
     }
     /* Run mode */
     else if (!gb->halted) {
-        uint8_t opcode = gb->hdma_open_bus = cycle_read(gb, gb->pc++);
+        uint8_t opcode = cycle_read(gb, gb->pc++);
         if (unlikely(gb->hdma_on)) {
             GB_hdma_run(gb);
         }
