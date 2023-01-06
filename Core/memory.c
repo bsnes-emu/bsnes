@@ -1736,6 +1736,12 @@ void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     if (unlikely(gb->n_watchpoints)) {
         GB_debugger_test_write_watchpoint(gb, addr, value);
     }
+    if (bus_for_addr(gb, addr) == GB_BUS_MAIN && addr < 0xFF00) {
+        gb->data_bus = value;
+    }
+    else {
+        gb->data_bus = 0xFF;
+    }
     
     if (unlikely(gb->write_memory_callback)) {
         if (!gb->write_memory_callback(gb, addr, value)) return;
