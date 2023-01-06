@@ -786,15 +786,12 @@ uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
              but should be good enough */
     if (bus_for_addr(gb, addr) == GB_BUS_MAIN && addr < 0xFF00) {
         if (unlikely(gb->returned_open_bus)) {
-            gb->data_bus = 0xFF;
             gb->returned_open_bus = false;
         }
         else {
             gb->data_bus = data;
+            gb->data_bus_decay_countdown = gb->data_bus_decay;
         }
-    }
-    else {
-        gb->data_bus = 0xFF;
     }
     return data;
 }
@@ -1738,9 +1735,7 @@ void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     }
     if (bus_for_addr(gb, addr) == GB_BUS_MAIN && addr < 0xFF00) {
         gb->data_bus = value;
-    }
-    else {
-        gb->data_bus = 0xFF;
+        gb->data_bus_decay_countdown = gb->data_bus_decay;
     }
     
     if (unlikely(gb->write_memory_callback)) {
@@ -1831,10 +1826,13 @@ void GB_dma_run(GB_gameboy_t *gb)
 void GB_hdma_run(GB_gameboy_t *gb)
 {
     unsigned cycles = gb->cgb_double_speed? 4 : 2;
+    /* TODO: This portion of code is probably inaccurate because it probably depends on my specific GB-Live32 */
+    #if 0
     /* This is a bit cart, revision and unit specific. TODO: what if PC is in cart RAM? */
     if (gb->model < GB_MODEL_CGB_D || gb->pc > 0x8000) {
         gb->data_bus = 0xFF;
     }
+    #endif
     gb->addr_for_hdma_conflict = 0xFFFF;
     uint16_t vram_base = gb->cgb_vram_bank? 0x2000 : 0;
     gb->hdma_in_progress = true;
@@ -1877,7 +1875,6 @@ void GB_hdma_run(GB_gameboy_t *gb)
             }
             gb->hdma_current_dest++;
         }
-        gb->data_bus = 0xFF;
         
         if ((gb->hdma_current_dest & 0xF) == 0) {
             if (--gb->hdma_steps_left == 0 || gb->hdma_current_dest == 0) {

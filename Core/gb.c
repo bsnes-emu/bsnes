@@ -183,6 +183,8 @@ GB_gameboy_t *GB_init(GB_gameboy_t *gb, GB_model_t model)
         gb->turbo = true;
     }
     
+    gb->data_bus_decay = 12;
+    
     GB_reset(gb);
     load_default_border(gb);
     return gb;
@@ -1989,6 +1991,11 @@ void GB_set_accelerometer_values(GB_gameboy_t *gb, double x, double y)
 {
     gb->accelerometer_x = x;
     gb->accelerometer_y = y;
+}
+
+void GB_set_open_bus_decay_time(GB_gameboy_t *gb, uint32_t decay)
+{
+    gb->data_bus_decay = decay;
 }
 
 void GB_get_rom_title(GB_gameboy_t *gb, char *title)

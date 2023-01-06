@@ -421,7 +421,7 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
             gb->halted = false;
         }
     }
-    
+        
     gb->debugger_ticks += cycles;
     
     if (gb->speed_switch_freeze) {
@@ -449,6 +449,16 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     
     gb->rumble_on_cycles += gb->rumble_strength & 3;
     gb->rumble_off_cycles += (gb->rumble_strength & 3) ^ 3;
+    
+    if (unlikely(gb->data_bus_decay_countdown)) {
+        if (gb->data_bus_decay_countdown <= cycles) {
+            gb->data_bus_decay_countdown = 0;
+            gb->data_bus = 0xFF;
+        }
+        else {
+            gb->data_bus_decay_countdown -= cycles;
+        }
+    }
     
     GB_joypad_run(gb, cycles);
     GB_apu_run(gb, false);
