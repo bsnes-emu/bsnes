@@ -121,6 +121,8 @@ enum model {
     bool _isRecordingAudio;
     
     void (^ volatile _pendingAtomicBlock)();
+    
+    NSDate *_fileModificationTime;
 }
 
 static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
@@ -1126,7 +1128,16 @@ static bool is_path_writeable(const char *path)
         rom_warning_issued = true;
         [GBWarningPopover popoverWithContents:rom_warnings onWindow:self.mainWindow];
     }
+    _fileModificationTime = [[NSFileManager defaultManager] attributesOfItemAtPath:fileName error:nil][NSFileModificationDate];
     return ret;
+}
+
+- (void)showWindows
+{
+    if (![_fileModificationTime isEqualToDate:[[NSFileManager defaultManager] attributesOfItemAtPath:self.fileName error:nil][NSFileModificationDate]]) {
+        [self reset:nil];
+    }
+    [super showWindows];
 }
 
 - (void)close
