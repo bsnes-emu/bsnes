@@ -1134,8 +1134,10 @@ static bool is_path_writeable(const char *path)
 
 - (void)showWindows
 {
-    if (![_fileModificationTime isEqualToDate:[[NSFileManager defaultManager] attributesOfItemAtPath:self.fileName error:nil][NSFileModificationDate]]) {
-        [self reset:nil];
+    if (GB_is_inited(&gb)) {
+        if (![_fileModificationTime isEqualToDate:[[NSFileManager defaultManager] attributesOfItemAtPath:self.fileName error:nil][NSFileModificationDate]]) {
+            [self reset:nil];
+        }
     }
     [super showWindows];
 }
