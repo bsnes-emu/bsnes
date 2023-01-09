@@ -48,9 +48,10 @@ typedef enum {
 
 typedef struct
 {
-    bool locked:1;
+    bool locked:1; // Represents FYNO's output on channel 4
     bool clock:1; // Represents FOSY on channel 4
-    unsigned padding:6;
+    bool should_lock:1;  // Represents FYNO's input on channel 4
+    unsigned padding:5;
 } GB_envelope_clock_t;
 
 typedef void (*GB_sample_callback_t)(GB_gameboy_t *gb, GB_sample_t *sample);
