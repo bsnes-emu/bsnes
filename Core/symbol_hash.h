@@ -35,4 +35,4 @@ internal GB_symbol_map_t *GB_map_alloc(void);
 internal void GB_map_free(GB_symbol_map_t *map);
 #endif
 
-#endif /* symbol_hash_h */
+#endif

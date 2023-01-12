@@ -43,4 +43,4 @@ void GB_set_emulate_joypad_bouncing(GB_gameboy_t *gb, bool emulate);
 internal void GB_update_joyp(GB_gameboy_t *gb);
 internal void GB_joypad_run(GB_gameboy_t *gb, unsigned cycles);
 #endif
-#endif /* joypad_h */
+#endif

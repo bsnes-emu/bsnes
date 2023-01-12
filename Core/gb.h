@@ -1009,4 +1009,4 @@ internal void GB_borrow_sgb_border(GB_gameboy_t *gb);
 internal void GB_update_clock_rate(GB_gameboy_t *gb);
 #endif
     
-#endif /* GB_h */
+#endif

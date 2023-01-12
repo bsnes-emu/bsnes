@@ -19,4 +19,4 @@ internal void GB_trigger_oam_bug(GB_gameboy_t *gb, uint16_t address);
 internal uint8_t GB_read_oam(GB_gameboy_t *gb, uint8_t addr);
 #endif
 
-#endif /* memory_h */
+#endif

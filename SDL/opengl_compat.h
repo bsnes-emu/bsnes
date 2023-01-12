@@ -42,4 +42,4 @@ if (!GL_COMPAT_NAME(func)) GL_COMPAT_NAME(func) = SDL_GL_GetProcAddress(#func); 
 #define glGetShaderInfoLog GL_COMPAT_WRAPPER(glGetShaderInfoLog)
 #endif
 
-#endif /* opengl_compat_h */
+#endif

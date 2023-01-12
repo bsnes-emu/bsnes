@@ -1,5 +1,5 @@
-#ifndef MBC_h
-#define MBC_h
+#ifndef mbc_h
+#define mbc_h
 #include "defs.h"
 #include <stdbool.h>
 
@@ -30,4 +30,4 @@ internal void GB_configure_cart(GB_gameboy_t *gb);
 internal void GB_reset_mbc(GB_gameboy_t *gb);
 #endif
 
-#endif /* MBC_h */
+#endif

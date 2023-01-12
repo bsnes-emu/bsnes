@@ -80,4 +80,4 @@ bool GB_is_object_rendering_disabled(GB_gameboy_t *gb);
 bool GB_is_background_rendering_disabled(GB_gameboy_t *gb);
 
 
-#endif /* display_h */
+#endif

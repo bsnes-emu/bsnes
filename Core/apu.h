@@ -198,4 +198,4 @@ internal void GB_apu_init(GB_gameboy_t *gb);
 internal void GB_apu_run(GB_gameboy_t *gb, bool force);
 #endif
 
-#endif /* apu_h */
+#endif

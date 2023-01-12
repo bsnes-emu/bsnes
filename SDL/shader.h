@@ -31,4 +31,4 @@ void render_bitmap_with_shader(shader_t *shader, void *bitmap, void *previous,
                                GB_frame_blending_mode_t blending_mode);
 void free_shader(struct shader_s *shader);
 
-#endif /* shader_h */
+#endif

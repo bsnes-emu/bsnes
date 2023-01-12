@@ -43,4 +43,4 @@ void GB_debugger_break(GB_gameboy_t *gb);
 bool GB_debugger_is_stopped(GB_gameboy_t *gb);
 void GB_debugger_set_disabled(GB_gameboy_t *gb, bool disabled);
 void GB_debugger_clear_symbols(GB_gameboy_t *gb);
-#endif /* debugger_h */
+#endif

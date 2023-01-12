@@ -45,4 +45,4 @@ internal size_t GB_get_save_state_size_no_bess(GB_gameboy_t *gb);
 internal void GB_save_state_to_buffer_no_bess(GB_gameboy_t *gb, uint8_t *buffer);
 #endif
 
-#endif /* save_state_h */
+#endif

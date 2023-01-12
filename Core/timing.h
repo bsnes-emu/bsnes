@@ -63,4 +63,4 @@ GB_STATE_MACHINE(gb, unit, cycles, divisor)
 
 #define GB_UNIT(unit) int32_t unit##_cycles, unit##_state
 
-#endif /* timing_h */
+#endif
