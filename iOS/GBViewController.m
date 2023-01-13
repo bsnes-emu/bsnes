@@ -3,6 +3,8 @@
 #import "GBVerticalLayout.h"
 #import "GBViewMetal.h"
 #import "GBAudioClient.h"
+#import "GBROMManager.h"
+#import "GBLoadROMTableViewController.h"
 #include <Core/gb.h>
 
 @implementation GBViewController
@@ -11,6 +13,7 @@
     GBView *_gbView;
     volatile bool _running;
     volatile bool _stopping;
+    bool _romLoaded;
     GBLayout *_currentLayout;
     GBHorizontalLayout *_horizontalLayout;
     GBVerticalLayout *_verticalLayout;
@@ -138,11 +141,34 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     
     _audioLock = [[NSCondition alloc] init];
     
+    [self loadROM];
+    [[NSNotificationCenter defaultCenter] addObserverForName:@"GBROMChanged"
+                                                      object:nil
+                                                       queue:nil
+                                                  usingBlock:^(NSNotification * _Nonnull note) {
+        [self loadROM];
+        [self start];
+    }];
     return true;
+}
+
+- (void)loadROM
+{
+    GBROMManager *romManager = [GBROMManager sharedManager];
+    if (romManager.romFile) {
+        // Todo: display errors and warnings
+        _romLoaded = GB_load_rom(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
+    }
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
+    if (self.presentedViewController) return;
+    if (!_romLoaded) {
+        [self presentViewController:[[GBLoadROMTableViewController alloc] init]
+                           animated:true
+                         completion:nil];
+    }
     [self start];
 }
 
@@ -253,6 +279,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)start
 {
+    if (!_romLoaded) return;
     if (_running) return;
     _running = true;
     [[[NSThread alloc] initWithTarget:self selector:@selector(run) object:nil] start];
