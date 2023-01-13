@@ -104,8 +104,6 @@ static const uint8_t workboy_vk_to_key[] = {
 
 @implementation GBView
 {
-    uint32_t *image_buffers[3];
-    unsigned char current_buffer;
     bool mouse_hidden;
     NSTrackingArea *tracking_area;
     bool _mouseHidingEnabled;
@@ -116,7 +114,6 @@ static const uint8_t workboy_vk_to_key[] = {
     bool analogClockMultiplierValid;
     NSEventModifierFlags previousModifiers;
     JOYController *lastController;
-    GB_frame_blending_mode_t _frameBlendingMode;
     bool _turbo;
     bool _mouseControlEnabled;
 }
@@ -135,11 +132,6 @@ static const uint8_t workboy_vk_to_key[] = {
         return [GBViewGL allocWithZone: zone];
     }
     return [super allocWithZone:zone];
-}
-
-- (void) createInternalView
-{
-    assert(false && "createInternalView must not be inherited");
 }
 
 - (void) _init
@@ -162,15 +154,7 @@ static const uint8_t workboy_vk_to_key[] = {
 
 - (void)screenSizeChanged
 {
-    if (image_buffers[0]) free(image_buffers[0]);
-    if (image_buffers[1]) free(image_buffers[1]);
-    if (image_buffers[2]) free(image_buffers[2]);
-    
-    size_t buffer_size = sizeof(image_buffers[0][0]) * GB_get_screen_width(_gb) * GB_get_screen_height(_gb);
-    
-    image_buffers[0] = calloc(1, buffer_size);
-    image_buffers[1] = calloc(1, buffer_size);
-    image_buffers[2] = calloc(1, buffer_size);
+    [super screenSizeChanged];
     
     dispatch_async(dispatch_get_main_queue(), ^{
         [self setFrame:self.superview.frame];
@@ -182,33 +166,8 @@ static const uint8_t workboy_vk_to_key[] = {
     [self setFrame:self.superview.frame];
 }
 
-- (void) setFrameBlendingMode:(GB_frame_blending_mode_t)frameBlendingMode
-{
-    _frameBlendingMode = frameBlendingMode;
-    [self setNeedsDisplay:true];
-}
-
-
-- (GB_frame_blending_mode_t)frameBlendingMode
-{
-    if (_frameBlendingMode == GB_FRAME_BLENDING_MODE_ACCURATE) {
-        if (!_gb || GB_is_sgb(_gb)) {
-            return GB_FRAME_BLENDING_MODE_SIMPLE;
-        }
-        return GB_is_odd_frame(_gb)? GB_FRAME_BLENDING_MODE_ACCURATE_ODD : GB_FRAME_BLENDING_MODE_ACCURATE_EVEN;
-    }
-    return _frameBlendingMode;
-}
-- (unsigned char) numberOfBuffers
-{
-    return _frameBlendingMode? 3 : 2;
-}
-
 - (void)dealloc
 {
-    free(image_buffers[0]);
-    free(image_buffers[1]);
-    free(image_buffers[2]);
     if (mouse_hidden) {
         mouse_hidden = false;
         [NSCursor unhide];
@@ -217,6 +176,7 @@ static const uint8_t workboy_vk_to_key[] = {
     [self setRumble:0];
     [JOYController unregisterListener:self];
 }
+
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
     if (!(self = [super initWithCoder:coder])) { 
@@ -301,12 +261,7 @@ static const uint8_t workboy_vk_to_key[] = {
              (analogClockMultiplierValid && analogClockMultiplier < 1)) {
         [self.osdView displayText:@"Slow motion..."];
     }
-    current_buffer = (current_buffer + 1) % self.numberOfBuffers;
-}
-
-- (uint32_t *) pixels
-{
-    return image_buffers[(current_buffer + 1) % self.numberOfBuffers];
+    [super flip];
 }
 
 -(void)keyDown:(NSEvent *)theEvent
@@ -758,16 +713,6 @@ static const uint8_t workboy_vk_to_key[] = {
     }
     
     previousModifiers = event.modifierFlags;
-}
-
-- (uint32_t *)currentBuffer
-{
-    return image_buffers[current_buffer];
-}
-
-- (uint32_t *)previousBuffer
-{
-    return image_buffers[(current_buffer + 2) % self.numberOfBuffers];
 }
 
 -(NSDragOperation)draggingEntered:(id<NSDraggingInfo>)sender

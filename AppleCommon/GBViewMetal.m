@@ -25,10 +25,14 @@ static const vector_float2 rect[] =
 
 + (bool)isSupported
 {
+#if TARGET_OS_IPHONE
+    return true;
+#else
     if (MTLCopyAllDevices) {
         return [MTLCopyAllDevices() count];
     }
     return false;
+#endif
 }
 
 - (void) allocateTextures
@@ -135,7 +139,9 @@ static const vector_float2 rect[] =
 
 - (void)drawInMTKView:(MTKView *)view
 {
+#if !TARGET_OS_IPHONE
     if (!(view.window.occlusionState & NSWindowOcclusionStateVisible)) return;
+#endif
     if (!self.gb) return;
     if (texture.width  != GB_get_screen_width(self.gb) ||
         texture.height != GB_get_screen_height(self.gb)) {
@@ -161,7 +167,7 @@ static const vector_float2 rect[] =
     MTLRenderPassDescriptor *render_pass_descriptor = view.currentRenderPassDescriptor;
     id<MTLCommandBuffer> command_buffer = [command_queue commandBuffer];
 
-    if (render_pass_descriptor != nil) { 
+    if (render_pass_descriptor) {
         *(GB_frame_blending_mode_t *)[frame_blending_mode_buffer contents] = [self frameBlendingMode];
         *(vector_float2 *)[output_resolution_buffer contents] = output_resolution;
 
@@ -210,10 +216,15 @@ static const vector_float2 rect[] =
 {
     [super flip];
     dispatch_async(dispatch_get_main_queue(), ^{
+#if TARGET_OS_IPHONE
+        [(MTKView *)self.internalView setNeedsDisplay];
+#else
         [(MTKView *)self.internalView setNeedsDisplay:true];
+#endif
     });
 }
 
+#if !TARGET_OS_IPHONE
 - (NSImage *)renderToImage
 {
     CIImage *ciImage = [CIImage imageWithMTLTexture:[[(MTKView *)self.internalView currentDrawable] texture]
@@ -228,5 +239,6 @@ static const vector_float2 rect[] =
     CGImageRelease(cgImage);
     return ret;
 }
+#endif
 
 @end

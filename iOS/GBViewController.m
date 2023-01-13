@@ -1,6 +1,8 @@
 #import "GBViewController.h"
 #import "GBHorizontalLayout.h"
 #import "GBVerticalLayout.h"
+#import "GBViewMetal.h"
+#include <Core/gb.h>
 
 static void positionView(UIImageView *view, CGPoint position)
 {
@@ -26,6 +28,8 @@ static void positionView(UIImageView *view, CGPoint position)
     UIImageView *_bButtonView;
     UIImageView *_startButtonView;
     UIImageView *_selectButtonView;
+    GBView *_gbView;
+    GB_gameboy_t _gb;
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -33,36 +37,42 @@ static void positionView(UIImageView *view, CGPoint position)
     _window = [[UIWindow alloc] init];
     _window.rootViewController = self;
     [_window makeKeyAndVisible];
+    
+    _window.backgroundColor = [UIColor colorWithRed:174 / 255.0 green:176 / 255.0 blue:180 / 255.0 alpha:1.0];
+    
     _horizontalLayout = [[GBHorizontalLayout alloc] init];
     _verticalLayout = [[GBVerticalLayout alloc] init];
     
     _backgroundView = [[UIImageView alloc] initWithImage:nil];
     [_window addSubview:_backgroundView];
+    self.view = _backgroundView;
     
     _dpadView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"dpad"]];
     _aButtonView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"button"]];
     _bButtonView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"button"]];
     _startButtonView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"button2"]];
     _selectButtonView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"button2"]];
+    _gbView = [[GBViewMetal alloc] initWithFrame:CGRectZero];
+    
+    GB_init(&_gb, GB_MODEL_CGB_E);
+    _gbView.gb = &_gb;
+    [_gbView screenSizeChanged];
+    
+    [self willRotateToInterfaceOrientation:[UIApplication sharedApplication].statusBarOrientation
+                                  duration:0];
     
     [_backgroundView addSubview:_dpadView];
     [_backgroundView addSubview:_aButtonView];
     [_backgroundView addSubview:_bButtonView];
     [_backgroundView addSubview:_startButtonView];
     [_backgroundView addSubview:_selectButtonView];
+    [_backgroundView addSubview:_gbView];
     
-    [self orientationChange];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(orientationChange)
-                                                 name:UIApplicationDidChangeStatusBarOrientationNotification
-                                               object:nil];
     return true;
 }
 
-- (void)orientationChange
+- (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)orientation duration:(NSTimeInterval)duration
 {
-    UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
     if (orientation == UIInterfaceOrientationPortrait || orientation == UIInterfaceOrientationPortraitUpsideDown) {
         _currentLayout = _verticalLayout;
     }
@@ -78,6 +88,16 @@ static void positionView(UIImageView *view, CGPoint position)
     positionView(_bButtonView, _currentLayout.bLocation);
     positionView(_startButtonView, _currentLayout.startLocation);
     positionView(_selectButtonView, _currentLayout.selectLocation);
+    
+    CGRect screenFrame = _currentLayout.screenRect;
+    screenFrame.origin.x /= [UIScreen mainScreen].scale;
+    screenFrame.origin.y /= [UIScreen mainScreen].scale;
+    screenFrame.size.width /= [UIScreen mainScreen].scale;
+    screenFrame.size.height /= [UIScreen mainScreen].scale;
+    
+    _gbView.frame = screenFrame;
+    memset(_gbView.pixels, rand(), 160 * 144 * 4);
+    [_gbView flip];
 }
 
 - (BOOL)prefersHomeIndicatorAutoHidden
