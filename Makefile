@@ -183,10 +183,10 @@ SYSROOT := $(shell xcodebuild -sdk iphoneos -version Path 2> $(NULL))
 ifeq ($(SYSROOT),)
 $(error Could not find an iOS SDK)
 endif
-CFLAGS += -arch arm64 -miphoneos-version-min=11.0 -isysroot $(SYSROOT)
+CFLAGS += -arch arm64 -miphoneos-version-min=11.0 -isysroot $(SYSROOT) -IAppleCommon
 LDFLAGS += -arch arm64
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT)
-LDFLAGS += -lobjc -framework UIKit -framework Foundation -framework CoreGraphics -framework Metal -framework MetalKit -framework AVFoundation -miphoneos-version-min=11.0  -isysroot $(SYSROOT)
+LDFLAGS += -lobjc -framework UIKit -framework Foundation -framework CoreGraphics -framework Metal -framework MetalKit -framework AudioToolbox -framework AVFoundation -miphoneos-version-min=11.0  -isysroot $(SYSROOT)
 CODESIGN := codesign -fs -
 else
 ifeq ($(PLATFORM),Darwin)
@@ -198,7 +198,7 @@ ifeq ($(SYSROOT),/Library/Developer/CommandLineTools/SDKs/)
 $(error Could not find a macOS SDK)
 endif
 
-CFLAGS += -F/Library/Frameworks -mmacosx-version-min=10.9 -isysroot $(SYSROOT)
+CFLAGS += -F/Library/Frameworks -mmacosx-version-min=10.9 -isysroot $(SYSROOT) -IAppleCommon
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT)
 LDFLAGS += -framework AppKit -mmacosx-version-min=10.9 -isysroot $(SYSROOT)
 GL_LDFLAGS := -framework OpenGL
@@ -255,8 +255,8 @@ all: cocoa sdl tester libretro
 CORE_SOURCES := $(shell ls Core/*.c)
 SDL_SOURCES := $(shell ls SDL/*.c) $(OPEN_DIALOG) $(patsubst %,SDL/audio/%.c,$(SDL_AUDIO_DRIVERS))
 TESTER_SOURCES := $(shell ls Tester/*.c)
-IOS_SOURCES := $(shell ls iOS/*.m)
-COCOA_SOURCES := $(shell ls Cocoa/*.m) $(shell ls HexFiend/*.m) $(shell ls JoyKit/*.m)
+IOS_SOURCES := $(shell ls iOS/*.m) $(shell ls AppleCommon/*.m)
+COCOA_SOURCES := $(shell ls Cocoa/*.m) $(shell ls HexFiend/*.m) $(shell ls JoyKit/*.m) $(shell ls AppleCommon/*.m)
 QUICKLOOK_SOURCES := $(shell ls QuickLook/*.m) $(shell ls QuickLook/*.c)
 
 ifeq ($(PLATFORM),windows32)
@@ -385,7 +385,7 @@ endif
 
 $(BIN)/SameBoy.app/Contents/MacOS/SameBoy: $(CORE_OBJECTS) $(COCOA_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $^ -o $@ $(LDFLAGS) $(FAT_FLAGS) -framework OpenGL -framework AudioUnit -framework AVFoundation -framework CoreVideo -framework CoreMedia -framework IOKit -framework PreferencePanes -framework Carbon -framework QuartzCore -framework Security -framework WebKit -weak_framework Metal -weak_framework MetalKit
+	$(CC) $^ -o $@ $(LDFLAGS) $(FAT_FLAGS) -framework OpenGL -framework AudioToolbox -framework AVFoundation -framework CoreVideo -framework CoreMedia -framework IOKit -framework PreferencePanes -framework Carbon -framework QuartzCore -framework Security -framework WebKit -weak_framework Metal -weak_framework MetalKit
 ifeq ($(CONF), release)
 	$(STRIP) $@
 endif
