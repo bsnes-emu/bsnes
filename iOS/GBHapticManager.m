@@ -1,4 +1,5 @@
 #import "GBHapticManager.h"
+#import "GBHapticManagerLegacy.h"
 #import <CoreHaptics/CoreHaptics.h>
 
 @implementation GBHapticManager
@@ -25,15 +26,14 @@
 {
     self = [super init];
     if (!self) return nil;
+    if (self.class != [GBHapticManager class]) return self;
+    
     if (@available(iOS 13.0, *)) {
-        _engine = [[CHHapticEngine alloc] initAndReturnError:nil];
-        _engine.playsHapticsOnly = true;
-        _engine.autoShutdownEnabled = true;
+            _engine = [[CHHapticEngine alloc] initAndReturnError:nil];
+            _engine.playsHapticsOnly = true;
+            _engine.autoShutdownEnabled = true;
     }
-    else {
-        return nil;
-    }
-    if (!_engine) return nil;
+    if (!_engine) return [[GBHapticManagerLegacy alloc] init];
     return self;
 }
 
