@@ -18,9 +18,9 @@
     while (true) {
         horizontalMargin = (resolution.width - screenRect.size.width) / 2;
         verticalMargin = (resolution.height - screenRect.size.height) / 2;
-        if (horizontalMargin / self.factor < 170) {
+        if (horizontalMargin / self.factor < 164) {
             if (self.hasFractionalPixels) {
-                screenRect.size.width = resolution.width - 170 * self.factor * 2;
+                screenRect.size.width = resolution.width - 164 * self.factor * 2;
                 screenRect.size.height = screenRect.size.width / 160 * 144;
                 continue;
             }

@@ -159,6 +159,17 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     _backgroundView.layout = layout;
 }
 
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+        return UIInterfaceOrientationMaskAll;
+    }
+    if ([UIScreen mainScreen].bounds.size.height <= 568) {
+        return UIInterfaceOrientationMaskLandscape;
+    }
+    return UIInterfaceOrientationMaskAllButUpsideDown;
+}
+
 - (BOOL)prefersHomeIndicatorAutoHidden
 {
     UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
