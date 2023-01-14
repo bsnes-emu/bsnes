@@ -32,6 +32,7 @@ static void positionView(UIImageView *view, CGPoint position)
 {
     NSMutableSet<UITouch *> *_touches;
     UIImageView *_dpadView;
+    UIImageView *_dpadShadowView;
     UIImageView *_aButtonView;
     UIImageView *_bButtonView;
     UIImageView *_startButtonView;
@@ -45,6 +46,8 @@ static void positionView(UIImageView *view, CGPoint position)
     if (!self) return nil;
     _touches = [NSMutableSet set];
     _dpadView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"dpad"]];
+    _dpadShadowView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"dpadShadow"]];
+    _dpadShadowView.hidden = true;
     _aButtonView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"button"]];
     _bButtonView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"button"]];
     _startButtonView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"button2"]];
@@ -57,6 +60,8 @@ static void positionView(UIImageView *view, CGPoint position)
     [self addSubview:_startButtonView];
     [self addSubview:_selectButtonView];
     [self addSubview:_gbView];
+    
+    [_dpadView addSubview:_dpadShadowView];
     return self;
 }
 
@@ -90,6 +95,7 @@ static void positionView(UIImageView *view, CGPoint position)
     double factor = [UIScreen mainScreen].scale;
     double buttonRadiusSquared = 36 *  36 * factor * factor;
     double dpadRadiusSquared = 75 *  75 * factor * factor;
+    bool dpadHandled = false;
     for (UITouch *touch in _touches) {
         CGPoint point = [touch locationInView:self];
         point.x *= factor;
@@ -106,36 +112,67 @@ static void positionView(UIImageView *view, CGPoint position)
         else if (CGPointSquaredDistance(point, _layout.selectLocation) <= buttonRadiusSquared) {
             mask |= GB_KEY_SELECT_MASK;
         }
-        else if (CGPointSquaredDistance(point, _layout.dpadLocation) <= dpadRadiusSquared) {
+        else if (!dpadHandled && CGPointSquaredDistance(point, _layout.dpadLocation) <= dpadRadiusSquared) {
+            dpadHandled = true; // Don't handle the dpad twice
             double angle = CGPointAngle(point, _layout.dpadLocation);
             signed quantizedAngle = round(angle / M_PI * 6);
             if (quantizedAngle < 0) {
                 quantizedAngle += 12;
             }
             switch (quantizedAngle) {
+                case 12:
                 case 0 : mask |= GB_KEY_RIGHT_MASK; break;
                 case 1 : mask |= GB_KEY_RIGHT_MASK | GB_KEY_DOWN_MASK; break;
                 case 2 : mask |= GB_KEY_DOWN_MASK; break;
                     
                 case 3 : mask |= GB_KEY_DOWN_MASK; break;
                 case 4 : mask |= GB_KEY_LEFT_MASK | GB_KEY_DOWN_MASK; break;
+                case 5 : mask |= GB_KEY_LEFT_MASK; break;
+                    
                 case 6 : mask |= GB_KEY_LEFT_MASK; break;
+                case 7 : mask |= GB_KEY_LEFT_MASK | GB_KEY_UP_MASK; break;
+                case 8 : mask |= GB_KEY_UP_MASK; break;
                     
-                case 7 : mask |= GB_KEY_LEFT_MASK; break;
-                case 8 : mask |= GB_KEY_LEFT_MASK | GB_KEY_UP_MASK; break;
-                case 9 : mask |= GB_KEY_UP_MASK; break;
-                    
-                case 10: mask |= GB_KEY_UP_MASK; break;
-                case 11: mask |= GB_KEY_RIGHT_MASK | GB_KEY_UP_MASK; break;
-                case 12: mask |= GB_KEY_RIGHT_MASK; break;
+                case 9: mask |= GB_KEY_UP_MASK; break;
+                case 10: mask |= GB_KEY_RIGHT_MASK | GB_KEY_UP_MASK; break;
+                case 11: mask |= GB_KEY_RIGHT_MASK; break;
             }
         }
     }
-    GB_set_key_mask(_gbView.gb, mask);
-    if (mask & ~_lastMask) {
-        [[GBHapticManager sharedManager] doTapHaptic];
+    if (mask != _lastMask) {
+        _aButtonView.image      = [UIImage imageNamed:(mask & GB_KEY_A_MASK)?      @"buttonPressed"  : @"button"];
+        _bButtonView.image      = [UIImage imageNamed:(mask & GB_KEY_B_MASK)?      @"buttonPressed"  : @"button"];
+        _startButtonView.image  = [UIImage imageNamed:(mask & GB_KEY_START_MASK) ? @"button2Pressed" : @"button2"];
+        _selectButtonView.image = [UIImage imageNamed:(mask & GB_KEY_SELECT_MASK)? @"button2Pressed" : @"button2"];
+        
+        bool hidden = false;
+        bool diagonal = false;
+        double rotation = 0;
+        switch (mask & (GB_KEY_RIGHT_MASK | GB_KEY_DOWN_MASK | GB_KEY_LEFT_MASK | GB_KEY_UP_MASK)) {
+            case GB_KEY_RIGHT_MASK: break;
+            case GB_KEY_RIGHT_MASK | GB_KEY_DOWN_MASK: diagonal = true; break;
+            case GB_KEY_DOWN_MASK: rotation = M_PI_2; break;
+            case GB_KEY_LEFT_MASK | GB_KEY_DOWN_MASK: diagonal = true; rotation = M_PI_2; break;
+            case GB_KEY_LEFT_MASK: rotation = M_PI; break;
+            case GB_KEY_LEFT_MASK | GB_KEY_UP_MASK: diagonal = true; rotation = M_PI; break;
+            case GB_KEY_UP_MASK: rotation = -M_PI_2; break;
+            case GB_KEY_RIGHT_MASK | GB_KEY_UP_MASK: diagonal = true; rotation = -M_PI_2; break;
+            default:
+                hidden = true;
+        }
+        
+        _dpadShadowView.hidden = hidden;
+        if (!hidden) {
+            _dpadShadowView.image = [UIImage imageNamed:diagonal? @"dpadShadowDiagonal" : @"dpadShadow"];
+            _dpadShadowView.transform = CGAffineTransformMakeRotation(rotation);
+        }
+        
+        GB_set_key_mask(_gbView.gb, mask);
+        if (mask & ~_lastMask) {
+            [[GBHapticManager sharedManager] doTapHaptic];
+        }
+        _lastMask = mask;
     }
-    _lastMask = mask;
 }
 
 - (BOOL)isMultipleTouchEnabled
