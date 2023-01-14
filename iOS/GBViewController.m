@@ -6,6 +6,7 @@
 #import "GBROMManager.h"
 #import "GBLoadROMTableViewController.h"
 #import "GBBackgroundView.h"
+#import "GBHapticManager.h"
 #include <Core/gb.h>
 
 @implementation GBViewController
@@ -116,7 +117,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [[NSNotificationCenter defaultCenter] addObserverForName:@"GBROMChanged"
                                                       object:nil
                                                        queue:nil
-                                                  usingBlock:^(NSNotification * _Nonnull note) {
+                                                  usingBlock:^(NSNotification *note) {
         [self loadROM];
         [self start];
     }];
@@ -305,7 +306,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)rumbleChanged:(double)amp
 {
-    // TODO
+    [[GBHapticManager sharedManager] setRumbleStrength:amp];
 }
 
 - (void)updateRumbleMode

@@ -1,5 +1,6 @@
 #import "GBBackgroundView.h"
 #import "GBViewMetal.h"
+#import "GBHapticManager.h"
 
 double CGPointSquaredDistance(CGPoint a, CGPoint b)
 {
@@ -35,6 +36,7 @@ static void positionView(UIImageView *view, CGPoint position)
     UIImageView *_bButtonView;
     UIImageView *_startButtonView;
     UIImageView *_selectButtonView;
+    GB_key_mask_t _lastMask;
 }
 
 - (instancetype)init
@@ -130,6 +132,10 @@ static void positionView(UIImageView *view, CGPoint position)
         }
     }
     GB_set_key_mask(_gbView.gb, mask);
+    if (mask & ~_lastMask) {
+        [[GBHapticManager sharedManager] doTapHaptic];
+    }
+    _lastMask = mask;
 }
 
 - (BOOL)isMultipleTouchEnabled

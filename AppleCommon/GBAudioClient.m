@@ -55,7 +55,7 @@ static OSStatus render(
     // Set our tone rendering function on the unit
     AURenderCallbackStruct input;
     input.inputProc = (void*)render;
-    input.inputProcRefCon = (__bridge void * _Nullable)(self);
+    input.inputProcRefCon = (__bridge void *)(self);
     err = AudioUnitSetProperty(audioUnit,
                                kAudioUnitProperty_SetRenderCallback,
                                kAudioUnitScope_Input,
