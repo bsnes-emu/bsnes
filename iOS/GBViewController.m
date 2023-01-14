@@ -164,7 +164,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
         return UIInterfaceOrientationMaskAll;
     }
-    if ([UIScreen mainScreen].bounds.size.height <= 568) {
+    if (MAX([UIScreen mainScreen].bounds.size.height, [UIScreen mainScreen].bounds.size.width) <= 568) {
         return UIInterfaceOrientationMaskLandscape;
     }
     return UIInterfaceOrientationMaskAllButUpsideDown;
