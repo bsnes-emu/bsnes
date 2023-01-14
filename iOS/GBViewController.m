@@ -130,6 +130,10 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     if (romManager.romFile) {
         // Todo: display errors and warnings
         _romLoaded = GB_load_rom(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
+        if (_romLoaded) {
+            GB_load_battery(&_gb, [GBROMManager sharedManager].batterySaveFile.fileSystemRepresentation);
+            GB_load_state(&_gb, [GBROMManager sharedManager].autosaveStateFile.fileSystemRepresentation);
+        }
     }
 }
 
@@ -238,8 +242,8 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [_audioClient stop];
     _audioClient = nil;
 
-    // Todo
-    //GB_save_battery(&gb, self.savPath.UTF8String);
+    GB_save_battery(&_gb, [GBROMManager sharedManager].batterySaveFile.fileSystemRepresentation);
+    GB_save_state(&_gb, [GBROMManager sharedManager].autosaveStateFile.fileSystemRepresentation);
 }
 
 - (void)start
