@@ -44,7 +44,7 @@
                         intensity:(double)intensity
                          duration:(NSTimeInterval)duration
 {
-    return [[CHHapticEvent alloc] initWithEventType:CHHapticEventTypeHapticTransient
+    return [[CHHapticEvent alloc] initWithEventType:type
                                          parameters:@[[[CHHapticEventParameter alloc] initWithParameterID:CHHapticEventParameterIDHapticSharpness
                                                                                                     value:sharpness],
                                                       [[CHHapticEventParameter alloc] initWithParameterID:CHHapticEventParameterIDHapticIntensity
