@@ -305,6 +305,44 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     _stopping = false;
 }
 
+- (UIImage *)imageFromData:(NSData *)data width:(unsigned)width height:(unsigned)height
+{
+    /* Convert the screenshot to a CGImageRef */
+    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data.bytes, data.length, NULL);
+    CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
+    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault;
+    CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
+    
+    CGImageRef iref = CGImageCreate(width,
+                                    height,
+                                    8,
+                                    32,
+                                    4 * width,
+                                    colorSpaceRef,
+                                    bitmapInfo,
+                                    provider,
+                                    NULL,
+                                    true,
+                                    renderingIntent);
+
+    UIImage *ret = [[UIImage alloc] initWithCGImage:iref];
+    CGColorSpaceRelease(colorSpaceRef);
+    CGDataProviderRelease(provider);
+    CGImageRelease(iref);
+    return ret;
+}
+
+- (void)saveStateToFile:(NSString *)file
+{
+    GB_save_state(&_gb, file.fileSystemRepresentation);
+    NSData *data = [NSData dataWithBytes:_gbView.previousBuffer
+                                  length:GB_get_screen_width(&_gb) *
+                                         GB_get_screen_height(&_gb) *
+                                         sizeof(*_gbView.previousBuffer)];
+    UIImage *screenshot = [self imageFromData:data width:GB_get_screen_width(&_gb) height:GB_get_screen_height(&_gb)];
+    [UIImagePNGRepresentation(screenshot) writeToFile:[file stringByAppendingPathExtension:@"png"] atomically:false];
+}
+
 - (void)postRun
 {
     [_audioLock lock];
@@ -316,7 +354,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     _audioClient = nil;
 
     GB_save_battery(&_gb, [GBROMManager sharedManager].batterySaveFile.fileSystemRepresentation);
-    GB_save_state(&_gb, [GBROMManager sharedManager].autosaveStateFile.fileSystemRepresentation);
+    [self saveStateToFile:[GBROMManager sharedManager].autosaveStateFile];
 }
 
 - (void)start

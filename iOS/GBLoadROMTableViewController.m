@@ -1,4 +1,5 @@
 #import "GBLoadROMTableViewController.h"
+#import "GBTableViewCell.h"
 #import "GBROMManager.h"
 
 @interface GBLoadROMTableViewController ()
@@ -25,12 +26,33 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
+    GBTableViewCell *cell = [[GBTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
     NSString *rom = [GBROMManager sharedManager].allROMs[[indexPath indexAtPosition:1]];
     cell.textLabel.text = rom;
     cell.accessoryType = [rom isEqualToString:[GBROMManager sharedManager].currentROM]? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
     
+    NSString *pngPath = [[[GBROMManager sharedManager] autosaveStateFileForROM:rom] stringByAppendingPathExtension:@"png"];
+    UIImage *image = [UIImage imageWithContentsOfFile:pngPath];
+    if (!image) {
+        static dispatch_once_t onceToken;
+        static UIImage *emptyImage = nil;
+        dispatch_once(&onceToken, ^{
+            UIGraphicsBeginImageContextWithOptions((CGSize){160, 144}, false, 1);
+            emptyImage = UIGraphicsGetImageFromCurrentImageContext();
+            UIGraphicsEndImageContext();
+        });
+        image = emptyImage;
+    }
+    cell.padding = 4;
+    cell.imageView.image = image;
+    cell.imageView.contentMode = UIViewContentModeScaleAspectFit;
+    
     return cell;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return 64;
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
@@ -46,9 +68,9 @@
     }];
 }
 
-- (BOOL)isModalInPresentation
+- (UIModalPresentationStyle)modalPresentationStyle
 {
-    return true;
+    return UIModalPresentationFormSheet;
 }
 
 @end

@@ -60,7 +60,7 @@
         return self.romFile;
     }
     NSString *root = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstObject;
-    NSString *romDirectory = [root stringByAppendingPathComponent:_currentROM];
+    NSString *romDirectory = [root stringByAppendingPathComponent:rom];
     return [self romFileForDirectory:romDirectory];
 }
 
