@@ -6,6 +6,7 @@
 #include <stdalign.h>
 #include <time.h>
 
+#include "model.h"
 #include "defs.h"
 #include "save_state.h"
 
@@ -28,14 +29,6 @@
 #include "random.h"
 
 #define GB_STRUCT_VERSION 14
-
-#define GB_MODEL_FAMILY_MASK 0xF00
-#define GB_MODEL_DMG_FAMILY 0x000
-#define GB_MODEL_MGB_FAMILY 0x100
-#define GB_MODEL_CGB_FAMILY 0x200
-#define GB_MODEL_GBP_BIT 0x20
-#define GB_MODEL_PAL_BIT 0x40
-#define GB_MODEL_NO_SFC_BIT 0x80
 
 #define GB_REWIND_FRAMES_PER_KEY 255
 
@@ -95,36 +88,6 @@ typedef struct __attribute__((packed)) {
     uint16_t alarm_minutes, alarm_days;
     uint8_t alarm_enabled;
 } GB_huc3_rtc_time_t;
-
-typedef enum {
-    // GB_MODEL_DMG_0 = 0x000,
-    // GB_MODEL_DMG_A = 0x001,
-    GB_MODEL_DMG_B = 0x002,
-    // GB_MODEL_DMG_C = 0x003,
-    GB_MODEL_SGB = 0x004,
-    GB_MODEL_SGB_NTSC = GB_MODEL_SGB,
-    GB_MODEL_SGB_PAL = GB_MODEL_SGB | GB_MODEL_PAL_BIT,
-    GB_MODEL_SGB_NTSC_NO_SFC = GB_MODEL_SGB | GB_MODEL_NO_SFC_BIT,
-    GB_MODEL_SGB_NO_SFC = GB_MODEL_SGB_NTSC_NO_SFC,
-    GB_MODEL_SGB_PAL_NO_SFC = GB_MODEL_SGB | GB_MODEL_NO_SFC_BIT | GB_MODEL_PAL_BIT,
-    GB_MODEL_MGB = 0x100,
-    GB_MODEL_SGB2 = 0x101,
-    GB_MODEL_SGB2_NO_SFC = GB_MODEL_SGB2 | GB_MODEL_NO_SFC_BIT,
-    GB_MODEL_CGB_0 = 0x200,
-    GB_MODEL_CGB_A = 0x201,
-    GB_MODEL_CGB_B = 0x202,
-    GB_MODEL_CGB_C = 0x203,
-    GB_MODEL_CGB_D = 0x204,
-    GB_MODEL_CGB_E = 0x205,
-    // GB_MODEL_AGB_0 = 0x206,
-    GB_MODEL_AGB_A = 0x207,
-    GB_MODEL_GBP_A = GB_MODEL_AGB_A | GB_MODEL_GBP_BIT, // AGB-A inside a Game Boy Player
-    GB_MODEL_AGB = GB_MODEL_AGB_A,
-    GB_MODEL_GBP = GB_MODEL_GBP_A,
-    //GB_MODEL_AGB_B = 0x208
-    //GB_MODEL_AGB_E = 0x209
-    //GB_MODEL_GBP_E = GB_MODEL_AGB_E | GB_MODEL_GBP_BIT, // AGB-E inside a Game Boy Player
-} GB_model_t;
 
 enum {
     GB_REGISTER_AF,

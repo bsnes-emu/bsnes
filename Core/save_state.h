@@ -33,6 +33,9 @@ void GB_save_state_to_buffer(GB_gameboy_t *gb, uint8_t *buffer);
 int GB_load_state(GB_gameboy_t *gb, const char *path);
 int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t length);
 bool GB_is_save_state(const char *path);
+int GB_get_state_model(const char *path, GB_model_t *model);
+int GB_get_state_model_from_buffer(const uint8_t *buffer, size_t length, GB_model_t *model);
+
 #ifdef GB_INTERNAL
 static inline uint32_t state_magic(void)
 {
