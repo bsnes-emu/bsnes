@@ -1,6 +1,7 @@
 #import "GBBackgroundView.h"
 #import "GBViewMetal.h"
 #import "GBHapticManager.h"
+#import "GBMenuViewController.h"
 
 double CGPointSquaredDistance(CGPoint a, CGPoint b)
 {
@@ -67,6 +68,11 @@ static void positionView(UIImageView *view, CGPoint position)
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
 {
+    for (UITouch *touch in touches) {
+        if (CGRectContainsPoint(self.gbView.frame, [touch locationInView:self])) {
+            [self.window.rootViewController presentViewController:[GBMenuViewController menu] animated:true completion:nil];
+        }
+    }
     [_touches unionSet:touches];
     [self touchesChanged];
 }

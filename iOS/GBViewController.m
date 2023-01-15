@@ -7,6 +7,7 @@
 #import "GBLoadROMTableViewController.h"
 #import "GBBackgroundView.h"
 #import "GBHapticManager.h"
+#import "GBMenuViewController.h"
 #include <Core/gb.h>
 
 @implementation GBViewController
@@ -126,11 +127,13 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)loadROM
 {
+    [self stop];
     GBROMManager *romManager = [GBROMManager sharedManager];
     if (romManager.romFile) {
         // Todo: display errors and warnings
         _romLoaded = GB_load_rom(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
         if (_romLoaded) {
+            GB_reset(&_gb);
             GB_load_battery(&_gb, [GBROMManager sharedManager].batterySaveFile.fileSystemRepresentation);
             GB_load_state(&_gb, [GBROMManager sharedManager].autosaveStateFile.fileSystemRepresentation);
         }
@@ -140,12 +143,29 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
     if (self.presentedViewController) return;
-    if (!_romLoaded) {
-        [self presentViewController:[[GBLoadROMTableViewController alloc] init]
-                           animated:true
-                         completion:nil];
-    }
     [self start];
+}
+
+-(void)presentViewController:(UIViewController *)viewControllerToPresent animated:(BOOL)flag completion:(void (^)(void))completion
+{
+    [self stop];
+    [super presentViewController:viewControllerToPresent
+                        animated:flag
+                      completion:completion];
+}
+
+- (void)reset
+{
+    [self stop];
+    GB_reset(&_gb);
+    [self start];
+}
+
+- (void)openLibrary
+{
+    [self presentViewController:[[GBLoadROMTableViewController alloc] init]
+                       animated:true
+                     completion:nil];
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application
