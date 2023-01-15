@@ -17,6 +17,7 @@ int main(int argc, char * argv[])
             @"GBAGBModel": @(GB_MODEL_AGB_A),
             @"GBSGBModel": @(GB_MODEL_SGB2),
             @"GBRumbleMode": @(GB_RUMBLE_CARTRIDGE_ONLY),
+            @"GBColorPalette": @(1),
             
             @"GBVolume": @(1.0),
                         

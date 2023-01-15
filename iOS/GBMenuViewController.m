@@ -19,9 +19,7 @@
                                                 preferredStyle:style];
     [ret addAction:[UIAlertAction actionWithTitle:@"Close"
                                             style:UIAlertActionStyleCancel
-                                          handler:^(UIAlertAction * _Nonnull action) {
-        [(GBViewController *)[UIApplication sharedApplication].delegate start];
-    }]];
+                                          handler:nil]];
     return ret;
 }
 
@@ -38,7 +36,7 @@
     } buttons[] = {
         {@"Reset", @"arrow.2.circlepath", SelectorString(reset)},
         {@"Library", @"bookmark", SelectorString(openLibrary)},
-        {@"Model", @"ModelTemplate", nil},
+        {@"Model", @"ModelTemplate", SelectorString(changeModel)},
         {@"States", @"square.stack", nil},
         {@"Settings", @"gear", nil},
         {@"About", @"info.circle", nil},

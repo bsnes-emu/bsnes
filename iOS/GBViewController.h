@@ -6,4 +6,5 @@
 - (void)openLibrary;
 - (void)start;
 - (void)stop;
+- (void)changeModel;
 @end

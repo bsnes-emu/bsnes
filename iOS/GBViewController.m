@@ -8,6 +8,7 @@
 #import "GBBackgroundView.h"
 #import "GBHapticManager.h"
 #import "GBMenuViewController.h"
+#import "GBOptionViewController.h"
 #include <Core/gb.h>
 
 @implementation GBViewController
@@ -69,7 +70,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)initGameBoy
 {
-    GB_init(&_gb, GB_MODEL_CGB_E);
+    GB_init(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBCGBModel"]);
     GB_set_user_data(&_gb, (__bridge void *)(self));
     GB_set_boot_rom_load_callback(&_gb, (GB_boot_rom_load_callback_t)loadBootROM);
     GB_set_vblank_callback(&_gb, (GB_vblank_callback_t) vblank);
@@ -125,6 +126,15 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     return true;
 }
 
+- (void)loadState:(NSString *)state
+{
+    GB_model_t model;
+    if (!GB_get_state_model(state.fileSystemRepresentation, &model)) {
+        GB_switch_model_and_reset(&_gb, model);
+        GB_load_state(&_gb, state.fileSystemRepresentation);
+    }
+}
+
 - (void)loadROM
 {
     [self stop];
@@ -135,7 +145,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         if (_romLoaded) {
             GB_reset(&_gb);
             GB_load_battery(&_gb, [GBROMManager sharedManager].batterySaveFile.fileSystemRepresentation);
-            GB_load_state(&_gb, [GBROMManager sharedManager].autosaveStateFile.fileSystemRepresentation);
+            [self loadState:[GBROMManager sharedManager].autosaveStateFile];
         }
     }
 }
@@ -166,6 +176,49 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [self presentViewController:[[GBLoadROMTableViewController alloc] init]
                        animated:true
                      completion:nil];
+}
+
+- (void)changeModel
+{
+    GBOptionViewController *controller = [[GBOptionViewController alloc] initWithHeader:@"Select a model to emulate"];
+    controller.footer = @"Changing the emulated model will reset the emulator";
+    
+    GB_model_t currentModel = GB_get_model(&_gb);
+    struct {
+        NSString *title;
+        NSString *settingKey;
+        bool checked;
+    } items[] = {
+        {@"Game Boy", @"GBDMGModel", currentModel < GB_MODEL_SGB},
+        {@"Game Boy Pocket/Light", nil, currentModel == GB_MODEL_MGB},
+        {@"Super Game Boy", @"GBSGBModel", GB_is_sgb(&_gb)},
+        {@"Game Boy Color", @"GBCGBModel", GB_is_cgb(&_gb) && currentModel <= GB_MODEL_CGB_E},
+        {@"Game Boy Advance", @"GBAGBModel", currentModel > GB_MODEL_CGB_E},
+    };
+    
+    for (unsigned i = 0; i <  sizeof(items) / sizeof(items[0]); i++) {
+        GB_model_t model = GB_MODEL_MGB;
+        if (items[i].settingKey) {
+            model = [[NSUserDefaults standardUserDefaults] integerForKey:items[i].settingKey];
+        }
+        [controller addOption:items[i].title withCheckmark:items[i].checked action:^{
+            GB_switch_model_and_reset(&_gb, model);
+            [self start];
+        }];
+    }
+    [self presentViewController:controller animated:true completion:nil];
+}
+
+- (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)(void))completion
+{
+    [super dismissViewControllerAnimated:flag completion:^() {
+        if (completion) {
+            completion();
+        }
+        if (!self.presentedViewController) {
+            [self start];
+        }
+    }];
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application

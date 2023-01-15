@@ -7,6 +7,12 @@
 
 @implementation GBLoadROMTableViewController
 
+- (instancetype)init
+{
+    self = [super initWithStyle:UITableViewStyleGrouped];
+    return self;
+}
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
     return 1;
@@ -17,13 +23,19 @@
     return [GBROMManager sharedManager].allROMs.count;
 }
 
-
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
-    cell.textLabel.text = [GBROMManager sharedManager].allROMs[[indexPath indexAtPosition:1]];
+    NSString *rom = [GBROMManager sharedManager].allROMs[[indexPath indexAtPosition:1]];
+    cell.textLabel.text = rom;
+    cell.accessoryType = [rom isEqualToString:[GBROMManager sharedManager].currentROM]? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
     
     return cell;
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+{
+    return @"ROM Library";
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
