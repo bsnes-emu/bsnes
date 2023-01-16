@@ -9,6 +9,7 @@
 #import "GBHapticManager.h"
 #import "GBMenuViewController.h"
 #import "GBOptionViewController.h"
+#import "GBAboutController.h"
 #include <Core/gb.h>
 
 @implementation GBViewController
@@ -207,6 +208,11 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         }];
     }
     [self presentViewController:controller animated:true completion:nil];
+}
+
+- (void)showAbout
+{
+    [self presentViewController:[[GBAboutController alloc] init] animated:true completion:nil];
 }
 
 - (void)dismissViewControllerAnimated:(BOOL)flag completion:(void (^)(void))completion

@@ -7,4 +7,5 @@
 - (void)start;
 - (void)stop;
 - (void)changeModel;
+- (void)showAbout;
 @end

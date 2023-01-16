@@ -39,7 +39,7 @@
         {@"Model", @"ModelTemplate", SelectorString(changeModel)},
         {@"States", @"square.stack", nil},
         {@"Settings", @"gear", nil},
-        {@"About", @"info.circle", nil},
+        {@"About", @"info.circle", SelectorString(showAbout)},
     };
     
     double width = self.view.frame.size.width / 3;
