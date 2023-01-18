@@ -11,6 +11,7 @@
 - (instancetype)init
 {
     self = [super initWithStyle:UITableViewStyleGrouped];
+    self.navigationItem.rightBarButtonItem = self.editButtonItem;
     return self;
 }
 
@@ -55,9 +56,14 @@
     return 64;
 }
 
-- (NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+- (NSString *)title
 {
     return @"ROM Library";
+}
+
+- (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
+{
+    return @"Import ROMs using AirDrop or by opening them in SameBoy using the Files app";
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -71,6 +77,29 @@
 - (UIModalPresentationStyle)modalPresentationStyle
 {
     return UIModalPresentationFormSheet;
+}
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (editingStyle != UITableViewCellEditingStyleDelete) return;
+    NSString *rom = [GBROMManager sharedManager].allROMs[[indexPath indexAtPosition:1]];
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:@"Delete ROM “%@”?", rom]
+                                                                   message: @"Save data for this ROM will also be deleted."
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    [alert  addAction:[UIAlertAction actionWithTitle:@"Delete"
+                                               style:UIAlertActionStyleDestructive
+                                             handler:^(UIAlertAction * _Nonnull action) {
+        [[GBROMManager sharedManager] deleteROM:rom];
+        [self.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+        if ([[GBROMManager sharedManager].currentROM isEqualToString:rom]) {
+            [GBROMManager sharedManager].currentROM = nil;
+            [[NSNotificationCenter defaultCenter] postNotificationName:@"GBROMChanged" object:nil];
+        }
+    }]];
+    [alert  addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                               style:UIAlertActionStyleCancel
+                                             handler:nil]];
+    [self presentViewController:alert animated:true completion:nil];
 }
 
 @end

@@ -16,4 +16,5 @@
 - (NSString *)autosaveStateFileForROM:(NSString *)rom;
 - (NSString *)stateFile:(unsigned)index forROM:(NSString *)rom;
 - (NSString *)importROM:(NSString *)romFile keepOriginal:(bool)keep;
+- (void)deleteROM:(NSString *)rom;
 @end

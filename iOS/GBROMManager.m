@@ -160,4 +160,11 @@
     return friendlyName;
 }
 
+- (void)deleteROM:(NSString *)rom
+{
+    NSString *root = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstObject;
+    NSString *romDirectory = [root stringByAppendingPathComponent:rom];
+    [[NSFileManager defaultManager] removeItemAtPath:romDirectory error:nil];
+}
+
 @end

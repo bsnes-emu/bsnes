@@ -107,6 +107,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     
     [self initGameBoy];
     _gbView = _backgroundView.gbView;
+    _gbView.hidden = true;
     _gbView.gb = &_gb;
     [_gbView screenSizeChanged];
     
@@ -149,6 +150,10 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
             [self loadState:[GBROMManager sharedManager].autosaveStateFile];
         }
     }
+    else {
+        _romLoaded = false;
+    }
+    _gbView.hidden = !_romLoaded;
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
@@ -174,7 +179,13 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)openLibrary
 {
-    [self presentViewController:[[GBLoadROMTableViewController alloc] init]
+    UINavigationController *controller = [[UINavigationController alloc] initWithRootViewController:[[GBLoadROMTableViewController alloc] init]];
+    UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:@"Close"
+                                                             style:UIBarButtonItemStylePlain
+                                                             target:self
+                                                             action:@selector(dismissViewController)];
+    [controller.visibleViewController.navigationItem setLeftBarButtonItem:close];
+    [self presentViewController:controller
                        animated:true
                      completion:nil];
 }
@@ -225,6 +236,11 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
             [self start];
         }
     }];
+}
+
+- (void)dismissViewController
+{
+    [self dismissViewControllerAnimated:true completion:nil];
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application
