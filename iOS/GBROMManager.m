@@ -36,7 +36,8 @@
 
 - (NSString *)romFileForDirectory:(NSString *)romDirectory
 {
-    for (NSString *filename in [NSFileManager.defaultManager enumeratorAtPath:romDirectory]) {
+    for (NSString *filename in [NSFileManager.defaultManager contentsOfDirectoryAtPath:romDirectory
+                                                                                 error:nil]) {
         if ([@[@"gb", @"gbc", @"isx"] containsObject:filename.pathExtension.lowercaseString]) {
             return [romDirectory stringByAppendingPathComponent:filename];
         }
@@ -103,7 +104,9 @@
 {
     NSMutableArray<NSString *> *ret = [NSMutableArray array];
     NSString *root = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstObject;
-    for (NSString *romDirectory in [NSFileManager.defaultManager enumeratorAtPath:root]) {
+    for (NSString *romDirectory in [NSFileManager.defaultManager contentsOfDirectoryAtPath:root
+                                                                                     error:nil]) {
+        if ([romDirectory hasPrefix:@"."] || [romDirectory isEqualToString:@"Inbox"]) continue;
         if ([self romFileForDirectory:[root stringByAppendingPathComponent:romDirectory]]) {
             [ret addObject:romDirectory];
         }
