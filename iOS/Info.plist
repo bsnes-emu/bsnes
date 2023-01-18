@@ -48,5 +48,110 @@
 	</dict>
 	<key>LSApplicationCategoryType</key>
 	<string>public.app-category.games</string>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+	<key>UIFileSharingEnabled</key>
+	<true/>
+	<key>UISupportsDocumentBrowser</key>
+	<true/>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>gb</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Game Boy Game</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.github.liji32.sameboy.gb</string>
+			</array>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>gbc</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Game Boy Color Game</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.github.liji32.sameboy.gbc</string>
+			</array>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+		</dict>
+		<dict>
+			<key>CFBundleTypeExtensions</key>
+			<array>
+				<string>isx</string>
+			</array>
+			<key>CFBundleTypeName</key>
+			<string>Game Boy ISX File</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.github.liji32.sameboy.isx</string>
+			</array>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+		</dict>
+	</array>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Game Boy Game</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.github.liji32.sameboy.gb</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>gb</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Game Boy Color Game</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.github.liji32.sameboy.gbc</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>gbc</string>
+				</array>
+			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Game Boy ISX File</string>
+			<key>UTTypeIdentifier</key>
+			<string>com.github.liji32.sameboy.isx</string>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>isx</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
 </dict>
 </plist>

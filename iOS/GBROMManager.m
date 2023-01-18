@@ -114,4 +114,50 @@
     return ret;
 }
 
+- (NSString *)importROM:(NSString *)romFile keepOriginal:(bool)keep
+{
+    NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\([^)]+\\)|\\[[^\\]]+\\]" options:0 error:nil];
+    NSString *friendlyName = [[romFile lastPathComponent] stringByDeletingPathExtension];
+    friendlyName = [regex stringByReplacingMatchesInString:friendlyName options:0 range:NSMakeRange(0, [friendlyName length]) withTemplate:@""];
+    friendlyName = [friendlyName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+    
+    NSString *root = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstObject;
+    if ([[NSFileManager defaultManager] fileExistsAtPath:[root stringByAppendingPathComponent:friendlyName]]) {
+        unsigned i = 2;
+        while (true) {
+            NSString *attempt = [friendlyName stringByAppendingFormat:@" %u", i];
+            if ([[NSFileManager defaultManager] fileExistsAtPath:[root stringByAppendingPathComponent:attempt]]) {
+                i++;
+                continue;
+            }
+            friendlyName = attempt;
+            break;
+        }
+    }
+    
+    NSString *romFolder = [root stringByAppendingPathComponent:friendlyName];
+    [[NSFileManager defaultManager] createDirectoryAtPath:romFolder
+                              withIntermediateDirectories:false
+                                               attributes:nil
+                                                    error:nil];
+    
+    NSString *newROMPath = [romFolder stringByAppendingPathComponent:romFile.lastPathComponent];
+    
+    NSError *error = nil;
+    
+    if (keep) {
+        [[NSFileManager defaultManager] linkItemAtPath:romFile
+                                                toPath:newROMPath
+                                                 error:&error];
+    }
+    else {
+        [[NSFileManager defaultManager] moveItemAtPath:romFile
+                                                toPath:newROMPath
+                                                 error:&error];
+    }
+    NSLog(@"%@", error);
+    
+    return friendlyName;
+}
+
 @end

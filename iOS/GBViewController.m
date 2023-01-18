@@ -316,7 +316,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     /* Convert the screenshot to a CGImageRef */
     CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data.bytes, data.length, NULL);
     CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
-    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault;
+    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaNoneSkipLast;
     CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
     
     CGImageRef iref = CGImageCreate(width,
@@ -472,5 +472,22 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 - (void)updatePalette
 {
     GB_set_palette(&_gb, [self userPalette]);
+}
+
+- (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
+{
+    [self stop];
+    NSString *potentialROM = [[url.path stringByDeletingLastPathComponent] lastPathComponent];
+    if ([[[GBROMManager sharedManager] romFileForROM:potentialROM].stringByStandardizingPath isEqualToString:url.path.stringByStandardizingPath]) {
+        [GBROMManager sharedManager].currentROM = potentialROM;
+    }
+    else {
+        [GBROMManager sharedManager].currentROM =
+            [[GBROMManager sharedManager] importROM:url.path
+                                       keepOriginal:[options[UIApplicationOpenURLOptionsOpenInPlaceKey] boolValue]];
+    }
+    [self loadROM];
+    [self start];
+    return false;
 }
 @end
