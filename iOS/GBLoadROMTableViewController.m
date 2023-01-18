@@ -33,27 +33,27 @@
     cell.accessoryType = [rom isEqualToString:[GBROMManager sharedManager].currentROM]? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
     
     NSString *pngPath = [[[GBROMManager sharedManager] autosaveStateFileForROM:rom] stringByAppendingPathExtension:@"png"];
+    UIGraphicsBeginImageContextWithOptions((CGSize){60, 60}, false, self.view.window.screen.scale);
+    UIBezierPath *mask = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(0, 3, 60, 54) cornerRadius:4];
+    [mask addClip];
     UIImage *image = [UIImage imageWithContentsOfFile:pngPath];
-    if (!image) {
-        static dispatch_once_t onceToken;
-        static UIImage *emptyImage = nil;
-        dispatch_once(&onceToken, ^{
-            UIGraphicsBeginImageContextWithOptions((CGSize){160, 144}, false, 1);
-            emptyImage = UIGraphicsGetImageFromCurrentImageContext();
-            UIGraphicsEndImageContext();
-        });
-        image = emptyImage;
+    [image drawInRect:mask.bounds];
+    if (@available(iOS 13.0, *)) {
+        [[UIColor tertiaryLabelColor] set];
     }
-    cell.padding = 4;
-    cell.imageView.image = image;
-    cell.imageView.contentMode = UIViewContentModeScaleAspectFit;
+    else {
+        [UIColor colorWithWhite:0 alpha:0.5];
+    }
+    [mask stroke];
+    cell.imageView.image = UIGraphicsGetImageFromCurrentImageContext();
+    UIGraphicsEndImageContext();
     
     return cell;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    return 64;
+    return 60;
 }
 
 - (NSString *)title
@@ -63,7 +63,7 @@
 
 - (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section
 {
-    return @"Import ROMs using AirDrop or by opening them in SameBoy using the Files app";
+    return @"Import ROMs by opening them in SameBoy using the Files app or a web browser, or by sending them over with AirDrop";
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath

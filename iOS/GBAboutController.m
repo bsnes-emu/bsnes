@@ -70,6 +70,7 @@
     }
     _licenseView.hidden = true;
     _licenseView.userInteractionEnabled = false;
+    _licenseView.layer.cornerRadius = 6;
     [root addSubview:_licenseView];
     
     _buttonsView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 480)];
