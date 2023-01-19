@@ -11,13 +11,13 @@
     CGSize resolution = {self.resolution.height - self.cutout, self.resolution.width};
     
     CGRect screenRect = {0,};
-    screenRect.size.height = self.hasFractionalPixels? resolution.height : floor(resolution.height / 144) * 144;
+    screenRect.size.height = self.hasFractionalPixels? resolution.height : floor((resolution.height - self.homeBar) / 144) * 144;
     screenRect.size.width = screenRect.size.height / 144 * 160;
     
     double horizontalMargin, verticalMargin;
     while (true) {
         horizontalMargin = (resolution.width - screenRect.size.width) / 2;
-        verticalMargin = (resolution.height - screenRect.size.height) / 2;
+        verticalMargin = (resolution.height - self.homeBar - screenRect.size.height) / 2;
         if (horizontalMargin / self.factor < 164) {
             if (self.hasFractionalPixels) {
                 screenRect.size.width = resolution.width - 164 * self.factor * 2;
@@ -37,10 +37,10 @@
     bool drawSameBoyLogo = false;
     if (verticalMargin * 2 > screenBorderWidth * 7) {
         drawSameBoyLogo = true;
-        screenRect.origin.y = (resolution.height - screenRect.size.height - screenBorderWidth * 5) / 2;
+        screenRect.origin.y = (resolution.height - self.homeBar - screenRect.size.height - screenBorderWidth * 5) / 2;
     }
     else {
-        screenRect.origin.y = (resolution.height - screenRect.size.height) / 2;
+        screenRect.origin.y = (resolution.height - self.homeBar - screenRect.size.height) / 2;
     }
     
     self.screenRect = screenRect;

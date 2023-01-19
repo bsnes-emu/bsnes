@@ -21,6 +21,10 @@
                                                                 ignoreHidden:true] * _factor;
     _cutout = _minY <= 24 * _factor? 0 : _minY;
     
+    if ([UIApplication sharedApplication].windows[0].safeAreaInsets.bottom) {
+        _homeBar =  21 * _factor;
+    }
+    
     // The Plus series will scale things lossily anyway, so no need to bother with integer scale things
     // This also "catches" zoomed display modes
     _hasFractionalPixels = _factor != [UIScreen mainScreen].nativeScale;

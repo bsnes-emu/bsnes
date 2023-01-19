@@ -24,6 +24,7 @@
 @property (readonly) CGSize resolution;
 @property (readonly) unsigned factor;
 @property (readonly) unsigned minY;
+@property (readonly) unsigned homeBar;
 @property (readonly) unsigned cutout;
 @property (readonly) bool hasFractionalPixels;
 

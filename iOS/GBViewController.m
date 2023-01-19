@@ -271,10 +271,16 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (BOOL)prefersHomeIndicatorAutoHidden
 {
-    UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
-    if (orientation == UIInterfaceOrientationPortrait || orientation == UIInterfaceOrientationPortraitUpsideDown) {
-        return false;
-    }
+    return true;
+}
+
+- (UIRectEdge)preferredScreenEdgesDeferringSystemGestures
+{
+    return UIRectEdgeTop;
+}
+
+- (BOOL)prefersStatusBarHidden
+{
     return true;
 }
 
