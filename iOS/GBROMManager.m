@@ -1,4 +1,5 @@
 #import "GBROMManager.h"
+#include <copyfile.h>
 
 @implementation GBROMManager
 {
@@ -142,20 +143,25 @@
                                                     error:nil];
     
     NSString *newROMPath = [romFolder stringByAppendingPathComponent:romFile.lastPathComponent];
-    
-    NSError *error = nil;
-    
+        
     if (keep) {
-        [[NSFileManager defaultManager] linkItemAtPath:romFile
-                                                toPath:newROMPath
-                                                 error:&error];
+        if (copyfile(romFile.fileSystemRepresentation,
+                     newROMPath.fileSystemRepresentation,
+                     NULL,
+                     COPYFILE_CLONE)) {
+            [[NSFileManager defaultManager] removeItemAtPath:romFolder error:nil];
+            return nil;
+        }
     }
     else {
-        [[NSFileManager defaultManager] moveItemAtPath:romFile
-                                                toPath:newROMPath
-                                                 error:&error];
+        if (![[NSFileManager defaultManager] moveItemAtPath:romFile
+                                                     toPath:newROMPath
+                                                      error:nil]) {
+            [[NSFileManager defaultManager] removeItemAtPath:romFolder error:nil];
+            return nil;
+        }
+        
     }
-    NSLog(@"%@", error);
     
     return friendlyName;
 }

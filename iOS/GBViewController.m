@@ -498,12 +498,14 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         [GBROMManager sharedManager].currentROM = potentialROM;
     }
     else {
+        [url startAccessingSecurityScopedResource];
         [GBROMManager sharedManager].currentROM =
             [[GBROMManager sharedManager] importROM:url.path
                                        keepOriginal:[options[UIApplicationOpenURLOptionsOpenInPlaceKey] boolValue]];
+        [url stopAccessingSecurityScopedResource];
     }
     [self loadROM];
     [self start];
-    return false;
+    return [GBROMManager sharedManager].currentROM != nil;
 }
 @end
