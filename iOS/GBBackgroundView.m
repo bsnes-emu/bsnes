@@ -38,6 +38,7 @@ static void positionView(UIImageView *view, CGPoint position)
     UIImageView *_bButtonView;
     UIImageView *_startButtonView;
     UIImageView *_selectButtonView;
+    UILabel *_screenLabel;
     GB_key_mask_t _lastMask;
 }
 
@@ -46,6 +47,16 @@ static void positionView(UIImageView *view, CGPoint position)
     self = [super initWithImage:nil];
     if (!self) return nil;
     _touches = [NSMutableSet set];
+    
+    _screenLabel = [[UILabel alloc] initWithFrame:CGRectZero];
+    _screenLabel.text = @"Tap the Game Boy screen to open the menu and load a ROM from the library.";
+    _screenLabel.font = [UIFont systemFontOfSize:20 weight:UIFontWeightMedium];
+    _screenLabel.textAlignment = NSTextAlignmentCenter;
+    _screenLabel.textColor = [UIColor whiteColor];
+    _screenLabel.lineBreakMode = NSLineBreakByWordWrapping;
+    _screenLabel.numberOfLines = 0;
+    [self addSubview:_screenLabel];
+    
     _dpadView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"dpad"]];
     _dpadShadowView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"dpadShadow"]];
     _dpadShadowView.hidden = true;
@@ -209,6 +220,12 @@ static void positionView(UIImageView *view, CGPoint position)
     screenFrame.size.height /= [UIScreen mainScreen].scale;
     
     _gbView.frame = screenFrame;
+    
+    screenFrame.origin.x += 8;
+    screenFrame.origin.y += 8;
+    screenFrame.size.width -= 16;
+    screenFrame.size.height -= 16;
+    _screenLabel.frame = screenFrame;
 }
 
 @end
