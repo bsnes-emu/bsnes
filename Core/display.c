@@ -236,7 +236,7 @@ static inline void temperature_tint(double temperature, double *r, double *g, do
             *b = 0;
         }
         else {
-            *b = sqrt(0.75 - temperature);
+            *b = sqrt(0.75 - temperature) / sqrt(0.75);
         }
     }
     else {
