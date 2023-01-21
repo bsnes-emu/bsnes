@@ -113,7 +113,23 @@
             [ret addObject:romDirectory];
         }
     }
-    return ret;
+    return [ret sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+}
+
+- (NSString *)makeNameUnique:(NSString *)name
+{
+    NSString *root = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstObject;
+    if (![[NSFileManager defaultManager] fileExistsAtPath:[root stringByAppendingPathComponent:name]]) return name;
+    
+    unsigned i = 2;
+    while (true) {
+        NSString *attempt = [name stringByAppendingFormat:@" %u", i];
+        if ([[NSFileManager defaultManager] fileExistsAtPath:[root stringByAppendingPathComponent:attempt]]) {
+            i++;
+            continue;
+        }
+        return attempt;
+    }
 }
 
 - (NSString *)importROM:(NSString *)romFile keepOriginal:(bool)keep
@@ -136,7 +152,13 @@
             break;
         }
     }
-    
+
+    return [self importROM:romFile withName:friendlyName keepOriginal:keep];
+}
+
+- (NSString *)importROM:(NSString *)romFile withName:(NSString *)friendlyName keepOriginal:(bool)keep
+{
+    NSString *root = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstObject;
     NSString *romFolder = [root stringByAppendingPathComponent:friendlyName];
     [[NSFileManager defaultManager] createDirectoryAtPath:romFolder
                               withIntermediateDirectories:false
@@ -165,6 +187,27 @@
     }
     
     return friendlyName;
+}
+
+- (NSString *)renameROM:(NSString *)rom toName:(NSString *)newName
+{
+    newName = [self makeNameUnique:newName];
+    if ([rom isEqualToString:_currentROM]) {
+        _currentROM = newName;
+    }
+    NSString *root = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstObject;
+
+    [[NSFileManager defaultManager] moveItemAtPath:[root stringByAppendingPathComponent:rom]
+                                            toPath:[root stringByAppendingPathComponent:newName] error:nil];
+    return newName;
+}
+
+- (NSString *)duplicateROM:(NSString *)rom
+{
+    NSString *newName = [self makeNameUnique:rom];
+    return [self importROM:[self romFileForROM:rom]
+                  withName:newName
+              keepOriginal:true];
 }
 
 - (void)deleteROM:(NSString *)rom

@@ -67,7 +67,7 @@
     return self.uniqueID == object.uniqueID;
 }
 
-- (id)copyWithZone:(nullable NSZone *)zone;
+- (id)copyWithZone:(NSZone *)zone;
 {
     return self;
 }

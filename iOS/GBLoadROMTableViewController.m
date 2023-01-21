@@ -6,6 +6,9 @@
 @end
 
 @implementation GBLoadROMTableViewController
+{
+    NSIndexPath *_renamingPath;
+}
 
 - (instancetype)init
 {
@@ -75,7 +78,7 @@
 
 - (UIModalPresentationStyle)modalPresentationStyle
 {
-    return UIModalPresentationFormSheet;
+    return UIModalPresentationOverFullScreen;
 }
 
 - (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
@@ -87,7 +90,7 @@
                                                             preferredStyle:UIAlertControllerStyleAlert];
     [alert  addAction:[UIAlertAction actionWithTitle:@"Delete"
                                                style:UIAlertActionStyleDestructive
-                                             handler:^(UIAlertAction * _Nonnull action) {
+                                             handler:^(UIAlertAction *action) {
         [[GBROMManager sharedManager] deleteROM:rom];
         [self.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
         if ([[GBROMManager sharedManager].currentROM isEqualToString:rom]) {
@@ -99,6 +102,72 @@
                                                style:UIAlertActionStyleCancel
                                              handler:nil]];
     [self presentViewController:alert animated:true completion:nil];
+}
+
+- (void)renameRow:(NSIndexPath *)indexPath
+{
+    UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+    UITextField *field = [[UITextField alloc] initWithFrame:cell.textLabel.frame];
+    field.font = cell.textLabel.font;
+    field.text = cell.textLabel.text;
+    cell.textLabel.text = @"";
+    [[cell.textLabel superview] addSubview:field];
+    [field becomeFirstResponder];
+    [field selectAll:nil];
+    _renamingPath = indexPath;
+    [field addTarget:self action:@selector(doneRename:) forControlEvents:UIControlEventEditingDidEnd | UIControlEventEditingDidEndOnExit];
+}
+
+- (void)doneRename:(UITextField *)sender
+{
+    if (!_renamingPath) return;
+    NSString *newName = sender.text;
+    NSString *oldName = [GBROMManager sharedManager].allROMs[[_renamingPath indexAtPosition:1]];
+    _renamingPath = nil;
+    if ([newName isEqualToString:oldName]) {
+        [self.tableView reloadData];
+        return;
+    }
+    if ([newName containsString:@"/"]) {
+        [self.tableView reloadData];
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"You can't use a name that contains “/”. Please choose another name."
+                                                                       message:nil
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        [alert  addAction:[UIAlertAction actionWithTitle:@"OK"
+                                                   style:UIAlertActionStyleCancel
+                                                 handler:nil]];
+        [self presentViewController:alert animated:true completion:nil];
+        return;
+    }
+    [[GBROMManager sharedManager] renameROM:oldName toName:newName];
+    [self.tableView reloadData];
+    _renamingPath = nil;
+}
+
+// Leave these ROM management to iOS 13.0 and up for now
+- (UIContextMenuConfiguration *)tableView:(UITableView *)tableView
+contextMenuConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath
+                                    point:(CGPoint)point API_AVAILABLE(ios(13.0))
+{
+    return [UIContextMenuConfiguration configurationWithIdentifier:nil
+                                                   previewProvider:nil
+                                                    actionProvider:^UIMenu *(NSArray<UIMenuElement *> *suggestedActions) {
+        return [UIMenu menuWithTitle:nil children:@[
+            [UIAction actionWithTitle:@"Rename"
+                                image:[UIImage systemImageNamed:@"pencil"]
+                           identifier:nil
+                              handler:^(__kindof UIAction *action) {
+                [self renameRow:indexPath];
+            }],
+            [UIAction actionWithTitle:@"Duplicate"
+                                image:[UIImage systemImageNamed:@"plus.rectangle.on.rectangle"]
+                           identifier:nil
+                              handler:^(__kindof UIAction *action) {
+                [[GBROMManager sharedManager] duplicateROM:[GBROMManager sharedManager].allROMs[[indexPath indexAtPosition:1]]];
+                [self.tableView reloadData];
+            }],
+        ]];
+    }];
 }
 
 @end

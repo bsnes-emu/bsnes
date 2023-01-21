@@ -42,7 +42,7 @@
     return nil;
 }
 
-- (nullable id)tableView:(NSTableView *)tableView objectValueForTableColumn:(nullable NSTableColumn *)tableColumn row:(NSInteger)row
+- (id)tableView:(NSTableView *)tableView objectValueForTableColumn:(NSTableColumn *)tableColumn row:(NSInteger)row
 {
     size_t cheatCount;
     GB_gameboy_t *gb = self.document.gameboy;

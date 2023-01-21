@@ -126,7 +126,7 @@
     return self->_element == object;
 }
 
-- (id)copyWithZone:(nullable NSZone *)zone;
+- (id)copyWithZone:(NSZone *)zone;
 {
     return self;
 }
