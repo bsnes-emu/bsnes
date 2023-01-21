@@ -185,7 +185,7 @@ static void positionView(UIImageView *view, CGPoint position)
         }
         
         GB_set_key_mask(_gbView.gb, mask);
-        if (mask & ~_lastMask) {
+        if ((mask & ~_lastMask) && ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBButtonHaptics"])) {
             [[GBHapticManager sharedManager] doTapHaptic];
         }
         _lastMask = mask;

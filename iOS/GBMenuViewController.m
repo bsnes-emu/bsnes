@@ -38,7 +38,7 @@
         {@"Library", @"bookmark", SelectorString(openLibrary)},
         {@"Model", @"ModelTemplate", SelectorString(changeModel)},
         {@"States", @"square.stack", nil},
-        {@"Settings", @"gear", nil},
+        {@"Settings", @"gear", SelectorString(openSettings)},
         {@"About", @"info.circle", SelectorString(showAbout)},
     };
     

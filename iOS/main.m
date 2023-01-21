@@ -9,7 +9,8 @@ int main(int argc, char * argv[])
         [[NSUserDefaults standardUserDefaults] registerDefaults:@{
             @"GBFilter": @"NearestNeighbor",
             @"GBColorCorrection": @(GB_COLOR_CORRECTION_MODERN_BALANCED),
-            @"GBHighpassFilter": @(GB_HIGHPASS_REMOVE_DC_OFFSET),
+            @"GBHighpassFilter": @(GB_HIGHPASS_ACCURATE),
+            @"GBRewindLength": @(10),
             @"GBFrameBlendingMode": @(GB_FRAME_BLENDING_MODE_ACCURATE),
             
             @"GBDMGModel": @(GB_MODEL_DMG_B),
@@ -17,10 +18,9 @@ int main(int argc, char * argv[])
             @"GBAGBModel": @(GB_MODEL_AGB_A),
             @"GBSGBModel": @(GB_MODEL_SGB2),
             @"GBRumbleMode": @(GB_RUMBLE_CARTRIDGE_ONLY),
-            @"GBColorPalette": @(1),
-            
-            @"GBVolume": @(1.0),
+            @"GBButtonHaptics": @YES,
                         
+            @"GBCurrentTheme": @"Lime (Game Boy)",
             // Default themes
             @"GBThemes": @{
                     @"Desert": @{

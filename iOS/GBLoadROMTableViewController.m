@@ -1,5 +1,4 @@
 #import "GBLoadROMTableViewController.h"
-#import "GBTableViewCell.h"
 #import "GBROMManager.h"
 
 @interface GBLoadROMTableViewController ()
@@ -27,7 +26,7 @@
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    GBTableViewCell *cell = [[GBTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
+    UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
     NSString *rom = [GBROMManager sharedManager].allROMs[[indexPath indexAtPosition:1]];
     cell.textLabel.text = rom;
     cell.accessoryType = [rom isEqualToString:[GBROMManager sharedManager].currentROM]? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;

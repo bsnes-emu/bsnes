@@ -58,6 +58,7 @@
 
 - (NSString *)romFileForROM:(NSString *)rom
 {
+    if ([rom isEqualToString:@"Inbox"]) return nil;
     if (rom == _currentROM) {
         return self.romFile;
     }

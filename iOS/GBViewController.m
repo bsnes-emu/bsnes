@@ -10,6 +10,7 @@
 #import "GBMenuViewController.h"
 #import "GBOptionViewController.h"
 #import "GBAboutController.h"
+#import "GBSettingsViewController.h"
 #include <Core/gb.h>
 
 @implementation GBViewController
@@ -28,6 +29,7 @@
     size_t _audioBufferPosition;
     size_t _audioBufferNeeded;
     GBAudioClient *_audioClient;
+    NSMutableSet *_defaultsObservers;
 }
 
 static void loadBootROM(GB_gameboy_t *gb, GB_boot_rom_t type)
@@ -71,22 +73,60 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)initGameBoy
 {
-    GB_init(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBCGBModel"]);
-    GB_set_user_data(&_gb, (__bridge void *)(self));
-    GB_set_boot_rom_load_callback(&_gb, (GB_boot_rom_load_callback_t)loadBootROM);
-    GB_set_vblank_callback(&_gb, (GB_vblank_callback_t) vblank);
-    GB_set_log_callback(&_gb, (GB_log_callback_t) consoleLog);
-    GB_set_color_correction_mode(&_gb, (GB_color_correction_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorCorrection"]);
-    GB_set_light_temperature(&_gb, [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBLightTemperature"]);
-    GB_set_interference_volume(&_gb, [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBInterferenceVolume"]);
-    GB_set_border_mode(&_gb, GB_BORDER_NEVER);
-    [self updatePalette];
-    GB_set_rgb_encode_callback(&_gb, rgbEncode);
-    GB_set_highpass_filter_mode(&_gb, (GB_highpass_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBHighpassFilter"]);
-    GB_set_rtc_mode(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRTCMode"]);
-    GB_apu_set_sample_callback(&_gb, audioCallback);
-    GB_set_rumble_callback(&_gb, rumbleCallback);
-    [self updateRumbleMode];
+    GB_gameboy_t *gb = &_gb;
+    GB_init(gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBCGBModel"]);
+    GB_set_user_data(gb, (__bridge void *)(self));
+    GB_set_boot_rom_load_callback(gb, (GB_boot_rom_load_callback_t)loadBootROM);
+    GB_set_vblank_callback(gb, (GB_vblank_callback_t) vblank);
+    GB_set_log_callback(gb, (GB_log_callback_t) consoleLog);
+    [self addDefaultObserver:^(id newValue) {
+        GB_set_color_correction_mode(gb, (GB_color_correction_mode_t)[newValue integerValue]);
+    } forKey:@"GBColorCorrection"];
+    [self addDefaultObserver:^(id newValue) {
+        GB_set_light_temperature(gb, [newValue doubleValue]);
+    } forKey:@"GBLightTemperature"];
+    [self addDefaultObserver:^(id newValue) {
+        GB_set_interference_volume(gb, [newValue doubleValue]);
+    } forKey:@"GBInterferenceVolume"];
+    GB_set_border_mode(gb, GB_BORDER_NEVER);
+    __weak typeof(self) weakSelf = self;
+    [self addDefaultObserver:^(id newValue) {
+        [weakSelf updatePalette];
+    } forKey:@"GBCurrentTheme"];
+    GB_set_rgb_encode_callback(gb, rgbEncode);
+    [self addDefaultObserver:^(id newValue) {
+        GB_set_highpass_filter_mode(gb, (GB_highpass_mode_t)[newValue integerValue]);
+    } forKey:@"GB_HIGHPASS_ACCURATE"];
+    [self addDefaultObserver:^(id newValue) {
+        GB_set_rtc_mode(gb, [newValue integerValue]);
+    } forKey:@"GBRTCMode"];
+    GB_apu_set_sample_callback(gb, audioCallback);
+    GB_set_rumble_callback(gb, rumbleCallback);
+    [self addDefaultObserver:^(id newValue) {
+        GB_set_rumble_mode(gb, [newValue integerValue]);
+    } forKey:@"GBRumbleMode"];
+    [self addDefaultObserver:^(id newValue) {
+        GB_set_interference_volume(gb, [newValue doubleValue]);
+    } forKey:@"GBInterferenceVolume"];
+}
+
+- (void)addDefaultObserver:(void(^)(id newValue))block forKey:(NSString *)key
+{
+    if (!_defaultsObservers) {
+        _defaultsObservers = [NSMutableSet set];
+    }
+    block = [block copy];
+    [_defaultsObservers addObject:block];
+    [[NSUserDefaults standardUserDefaults] addObserver:self
+                                            forKeyPath:key
+                                               options:NSKeyValueObservingOptionNew
+                                               context:(void *)block];
+    block([[NSUserDefaults standardUserDefaults] objectForKey:key]);
+}
+
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context
+{
+    ((__bridge void(^)(id))context)(change[NSKeyValueChangeNewKey]);
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -110,6 +150,16 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     _gbView.hidden = true;
     _gbView.gb = &_gb;
     [_gbView screenSizeChanged];
+    
+    [self addDefaultObserver:^(id newValue) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"GBFilterChanged" object:nil];
+    } forKey:@"GBFilter"];
+    
+    __weak GBView *weakGBView = _gbView;
+    [self addDefaultObserver:^(id newValue) {
+        weakGBView.frameBlendingMode = [newValue integerValue];
+    } forKey:@"GBFrameBlendingMode"];
+
     
     [self willRotateToInterfaceOrientation:[UIApplication sharedApplication].statusBarOrientation
                                   duration:0];
@@ -219,6 +269,17 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         }];
     }
     [self presentViewController:controller animated:true completion:nil];
+}
+
+- (void)openSettings
+{
+    UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:@"Close"
+                                                              style:UIBarButtonItemStylePlain
+                                                             target:self
+                                                             action:@selector(dismissViewController)];
+    [self presentViewController:[GBSettingsViewController settingsViewControllerWithLeftButton:close]
+                       animated:true
+                     completion:nil];
 }
 
 - (void)showAbout
@@ -383,6 +444,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
     GB_save_battery(&_gb, [GBROMManager sharedManager].batterySaveFile.fileSystemRepresentation);
     [self saveStateToFile:[GBROMManager sharedManager].autosaveStateFile];
+    [[GBHapticManager sharedManager] setRumbleStrength:0];
 }
 
 - (void)start
@@ -463,32 +525,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [[GBHapticManager sharedManager] setRumbleStrength:amp];
 }
 
-- (void)updateRumbleMode
-{
-    GB_set_rumble_mode(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRumbleMode"]);
-}
-
 - (const GB_palette_t *)userPalette
 {
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    switch ([defaults integerForKey:@"GBColorPalette"]) {
-        case 1: return &GB_PALETTE_DMG;
-        case 2: return &GB_PALETTE_MGB;
-        case 3: return &GB_PALETTE_GBL;
-        default: return &GB_PALETTE_GREY;
-        case -1: {
-            static GB_palette_t customPalette;
-            NSArray *colors = [defaults dictionaryForKey:@"GBThemes"][[defaults stringForKey:@"GBCurrentTheme"]][@"Colors"];
-            if (colors.count == 5) {
-                unsigned i = 0;
-                for (NSNumber *color in colors) {
-                    uint32_t c = [color unsignedIntValue];
-                    customPalette.colors[i++] = (struct GB_color_s) {c, c >> 8, c >> 16};
-                }
-            }
-            return &customPalette;
-        }
-    }
+    return [GBSettingsViewController paletteForTheme:[[NSUserDefaults standardUserDefaults] stringForKey:@"GBCurrentTheme"]];
 }
 
 - (void)updatePalette
