@@ -44,7 +44,7 @@
         [[UIColor tertiaryLabelColor] set];
     }
     else {
-        [UIColor colorWithWhite:0 alpha:0.5];
+        [[UIColor colorWithWhite:0 alpha:0.5] set];
     }
     [mask stroke];
     cell.imageView.image = UIGraphicsGetImageFromCurrentImageContext();

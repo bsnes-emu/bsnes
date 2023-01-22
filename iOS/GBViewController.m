@@ -11,6 +11,7 @@
 #import "GBOptionViewController.h"
 #import "GBAboutController.h"
 #import "GBSettingsViewController.h"
+#import "GBStatesViewController.h"
 #include <Core/gb.h>
 
 @implementation GBViewController
@@ -96,7 +97,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     GB_set_rgb_encode_callback(gb, rgbEncode);
     [self addDefaultObserver:^(id newValue) {
         GB_set_highpass_filter_mode(gb, (GB_highpass_mode_t)[newValue integerValue]);
-    } forKey:@"GB_HIGHPASS_ACCURATE"];
+    } forKey:@"GBHighpassFilter"];
     [self addDefaultObserver:^(id newValue) {
         GB_set_rtc_mode(gb, [newValue integerValue]);
     } forKey:@"GBRTCMode"];
@@ -178,12 +179,12 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     return true;
 }
 
-- (void)loadState:(NSString *)state
+- (void)loadStateFromFile:(NSString *)file
 {
     GB_model_t model;
-    if (!GB_get_state_model(state.fileSystemRepresentation, &model)) {
+    if (!GB_get_state_model(file.fileSystemRepresentation, &model)) {
         GB_switch_model_and_reset(&_gb, model);
-        GB_load_state(&_gb, state.fileSystemRepresentation);
+        GB_load_state(&_gb, file.fileSystemRepresentation);
     }
 }
 
@@ -197,7 +198,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         if (_romLoaded) {
             GB_reset(&_gb);
             GB_load_battery(&_gb, [GBROMManager sharedManager].batterySaveFile.fileSystemRepresentation);
-            [self loadState:[GBROMManager sharedManager].autosaveStateFile];
+            [self loadStateFromFile:[GBROMManager sharedManager].autosaveStateFile];
         }
     }
     else {
@@ -269,6 +270,19 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         }];
     }
     [self presentViewController:controller animated:true completion:nil];
+}
+
+- (void)openStates
+{
+    UINavigationController *controller = [[UINavigationController alloc] initWithRootViewController:[[GBStatesViewController alloc] init]];
+    UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:@"Close"
+                                                              style:UIBarButtonItemStylePlain
+                                                             target:self
+                                                             action:@selector(dismissViewController)];
+    [controller.visibleViewController.navigationItem setLeftBarButtonItem:close];
+    [self presentViewController:controller
+                       animated:true
+                     completion:nil];
 }
 
 - (void)openSettings

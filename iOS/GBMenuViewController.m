@@ -37,7 +37,7 @@
         {@"Reset", @"arrow.2.circlepath", SelectorString(reset)},
         {@"Library", @"bookmark", SelectorString(openLibrary)},
         {@"Model", @"ModelTemplate", SelectorString(changeModel)},
-        {@"States", @"square.stack", nil},
+        {@"States", @"square.stack", SelectorString(openStates)},
         {@"Settings", @"gear", SelectorString(openSettings)},
         {@"About", @"info.circle", SelectorString(showAbout)},
     };
@@ -62,7 +62,8 @@
             continue;
         }
         SEL selector = NSSelectorFromString(buttons[i].selector);
-        if (selector == @selector(reset) && ![GBROMManager sharedManager].currentROM) {
+        if ((selector == @selector(reset) || selector == @selector(openStates))
+            && ![GBROMManager sharedManager].currentROM) {
             button.enabled = false;
             continue;
         }

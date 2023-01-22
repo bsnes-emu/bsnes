@@ -7,6 +7,9 @@
 - (void)start;
 - (void)stop;
 - (void)changeModel;
+- (void)openStates;
 - (void)openSettings;
 - (void)showAbout;
+- (void)saveStateToFile:(NSString *)file;
+- (void)loadStateFromFile:(NSString *)file;
 @end
