@@ -269,7 +269,16 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
             [self start];
         }];
     }
-    [self presentViewController:controller animated:true completion:nil];
+    controller.title = @"Change Model";
+    
+    UINavigationController *navController = [[UINavigationController alloc] initWithRootViewController:controller];
+    UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:@"Close"
+                                                              style:UIBarButtonItemStylePlain
+                                                             target:self
+                                                             action:@selector(dismissViewController)];
+    [navController.visibleViewController.navigationItem setLeftBarButtonItem:close];
+
+    [self presentViewController:navController animated:true completion:nil];
 }
 
 - (void)openStates

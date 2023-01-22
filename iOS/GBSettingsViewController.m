@@ -112,7 +112,7 @@ static NSString const *typeLightTemp = @"typeLightTemp";
 #define QUICK_SUBMENU(title, ...) @{@"type": typeOptionSubmenu, @"title": title, @"submenu": @[@{@"items": __VA_ARGS__}]}
     NSArray<NSDictionary *> *emulationMenu = @[
         @{
-            @"header": @"Rewind duration",
+            @"header": @"Rewind Duration",
             @"items": @[
                 @{@"type": typeRadio, @"pref": @"GBRewindLength", @"title": @"Disabled",   @"value": @0,},
                 @{@"type": typeRadio, @"pref": @"GBRewindLength", @"title": @"10 Seconds", @"value": @10,},
@@ -124,14 +124,14 @@ static NSString const *typeLightTemp = @"typeLightTemp";
             ]
         },
         @{
-            @"header": @"Real Time Clock emulation",
+            @"header": @"Real Time Clock Emulation",
             @"items": @[
                 @{@"type": typeRadio, @"pref": @"GBRTCMode", @"title": @"Accurate",   @"value": @(GB_RTC_MODE_ACCURATE),},
-                @{@"type": typeRadio, @"pref": @"GBRTCMode", @"title": @"Sync to system clock", @"value": @(GB_RTC_MODE_SYNC_TO_HOST),},
+                @{@"type": typeRadio, @"pref": @"GBRTCMode", @"title": @"Sync to System Clock", @"value": @(GB_RTC_MODE_SYNC_TO_HOST),},
             ]
         },
         @{
-            @"header": @"Emulated revisions",
+            @"header": @"Emulated Revisions",
             @"items": @[
                 QUICK_SUBMENU(@"Game Boy", @[
                     @{@"type": typeDisabled, @"title": @"DMG-CPU 0"},
@@ -169,11 +169,11 @@ static NSString const *typeLightTemp = @"typeLightTemp";
         @{
             @"items": @[
                 @{
-                    @"title": @"Graphics filter",
+                    @"title": @"Graphics Filter",
                     @"type": typeOptionSubmenu,
                     @"submenu": @[
                         @{
-                            @"header": @"Standard filters",
+                            @"header": @"Standard Filters",
                             @"items": @[
                                 @{@"type": typeRadio, @"pref": @"GBFilter", @"title": @"Nearest Neighbor (Pixelated)", @"value": @"NearestNeighbor",},
                                 @{@"type": typeRadio, @"pref": @"GBFilter", @"title": @"Bilinear (Blurry)", @"value": @"Bilinear",},
@@ -181,7 +181,7 @@ static NSString const *typeLightTemp = @"typeLightTemp";
                             ]
                         },
                         @{
-                            @"header": @"Screen filters",
+                            @"header": @"Screen Filters",
                             @"items": @[
                                 @{@"type": typeRadio, @"pref": @"GBFilter", @"title": @"Monochrome LCD Display", @"value": @"MonoLCD",},
                                 @{@"type": typeRadio, @"pref": @"GBFilter", @"title": @"LCD Display", @"value": @"LCD",},
@@ -189,7 +189,7 @@ static NSString const *typeLightTemp = @"typeLightTemp";
                             ]
                         },
                         @{
-                            @"header": @"Upscaling filters",
+                            @"header": @"Upscaling Filters",
                             @"items": @[
                                 @{@"type": typeRadio, @"pref": @"GBFilter", @"title": @"Scale2x", @"value": @"Scale2x"},
                                 @{@"type": typeRadio, @"pref": @"GBFilter", @"title": @"Scale4x", @"value": @"Scale4x"},
@@ -209,14 +209,14 @@ static NSString const *typeLightTemp = @"typeLightTemp";
             @"header": @"Color Correction",
             @"items": @[
                 @{@"type": typeRadio, @"pref": @"GBColorCorrection", @"title": @"Disabled",                     @"value": @(GB_COLOR_CORRECTION_DISABLED),},
-                @{@"type": typeRadio, @"pref": @"GBColorCorrection", @"title": @"Correct color curves",         @"value": @(GB_COLOR_CORRECTION_CORRECT_CURVES),},
+                @{@"type": typeRadio, @"pref": @"GBColorCorrection", @"title": @"Correct Color Curves",         @"value": @(GB_COLOR_CORRECTION_CORRECT_CURVES),},
                 @{@"type": typeSeparator},
                 @{@"type": typeRadio, @"pref": @"GBColorCorrection", @"title": @"Modern – Balanced",            @"value": @(GB_COLOR_CORRECTION_MODERN_BALANCED),},
                 @{@"type": typeRadio, @"pref": @"GBColorCorrection", @"title": @"Modern – Accurate",            @"value": @(GB_COLOR_CORRECTION_MODERN_ACCURATE),},
                 @{@"type": typeRadio, @"pref": @"GBColorCorrection", @"title": @"Modern – Boost contrast",      @"value": @(GB_COLOR_CORRECTION_MODERN_BOOST_CONTRAST),},
                 @{@"type": typeSeparator},
-                @{@"type": typeRadio, @"pref": @"GBColorCorrection", @"title": @"Reduce contrast",              @"value": @(GB_COLOR_CORRECTION_REDUCE_CONTRAST),},
-                @{@"type": typeRadio, @"pref": @"GBColorCorrection", @"title": @"Harsh reality (low contrast)", @"value": @(GB_COLOR_CORRECTION_LOW_CONTRAST),},
+                @{@"type": typeRadio, @"pref": @"GBColorCorrection", @"title": @"Reduce Contrast",              @"value": @(GB_COLOR_CORRECTION_REDUCE_CONTRAST),},
+                @{@"type": typeRadio, @"pref": @"GBColorCorrection", @"title": @"Harsh Reality (Low Contrast)", @"value": @(GB_COLOR_CORRECTION_LOW_CONTRAST),},
             ],
             @"footer": ^NSString *(){
                 return (NSString * const[]){
@@ -231,13 +231,13 @@ static NSString const *typeLightTemp = @"typeLightTemp";
             },
         },
         @{
-            @"header": @"Ambient light temperature",
+            @"header": @"Ambient Light Temperature",
             @"items": @[
                 @{@"type": typeLightTemp, @"pref": @"GBLightTemperature", @"min": @-1, @"max": @1}
             ],
         },
         @{
-            @"header": @"Frame blending",
+            @"header": @"Frame Blending",
             @"items": @[
                 @{@"type": typeRadio, @"pref": @"GBFrameBlendingMode", @"title": @"Disabled", @"value": @(GB_FRAME_BLENDING_MODE_DISABLED),},
                 @{@"type": typeRadio, @"pref": @"GBFrameBlendingMode", @"title": @"Simple",   @"value": @(GB_FRAME_BLENDING_MODE_SIMPLE),},
@@ -246,7 +246,7 @@ static NSString const *typeLightTemp = @"typeLightTemp";
         },
         @{
             @"items": @[@{
-                @"title": @"Monochrome palette",
+                @"title": @"Monochrome Palette",
                 @"type": typeOptionSubmenu,
                 @"submenu": [self paletteMenu]
             }],
@@ -256,11 +256,11 @@ static NSString const *typeLightTemp = @"typeLightTemp";
     
     NSArray<NSDictionary *> *audioMenu = @[
         @{
-            @"header": @"High-pass filter",
+            @"header": @"High-pass Filter",
             @"items": @[
-                @{@"type": typeRadio, @"pref": @"GBHighpassFilter", @"title": @"Disabled (Keep DC offset)",   @"value": @(GB_HIGHPASS_OFF),},
-                @{@"type": typeRadio, @"pref": @"GBHighpassFilter", @"title": @"Accurate (Emulate hardware)", @"value": @(GB_HIGHPASS_ACCURATE),},
-                @{@"type": typeRadio, @"pref": @"GBHighpassFilter", @"title": @"Preserve waveform",           @"value": @(GB_HIGHPASS_REMOVE_DC_OFFSET),},
+                @{@"type": typeRadio, @"pref": @"GBHighpassFilter", @"title": @"Disabled (Keep DC Offset)",   @"value": @(GB_HIGHPASS_OFF),},
+                @{@"type": typeRadio, @"pref": @"GBHighpassFilter", @"title": @"Accurate (Emulate Hardware)", @"value": @(GB_HIGHPASS_ACCURATE),},
+                @{@"type": typeRadio, @"pref": @"GBHighpassFilter", @"title": @"Preserve Waveform",           @"value": @(GB_HIGHPASS_REMOVE_DC_OFFSET),},
             ],
             @"footer": ^NSString *(){
                 return (NSString * const[]){
@@ -280,7 +280,7 @@ static NSString const *typeLightTemp = @"typeLightTemp";
     
     NSArray<NSDictionary *> *controlsMenu = @[
         @{
-            @"header": @"D-pad style",
+            @"header": @"D-pad Style",
             @"items": @[
                 // TODO: Convert to enum when implemented
                 @{@"type": typeRadio, @"pref": @"GBDpadMode", @"title": @"Standard", @"value": @(0),},
@@ -294,9 +294,9 @@ static NSString const *typeLightTemp = @"typeLightTemp";
             },
         },
         @{
-            @"header": @"Fast-forward and rewind behavior",
+            @"header": @"Fast-forward and Rewind Behavior",
             @"items": @[
-                @{@"type": typeCheck, @"pref": @"GBSwipeLock", @"title": @"Lock after swiping"},
+                @{@"type": typeCheck, @"pref": @"GBSwipeLock", @"title": @"Lock After Swiping"},
             ],
             @"footer": ^NSString *(){
                 if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBSwipeLock"]) {
@@ -306,9 +306,9 @@ static NSString const *typeLightTemp = @"typeLightTemp";
             },
         },
         @{
-            @"header": @"Quick save and load",
+            @"header": @"Quick Save and Load",
             @"items": @[
-                @{@"type": typeCheck, @"pref": @"GBSwipeState", @"title": @"Swipe to save and load from slot 1"},
+                @{@"type": typeCheck, @"pref": @"GBSwipeState", @"title": @"Swipe to Save and Load from Slot 1"},
             ],
             @"footer": ^NSString *(){
                 if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBSwipeState"]) {
@@ -318,16 +318,16 @@ static NSString const *typeLightTemp = @"typeLightTemp";
             },
         },
         @{
-            @"header": @"Enable rumble",
+            @"header": @"Enable Rumble",
             @"items": @[
                 @{@"type": typeRadio, @"pref": @"GBRumbleMode", @"title": @"Never",                        @"value": @(GB_RUMBLE_DISABLED),},
-                @{@"type": typeRadio, @"pref": @"GBRumbleMode", @"title": @"For rumble-enabled Game Paks", @"value": @(GB_RUMBLE_CARTRIDGE_ONLY),},
+                @{@"type": typeRadio, @"pref": @"GBRumbleMode", @"title": @"For Rumble-Enabled Game Paks", @"value": @(GB_RUMBLE_CARTRIDGE_ONLY),},
                 @{@"type": typeRadio, @"pref": @"GBRumbleMode", @"title": @"Always",                       @"value": @(GB_RUMBLE_ALL_GAMES),},
             ],
         },
         @{
             @"items": @[
-                @{@"type": typeCheck, @"pref": @"GBButtonHaptics", @"title": @"Enable button haptics"},
+                @{@"type": typeCheck, @"pref": @"GBButtonHaptics", @"title": @"Enable Button Haptics"},
             ],
         },
     ];
