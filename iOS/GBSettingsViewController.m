@@ -283,14 +283,14 @@ static NSString const *typeLightTemp = @"typeLightTemp";
             @"header": @"D-pad Style",
             @"items": @[
                 // TODO: Convert to enum when implemented
-                @{@"type": typeRadio, @"pref": @"GBDpadMode", @"title": @"Standard", @"value": @(0),},
-                @{@"type": typeRadio, @"pref": @"GBDpadMode", @"title": @"Swipe",    @"value": @(1),},
+                @{@"type": typeRadio, @"pref": @"GBSwipeDpad", @"title": @"Standard", @"value": @NO,},
+                @{@"type": typeRadio, @"pref": @"GBSwipeDpad", @"title": @"Swipe",    @"value": @YES,},
             ],
             @"footer": ^NSString *(){
-                return (NSString * const[]){
-                    [0] = @"Directional input is determined by the touch position.",
-                    [1] = @"Directional input is determined by the swipe direction.",
-                }[MIN(1, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBDpadMode"])];
+                if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBSwipeDpad"]) {
+                    return @"Directional input is determined by the swipe direction.";
+                }
+                return @"Directional input is determined by the touch position.";
             },
         },
         @{

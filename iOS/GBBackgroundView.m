@@ -29,9 +29,59 @@ static void positionView(UIImageView *view, CGPoint position)
     };
 }
 
+static GB_key_mask_t angleToKeyMask(double angle)
+{
+    signed quantizedAngle = round(angle / M_PI * 16);
+    if (quantizedAngle < 0) {
+        quantizedAngle += 32;
+    }
+    switch (quantizedAngle) {
+        case 32:
+        case  0: return GB_KEY_RIGHT_MASK;
+        case  1: return GB_KEY_RIGHT_MASK;
+        case  2: return GB_KEY_RIGHT_MASK;
+        case  3: return GB_KEY_RIGHT_MASK | GB_KEY_DOWN_MASK;
+        case  4: return GB_KEY_RIGHT_MASK | GB_KEY_DOWN_MASK;
+        case  5: return GB_KEY_DOWN_MASK;
+        case  6: return GB_KEY_DOWN_MASK;
+        case  7: return GB_KEY_DOWN_MASK;
+            
+        case  8: return GB_KEY_DOWN_MASK;
+        case  9: return GB_KEY_DOWN_MASK;
+        case 10: return GB_KEY_DOWN_MASK;
+        case 11: return GB_KEY_LEFT_MASK | GB_KEY_DOWN_MASK;
+        case 12: return GB_KEY_LEFT_MASK | GB_KEY_DOWN_MASK;
+        case 13: return GB_KEY_LEFT_MASK;
+        case 14: return GB_KEY_LEFT_MASK;
+        case 15: return GB_KEY_LEFT_MASK;
+            
+        case 16: return GB_KEY_LEFT_MASK;
+        case 17: return GB_KEY_LEFT_MASK;
+        case 18: return GB_KEY_LEFT_MASK;
+        case 19: return GB_KEY_LEFT_MASK | GB_KEY_UP_MASK;
+        case 20: return GB_KEY_LEFT_MASK | GB_KEY_UP_MASK;
+        case 21: return GB_KEY_UP_MASK;
+        case 22: return GB_KEY_UP_MASK;
+        case 23: return GB_KEY_UP_MASK;
+            
+        case 24: return GB_KEY_UP_MASK;
+        case 25: return GB_KEY_UP_MASK;
+        case 26: return GB_KEY_UP_MASK;
+        case 27: return GB_KEY_RIGHT_MASK | GB_KEY_UP_MASK;
+        case 28: return GB_KEY_RIGHT_MASK | GB_KEY_UP_MASK;
+        case 29: return GB_KEY_RIGHT_MASK;
+        case 30: return GB_KEY_RIGHT_MASK;
+        case 31: return GB_KEY_RIGHT_MASK;
+    }
+    
+    return 0;
+}
+
 @implementation GBBackgroundView
 {
     NSMutableSet<UITouch *> *_touches;
+    UITouch *_swipePadTouch;
+    CGPoint _swipeOrigin;
     UIImageView *_dpadView;
     UIImageView *_dpadShadowView;
     UIImageView *_aButtonView;
@@ -79,9 +129,23 @@ static void positionView(UIImageView *view, CGPoint position)
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
 {
+    static const double dpadRadius = 75;
+    CGPoint dpadLocation = _layout.dpadLocation;
+    double factor = [UIScreen mainScreen].scale;
+    dpadLocation.x /= factor;
+    dpadLocation.y /= factor;
     for (UITouch *touch in touches) {
-        if (CGRectContainsPoint(self.gbView.frame, [touch locationInView:self])) {
+        CGPoint point = [touch locationInView:self];
+        if (CGRectContainsPoint(self.gbView.frame, point)) {
             [self.window.rootViewController presentViewController:[GBMenuViewController menu] animated:true completion:nil];
+        }
+        
+        if (_usesSwipePad && !_swipePadTouch) {
+            if (fabs(point.x - dpadLocation.x) <= dpadRadius &&
+                fabs(point.y - dpadLocation.y) <= dpadRadius) {
+                _swipePadTouch = touch;
+                _swipeOrigin = point;
+            }
         }
     }
     [_touches unionSet:touches];
@@ -90,6 +154,9 @@ static void positionView(UIImageView *view, CGPoint position)
 
 - (void)touchesEnded:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
 {
+    if ([touches containsObject:_swipePadTouch]) {
+        _swipePadTouch = nil;
+    }
     [_touches minusSet:touches];
     [self touchesChanged];
 }
@@ -111,9 +178,28 @@ static void positionView(UIImageView *view, CGPoint position)
     GB_key_mask_t mask = 0;
     double factor = [UIScreen mainScreen].scale;
     double buttonRadiusSquared = 36 *  36 * factor * factor;
-    double dpadRadiusSquared = 75 *  75 * factor * factor;
+    double dpadRadius = 75 * factor;
     bool dpadHandled = false;
+    if (_usesSwipePad) {
+        dpadHandled = true;
+        if (_swipePadTouch) {
+            CGPoint point = [_swipePadTouch locationInView:self];
+            double squaredDistance = CGPointSquaredDistance(point, _swipeOrigin);
+            if (squaredDistance > 16 * 16) {
+                double angle = CGPointAngle(point, _swipeOrigin);
+                mask |= angleToKeyMask(angle);
+                if (squaredDistance > 24 * 24) {
+                    double deltaX = point.x - _swipeOrigin.x;
+                    double deltaY = point.y - _swipeOrigin.y;
+                    double distance = sqrt(squaredDistance);
+                    _swipeOrigin.x = point.x - deltaX / distance * 24;
+                    _swipeOrigin.y = point.y - deltaY / distance * 24;
+                }
+            }
+        }
+    }
     for (UITouch *touch in _touches) {
+        if (touch == _swipePadTouch) continue;
         CGPoint point = [touch locationInView:self];
         point.x *= factor;
         point.y *= factor;
@@ -129,31 +215,12 @@ static void positionView(UIImageView *view, CGPoint position)
         else if (CGPointSquaredDistance(point, _layout.selectLocation) <= buttonRadiusSquared) {
             mask |= GB_KEY_SELECT_MASK;
         }
-        else if (!dpadHandled && CGPointSquaredDistance(point, _layout.dpadLocation) <= dpadRadiusSquared) {
+        else if (!dpadHandled &&
+                 fabs(point.x - _layout.dpadLocation.x) <= dpadRadius &&
+                 fabs(point.y - _layout.dpadLocation.y) <= dpadRadius) {
             dpadHandled = true; // Don't handle the dpad twice
             double angle = CGPointAngle(point, _layout.dpadLocation);
-            signed quantizedAngle = round(angle / M_PI * 6);
-            if (quantizedAngle < 0) {
-                quantizedAngle += 12;
-            }
-            switch (quantizedAngle) {
-                case 12:
-                case 0 : mask |= GB_KEY_RIGHT_MASK; break;
-                case 1 : mask |= GB_KEY_RIGHT_MASK | GB_KEY_DOWN_MASK; break;
-                case 2 : mask |= GB_KEY_DOWN_MASK; break;
-                    
-                case 3 : mask |= GB_KEY_DOWN_MASK; break;
-                case 4 : mask |= GB_KEY_LEFT_MASK | GB_KEY_DOWN_MASK; break;
-                case 5 : mask |= GB_KEY_LEFT_MASK; break;
-                    
-                case 6 : mask |= GB_KEY_LEFT_MASK; break;
-                case 7 : mask |= GB_KEY_LEFT_MASK | GB_KEY_UP_MASK; break;
-                case 8 : mask |= GB_KEY_UP_MASK; break;
-                    
-                case 9: mask |= GB_KEY_UP_MASK; break;
-                case 10: mask |= GB_KEY_RIGHT_MASK | GB_KEY_UP_MASK; break;
-                case 11: mask |= GB_KEY_RIGHT_MASK; break;
-            }
+            mask |= angleToKeyMask(angle);
         }
     }
     if (mask != _lastMask) {
@@ -180,7 +247,13 @@ static void positionView(UIImageView *view, CGPoint position)
         
         _dpadShadowView.hidden = hidden;
         if (!hidden) {
-            _dpadShadowView.image = [UIImage imageNamed:diagonal? @"dpadShadowDiagonal" : @"dpadShadow"];
+            if (_usesSwipePad) {
+                _dpadShadowView.image = [UIImage imageNamed:diagonal? @"swipepadShadowDiagonal" : @"swipepadShadow"];
+
+            }
+            else {
+                _dpadShadowView.image = [UIImage imageNamed:diagonal? @"dpadShadowDiagonal" : @"dpadShadow"];
+            }
             _dpadShadowView.transform = CGAffineTransformMakeRotation(rotation);
         }
         
@@ -226,6 +299,12 @@ static void positionView(UIImageView *view, CGPoint position)
     screenFrame.size.width -= 16;
     screenFrame.size.height -= 16;
     _screenLabel.frame = screenFrame;
+}
+
+- (void)setUsesSwipePad:(bool)usesSwipePad
+{
+    _usesSwipePad = usesSwipePad;
+    _dpadView.image = [UIImage imageNamed:usesSwipePad? @"swipepad" : @"dpad"];
 }
 
 @end

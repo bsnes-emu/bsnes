@@ -160,7 +160,7 @@ contextMenuConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath
                 [self renameRow:indexPath];
             }],
             [UIAction actionWithTitle:@"Duplicate"
-                                image:[UIImage systemImageNamed:@"plus.rectangle.on.rectangle"]
+                                image:[UIImage systemImageNamed:@"plus.square.on.square"]
                            identifier:nil
                               handler:^(__kindof UIAction *action) {
                 [[GBROMManager sharedManager] duplicateROM:[GBROMManager sharedManager].allROMs[[indexPath indexAtPosition:1]]];

@@ -156,10 +156,15 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         [[NSNotificationCenter defaultCenter] postNotificationName:@"GBFilterChanged" object:nil];
     } forKey:@"GBFilter"];
     
-    __weak GBView *weakGBView = _gbView;
+    __weak GBView *gbview = _gbView;
     [self addDefaultObserver:^(id newValue) {
-        weakGBView.frameBlendingMode = [newValue integerValue];
+        gbview.frameBlendingMode = [newValue integerValue];
     } forKey:@"GBFrameBlendingMode"];
+    
+    __weak GBBackgroundView *backgroundView = _backgroundView;
+    [self addDefaultObserver:^(id newValue) {
+        backgroundView.usesSwipePad = [newValue boolValue];
+    } forKey:@"GBSwipeDpad"];
 
     
     [self willRotateToInterfaceOrientation:[UIApplication sharedApplication].statusBarOrientation

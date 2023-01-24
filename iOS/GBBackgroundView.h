@@ -5,4 +5,5 @@
 @interface GBBackgroundView : UIImageView
 @property (readonly) GBView *gbView;
 @property (nonatomic) GBLayout *layout;
+@property (nonatomic) bool usesSwipePad;
 @end
