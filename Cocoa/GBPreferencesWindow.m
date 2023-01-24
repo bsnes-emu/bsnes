@@ -297,7 +297,7 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
     }
 
     if (is_button_being_modified && button_being_modified == row) {
-        return @"Select a new key...";
+        return @"Select a new key…";
     }
     
     NSNumber *key = [[NSUserDefaults standardUserDefaults] valueForKey:button_to_preference_name(row, self.playerListButton.selectedTag)];

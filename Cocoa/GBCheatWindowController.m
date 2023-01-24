@@ -58,7 +58,7 @@
                 return @NO;
                 
             case 2:
-                return @"Add Cheat...";
+                return @"Add Cheat…";
             
             case 3:
                 return @"";

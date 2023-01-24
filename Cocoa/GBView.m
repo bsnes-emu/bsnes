@@ -255,11 +255,11 @@ static const uint8_t workboy_vk_to_key[] = {
     }
     if ((!analogClockMultiplierValid && clockMultiplier > 1) ||
         _turbo || (analogClockMultiplierValid && analogClockMultiplier > 1)) {
-        [self.osdView displayText:@"Fast forwarding..."];
+        [self.osdView displayText:@"Fast forwarding…"];
     }
     else if ((!analogClockMultiplierValid && clockMultiplier < 1) ||
              (analogClockMultiplierValid && analogClockMultiplier < 1)) {
-        [self.osdView displayText:@"Slow motion..."];
+        [self.osdView displayText:@"Slow motion…"];
     }
     [super flip];
 }

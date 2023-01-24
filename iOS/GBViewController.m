@@ -32,6 +32,7 @@
     GBAudioClient *_audioClient;
     NSMutableSet *_defaultsObservers;
     GB_palette_t _palette;
+    bool _rewind;
 }
 
 static void loadBootROM(GB_gameboy_t *gb, GB_boot_rom_t type)
@@ -110,6 +111,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [self addDefaultObserver:^(id newValue) {
         GB_set_interference_volume(gb, [newValue doubleValue]);
     } forKey:@"GBInterferenceVolume"];
+    [self addDefaultObserver:^(id newValue) {
+        GB_set_rewind_length(gb, [newValue unsignedIntValue]);
+    } forKey:@"GBRewindLength"];
 }
 
 - (void)addDefaultObserver:(void(^)(id newValue))block forKey:(NSString *)key
@@ -183,6 +187,17 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         [self start];
     }];
     return true;
+}
+
+- (void)saveStateToFile:(NSString *)file
+{
+    GB_save_state(&_gb, file.fileSystemRepresentation);
+    NSData *data = [NSData dataWithBytes:_gbView.previousBuffer
+                                  length:GB_get_screen_width(&_gb) *
+                    GB_get_screen_height(&_gb) *
+                    sizeof(*_gbView.previousBuffer)];
+    UIImage *screenshot = [self imageFromData:data width:GB_get_screen_width(&_gb) height:GB_get_screen_height(&_gb)];
+    [UIImagePNGRepresentation(screenshot) writeToFile:[file stringByAppendingPathExtension:@"png"] atomically:false];
 }
 
 - (void)loadStateFromFile:(NSString *)file
@@ -417,7 +432,16 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 {
     [self preRun];
     while (_running) {
-        GB_run(&_gb);
+        if (_rewind) {
+            _rewind = false;
+            GB_rewind_pop(&_gb);
+            if (!GB_rewind_pop(&_gb)) {
+                self.runMode = GBRunModeRewindPaused;
+            }
+        }
+        if (_runMode != GBRunModeRewindPaused) {
+            GB_run(&_gb);
+        }
     }
     [self postRun];
     _stopping = false;
@@ -448,17 +472,6 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     CGDataProviderRelease(provider);
     CGImageRelease(iref);
     return ret;
-}
-
-- (void)saveStateToFile:(NSString *)file
-{
-    GB_save_state(&_gb, file.fileSystemRepresentation);
-    NSData *data = [NSData dataWithBytes:_gbView.previousBuffer
-                                  length:GB_get_screen_width(&_gb) *
-                                         GB_get_screen_height(&_gb) *
-                                         sizeof(*_gbView.previousBuffer)];
-    UIImage *screenshot = [self imageFromData:data width:GB_get_screen_width(&_gb) height:GB_get_screen_height(&_gb)];
-    [UIImagePNGRepresentation(screenshot) writeToFile:[file stringByAppendingPathExtension:@"png"] atomically:false];
 }
 
 - (void)postRun
@@ -519,6 +532,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         [_gbView flip];
         GB_set_pixels_output(&_gb, _gbView.pixels);
     }
+    _rewind = _runMode == GBRunModeRewind;
 }
 
 - (void)gotNewSample:(GB_sample_t *)sample
@@ -579,5 +593,18 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [self loadROM];
     [self start];
     return [GBROMManager sharedManager].currentROM != nil;
+}
+
+- (void)setRunMode:(GBRunMode)runMode
+{
+    if (runMode == _runMode) return;
+    if (_runMode == GBRunModeRewindPaused) {
+        [_audioClient start];
+    }
+    _runMode = runMode;
+    if (_runMode == GBRunModeRewindPaused) {
+        [_audioClient stop];
+    }
+    GB_set_turbo_mode(&_gb, runMode == GBRunModeTurbo, false);
 }
 @end

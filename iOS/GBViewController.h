@@ -1,5 +1,12 @@
 #import <UIKit/UIKit.h>
 
+typedef enum {
+    GBRunModeNormal,
+    GBRunModeTurbo,
+    GBRunModeRewind,
+    GBRunModeRewindPaused,
+} GBRunMode;
+
 @interface GBViewController : UIViewController <UIApplicationDelegate>
 @property (nonatomic, strong) UIWindow *window;
 - (void)reset;
@@ -12,4 +19,5 @@
 - (void)showAbout;
 - (void)saveStateToFile:(NSString *)file;
 - (void)loadStateFromFile:(NSString *)file;
+@property (nonatomic) GBRunMode runMode;
 @end

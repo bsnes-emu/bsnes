@@ -359,7 +359,7 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
     }
     if (self.view.isRewinding) {
         rewind = true;
-        [self.osdView displayText:@"Rewinding..."];
+        [self.osdView displayText:@"Rewinding…"];
     }
 }
 

@@ -2,6 +2,8 @@
 #import "GBViewMetal.h"
 #import "GBHapticManager.h"
 #import "GBMenuViewController.h"
+#import "GBViewController.h"
+#import "GBROMManager.h"
 
 double CGPointSquaredDistance(CGPoint a, CGPoint b)
 {
@@ -81,7 +83,11 @@ static GB_key_mask_t angleToKeyMask(double angle)
 {
     NSMutableSet<UITouch *> *_touches;
     UITouch *_swipePadTouch;
-    CGPoint _swipeOrigin;
+    CGPoint _padSwipeOrigin;
+    UITouch *_screenTouch;
+    CGPoint _screenSwipeOrigin;
+    bool _screenSwiped;
+    
     UIImageView *_dpadView;
     UIImageView *_dpadShadowView;
     UIImageView *_aButtonView;
@@ -89,6 +95,11 @@ static GB_key_mask_t angleToKeyMask(double angle)
     UIImageView *_startButtonView;
     UIImageView *_selectButtonView;
     UILabel *_screenLabel;
+    
+    UIVisualEffectView *_overlayView;
+    UIView *_overlayViewContents;
+    NSTimer *_fadeTimer;
+    
     GB_key_mask_t _lastMask;
 }
 
@@ -124,7 +135,33 @@ static GB_key_mask_t angleToKeyMask(double angle)
     [self addSubview:_gbView];
     
     [_dpadView addSubview:_dpadShadowView];
+    
+    UIVisualEffect *effect = [UIBlurEffect effectWithStyle:(UIBlurEffectStyle)UIBlurEffectStyleDark];
+    _overlayView = [[UIVisualEffectView alloc] initWithEffect:effect];
+    _overlayView.frame = CGRectMake(8, 8, 32, 32);
+    _overlayView.layer.cornerRadius = 12;
+    _overlayView.layer.masksToBounds = true;
+    _overlayView.alpha = 0;
+    
+    if (@available(iOS 13.0, *)) {
+        _overlayViewContents = [[UIImageView alloc] init];
+        _overlayViewContents.tintColor = [UIColor whiteColor];
+    }
+    else {
+        _overlayViewContents = [[UILabel alloc] init];
+        ((UILabel *)_overlayViewContents).font = [UIFont systemFontOfSize:UIFont.systemFontSize weight:UIFontWeightMedium];
+        ((UILabel *)_overlayViewContents).textColor = [UIColor whiteColor];
+    }
+    _overlayViewContents.frame = CGRectMake(8, 8, 160, 20.5);
+    [_overlayView.contentView addSubview:_overlayViewContents];
+    [_gbView addSubview:_overlayView];
+    
     return self;
+}
+
+- (GBViewController *)viewController
+{
+    return (GBViewController *)[UIApplication sharedApplication].delegate;
 }
 
 - (void)touchesBegan:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
@@ -136,15 +173,26 @@ static GB_key_mask_t angleToKeyMask(double angle)
     dpadLocation.y /= factor;
     for (UITouch *touch in touches) {
         CGPoint point = [touch locationInView:self];
-        if (CGRectContainsPoint(self.gbView.frame, point)) {
-            [self.window.rootViewController presentViewController:[GBMenuViewController menu] animated:true completion:nil];
+        if (CGRectContainsPoint(self.gbView.frame, point) && !_screenTouch) {
+            if (self.viewController.runMode != GBRunModeNormal) {
+                self.viewController.runMode = GBRunModeNormal;
+                [self fadeOverlayOut];
+            }
+            else {
+                _screenTouch = touch;
+                _screenSwipeOrigin = point;
+                _screenSwiped = false;
+                _overlayView.alpha = 0;
+                [_fadeTimer invalidate];
+                _fadeTimer = nil;
+            }
         }
         
         if (_usesSwipePad && !_swipePadTouch) {
             if (fabs(point.x - dpadLocation.x) <= dpadRadius &&
                 fabs(point.y - dpadLocation.y) <= dpadRadius) {
                 _swipePadTouch = touch;
-                _swipeOrigin = point;
+                _padSwipeOrigin = point;
             }
         }
     }
@@ -157,14 +205,27 @@ static GB_key_mask_t angleToKeyMask(double angle)
     if ([touches containsObject:_swipePadTouch]) {
         _swipePadTouch = nil;
     }
+    
+    if ([touches containsObject:_screenTouch]) {
+        _screenTouch = nil;
+        if (!_screenSwiped) {
+            [self.window.rootViewController presentViewController:[GBMenuViewController menu] animated:true completion:nil];
+        }
+        if (![[NSUserDefaults standardUserDefaults] boolForKey:@"GBSwipeLock"]) {
+            if (self.viewController.runMode != GBRunModeNormal) {
+                self.viewController.runMode = GBRunModeNormal;
+                [self fadeOverlayOut];
+            }
+        }
+    }
+
     [_touches minusSet:touches];
     [self touchesChanged];
 }
 
 - (void)touchesCancelled:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
 {
-    [_touches minusSet:touches];
-    [self touchesChanged];
+    [self touchesEnded:touches withEvent:event];
 }
 
 - (void)touchesMoved:(NSSet<UITouch *> *)touches withEvent:(UIEvent *)event
@@ -184,16 +245,16 @@ static GB_key_mask_t angleToKeyMask(double angle)
         dpadHandled = true;
         if (_swipePadTouch) {
             CGPoint point = [_swipePadTouch locationInView:self];
-            double squaredDistance = CGPointSquaredDistance(point, _swipeOrigin);
+            double squaredDistance = CGPointSquaredDistance(point, _padSwipeOrigin);
             if (squaredDistance > 16 * 16) {
-                double angle = CGPointAngle(point, _swipeOrigin);
+                double angle = CGPointAngle(point, _padSwipeOrigin);
                 mask |= angleToKeyMask(angle);
                 if (squaredDistance > 24 * 24) {
-                    double deltaX = point.x - _swipeOrigin.x;
-                    double deltaY = point.y - _swipeOrigin.y;
+                    double deltaX = point.x - _padSwipeOrigin.x;
+                    double deltaY = point.y - _padSwipeOrigin.y;
                     double distance = sqrt(squaredDistance);
-                    _swipeOrigin.x = point.x - deltaX / distance * 24;
-                    _swipeOrigin.y = point.y - deltaY / distance * 24;
+                    _padSwipeOrigin.x = point.x - deltaX / distance * 24;
+                    _padSwipeOrigin.y = point.y - deltaY / distance * 24;
                 }
             }
         }
@@ -201,6 +262,24 @@ static GB_key_mask_t angleToKeyMask(double angle)
     for (UITouch *touch in _touches) {
         if (touch == _swipePadTouch) continue;
         CGPoint point = [touch locationInView:self];
+        
+        if (touch == _screenTouch) {
+            if (_screenSwiped) continue;
+            if (point.x - _screenSwipeOrigin.x > 32) {
+                [self turboSwipe];
+            }
+            else if (point.x - _screenSwipeOrigin.x < -32) {
+                [self rewindSwipe];
+            }
+            else if (point.y - _screenSwipeOrigin.y > 32) {
+                [self saveSwipe];
+            }
+            else if (point.y - _screenSwipeOrigin.y < -32) {
+                [self loadSwipe];
+            }
+            continue;
+        }
+        
         point.x *= factor;
         point.y *= factor;
         if (CGPointSquaredDistance(point, _layout.aLocation) <= buttonRadiusSquared) {
@@ -305,6 +384,84 @@ static GB_key_mask_t angleToKeyMask(double angle)
 {
     _usesSwipePad = usesSwipePad;
     _dpadView.image = [UIImage imageNamed:usesSwipePad? @"swipepad" : @"dpad"];
+}
+
+- (void)displayOverlayWithImage:(NSString *)imageName orTitle:(NSString *)title
+{
+    if (@available(iOS 13.0, *)) {
+        ((UIImageView *)_overlayViewContents).image = [UIImage systemImageNamed:imageName
+                                                              withConfiguration:[UIImageSymbolConfiguration configurationWithWeight:UIImageSymbolWeightMedium]];
+    }
+    else {
+        ((UILabel *)_overlayViewContents).text = title;
+    }
+    [_overlayViewContents sizeToFit];
+
+    CGRect bounds = _overlayViewContents.bounds;
+    bounds.origin = (CGPoint){8, 8};
+    bounds.size.width += 16;
+    bounds.size.height += 16;
+    _overlayView.frame = bounds;
+    
+    _overlayView.alpha = 1.0;
+}
+
+- (void)fadeOverlayOut
+{
+    [UIView animateWithDuration:1 animations:^{
+        _overlayView.alpha = 0;
+    }];
+    [_fadeTimer invalidate];
+    _fadeTimer = nil;
+}
+
+- (void)turboSwipe
+{
+    _screenSwiped = true;
+    [self displayOverlayWithImage:@"forward" orTitle:@"Fast-forwarding…"];
+    self.viewController.runMode = GBRunModeTurbo;
+}
+
+- (void)rewindSwipe
+{
+    _screenSwiped = true;
+    [self displayOverlayWithImage:@"backward" orTitle:@"Rewinding…"];
+    self.viewController.runMode = GBRunModeRewind;
+}
+
+- (NSString *)swipeStateFile
+{
+    return [[GBROMManager sharedManager] stateFile:1];
+}
+
+- (void)saveSwipe
+{
+    _screenSwiped = true;
+    if (![[NSUserDefaults standardUserDefaults] boolForKey:@"GBSwipeState"]) {
+        return;
+    }
+    [self displayOverlayWithImage:@"square.and.arrow.down" orTitle:@"Saved state to Slot 1"];
+    _fadeTimer = [NSTimer scheduledTimerWithTimeInterval:1 repeats:false block:^(NSTimer *timer) {
+        [self fadeOverlayOut];
+    }];
+    [self.viewController stop];
+    [self.viewController saveStateToFile:self.swipeStateFile];
+    [self.viewController start];
+}
+
+- (void)loadSwipe
+{
+    _screenSwiped = true;
+    if (![[NSUserDefaults standardUserDefaults] boolForKey:@"GBSwipeState"]) {
+        return;
+    }
+    [self displayOverlayWithImage:@"square.and.arrow.up" orTitle:@"Loaded state from Slot 1"];
+    _fadeTimer = [NSTimer scheduledTimerWithTimeInterval:1 repeats:false block:^(NSTimer *timer) {
+        [self fadeOverlayOut];
+    }];
+    [self.viewController stop];
+    [self.viewController loadStateFromFile:self.swipeStateFile];
+    [self.viewController start];
 }
 
 @end
