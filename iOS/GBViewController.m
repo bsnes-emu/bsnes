@@ -31,6 +31,7 @@
     size_t _audioBufferNeeded;
     GBAudioClient *_audioClient;
     NSMutableSet *_defaultsObservers;
+    GB_palette_t _palette;
 }
 
 static void loadBootROM(GB_gameboy_t *gb, GB_boot_rom_t type)
@@ -553,14 +554,12 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [[GBHapticManager sharedManager] setRumbleStrength:amp];
 }
 
-- (const GB_palette_t *)userPalette
-{
-    return [GBSettingsViewController paletteForTheme:[[NSUserDefaults standardUserDefaults] stringForKey:@"GBCurrentTheme"]];
-}
-
 - (void)updatePalette
 {
-    GB_set_palette(&_gb, [self userPalette]);
+    memcpy(&_palette,
+           [GBSettingsViewController paletteForTheme:[[NSUserDefaults standardUserDefaults] stringForKey:@"GBCurrentTheme"]],
+           sizeof(_palette));
+    GB_set_palette(&_gb, &_palette);
 }
 
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
