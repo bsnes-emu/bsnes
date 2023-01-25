@@ -13,6 +13,7 @@
 #import "GBSettingsViewController.h"
 #import "GBStatesViewController.h"
 #include <Core/gb.h>
+#include <CoreMotion/CoreMotion.h>
 
 @implementation GBViewController
 {
@@ -33,6 +34,7 @@
     NSMutableSet *_defaultsObservers;
     GB_palette_t _palette;
     bool _rewind;
+    CMMotionManager *_motionManager;
 }
 
 static void loadBootROM(GB_gameboy_t *gb, GB_boot_rom_t type)
@@ -186,6 +188,8 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         [self loadROM];
         [self start];
     }];
+    
+    _motionManager = [[CMMotionManager alloc] init];
     return true;
 }
 
@@ -374,6 +378,14 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     return UIInterfaceOrientationMaskAllButUpsideDown;
 }
 
+- (BOOL)shouldAutorotate
+{
+    if (_running && GB_has_accelerometer(&_gb)) {
+        return false;
+    }
+    return true;
+}
+
 - (BOOL)prefersHomeIndicatorAutoHidden
 {
     return true;
@@ -426,6 +438,35 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     } andSampleRate:96000];
     
     [_audioClient start];
+    if (GB_has_accelerometer(&_gb)) {
+        [_motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue mainQueue]
+                                             withHandler:^(CMAccelerometerData *accelerometerData, NSError *error) {
+            CMAcceleration data = accelerometerData.acceleration;
+            UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
+            switch (orientation) {
+                case UIInterfaceOrientationUnknown:
+                case UIInterfaceOrientationPortrait:
+                    break;
+                case UIInterfaceOrientationPortraitUpsideDown:
+                    data.x = -data.x;
+                    data.y = -data.y;
+                    break;
+                case UIInterfaceOrientationLandscapeLeft: {
+                    double tempX = data.x;
+                    data.x = data.y;
+                    data.y = -tempX;
+                    break;
+                }
+                case UIInterfaceOrientationLandscapeRight:{
+                    double tempX = data.x;
+                    data.x = -data.y;
+                    data.y = tempX;
+                    break;
+                }
+            }
+            GB_set_accelerometer_values(&_gb, -data.x, data.y);
+        }];
+    }
 }
 
 - (void)run
@@ -487,6 +528,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     GB_save_battery(&_gb, [GBROMManager sharedManager].batterySaveFile.fileSystemRepresentation);
     [self saveStateToFile:[GBROMManager sharedManager].autosaveStateFile];
     [[GBHapticManager sharedManager] setRumbleStrength:0];
+    [_motionManager stopAccelerometerUpdates];
 }
 
 - (void)start
