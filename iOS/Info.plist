@@ -59,6 +59,10 @@
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
+			<key>CFBundleTypeIconFiles</key>
+			<array>
+				<string>Cartridge.png</string>
+			</array>
 			<key>CFBundleTypeExtensions</key>
 			<array>
 				<string>gb</string>
@@ -73,6 +77,10 @@
 			<string>Owner</string>
 		</dict>
 		<dict>
+			<key>CFBundleTypeIconFiles</key>
+			<array>
+				<string>ColorCartridge.png</string>
+			</array>
 			<key>CFBundleTypeExtensions</key>
 			<array>
 				<string>gbc</string>
@@ -87,6 +95,10 @@
 			<string>Owner</string>
 		</dict>
 		<dict>
+			<key>CFBundleTypeIconFiles</key>
+			<array>
+				<string>ColorCartridge.png</string>
+			</array>
 			<key>CFBundleTypeExtensions</key>
 			<array>
 				<string>isx</string>
