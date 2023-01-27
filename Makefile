@@ -272,7 +272,7 @@ TESTER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(TESTER_SOURCES))
 
 # Automatic dependency generation
 
-ifneq ($(filter-out clean bootroms libretro %.bin, $(MAKECMDGOALS)),)
+ifneq ($(filter-out ios clean bootroms libretro %.bin, $(MAKECMDGOALS)),)
 -include $(CORE_OBJECTS:.o=.dep)
 ifneq ($(filter $(MAKECMDGOALS),sdl),)
 -include $(SDL_OBJECTS:.o=.dep)
@@ -282,6 +282,9 @@ ifneq ($(filter $(MAKECMDGOALS),tester),)
 endif
 ifneq ($(filter $(MAKECMDGOALS),cocoa),)
 -include $(COCOA_OBJECTS:.o=.dep)
+endif
+ifneq ($(filter $(MAKECMDGOALS),_ios),)
+-include $(IOS_OBJECTS:.o=.dep)
 endif
 endif
 
