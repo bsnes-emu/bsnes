@@ -217,7 +217,7 @@
 		</dict>
 	</array>
 	<key>NSCameraUsageDescription</key>
-	<string>SameBoy needs to access your camera to emulate the Game Boy Camera</string>
+	<string>SameBoy needs to access your device&apos;s camera to emulate the Game Boy Camera</string>
 	<key>NSSupportsAutomaticGraphicsSwitching</key>
 	<true/>
 </dict>

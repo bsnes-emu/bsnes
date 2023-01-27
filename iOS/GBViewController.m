@@ -12,29 +12,43 @@
 #import "GBAboutController.h"
 #import "GBSettingsViewController.h"
 #import "GBStatesViewController.h"
+#import <CoreMotion/CoreMotion.h>
 #include <Core/gb.h>
-#include <CoreMotion/CoreMotion.h>
 
 @implementation GBViewController
 {
     GB_gameboy_t _gb;
     GBView *_gbView;
+    
     volatile bool _running;
     volatile bool _stopping;
     bool _romLoaded;
+    
+    UIInterfaceOrientation _orientation;
     GBHorizontalLayout *_horizontalLayout;
     GBVerticalLayout *_verticalLayout;
     GBBackgroundView *_backgroundView;
+    
     NSCondition *_audioLock;
     GB_sample_t *_audioBuffer;
     size_t _audioBufferSize;
     size_t _audioBufferPosition;
     size_t _audioBufferNeeded;
     GBAudioClient *_audioClient;
+    
     NSMutableSet *_defaultsObservers;
     GB_palette_t _palette;
     bool _rewind;
     CMMotionManager *_motionManager;
+    
+    CVImageBufferRef _cameraImage;
+    AVCaptureSession *_cameraSession;
+    AVCaptureConnection *_cameraConnection;
+    AVCaptureVideoDataOutput *_cameraOutput;
+    bool _cameraNeedsUpdate;
+    NSTimer *_disableCameraTimer;
+    AVCaptureDevicePosition _cameraPosition;
+    UIButton *_cameraPositionButton;
 }
 
 static void loadBootROM(GB_gameboy_t *gb, GB_boot_rom_t type)
@@ -70,6 +84,19 @@ static void audioCallback(GB_gameboy_t *gb, GB_sample_t *sample)
     [self gotNewSample:sample];
 }
 
+static void cameraRequestUpdate(GB_gameboy_t *gb)
+{
+    GBViewController *self = (__bridge GBViewController *)GB_get_user_data(gb);
+    [self cameraRequestUpdate];
+}
+
+static uint8_t cameraGetPixel(GB_gameboy_t *gb, uint8_t x, uint8_t y)
+{
+    GBViewController *self = (__bridge GBViewController *)GB_get_user_data(gb);
+    return [self cameraGetPixelAtX:x andY:y];
+}
+
+
 static void rumbleCallback(GB_gameboy_t *gb, double amp)
 {
     GBViewController *self = (__bridge GBViewController *)GB_get_user_data(gb);
@@ -84,6 +111,8 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     GB_set_boot_rom_load_callback(gb, (GB_boot_rom_load_callback_t)loadBootROM);
     GB_set_vblank_callback(gb, (GB_vblank_callback_t) vblank);
     GB_set_log_callback(gb, (GB_log_callback_t) consoleLog);
+    GB_set_camera_get_pixel_callback(gb, cameraGetPixel);
+    GB_set_camera_update_request_callback(gb, cameraRequestUpdate);
     [self addDefaultObserver:^(id newValue) {
         GB_set_color_correction_mode(gb, (GB_color_correction_mode_t)[newValue integerValue]);
     } forKey:@"GBColorCorrection"];
@@ -190,6 +219,31 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     }];
     
     _motionManager = [[CMMotionManager alloc] init];
+    _cameraPosition = AVCaptureDevicePositionBack;
+    _cameraPositionButton = [[UIButton alloc] initWithFrame:CGRectMake(8,
+                                                                       _backgroundView.bounds.size.height - 8 - 32,
+                                                                       32,
+                                                                       32)];
+    _cameraPositionButton.autoresizingMask = UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleTopMargin;
+    if (@available(iOS 13.0, *)) {
+        [_cameraPositionButton  setImage:[UIImage systemImageNamed:@"camera.rotate"
+                                                 withConfiguration:[UIImageSymbolConfiguration configurationWithScale:UIImageSymbolScaleLarge]]
+                                forState:UIControlStateNormal];
+        _cameraPositionButton.backgroundColor = [UIColor systemBackgroundColor];
+    }
+    else {
+        UIImage *image = [[UIImage imageNamed:@"CameraRotateTemplate"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+        [_cameraPositionButton  setImage:image
+                                forState:UIControlStateNormal];
+        _cameraPositionButton.backgroundColor = [UIColor whiteColor];
+    }
+    _cameraPositionButton.layer.cornerRadius = 6;
+    _cameraPositionButton.alpha = 0;
+    [_cameraPositionButton addTarget:self
+                              action:@selector(rotateCamera)
+                    forControlEvents:UIControlEventTouchUpInside];
+    [_backgroundView addSubview:_cameraPositionButton];
+
     return true;
 }
 
@@ -360,6 +414,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)orientation duration:(NSTimeInterval)duration
 {
     GBLayout *layout = _horizontalLayout;
+    _orientation = orientation;
     if (orientation == UIInterfaceOrientationPortrait || orientation == UIInterfaceOrientationPortraitUpsideDown) {
         layout = _verticalLayout;
     }
@@ -398,7 +453,13 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (BOOL)prefersStatusBarHidden
 {
-    return true;
+    switch (_orientation) {
+        case UIInterfaceOrientationLandscapeRight:
+        case UIInterfaceOrientationLandscapeLeft:
+            return true;
+        default:
+            return false;
+    }
 }
 
 - (void)preRun
@@ -442,7 +503,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         [_motionManager startAccelerometerUpdatesToQueue:[NSOperationQueue mainQueue]
                                              withHandler:^(CMAccelerometerData *accelerometerData, NSError *error) {
             CMAcceleration data = accelerometerData.acceleration;
-            UIInterfaceOrientation orientation = [UIApplication sharedApplication].statusBarOrientation;
+            UIInterfaceOrientation orientation = _orientation;
             switch (orientation) {
                 case UIInterfaceOrientationUnknown:
                 case UIInterfaceOrientationPortrait:
@@ -649,4 +710,170 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     }
     GB_set_turbo_mode(&_gb, runMode == GBRunModeTurbo, false);
 }
+
+- (AVCaptureDevice *)captureDevice
+{
+    NSArray *devices = [AVCaptureDevice devicesWithMediaType:AVMediaTypeVideo];
+    for (AVCaptureDevice *device in devices) {
+        if ([device position] == _cameraPosition) {
+            return device;
+        }
+    }
+    return [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeVideo];
+}
+
+- (void)cameraRequestUpdate
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        @try {
+            if (!_cameraSession) {
+                NSError *error;
+                AVCaptureDevice *device = [self captureDevice];
+                AVCaptureDeviceInput *input = [AVCaptureDeviceInput deviceInputWithDevice: device error: &error];
+                
+                if (!input) {
+                    GB_camera_updated(&_gb);
+                    return;
+                }
+                
+                _cameraOutput = [[AVCaptureVideoDataOutput alloc] init];
+                [_cameraOutput setVideoSettings: @{(id)kCVPixelBufferPixelFormatTypeKey: @(kCVPixelFormatType_32BGRA)}];
+                [_cameraOutput setSampleBufferDelegate:self
+                                                queue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)];
+                
+                
+                
+                _cameraSession = [AVCaptureSession new];
+                _cameraSession.sessionPreset = AVCaptureSessionPreset352x288;
+                
+                [_cameraSession addInput: input];
+                [_cameraSession addOutput: _cameraOutput];
+                _cameraConnection = [_cameraOutput connectionWithMediaType: AVMediaTypeVideo];
+                _cameraConnection.videoOrientation = AVCaptureVideoOrientationPortrait;
+                [_cameraSession startRunning];
+            }
+        }
+        @catch (NSException *exception) {
+            /* I have not tested camera support on many devices, so we catch exceptions just in case. */
+            GB_camera_updated(&_gb);
+        }
+        _cameraNeedsUpdate = true;
+        [_disableCameraTimer invalidate];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (!_cameraPositionButton.alpha) {
+                [UIView animateWithDuration:0.25 animations:^{
+                    _cameraPositionButton.alpha = 1;
+                }];
+            }
+            _disableCameraTimer = [NSTimer scheduledTimerWithTimeInterval:1
+                                                                 repeats:false
+                                                                   block:^(NSTimer *timer) {
+                if (_cameraPositionButton.alpha) {
+                    [UIView animateWithDuration:0.25 animations:^{
+                        _cameraPositionButton.alpha = 0;
+                    }];
+                }
+                [_cameraSession stopRunning];
+                _cameraSession = nil;
+                _cameraConnection = nil;
+                _cameraOutput = nil;
+            }];
+        });
+    });
+}
+
+- (uint8_t)cameraGetPixelAtX:(uint8_t)x andY:(uint8_t)y
+{
+    if (!_cameraImage) {
+        return 0;
+    }
+    if (_cameraNeedsUpdate) {
+        return 0;
+    }
+    
+    y += 8; // Equalize X and Y for rotation as a 128x128 image
+    
+    if (_cameraPosition == AVCaptureDevicePositionFront) {
+        x = 127 - x;
+    }
+    
+    switch (_orientation) {
+        case UIInterfaceOrientationUnknown:
+        case UIInterfaceOrientationPortrait:
+            break;
+        case UIInterfaceOrientationPortraitUpsideDown:
+            x = 127 - x;
+            y = 127 - y;
+            break;
+        case UIInterfaceOrientationLandscapeLeft: {
+            uint8_t tempX = x;
+            x = y;
+            y = 127 - tempX;
+            break;
+        }
+        case UIInterfaceOrientationLandscapeRight:{
+            uint8_t tempX = x;
+            x = 127 - y;
+            y = tempX;
+            break;
+        }
+    }
+    
+    if (_cameraPosition == AVCaptureDevicePositionFront) {
+        x = 127 - x;
+    }
+    
+    // Center the 128*128 image on the 130*XXX (or XXX*130) captured image
+    unsigned offsetX = (CVPixelBufferGetWidth(_cameraImage) - 128) / 2;
+    unsigned offsetY = (CVPixelBufferGetHeight(_cameraImage) - 112) / 2;
+    
+    uint8_t *baseAddress = (uint8_t *)CVPixelBufferGetBaseAddress(_cameraImage);
+    size_t bytesPerRow = CVPixelBufferGetBytesPerRow(_cameraImage);
+    uint8_t ret = baseAddress[(x + offsetX) * 4 + (y + offsetY) * bytesPerRow + 2];
+    
+    return ret;
+}
+
+- (void)captureOutput:(AVCaptureOutput *)captureOutput didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
+{
+    if (!_cameraNeedsUpdate) return;
+    CVImageBufferRef buffer = CMSampleBufferGetImageBuffer(sampleBuffer);
+    CIImage *image = [CIImage imageWithCVPixelBuffer:buffer
+                                             options:[NSDictionary dictionaryWithObjectsAndKeys:[NSNull null], kCIImageColorSpace, nil]];
+    double scale = MAX(130.0 / CVPixelBufferGetWidth(buffer), 130.0 / CVPixelBufferGetHeight(buffer));
+    image = [image imageByApplyingTransform:CGAffineTransformMakeScale(scale, scale)];
+    if (_cameraImage) {
+        CVPixelBufferUnlockBaseAddress(_cameraImage, 0);
+        CVBufferRelease(_cameraImage);
+        _cameraImage = NULL;
+    }
+    CGSize size = image.extent.size;
+    CVPixelBufferCreate(kCFAllocatorDefault,
+                        size.width,
+                        size.height,
+                        kCVPixelFormatType_32BGRA,
+                        NULL,
+                        &_cameraImage);
+    [[[CIContext alloc] init] render:image toCVPixelBuffer:_cameraImage];
+    CVPixelBufferLockBaseAddress(_cameraImage, 0);
+    
+    GB_camera_updated(&_gb);
+    
+    _cameraNeedsUpdate = false;
+}
+
+- (void)rotateCamera
+{
+    _cameraPosition ^= AVCaptureDevicePositionBack ^ AVCaptureDevicePositionFront;
+    [_cameraSession stopRunning];
+    _cameraSession = nil;
+    _cameraConnection = nil;
+    _cameraOutput = nil;
+    if (_cameraNeedsUpdate) {
+        _cameraNeedsUpdate = false;
+        GB_camera_updated(&_gb);
+    }
+
+}
+
 @end

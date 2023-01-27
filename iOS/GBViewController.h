@@ -1,4 +1,5 @@
 #import <UIKit/UIKit.h>
+#import <AVFoundation/AVFoundation.h>
 
 typedef enum {
     GBRunModeNormal,
@@ -7,7 +8,7 @@ typedef enum {
     GBRunModeRewindPaused,
 } GBRunMode;
 
-@interface GBViewController : UIViewController <UIApplicationDelegate>
+@interface GBViewController : UIViewController <UIApplicationDelegate, AVCaptureVideoDataOutputSampleBufferDelegate>
 @property (nonatomic, strong) UIWindow *window;
 - (void)reset;
 - (void)openLibrary;

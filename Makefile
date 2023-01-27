@@ -186,7 +186,7 @@ endif
 CFLAGS += -arch arm64 -miphoneos-version-min=11.0 -isysroot $(SYSROOT) -IAppleCommon
 LDFLAGS += -arch arm64
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT)
-LDFLAGS += -lobjc -framework UIKit -framework Foundation -framework CoreGraphics -framework Metal -framework MetalKit -framework AudioToolbox -framework AVFoundation -framework QuartzCore -framework CoreMotion -weak_framework CoreHaptics -miphoneos-version-min=11.0  -isysroot $(SYSROOT)
+LDFLAGS += -lobjc -framework UIKit -framework Foundation -framework CoreGraphics -framework Metal -framework MetalKit -framework AudioToolbox -framework AVFoundation -framework QuartzCore -framework CoreMotion -framework CoreVideo -framework CoreMedia -framework CoreImage -weak_framework CoreHaptics -miphoneos-version-min=11.0  -isysroot $(SYSROOT)
 CODESIGN := codesign -fs -
 else
 ifeq ($(PLATFORM),Darwin)

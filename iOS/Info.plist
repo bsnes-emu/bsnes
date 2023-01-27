@@ -54,6 +54,8 @@
 	<true/>
 	<key>UISupportsDocumentBrowser</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>SameBoy needs to access your device&apos;s camera to emulate the Game Boy Camera</string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
