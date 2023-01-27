@@ -43,6 +43,8 @@
 			<array>
 				<string>AppIcon60x60@2x.png</string>
 				<string>AppIcon60x60@3x.png</string>
+				<string>AppIcon76x76@2x.png</string>
+				<string>AppIcon83.5x83.5@2x.png</string>
 			</array>
 		</dict>
 	</dict>
