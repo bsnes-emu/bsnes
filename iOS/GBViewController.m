@@ -537,8 +537,10 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         if (_rewind) {
             _rewind = false;
             GB_rewind_pop(&_gb);
-            if (!GB_rewind_pop(&_gb)) {
-                self.runMode = GBRunModeRewindPaused;
+            for (unsigned i = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindSpeed"]; i--;)  {
+                if (!GB_rewind_pop(&_gb)) {
+                    self.runMode = GBRunModeRewindPaused;
+                }
             }
         }
         if (_runMode != GBRunModeRewindPaused) {
@@ -709,24 +711,14 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         [_audioClient stop];
     }
     
-    switch (_runMode) {
-        case GBRunModeNormal:
-        case GBRunModeRewindPaused:
-            GB_set_turbo_mode(&_gb, false, false);
-            GB_set_clock_multiplier(&_gb, 1.0);
-            break;
-        case GBRunModeTurbo: {
-            double multiplier = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBTurboSpeed"];
-            GB_set_turbo_mode(&_gb, multiplier == 1, false);
-            GB_set_clock_multiplier(&_gb, multiplier);
-            break;
-        }
-        case GBRunModeRewind: {
-            double multiplier = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBRewindSpeed"];
-            GB_set_turbo_mode(&_gb, false, false);
-            GB_set_clock_multiplier(&_gb, multiplier);
-            break;
-        }
+    if (_runMode == GBRunModeTurbo) {
+        double multiplier = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBTurboSpeed"];
+        GB_set_turbo_mode(&_gb, multiplier == 1, false);
+        GB_set_clock_multiplier(&_gb, multiplier);
+    }
+    else {
+        GB_set_turbo_mode(&_gb, false, false);
+        GB_set_clock_multiplier(&_gb, 1.0);
     }
 }
 
