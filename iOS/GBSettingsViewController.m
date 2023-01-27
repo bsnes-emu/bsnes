@@ -131,6 +131,22 @@ static NSString const *typeLightTemp = @"typeLightTemp";
             ]
         },
         @{
+            @"header": @"Turbo Speed",
+            @"items": @[
+                    @{@"type": typeRadio, @"pref": @"GBTurboSpeed", @"title": @"200%",     @"value": @2,},
+                    @{@"type": typeRadio, @"pref": @"GBTurboSpeed", @"title": @"400%",     @"value": @4,},
+                    @{@"type": typeRadio, @"pref": @"GBTurboSpeed", @"title": @"Uncapped", @"value": @1,},
+            ]
+        },
+        @{
+            @"header": @"Rewind Speed",
+            @"items": @[
+                    @{@"type": typeRadio, @"pref": @"GBRewindSpeed", @"title": @"100%", @"value": @1,},
+                    @{@"type": typeRadio, @"pref": @"GBRewindSpeed", @"title": @"200%", @"value": @2,},
+                    @{@"type": typeRadio, @"pref": @"GBRewindSpeed", @"title": @"400%", @"value": @4,},
+            ]
+        },
+        @{
             @"header": @"Emulated Revisions",
             @"items": @[
                 QUICK_SUBMENU(@"Game Boy", @[

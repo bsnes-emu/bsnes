@@ -708,7 +708,26 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     if (_runMode == GBRunModeRewindPaused) {
         [_audioClient stop];
     }
-    GB_set_turbo_mode(&_gb, runMode == GBRunModeTurbo, false);
+    
+    switch (_runMode) {
+        case GBRunModeNormal:
+        case GBRunModeRewindPaused:
+            GB_set_turbo_mode(&_gb, false, false);
+            GB_set_clock_multiplier(&_gb, 1.0);
+            break;
+        case GBRunModeTurbo: {
+            double multiplier = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBTurboSpeed"];
+            GB_set_turbo_mode(&_gb, multiplier == 1, false);
+            GB_set_clock_multiplier(&_gb, multiplier);
+            break;
+        }
+        case GBRunModeRewind: {
+            double multiplier = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBRewindSpeed"];
+            GB_set_turbo_mode(&_gb, false, false);
+            GB_set_clock_multiplier(&_gb, multiplier);
+            break;
+        }
+    }
 }
 
 - (AVCaptureDevice *)captureDevice
