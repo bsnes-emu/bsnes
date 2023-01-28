@@ -121,8 +121,9 @@
 
 - (void)layoutForVerticalLayout
 {
-    CGRect savedFrame = self.view.frame;
-    self.view.frame = CGRectMake(0, 0, 320, 480);
+    UIView *root = ((UIVisualEffectView *)self.view).contentView;
+    CGRect savedFrame = root.frame;
+    root.frame = CGRectMake(0, 0, 320, 480);
     
     _titleLabel.frame = CGRectMake(0, 20, 320, 47);
     _titleLabel.textAlignment = NSTextAlignmentCenter;
@@ -142,17 +143,18 @@
     _licenseView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
 
-    _copyrightLabel.frame = CGRectMake(0, 439, 320, 21);
+    _copyrightLabel.frame = CGRectMake(0, 450, 320, 21);
     _copyrightLabel.textAlignment = NSTextAlignmentCenter;
     _copyrightLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
 
-    self.view.frame = savedFrame;
+    root.frame = savedFrame;
 }
 
 - (void)layoutForHorizontalLayout
 {
-    CGRect savedFrame = self.view.frame;
-    self.view.frame = CGRectMake(0, 0, 568, 320);
+    UIView *root = ((UIVisualEffectView *)self.view).contentView;
+    CGRect savedFrame = root.frame;
+    root.frame = CGRectMake(0, 0, 568, 320);
     
     _titleLabel.frame = CGRectMake(20, 20, 260, 47);
     _titleLabel.textAlignment = NSTextAlignmentLeft;
@@ -167,7 +169,9 @@
                                      UIViewAutoresizingFlexibleRightMargin;
     
     _logo.frame = CGRectMake(0, 119, 284, 152);
-    _logo.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _logo.autoresizingMask = UIViewAutoresizingFlexibleWidth |
+    UIViewAutoresizingFlexibleRightMargin |
+    UIViewAutoresizingFlexibleHeight;
     
     _buttonsView.frame = _licenseView.frame = CGRectMake(284, 20, 284, 280);
     _buttonsView.autoresizingMask = UIViewAutoresizingFlexibleWidth |
@@ -178,13 +182,13 @@
                                     UIViewAutoresizingFlexibleLeftMargin;
 
     
-    _copyrightLabel.frame = CGRectMake(20, 279, 260, 21);
+    _copyrightLabel.frame = CGRectMake(20, 288, 260, 21);
     _copyrightLabel.textAlignment = NSTextAlignmentLeft;
     _copyrightLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth |
                                        UIViewAutoresizingFlexibleTopMargin |
                                        UIViewAutoresizingFlexibleRightMargin;
 
-    self.view.frame = savedFrame;
+    root.frame = savedFrame;
     CGRect licenseFrame = _licenseView.frame;
     licenseFrame.size.width -= 40;
     licenseFrame.origin.x += 20;
@@ -211,6 +215,13 @@
 - (void)viewDidLayoutSubviews
 {
     [super viewDidLayoutSubviews];
+    UIEdgeInsets insets = self.view.window.safeAreaInsets;
+    UIView *view = ((UIVisualEffectView *)self.view).contentView;
+    CGRect parentFrame = self.view.frame;
+    view.frame = CGRectMake(insets.left,
+                            0,
+                            parentFrame.size.width - insets.left  - insets.right,
+                            parentFrame.size.height - insets.bottom);
     if (self.view.frame.size.width > self.view.frame.size.height) {
         [self layoutForHorizontalLayout];
     }
