@@ -25,7 +25,7 @@
         }
         else {
             NSDateFormatter *formatter = [[NSDateFormatter alloc] init];
-            formatter.timeStyle = kCFDateFormatterShortStyle;
+            formatter.timeStyle = NSDateFormatterShortStyle;
             formatter.dateStyle = NSDateFormatterShortStyle;
             formatter.doesRelativeDateFormatting = true;
             view.slotSubtitleLabel.text = [formatter stringFromDate:date];
