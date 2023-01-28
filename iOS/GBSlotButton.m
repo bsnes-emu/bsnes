@@ -11,23 +11,23 @@
     if (!ret) return nil;
     ret.frame = CGRectMake(0, 0, 0x100, 0x100);
     
-    ret->_subtitleLabel = [[UILabel alloc] init];
-    ret->_subtitleLabel.text = @"Empty";
-    ret->_subtitleLabel.font = [UIFont systemFontOfSize:UIFont.smallSystemFontSize];
+    ret->_slotSubtitleLabel = [[UILabel alloc] init];
+    ret->_slotSubtitleLabel.text = @"Empty";
+    ret->_slotSubtitleLabel.font = [UIFont systemFontOfSize:UIFont.smallSystemFontSize];
     if (@available(iOS 13.0, *)) {
-        ret->_subtitleLabel.textColor = [UIColor secondaryLabelColor];
+        ret->_slotSubtitleLabel.textColor = [UIColor secondaryLabelColor];
     }
     else {
-        ret->_subtitleLabel.textColor = [UIColor systemGrayColor];
+        ret->_slotSubtitleLabel.textColor = [UIColor systemGrayColor];
     }
-    [ret->_subtitleLabel sizeToFit];
-    ret->_subtitleLabel.textAlignment = NSTextAlignmentCenter;
-    CGRect subtitleLabelRect = ret->_subtitleLabel.frame;
-    subtitleLabelRect.size.width = 0x100;
-    subtitleLabelRect.origin.y = 0x100 - subtitleLabelRect.size.height - 8;
-    ret->_subtitleLabel.frame = subtitleLabelRect;
-    ret->_subtitleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
-    [ret addSubview:ret->_subtitleLabel];
+    [ret->_slotSubtitleLabel sizeToFit];
+    ret->_slotSubtitleLabel.textAlignment = NSTextAlignmentCenter;
+    CGRect slotSubtitleLabelRect = ret->_slotSubtitleLabel.frame;
+    slotSubtitleLabelRect.size.width = 0x100;
+    slotSubtitleLabelRect.origin.y = 0x100 - slotSubtitleLabelRect.size.height - 8;
+    ret->_slotSubtitleLabel.frame = slotSubtitleLabelRect;
+    ret->_slotSubtitleLabel.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
+    [ret addSubview:ret->_slotSubtitleLabel];
     
     ret->_label = [[UILabel alloc] init];
     ret->_label.text = labelText;
@@ -35,7 +35,7 @@
     ret->_label.textAlignment = NSTextAlignmentCenter;
     CGRect labelRect = ret->_label.frame;
     labelRect.size.width = 0x100;
-    labelRect.origin.y = subtitleLabelRect.origin.y - labelRect.size.height - 4;
+    labelRect.origin.y = slotSubtitleLabelRect.origin.y - labelRect.size.height - 4;
     ret->_label.frame = labelRect;
     ret->_label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     [ret addSubview:ret->_label];

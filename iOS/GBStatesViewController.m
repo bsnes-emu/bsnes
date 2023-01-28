@@ -16,11 +16,11 @@
         NSDate *date = [[[NSFileManager defaultManager] attributesOfItemAtPath:stateFile error:nil] fileModificationDate];
         if (@available(iOS 13.0, *)) {
             if ((uint64_t)(date.timeIntervalSince1970) == (uint64_t)([NSDate now].timeIntervalSince1970)) {
-                view.subtitleLabel.text = @"Just now";
+                view.slotSubtitleLabel.text = @"Just now";
             }
             else {
                 NSRelativeDateTimeFormatter *formatter = [[NSRelativeDateTimeFormatter alloc] init];
-                view.subtitleLabel.text = [formatter localizedStringForDate:date relativeToDate:[NSDate now]];
+                view.slotSubtitleLabel.text = [formatter localizedStringForDate:date relativeToDate:[NSDate now]];
             }
         }
         else {
@@ -28,13 +28,13 @@
             formatter.timeStyle = kCFDateFormatterShortStyle;
             formatter.dateStyle = NSDateFormatterShortStyle;
             formatter.doesRelativeDateFormatting = true;
-            view.subtitleLabel.text = [formatter stringFromDate:date];
+            view.slotSubtitleLabel.text = [formatter stringFromDate:date];
         }
         
         view.imageView.image = [UIImage imageWithContentsOfFile:[stateFile stringByAppendingPathExtension:@"png"]];
     }
     else {
-        view.subtitleLabel.text = @"Empty";
+        view.slotSubtitleLabel.text = @"Empty";
         view.imageView.image = nil;
     }
 }
