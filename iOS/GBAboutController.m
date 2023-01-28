@@ -215,13 +215,15 @@
 - (void)viewDidLayoutSubviews
 {
     [super viewDidLayoutSubviews];
-    UIEdgeInsets insets = self.view.window.safeAreaInsets;
-    UIView *view = ((UIVisualEffectView *)self.view).contentView;
-    CGRect parentFrame = self.view.frame;
-    view.frame = CGRectMake(insets.left,
-                            0,
-                            parentFrame.size.width - insets.left  - insets.right,
-                            parentFrame.size.height - insets.bottom);
+    if ([UIDevice currentDevice].userInterfaceIdiom != UIUserInterfaceIdiomPad) {
+        UIEdgeInsets insets = self.view.window.safeAreaInsets;
+        UIView *view = ((UIVisualEffectView *)self.view).contentView;
+        CGRect parentFrame = self.view.frame;
+        view.frame = CGRectMake(insets.left,
+                                0,
+                                parentFrame.size.width - insets.left  - insets.right,
+                                parentFrame.size.height - insets.bottom);
+    }
     if (self.view.frame.size.width > self.view.frame.size.height) {
         [self layoutForHorizontalLayout];
     }
