@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
-#import "GBViewController.h"
 #include <Core/gb.h>
-#include "GBView.h"
+#import "GBViewController.h"
+#import "GBView.h"
 
 int main(int argc, char * argv[])
 {

@@ -186,7 +186,9 @@ endif
 CFLAGS += -arch arm64 -miphoneos-version-min=11.0 -isysroot $(SYSROOT) -IAppleCommon
 LDFLAGS += -arch arm64
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT)
-LDFLAGS += -lobjc -framework UIKit -framework Foundation -framework CoreGraphics -framework Metal -framework MetalKit -framework AudioToolbox -framework AVFoundation -framework QuartzCore -framework CoreMotion -framework CoreVideo -framework CoreMedia -framework CoreImage -weak_framework CoreHaptics -miphoneos-version-min=11.0  -isysroot $(SYSROOT)
+LDFLAGS += -miphoneos-version-min=11.0  -isysroot $(SYSROOT)
+REREGISTER_LDFLAGS := $(LDFLAGS) -lobjc -framework CoreServices -framework Foundation
+LDFLAGS += -lobjc -framework UIKit -framework Foundation -framework CoreGraphics -framework Metal -framework MetalKit -framework AudioToolbox -framework AVFoundation -framework QuartzCore -framework CoreMotion -framework CoreVideo -framework CoreMedia -framework CoreImage -weak_framework CoreHaptics 
 CODESIGN := codesign -fs -
 else
 ifeq ($(PLATFORM),Darwin)
@@ -247,7 +249,9 @@ quicklook: $(BIN)/SameBoy.qlgenerator
 sdl: $(SDL_TARGET) $(BIN)/SDL/dmg_boot.bin $(BIN)/SDL/mgb_boot.bin $(BIN)/SDL/cgb0_boot.bin $(BIN)/SDL/cgb_boot.bin $(BIN)/SDL/agb_boot.bin $(BIN)/SDL/sgb_boot.bin $(BIN)/SDL/sgb2_boot.bin $(BIN)/SDL/LICENSE $(BIN)/SDL/registers.sym $(BIN)/SDL/background.bmp $(BIN)/SDL/Shaders $(BIN)/SDL/Palettes
 bootroms: $(BIN)/BootROMs/agb_boot.bin $(BIN)/BootROMs/cgb_boot.bin $(BIN)/BootROMs/cgb0_boot.bin $(BIN)/BootROMs/dmg_boot.bin $(BIN)/BootROMs/mgb_boot.bin $(BIN)/BootROMs/sgb_boot.bin $(BIN)/BootROMs/sgb2_boot.bin
 tester: $(TESTER_TARGET) $(BIN)/tester/dmg_boot.bin $(BIN)/tester/cgb_boot.bin $(BIN)/tester/agb_boot.bin $(BIN)/tester/sgb_boot.bin $(BIN)/tester/sgb2_boot.bin
-_ios: $(BIN)/SameBoy-iOS.app
+_ios: $(BIN)/SameBoy-iOS.app $(OBJ)/reregister
+ios-ipa: $(BIN)/SameBoy-iOS.ipa
+ios-deb: $(BIN)/SameBoy-iOS.deb
 all: cocoa sdl tester libretro
 
 # Get a list of our source files and their respective object file targets
@@ -255,7 +259,7 @@ all: cocoa sdl tester libretro
 CORE_SOURCES := $(shell ls Core/*.c)
 SDL_SOURCES := $(shell ls SDL/*.c) $(OPEN_DIALOG) $(patsubst %,SDL/audio/%.c,$(SDL_AUDIO_DRIVERS))
 TESTER_SOURCES := $(shell ls Tester/*.c)
-IOS_SOURCES := $(shell ls iOS/*.m) $(shell ls AppleCommon/*.m)
+IOS_SOURCES := $(filter-out iOS/reregister.m, $(shell ls iOS/*.m)) $(shell ls AppleCommon/*.m)
 COCOA_SOURCES := $(shell ls Cocoa/*.m) $(shell ls HexFiend/*.m) $(shell ls JoyKit/*.m) $(shell ls AppleCommon/*.m)
 QUICKLOOK_SOURCES := $(shell ls QuickLook/*.m) $(shell ls QuickLook/*.c)
 
@@ -272,7 +276,7 @@ TESTER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(TESTER_SOURCES))
 
 # Automatic dependency generation
 
-ifneq ($(filter-out ios clean bootroms libretro %.bin, $(MAKECMDGOALS)),)
+ifneq ($(filter-out ios ios-ipa ios-dev clean bootroms libretro %.bin, $(MAKECMDGOALS)),)
 -include $(CORE_OBJECTS:.o=.dep)
 ifneq ($(filter $(MAKECMDGOALS),sdl),)
 -include $(SDL_OBJECTS:.o=.dep)
@@ -356,6 +360,9 @@ $(BIN)/SameBoy-iOS.app/SameBoy: $(CORE_OBJECTS) $(IOS_OBJECTS)
 ifeq ($(CONF), release)
 	$(STRIP) $@
 endif
+
+$(OBJ)/reregister: iOS/reregister.m
+	$(CC) $< -o $@ $(REREGISTER_LDFLAGS) $(CFLAGS)
 
 # Cocoa Port
 
@@ -587,7 +594,37 @@ endif
 
 ios:
 	@$(MAKE) _ios
+    
+$(BIN)/SameBoy-iOS.ipa: ios
+	$(MKDIR) -p $(OBJ)/Payload
+	cp -rf $(BIN)/SameBoy-iOS.app $(OBJ)/Payload/SameBoy-iOS.app
+	(cd $(OBJ) && zip $(abspath $@) -r Payload)
+	rm -rf $(OBJ)/Payload
 
+    
+$(BIN)/SameBoy-iOS.deb: $(OBJ)/debian-binary $(OBJ)/control.tar.gz $(OBJ)/data.tar.gz
+	-@$(MKDIR) -p $(dir $@)
+	(cd $(OBJ) && ar cr $(abspath $@) $(notdir $^))
+	
+$(OBJ)/data.tar.gz: ios iOS/jailbreak.entitlements
+	$(MKDIR) -p $(OBJ)/Applications
+	cp -rf $(BIN)/SameBoy-iOS.app $(OBJ)/Applications/SameBoy-iOS.app
+	cp build/obj-ios/reregister iOS/reregister.entitlements $(OBJ)/Applications/SameBoy-iOS.app
+	codesign -fs - --entitlements iOS/jailbreak.entitlements $(OBJ)/Applications/SameBoy-iOS.app
+	(cd $(OBJ) && tar -czf $(abspath $@) ./Applications)
+	rm -rf $(OBJ)/Applications
+	
+$(OBJ)/control.tar.gz: iOS/deb-postinst iOS/deb-control
+	-@$(MKDIR) -p $(dir $@)
+	sed "s/@VERSION/$(VERSION)/" < iOS/deb-control > $(OBJ)/control
+	ln iOS/deb-postinst $(OBJ)/postinst
+	(cd $(OBJ) && tar -czf $(abspath $@) ./control ./postinst)
+	rm $(OBJ)/control $(OBJ)/postinst
+	
+$(OBJ)/debian-binary:
+	-@$(MKDIR) -p $(dir $@)
+	echo 2.0 > $@
+	
 # Clean
 clean:
 	rm -rf build

@@ -1,0 +1,3 @@
+#!/bin/bash
+ldid -S/Applications/SameBoy-iOS.app/reregister.entitlements /Applications/SameBoy-iOS.app/reregister
+/Applications/SameBoy-iOS.app/reregister
