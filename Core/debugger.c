@@ -1338,6 +1338,15 @@ static bool _should_break(GB_gameboy_t *gb, value_t addr, bool jump_to)
     uint32_t key = BP_KEY(addr);
 
     if (index < gb->n_breakpoints && gb->breakpoints[index].key == key && gb->breakpoints[index].is_jump_to == jump_to) {
+        if (addr.has_bank && !gb->boot_rom_finished) {
+            if (addr.value < 0x100) {
+                return false;
+            }
+            
+            if (addr.value >= 0x200 && addr.value < 0x900 && GB_is_cgb(gb)) {
+                return false;
+            }
+        }
         if (!gb->breakpoints[index].condition) {
             return true;
         }
