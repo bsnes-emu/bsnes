@@ -25,10 +25,17 @@ static uint8_t generate_noise(uint8_t x, uint8_t y)
 
 static long get_processed_color(GB_gameboy_t *gb, uint8_t x, uint8_t y)
 {
-    if (x >= 128) {
+    if (x == 128) {
+        x = 127;
+    }
+    else if (x > 128) {
         x = 0;
     }
-    if (y >= 112) {
+    
+    if (y == 112) {
+        y = 111;
+    }
+    else if (y >= 112) {
         y = 0;
     }
 

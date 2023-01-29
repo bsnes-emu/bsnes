@@ -1861,18 +1861,20 @@ static bool is_path_writeable(const char *path)
                 NSError *error;
                 AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType: AVMediaTypeVideo];
                 AVCaptureDeviceInput *input = [AVCaptureDeviceInput deviceInputWithDevice: device error: &error];
-                CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions([[[device formats] firstObject] formatDescription]);
+                CMVideoDimensions dimensions = CMVideoFormatDescriptionGetDimensions([[[device formats] lastObject] formatDescription]);
 
                 if (!input) {
                     GB_camera_updated(&gb);
                     return;
                 }
+                
+                double ratio = MAX(130.0 / dimensions.width, 114.0 / dimensions.height);
 
                 cameraOutput = [[AVCaptureStillImageOutput alloc] init];
                 /* Greyscale is not widely supported, so we use YUV, whose first element is the brightness. */
                 [cameraOutput setOutputSettings: @{(id)kCVPixelBufferPixelFormatTypeKey: @(kYUVSPixelFormat),
-                                                   (id)kCVPixelBufferWidthKey: @(MAX(128, 112 * dimensions.width / dimensions.height)),
-                                                   (id)kCVPixelBufferHeightKey: @(MAX(112, 128 * dimensions.height / dimensions.width)),}];
+                                                   (id)kCVPixelBufferWidthKey: @(round(dimensions.width * ratio)),
+                                                   (id)kCVPixelBufferHeightKey: @(round(dimensions.height * ratio)),}];
 
 
                 cameraSession = [AVCaptureSession new];
@@ -1908,7 +1910,7 @@ static bool is_path_writeable(const char *path)
     });
 }
 
-- (uint8_t)cameraGetPixelAtX:(uint8_t)x andY:(uint8_t) y
+- (uint8_t)cameraGetPixelAtX:(unsigned)x andY:(unsigned)y
 {
     if (!cameraImage) {
         return 0;
@@ -1916,8 +1918,8 @@ static bool is_path_writeable(const char *path)
 
     uint8_t *baseAddress = (uint8_t *)CVPixelBufferGetBaseAddress(cameraImage);
     size_t bytesPerRow = CVPixelBufferGetBytesPerRow(cameraImage);
-    uint8_t offsetX = (CVPixelBufferGetWidth(cameraImage) - 128) / 2;
-    uint8_t offsetY = (CVPixelBufferGetHeight(cameraImage) - 112) / 2;
+    unsigned offsetX = (CVPixelBufferGetWidth(cameraImage) - 128) / 2;
+    unsigned offsetY = (CVPixelBufferGetHeight(cameraImage) - 112) / 2;
     uint8_t ret = baseAddress[(x + offsetX) * 2 + (y + offsetY) * bytesPerRow];
 
     return ret;
