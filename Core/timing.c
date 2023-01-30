@@ -165,8 +165,22 @@ static void increase_tima(GB_gameboy_t *gb)
 
 void GB_serial_master_edge(GB_gameboy_t *gb)
 {
-    if (unlikely(gb->printer_callback && (gb->printer.command_state || gb->printer.bits_received))) {
-        gb->printer.idle_time += 1 << gb->serial_mask;
+    if (gb->printer_callback) {
+        unsigned ticks = 1 << gb->serial_mask;
+        if (unlikely((gb->printer.command_state || gb->printer.bits_received))) {
+            gb->printer.idle_time +=ticks;
+        }
+        if (unlikely(gb->printer.time_remaining)) {
+            if (gb->printer.time_remaining <= ticks) {
+                gb->printer.time_remaining = 0;
+                if (gb->printer_done_callback) {
+                    gb->printer_done_callback(gb);
+                }
+            }
+            else {
+                gb->printer.time_remaining -= ticks;
+            }
+        }
     }
     
     gb->serial_master_clock ^= true;

@@ -180,6 +180,12 @@ static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
     [self printImage:image height:height topMargin:top_margin bottomMargin:bottom_margin exposure:exposure];
 }
 
+static void printDone(GB_gameboy_t *gb)
+{
+    Document *self = (__bridge Document *)GB_get_user_data(gb);
+    [self printDone];
+}
+
 static void setWorkboyTime(GB_gameboy_t *gb, time_t t)
 {
     [[NSUserDefaults standardUserDefaults] setInteger:time(NULL) - t forKey:@"GBWorkboyTimeOffset"];
@@ -2060,9 +2066,9 @@ static bool is_path_writeable(const char *path)
     [self reloadVRAMData: nil];
 }
 
-- (void) printImage:(uint32_t *)imageBytes height:(unsigned) height
-          topMargin:(unsigned) topMargin bottomMargin: (unsigned) bottomMargin
-           exposure:(unsigned) exposure
+- (void)printImage:(uint32_t *)imageBytes height:(unsigned) height
+         topMargin:(unsigned) topMargin bottomMargin: (unsigned) bottomMargin
+          exposure:(unsigned) exposure
 {
     uint32_t paddedImage[160 * (topMargin + height + bottomMargin)];
     memset(paddedImage, 0xFF, sizeof(paddedImage));
@@ -2073,6 +2079,7 @@ static bool is_path_writeable(const char *path)
     [currentPrinterImageData appendBytes:paddedImage length:sizeof(paddedImage)];
     /* UI related code must run on main thread. */
     dispatch_async(dispatch_get_main_queue(), ^{
+        [_printerSpinner startAnimation:nil];
         self.feedImageView.image = [Document imageFromData:currentPrinterImageData
                                                      width:160
                                                     height:currentPrinterImageData.length / 160 / sizeof(imageBytes[0])
@@ -2085,6 +2092,13 @@ static bool is_path_writeable(const char *path)
         [self.printerFeedWindow orderFront:NULL];
     });
     
+}
+
+- (void)printDone
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [_printerSpinner stopAnimation:nil];
+    });
 }
 
 - (void)printDocument:(id)sender
@@ -2135,7 +2149,7 @@ static bool is_path_writeable(const char *path)
     [self disconnectLinkCable];
     [self performAtomicBlock:^{
         accessory = GBAccessoryPrinter;
-        GB_connect_printer(&gb, printImage);
+        GB_connect_printer(&gb, printImage, printDone);
     }];
 }
 

@@ -710,6 +710,7 @@ struct GB_gameboy_internal_s {
         GB_write_memory_callback_t write_memory_callback;
         GB_boot_rom_load_callback_t boot_rom_load_callback;
         GB_print_image_callback_t printer_callback;
+        GB_printer_done_callback_t printer_done_callback;
         GB_workboy_set_time_callback workboy_set_time_callback;
         GB_workboy_get_time_callback workboy_get_time_callback;
         GB_execution_callback_t execution_callback;

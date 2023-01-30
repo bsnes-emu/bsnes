@@ -35,6 +35,7 @@
                 <outlet property="osdView" destination="MX4-l2-7NE" id="Am7-fq-uvu"/>
                 <outlet property="paletteView" destination="ZuP-AU-0pA" id="ef6-27-Bci"/>
                 <outlet property="printerFeedWindow" destination="NdE-0B-WCf" id="yVK-cS-NOJ"/>
+                <outlet property="printerSpinner" destination="rrz-Uh-Nae" id="CI8-Y2-s3l"/>
                 <outlet property="tilemapImageView" destination="LlK-tV-bjv" id="nSY-Xd-BjZ"/>
                 <outlet property="tilemapMapButton" destination="YIJ-Qc-SIZ" id="BB7-Gg-7XP"/>
                 <outlet property="tilemapPaletteButton" destination="loB-0k-Qff" id="2Or-7l-6vn"/>
@@ -680,11 +681,19 @@
                     <toolbarItem implicitItemIdentifier="NSToolbarPrintItem" explicitItemIdentifier="Print" id="mtd-zS-DXa"/>
                     <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="AoG-LH-J4b"/>
                     <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="Q0x-n5-Q2Y"/>
+                    <toolbarItem implicitItemIdentifier="E8F74F8F-6DE2-4774-A690-F71D92CD932E" label="" paletteLabel="" tag="-1" sizingBehavior="auto" id="CJX-Ff-7iQ">
+                        <nil key="toolTip"/>
+                        <progressIndicator key="view" wantsLayer="YES" maxValue="100" displayedWhenStopped="NO" indeterminate="YES" style="spinning" id="rrz-Uh-Nae">
+                            <rect key="frame" x="0.0" y="14" width="32" height="32"/>
+                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                        </progressIndicator>
+                    </toolbarItem>
                 </allowedToolbarItems>
                 <defaultToolbarItems>
                     <toolbarItem reference="CBz-1N-o0Q"/>
-                    <toolbarItem reference="Q0x-n5-Q2Y"/>
                     <toolbarItem reference="mtd-zS-DXa"/>
+                    <toolbarItem reference="Q0x-n5-Q2Y"/>
+                    <toolbarItem reference="CJX-Ff-7iQ"/>
                 </defaultToolbarItems>
             </toolbar>
             <point key="canvasLocation" x="-159" y="356"/>

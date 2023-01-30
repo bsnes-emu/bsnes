@@ -13,6 +13,8 @@ typedef void (*GB_print_image_callback_t)(GB_gameboy_t *gb,
                                           uint8_t bottom_margin,
                                           uint8_t exposure);
 
+typedef void (*GB_printer_done_callback_t)(GB_gameboy_t *gb);
+
 
 typedef struct
 {
@@ -56,8 +58,9 @@ typedef struct
     uint8_t bits_received;
     uint8_t byte_being_received;
     bool bit_to_send;
+    uint64_t time_remaining;
 } GB_printer_t;
 
 
-void GB_connect_printer(GB_gameboy_t *gb, GB_print_image_callback_t callback);
+void GB_connect_printer(GB_gameboy_t *gb, GB_print_image_callback_t callback, GB_printer_done_callback_t done_callback);
 #endif

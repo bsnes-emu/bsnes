@@ -35,6 +35,7 @@
 @property (nonatomic, strong) IBOutlet GBPaletteView *paletteView;
 @property (nonatomic, strong) IBOutlet GBObjectView *objectView;
 @property (nonatomic, strong) IBOutlet NSPanel *printerFeedWindow;
+@property (nonatomic, strong) IBOutlet NSProgressIndicator *printerSpinner;
 @property (nonatomic, strong) IBOutlet NSImageView *feedImageView;
 @property (nonatomic, strong) IBOutlet NSTextView *debuggerSideViewInput;
 @property (nonatomic, strong) IBOutlet NSTextView *debuggerSideView;
