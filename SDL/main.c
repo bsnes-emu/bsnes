@@ -45,6 +45,7 @@ void set_filename(const char *new_filename, typeof(free) *new_free_function)
     }
     filename = (char *) new_filename;
     free_function = new_free_function;
+    GB_rewind_reset(&gb);
 }
 
 static char *completer(const char *substring, uintptr_t *context)

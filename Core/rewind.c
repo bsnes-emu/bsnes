@@ -111,7 +111,7 @@ void GB_rewind_push(GB_gameboy_t *gb)
 {
     const size_t save_size = GB_get_save_state_size_no_bess(gb);
     if (gb->rewind_state_size != save_size) {
-        GB_rewind_free(gb);
+        GB_rewind_reset(gb);
         gb->rewind_state_size = save_size;
     }
     if (!gb->rewind_sequences) {
@@ -185,7 +185,7 @@ bool GB_rewind_pop(GB_gameboy_t *gb)
     return true;
 }
 
-void GB_rewind_free(GB_gameboy_t *gb)
+void GB_rewind_reset(GB_gameboy_t *gb)
 {
     if (!gb->rewind_sequences) return;
     for (unsigned i = 0; i < gb->rewind_buffer_length; i++) {
@@ -204,7 +204,7 @@ void GB_rewind_free(GB_gameboy_t *gb)
 
 void GB_set_rewind_length(GB_gameboy_t *gb, double seconds)
 {
-    GB_rewind_free(gb);
+    GB_rewind_reset(gb);
     if (seconds == 0) {
         gb->rewind_buffer_length = 0;
     }

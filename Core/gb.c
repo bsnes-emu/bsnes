@@ -14,7 +14,7 @@
 
 
 #ifdef GB_DISABLE_REWIND
-#define GB_rewind_free(...)
+#define GB_rewind_reset(...)
 #define GB_rewind_push(...)
 #endif
 
@@ -225,7 +225,7 @@ void GB_free(GB_gameboy_t *gb)
 #ifndef GB_DISABLE_DEBUGGER
     GB_debugger_clear_symbols(gb);
 #endif
-    GB_rewind_free(gb);
+    GB_rewind_reset(gb);
 #ifndef GB_DISABLE_CHEATS
     while (gb->cheats) {
         GB_remove_cheat(gb, gb->cheats[0]);
@@ -1775,7 +1775,7 @@ void GB_switch_model_and_reset(GB_gameboy_t *gb, GB_model_t model)
         free(gb->undo_state);
         gb->undo_state = NULL;
     }
-    GB_rewind_free(gb);
+    GB_rewind_reset(gb);
     GB_reset(gb);
     load_default_border(gb);
 }
