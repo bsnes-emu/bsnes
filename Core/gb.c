@@ -304,6 +304,21 @@ void GB_borrow_sgb_border(GB_gameboy_t *gb)
     GB_free(&sgb);
 }
 
+static size_t rounded_rom_size(size_t size)
+{
+    size = (size + 0x3FFF) & ~0x3FFF; /* Round to bank */
+    /* And then round to a power of two */
+    while (size & (size - 1)) {
+        /* I promise this works. */
+        size |= size >> 1;
+        size++;
+    }
+    if (size < 0x8000) {
+        size = 0x8000;
+    }
+    return size;
+}
+
 int GB_load_rom(GB_gameboy_t *gb, const char *path)
 {
     FILE *f = fopen(path, "rb");
@@ -312,16 +327,7 @@ int GB_load_rom(GB_gameboy_t *gb, const char *path)
         return errno;
     }
     fseek(f, 0, SEEK_END);
-    gb->rom_size = (ftell(f) + 0x3FFF) & ~0x3FFF; /* Round to bank */
-    /* And then round to a power of two */
-    while (gb->rom_size & (gb->rom_size - 1)) {
-        /* I promise this works. */
-        gb->rom_size |= gb->rom_size >> 1;
-        gb->rom_size++;
-    }
-    if (gb->rom_size < 0x8000) {
-        gb->rom_size = 0x8000;
-    }
+    gb->rom_size = rounded_rom_size(ftell(f));
     fseek(f, 0, SEEK_SET);
     if (gb->rom) {
         free(gb->rom);
@@ -423,18 +429,8 @@ int GB_load_gbs_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size
 
     size_t data_size = size - sizeof(gb->gbs_header);
 
-    gb->rom_size = (data_size + LE16(gb->gbs_header.load_address) + 0x3FFF) & ~0x3FFF; /* Round to bank */
-    /* And then round to a power of two */
-    while (gb->rom_size & (gb->rom_size - 1)) {
-        /* I promise this works. */
-        gb->rom_size |= gb->rom_size >> 1;
-        gb->rom_size++;
-    }
+    gb->rom_size = rounded_rom_size(data_size + LE16(gb->gbs_header.load_address));
     
-    if (gb->rom_size < 0x8000) {
-        gb->rom_size = 0x8000;
-    }
-
     if (gb->rom) {
         free(gb->rom);
     }
@@ -727,14 +723,7 @@ error:
 
 void GB_load_rom_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t size)
 {
-    gb->rom_size = (size + 0x3FFF) & ~0x3FFF;
-    while (gb->rom_size & (gb->rom_size - 1)) {
-        gb->rom_size |= gb->rom_size >> 1;
-        gb->rom_size++;
-    }
-    if (gb->rom_size == 0) {
-        gb->rom_size = 0x8000;
-    }
+    gb->rom_size = rounded_rom_size(size);
     if (gb->rom) {
         free(gb->rom);
     }
