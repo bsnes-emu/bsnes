@@ -262,7 +262,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 {
     GB_model_t model;
     if (!GB_get_state_model(file.fileSystemRepresentation, &model)) {
-        GB_switch_model_and_reset(&_gb, model);
+        if (GB_get_model(&_gb) != model) {
+            GB_switch_model_and_reset(&_gb, model);
+        }
         GB_load_state(&_gb, file.fileSystemRepresentation);
     }
 }
