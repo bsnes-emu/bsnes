@@ -759,6 +759,7 @@ struct GB_gameboy_internal_s {
 
         /* Rewind */
         size_t rewind_buffer_length;
+        size_t rewind_state_size;
         struct {
             uint8_t *key_state;
             uint8_t *compressed_states[GB_REWIND_FRAMES_PER_KEY];
