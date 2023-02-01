@@ -49,8 +49,15 @@ typedef struct
     
     uint8_t image[160 * 200];
     uint16_t image_offset;
-    
-    uint64_t idle_time;
+
+    // TODO: fix this when breaking backwards compatibility
+#ifdef GB_BIG_ENDIAN
+    uint32_t time_remaining;
+    uint32_t idle_time;
+#else
+    uint32_t idle_time;
+    uint32_t time_remaining;
+#endif
     
     uint8_t compression_run_lenth;
     bool compression_run_is_compressed;
@@ -58,7 +65,6 @@ typedef struct
     uint8_t bits_received;
     uint8_t byte_being_received;
     bool bit_to_send;
-    uint64_t time_remaining;
 } GB_printer_t;
 
 
