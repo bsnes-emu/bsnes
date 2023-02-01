@@ -275,7 +275,12 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     GBROMManager *romManager = [GBROMManager sharedManager];
     if (romManager.romFile) {
         // Todo: display errors and warnings
-        _romLoaded = GB_load_rom(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
+        if ([romManager.romFile.pathExtension.lowercaseString isEqualToString:@"isx"]) {
+            _romLoaded = GB_load_isx(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
+        }
+        else {
+            _romLoaded = GB_load_rom(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
+        }
         GB_rewind_reset(&_gb);
         if (_romLoaded) {
             GB_reset(&_gb);
