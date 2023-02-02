@@ -214,7 +214,7 @@ ELSE
 ENDC
     call Preboot
 IF DEF(AGB)
-    ld b, 1
+    inc b
 ENDC
     jr BootGame
 
@@ -976,6 +976,7 @@ GetPaletteIndex:
     inc l
     dec c
     jr nz, .checksumLoop
+    ldh [TitleChecksum], a
     ld b, a
 
     ; c = 0
