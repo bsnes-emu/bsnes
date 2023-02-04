@@ -218,4 +218,5 @@ void GB_connect_printer(GB_gameboy_t *gb, GB_print_image_callback_t callback, GB
     GB_set_serial_transfer_bit_end_callback(gb, serial_end);
     gb->printer_callback = callback;
     gb->printer_done_callback = done_callback;
+    gb->accessory = GB_ACCESSORY_PRINTER;
 }

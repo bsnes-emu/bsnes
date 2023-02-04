@@ -28,7 +28,7 @@
 #include "workboy.h"
 #include "random.h"
 
-#define GB_STRUCT_VERSION 14
+#define GB_STRUCT_VERSION 15
 
 #define GB_REWIND_FRAMES_PER_KEY 255
 
@@ -390,10 +390,8 @@ struct GB_gameboy_internal_s {
 
         /* Misc state */
         bool infrared_input;
-        GB_printer_t printer;
         uint8_t extra_oam[0xFF00 - 0xFEA0];
         uint32_t ram_size; // Different between CGB and DMG
-        GB_workboy_t workboy;
                
         int32_t ir_sensor;
         bool effective_ir_input;
@@ -416,7 +414,6 @@ struct GB_gameboy_internal_s {
         int8_t dma_cycles_modulo;
         bool dma_ppu_vram_conflict;
         uint16_t dma_ppu_vram_conflict_addr;
-        GB_PADDING(uint8_t, hdma_open_bus);
         bool allow_hdma_on_wake;
         bool dma_restarting;
     )
@@ -452,9 +449,9 @@ struct GB_gameboy_internal_s {
             } mbc5; // Also used for GB_CAMERA
                
             struct {
-                uint8_t rom_bank;
                 uint16_t x_latch;
                 uint16_t y_latch;
+                uint8_t rom_bank;
                 bool latch_ready:1;
                 bool eeprom_do:1;
                 bool eeprom_di:1;
@@ -487,17 +484,17 @@ struct GB_gameboy_internal_s {
             struct {
                 uint8_t bank_low:6;
                 uint8_t bank_high:3;
-                bool ir_mode;
+                bool ir_mode:1;
             } huc1;
 
             struct {
                 uint8_t rom_bank:7;
                 uint8_t padding:1;
                 uint8_t ram_bank:4;
-                uint8_t mode;
-                uint8_t access_index;
+                uint8_t mode:4;
                 uint16_t minutes, days;
                 uint16_t alarm_minutes, alarm_days;
+                uint8_t access_index;
                 bool alarm_enabled;
                 uint8_t read;
                 uint8_t access_flags;
@@ -509,10 +506,11 @@ struct GB_gameboy_internal_s {
                uint8_t mode;
            } tpp1;
         };
-        bool camera_registers_mapped;
-        uint8_t camera_registers[0x36];
         uint8_t rumble_strength;
         bool cart_ir;
+               
+        bool camera_registers_mapped;
+        uint8_t camera_registers[0x36];
         uint8_t camera_alignment;
         int32_t camera_countdown;
     )
@@ -528,7 +526,11 @@ struct GB_gameboy_internal_s {
         GB_UNIT(display);
         GB_UNIT(div);
         uint16_t div_counter;
-        uint8_t tima_reload_state; /* After TIMA overflows, it becomes 0 for 4 cycles before actually reloading. */
+        GB_ENUM(uint8_t, {
+            GB_TIMA_RUNNING = 0,
+            GB_TIMA_RELOADING = 1,
+            GB_TIMA_RELOADED = 2
+        }) tima_reload_state; /* After TIMA overflows, it becomes 0 for 4 cycles before actually reloading. */
         bool serial_master_clock;
         uint8_t serial_mask;
         uint8_t double_speed_alignment;
@@ -574,13 +576,12 @@ struct GB_gameboy_internal_s {
            See https://www.reddit.com/r/EmuDev/comments/6exyxu/ */
                
         /* TODO: Drop this and properly emulate the dropped vreset signal*/
-        enum {
+        GB_ENUM(uint8_t, {
             GB_FRAMESKIP_LCD_TURNED_ON, // On a DMG, the LCD renders a blank screen during this state,
                                         // on a CGB, the previous frame is repeated (which might be
                                         // blank if the LCD was off for more than a few cycles)
-            GB_FRAMESKIP_FIRST_FRAME_SKIPPED__DEPRECATED,
             GB_FRAMESKIP_FIRST_FRAME_RENDERED,
-        } frame_skip_state;
+        }) frame_skip_state;
         bool oam_read_blocked;
         bool vram_read_blocked;
         bool oam_write_blocked;
@@ -628,12 +629,23 @@ struct GB_gameboy_internal_s {
         bool is_odd_frame;
         uint16_t last_tile_data_address;
         uint16_t last_tile_index_address;
-        GB_PADDING(bool, cgb_repeated_a_frame);
         uint8_t data_for_sel_glitch;
         bool delayed_glitch_hblank_interrupt;
         uint32_t frame_repeat_countdown;
         bool disable_window_pixel_insertion_glitch;
         bool insert_bg_pixel;
+    )
+    
+    GB_SECTION(accessory,
+        GB_ENUM(uint8_t, {
+            GB_ACCESSORY_NONE,
+            GB_ACCESSORY_PRINTER,
+            GB_ACCESSORY_WORKBOY,
+        }) accessory;
+        union {
+            GB_printer_t printer;
+            GB_workboy_t workboy;
+        };
     )
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */

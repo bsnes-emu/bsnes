@@ -147,6 +147,7 @@ void GB_connect_workboy(GB_gameboy_t *gb,
     GB_set_serial_transfer_bit_end_callback(gb, serial_end);
     gb->workboy_set_time_callback = set_time_callback;
     gb->workboy_get_time_callback = get_time_callback;
+    gb->accessory = GB_ACCESSORY_WORKBOY;
 }
 
 bool GB_workboy_is_enabled(GB_gameboy_t *gb)

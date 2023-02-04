@@ -920,7 +920,7 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         case GB_HUC3:
             switch (addr & 0xF000) {
                 case 0x0000: case 0x1000:
-                    gb->huc3.mode = value & 0xF;
+                    gb->huc3.mode = value;
                     gb->mbc_ram_enable = gb->huc3.mode == 0xA;
                     break;
                 case 0x2000: case 0x3000: gb->huc3.rom_bank  = value; break;

@@ -21,8 +21,11 @@
 #define GB_GET_SECTION(gb, name) ((void*)&((gb)->name##_section_start))
 #endif
 
-#define GB_aligned_double __attribute__ ((aligned (8))) double
-
+#if __clang_major__ >= 8 || __GNUC__ >= 13
+#define GB_ENUM(type, ...) enum : type __VA_ARGS__
+#else
+#define GB_ENUM(type, ...) typeof((type)((enum __VA_ARGS__)0))
+#endif
 
 /* Public calls related to save states */
 int GB_save_state(GB_gameboy_t *gb, const char *path);

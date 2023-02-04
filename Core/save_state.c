@@ -17,6 +17,7 @@ _Static_assert((GB_SECTION_OFFSET(timing) & 7) == 0, "Section timing is not alig
 _Static_assert((GB_SECTION_OFFSET(apu) & 7) == 0, "Section apu is not aligned");
 _Static_assert((GB_SECTION_OFFSET(rtc) & 7) == 0, "Section rtc is not aligned");
 _Static_assert((GB_SECTION_OFFSET(video) & 7) == 0, "Section video is not aligned");
+_Static_assert((GB_SECTION_OFFSET(accessory) & 7) == 0, "Section accessory is not aligned");
 
 typedef struct __attribute__((packed)) {
     uint32_t magic;
@@ -280,6 +281,7 @@ size_t GB_get_save_state_size_no_bess(GB_gameboy_t *gb)
     + GB_SECTION_SIZE(apu       ) + sizeof(uint32_t)
     + GB_SECTION_SIZE(rtc       ) + sizeof(uint32_t)
     + GB_SECTION_SIZE(video     ) + sizeof(uint32_t)
+    + GB_SECTION_SIZE(accessory ) + sizeof(uint32_t)
     + (GB_is_hle_sgb(gb)? sizeof(*gb->sgb) + sizeof(uint32_t) : 0)
     + gb->mbc_ram_size
     + gb->ram_size
@@ -336,6 +338,10 @@ static bool verify_and_update_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t
         return false;
     }
     
+    if (gb->accessory != save->accessory) {
+        memset(GB_GET_SECTION(save, accessory), 0, GB_SECTION_SIZE(accessory));
+    }
+    
     switch (save->model) {
         case GB_MODEL_DMG_B: return true;
         case GB_MODEL_SGB_NTSC: return true;
@@ -358,6 +364,7 @@ static bool verify_and_update_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t
         save->model = gb->model;
         return true;
     }
+    
     GB_log(gb, "This save state is for an unknown Game Boy model\n");
     return false;
 }
@@ -544,7 +551,8 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file, bool appe
     if (!DUMP_SECTION(gb, file, rtc       )) goto error;
     uint32_t video_offset = file->tell(file) + 4;
     if (!DUMP_SECTION(gb, file, video     )) goto error;
-    
+    if (!DUMP_SECTION(gb, file, accessory )) goto error;
+
     uint32_t sgb_offset = 0;
     
     if (GB_is_hle_sgb(gb)) {
@@ -1304,7 +1312,8 @@ static int load_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
     if (!READ_SECTION(&save, file, apu       )) return errno ?: EIO;
     if (!READ_SECTION(&save, file, rtc       )) return errno ?: EIO;
     if (!READ_SECTION(&save, file, video     )) return errno ?: EIO;
-    
+    if (!READ_SECTION(&save, file, accessory )) return errno ?: EIO;
+
     
     bool attempt_bess = false;
     if (!verify_and_update_state_compatibility(gb, &save, &attempt_bess)) {
@@ -1509,4 +1518,48 @@ bool GB_is_save_state(const char *path)
 exit:
     fclose(f);
     return ret;
+}
+
+static void __attribute__((constructor)) wtf(void)
+{
+    printf("base offset %lx\n", GB_SECTION_OFFSET(apu) - offsetof(GB_gameboy_t, apu));
+    
+    printf("global_enable: %lx\n", offsetof(GB_apu_t, global_enable));
+    printf("apu_cycles: %lx\n", offsetof(GB_apu_t, apu_cycles));
+    
+    printf("samples: %lx\n", offsetof(GB_apu_t, samples));
+    printf("is_active: %lx\n", offsetof(GB_apu_t, is_active));
+    
+    printf("div_divider: %lx\n", offsetof(GB_apu_t, div_divider));
+    printf("lf_div: %lx\n", offsetof(GB_apu_t, lf_div));
+    
+    printf("square_sweep_countdown: %lx\n", offsetof(GB_apu_t, square_sweep_countdown));
+    printf("square_sweep_calculate_countdown: %lx\n", offsetof(GB_apu_t, square_sweep_calculate_countdown));
+    printf("sweep_length_addend: %lx\n", offsetof(GB_apu_t, sweep_length_addend));
+    printf("shadow_sweep_sample_length: %lx\n", offsetof(GB_apu_t, shadow_sweep_sample_length));
+    printf("unshifted_sweep: %lx\n", offsetof(GB_apu_t, unshifted_sweep));
+    printf("enable_zombie_calculate_stepping: %lx\n", offsetof(GB_apu_t, enable_zombie_calculate_stepping));
+    
+    printf("channel_1_restart_hold: %lx\n", offsetof(GB_apu_t, channel_1_restart_hold));
+    printf("channel1_completed_addend: %lx\n", offsetof(GB_apu_t, channel1_completed_addend));
+    printf("square_channels: %lx\n", offsetof(GB_apu_t, square_channels));
+    
+    printf("wave_channel: %lx\n", offsetof(GB_apu_t, wave_channel));
+    printf("noise_channel: %lx\n", offsetof(GB_apu_t, noise_channel));
+    
+    printf("pcm_mask: %lx\n", offsetof(GB_apu_t, pcm_mask));
+    
+    GB_gameboy_t *gb;
+    printf("pulse_length %lx\n", offsetof(typeof(gb->apu.square_channels[0]), pulse_length));
+    printf("current_volume %lx\n", offsetof(typeof(gb->apu.square_channels[0]), current_volume));
+    printf("volume_countdown %lx\n", offsetof(typeof(gb->apu.square_channels[0]), volume_countdown));
+    printf("current_sample_index %lx\n", offsetof(typeof(gb->apu.square_channels[0]), current_sample_index));
+    printf("sample_surpressed %lx\n", offsetof(typeof(gb->apu.square_channels[0]), sample_surpressed));
+    
+    printf("sample_countdown %lx\n", offsetof(typeof(gb->apu.square_channels[0]), sample_countdown));
+    printf("sample_length %lx\n", offsetof(typeof(gb->apu.square_channels[0]), sample_length));
+    printf("length_enabled %lx\n", offsetof(typeof(gb->apu.square_channels[0]), length_enabled));
+    printf("envelope_clock %lx\n", offsetof(typeof(gb->apu.square_channels[0]), envelope_clock));
+    printf("delay %lx\n", offsetof(typeof(gb->apu.square_channels[0]), delay));
+    printf("did_tick %lx\n", offsetof(typeof(gb->apu.square_channels[0]), did_tick));
 }

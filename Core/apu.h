@@ -51,7 +51,7 @@ typedef struct
     bool locked:1; // Represents FYNO's output on channel 4
     bool clock:1; // Represents FOSY on channel 4
     bool should_lock:1;  // Represents FYNO's input on channel 4
-    unsigned padding:5;
+    uint8_t padding:5;
 } GB_envelope_clock_t;
 
 typedef void (*GB_sample_callback_t)(GB_gameboy_t *gb, GB_sample_t *sample);
@@ -129,11 +129,11 @@ typedef struct
         GB_envelope_clock_t envelope_clock;
     } noise_channel;
 
-    enum {
+    GB_ENUM(uint8_t, {
         GB_SKIP_DIV_EVENT_INACTIVE,
         GB_SKIP_DIV_EVENT_SKIPPED,
         GB_SKIP_DIV_EVENT_SKIP,
-    } skip_div_event:8;
+    }) skip_div_event;
     uint8_t pcm_mask[2]; // For CGB-0 to CGB-C PCM read glitch
 } GB_apu_t;
 
@@ -199,3 +199,4 @@ internal void GB_apu_run(GB_gameboy_t *gb, bool force);
 #endif
 
 #endif
+
