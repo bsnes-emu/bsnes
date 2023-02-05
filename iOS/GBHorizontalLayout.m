@@ -11,7 +11,7 @@
     CGSize resolution = {self.resolution.height - self.cutout, self.resolution.width};
     
     CGRect screenRect = {0,};
-    screenRect.size.height = self.hasFractionalPixels? resolution.height : floor((resolution.height - self.homeBar) / 144) * 144;
+    screenRect.size.height = self.hasFractionalPixels? (resolution.height - self.homeBar) : floor((resolution.height - self.homeBar) / 144) * 144;
     screenRect.size.width = screenRect.size.height / 144 * 160;
     
     double horizontalMargin, verticalMargin;

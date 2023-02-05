@@ -449,11 +449,6 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     return true;
 }
 
-- (BOOL)prefersHomeIndicatorAutoHidden
-{
-    return true;
-}
-
 - (UIRectEdge)preferredScreenEdgesDeferringSystemGestures
 {
     return UIRectEdgeTop;
