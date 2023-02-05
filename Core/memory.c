@@ -755,6 +755,8 @@ void GB_set_read_memory_callback(GB_gameboy_t *gb, GB_read_memory_callback_t cal
 
 uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    
     if (unlikely(gb->n_watchpoints)) {
         GB_debugger_test_read_watchpoint(gb, addr);
     }
@@ -1730,6 +1732,8 @@ void GB_set_write_memory_callback(GB_gameboy_t *gb, GB_write_memory_callback_t c
 
 void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    
     if (unlikely(gb->n_watchpoints)) {
         GB_debugger_test_write_watchpoint(gb, addr, value);
     }

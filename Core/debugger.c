@@ -2277,6 +2277,8 @@ void GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, uint16_t addr)
 /* Returns true if debugger waits for more commands */
 bool GB_debugger_execute_command(GB_gameboy_t *gb, char *input)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    
     while (*input == ' ') {
         input++;
     }
@@ -2598,6 +2600,8 @@ const char *GB_debugger_name_for_address(GB_gameboy_t *gb, uint16_t addr)
 /* The public version of debugger_evaluate */
 bool GB_debugger_evaluate(GB_gameboy_t *gb, const char *string, uint16_t *result, uint16_t *result_bank)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    
     bool error = false;
     value_t value = debugger_evaluate(gb, string, strlen(string), &error, NULL, NULL);
     if (result) {
