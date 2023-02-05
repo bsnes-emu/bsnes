@@ -90,7 +90,6 @@ enum model {
     GB_oam_info_t _oamInfo[40];
     
     NSMutableData *currentPrinterImageData;
-    enum {GBAccessoryNone, GBAccessoryPrinter, GBAccessoryWorkboy, GBAccessoryLinkCable} accessory;
     
     bool rom_warning_issued;
     
@@ -1213,13 +1212,13 @@ static bool is_path_writeable(const char *path)
         }
     }
     else if ([anItem action] == @selector(disconnectAllAccessories:)) {
-        [(NSMenuItem *)anItem setState:accessory == GBAccessoryNone];
+        [(NSMenuItem *)anItem setState:GB_get_built_in_accessory(&gb) == GB_ACCESSORY_NONE && !self.partner];
     }
     else if ([anItem action] == @selector(connectPrinter:)) {
-        [(NSMenuItem *)anItem setState:accessory == GBAccessoryPrinter];
+        [(NSMenuItem *)anItem setState:GB_get_built_in_accessory(&gb) == GB_ACCESSORY_PRINTER];
     }
     else if ([anItem action] == @selector(connectWorkboy:)) {
-        [(NSMenuItem *)anItem setState:accessory == GBAccessoryWorkboy];
+        [(NSMenuItem *)anItem setState:GB_get_built_in_accessory(&gb) == GB_ACCESSORY_WORKBOY];
     }
     else if ([anItem action] == @selector(connectLinkCable:)) {
         [(NSMenuItem *)anItem setState:[(NSMenuItem *)anItem representedObject] == master ||
@@ -2139,7 +2138,6 @@ static bool is_path_writeable(const char *path)
 {
     [self disconnectLinkCable];
     [self performAtomicBlock:^{
-        accessory = GBAccessoryNone;
         GB_disconnect_serial(&gb);
     }];
 }
@@ -2148,7 +2146,6 @@ static bool is_path_writeable(const char *path)
 {
     [self disconnectLinkCable];
     [self performAtomicBlock:^{
-        accessory = GBAccessoryPrinter;
         GB_connect_printer(&gb, printImage, printDone);
     }];
 }
@@ -2157,7 +2154,6 @@ static bool is_path_writeable(const char *path)
 {
     [self disconnectLinkCable];
     [self performAtomicBlock:^{
-        accessory = GBAccessoryWorkboy;
         GB_connect_workboy(&gb, setWorkboyTime, getWorkboyTime);
     }];
 }
@@ -2320,8 +2316,6 @@ static bool is_path_writeable(const char *path)
         }
         GB_set_turbo_mode(&gb, false, false);
         GB_set_turbo_mode(&partner->gb, false, false);
-        partner->accessory = GBAccessoryNone;
-        accessory = GBAccessoryNone;
     }
 }
 
@@ -2338,8 +2332,6 @@ static bool is_path_writeable(const char *path)
     slave = partner;
     partner->master = self;
     linkOffset = 0;
-    partner->accessory = GBAccessoryLinkCable;
-    accessory = GBAccessoryLinkCable;
     GB_set_serial_transfer_bit_start_callback(&gb, linkCableBitStart);
     GB_set_serial_transfer_bit_start_callback(&partner->gb, linkCableBitStart);
     GB_set_serial_transfer_bit_end_callback(&gb, linkCableBitEnd);

@@ -1387,6 +1387,11 @@ void GB_disconnect_serial(GB_gameboy_t *gb)
     memset(GB_GET_SECTION(gb, accessory), 0, GB_SECTION_SIZE(accessory));
 }
 
+GB_accessory_t GB_get_built_in_accessory(GB_gameboy_t *gb)
+{
+    return gb->accessory;
+}
+
 bool GB_is_inited(GB_gameboy_t *gb)
 {
     return gb->magic == state_magic();

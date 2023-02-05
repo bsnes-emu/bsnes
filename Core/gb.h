@@ -336,6 +336,12 @@ typedef union {
     };
 } GB_registers_t;
 
+typedef GB_ENUM(uint8_t, {
+    GB_ACCESSORY_NONE,
+    GB_ACCESSORY_PRINTER,
+    GB_ACCESSORY_WORKBOY,
+}) GB_accessory_t;
+
 /* When state saving, each section is dumped independently of other sections.
    This allows adding data to the end of the section without worrying about future compatibility.
    Some other changes might be "safe" as well.
@@ -637,11 +643,7 @@ struct GB_gameboy_internal_s {
     )
     
     GB_SECTION(accessory,
-        GB_ENUM(uint8_t, {
-            GB_ACCESSORY_NONE,
-            GB_ACCESSORY_PRINTER,
-            GB_ACCESSORY_WORKBOY,
-        }) accessory;
+        GB_accessory_t accessory;
         union {
             GB_printer_t printer;
             GB_workboy_t workboy;
@@ -951,6 +953,7 @@ bool GB_serial_get_data_bit(GB_gameboy_t *gb);
 void GB_serial_set_data_bit(GB_gameboy_t *gb, bool data);
     
 void GB_disconnect_serial(GB_gameboy_t *gb);
+GB_accessory_t GB_get_built_in_accessory(GB_gameboy_t *gb);
     
 /* For cartridges with an alarm clock */
 unsigned GB_time_to_alarm(GB_gameboy_t *gb); // 0 if no alarm
