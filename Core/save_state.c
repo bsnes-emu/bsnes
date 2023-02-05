@@ -834,6 +834,7 @@ error:
 
 int GB_save_state(GB_gameboy_t *gb, const char *path)
 {
+    GB_ASSERT_NOT_RUNNING(gb)
     FILE *f = fopen(path, "wb");
     if (!f) {
         GB_log(gb, "Could not open save state: %s.\n", strerror(errno));
@@ -852,6 +853,7 @@ int GB_save_state(GB_gameboy_t *gb, const char *path)
 
 void GB_save_state_to_buffer(GB_gameboy_t *gb, uint8_t *buffer)
 {
+    GB_ASSERT_NOT_RUNNING(gb)
     virtual_file_t file = {
         .write = buffer_write,
         .seek = buffer_seek,
@@ -1354,6 +1356,7 @@ static int load_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
 
 int GB_load_state(GB_gameboy_t *gb, const char *path)
 {
+    GB_ASSERT_NOT_RUNNING(gb)
     FILE *f = fopen(path, "rb");
     if (!f) {
         GB_log(gb, "Could not open save state: %s.\n", strerror(errno));
@@ -1372,6 +1375,7 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
 
 int GB_load_state_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t length)
 {
+    GB_ASSERT_NOT_RUNNING(gb)
     virtual_file_t file = {
         .read = buffer_read,
         .seek = buffer_seek,

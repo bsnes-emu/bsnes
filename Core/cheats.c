@@ -61,6 +61,8 @@ void GB_set_cheats_enabled(GB_gameboy_t *gb, bool enabled)
 
 void GB_add_cheat(GB_gameboy_t *gb, const char *description, uint16_t address, uint16_t bank, uint8_t value, uint8_t old_value, bool use_old_value, bool enabled)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    
     GB_cheat_t *cheat = malloc(sizeof(*cheat));
     cheat->address = address;
     cheat->bank = bank;
@@ -91,8 +93,11 @@ const GB_cheat_t *const *GB_get_cheats(GB_gameboy_t *gb, size_t *size)
     *size = gb->cheat_count;
     return (void *)gb->cheats;
 }
+
 void GB_remove_cheat(GB_gameboy_t *gb, const GB_cheat_t *cheat)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    
     for (unsigned i = 0; i < gb->cheat_count; i++) {
         if (gb->cheats[i] == cheat) {
             gb->cheats[i] = gb->cheats[--gb->cheat_count];
@@ -127,6 +132,8 @@ void GB_remove_cheat(GB_gameboy_t *gb, const GB_cheat_t *cheat)
 
 bool GB_import_cheat(GB_gameboy_t *gb, const char *cheat, const char *description, bool enabled)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    
     uint8_t dummy;
     /* GameShark */
     {
@@ -186,6 +193,8 @@ bool GB_import_cheat(GB_gameboy_t *gb, const char *cheat, const char *descriptio
 
 void GB_update_cheat(GB_gameboy_t *gb, const GB_cheat_t *_cheat, const char *description, uint16_t address, uint16_t bank, uint8_t value, uint8_t old_value, bool use_old_value, bool enabled)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    
     GB_cheat_t *cheat = NULL;
     for (unsigned i = 0; i < gb->cheat_count; i++) {
         if (gb->cheats[i] == _cheat) {
@@ -242,6 +251,8 @@ void GB_update_cheat(GB_gameboy_t *gb, const GB_cheat_t *_cheat, const char *des
 
 void GB_load_cheats(GB_gameboy_t *gb, const char *path)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    
     FILE *f = fopen(path, "rb");
     if (!f) {
         return;

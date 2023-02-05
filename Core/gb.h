@@ -813,6 +813,9 @@ struct GB_gameboy_internal_s {
         bool returned_open_bus;
         uint16_t addr_for_hdma_conflict;
                
+        /* Thread safety (debug only) */
+        void *running_thread_id;
+               
         GB_gbs_header_t gbs_header;
    )
 };
@@ -986,4 +989,26 @@ internal void GB_borrow_sgb_border(GB_gameboy_t *gb);
 internal void GB_update_clock_rate(GB_gameboy_t *gb);
 #endif
     
+#ifdef GB_INTERNAL
+
+#ifndef NDEBUG
+#define GB_CONTEXT_SAFETY
+#endif
+    
+#ifdef GB_CONTEXT_SAFETY
+#include <assert.h>
+internal void *GB_get_thread_id(void);
+internal void GB_set_running_thread(GB_gameboy_t *gb);
+internal void GB_clear_running_thread(GB_gameboy_t *gb);
+#define GB_ASSERT_NOT_RUNNING(gb) if (gb->running_thread_id) {GB_log(gb, "Function %s must not be called in a running context.\n", __FUNCTION__); assert(!gb->running_thread_id);}
+#define GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb) if (gb->running_thread_id && gb->running_thread_id != GB_get_thread_id()) {GB_log(gb, "Function %s must not be called while running in another thread.\n", __FUNCTION__); assert(!gb->running_thread_id || gb->running_thread_id == GB_get_thread_id());}
+
+#else
+#define GB_ASSERT_NOT_RUNNING(gb)
+#define GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+#define GB_set_running_thread(gb)
+#define GB_clear_running_thread(gb)
+#endif
+    
+#endif
 #endif

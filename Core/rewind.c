@@ -160,6 +160,8 @@ void GB_rewind_push(GB_gameboy_t *gb)
 
 bool GB_rewind_pop(GB_gameboy_t *gb)
 {
+    GB_ASSERT_NOT_RUNNING(gb)
+    
     if (!gb->rewind_sequences || !gb->rewind_sequences[gb->rewind_pos].key_state) {
         return false;
     }
@@ -187,6 +189,8 @@ bool GB_rewind_pop(GB_gameboy_t *gb)
 
 void GB_rewind_reset(GB_gameboy_t *gb)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    
     if (!gb->rewind_sequences) return;
     for (unsigned i = 0; i < gb->rewind_buffer_length; i++) {
         if (gb->rewind_sequences[i].key_state) {
