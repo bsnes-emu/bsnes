@@ -542,7 +542,7 @@ $(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameBoyLogo.pb12
 	-@$(MKDIR) -p $(dir $@)
 	rgbasm -i $(OBJ)/BootROMs/ -i BootROMs/ -o $@.tmp $<
 	rgblink -o $@.tmp2 $@.tmp
-	dd if=$@.tmp2 of=$@ count=1 bs=$(if $(findstring dmg,$@)$(findstring sgb,$@),256,2304) 2> $(NULL)
+	dd if=$@.tmp2 of=$@ count=1 bs=$(if $(findstring dmg,$@)$(findstring sgb,$@)$(findstring mgb,$@),256,2304) 2> $(NULL)
 	@rm $@.tmp $@.tmp2
 
 # Libretro Core (uses its own build system)
