@@ -567,7 +567,7 @@ static void change_cheat_address_callback(char ch)
         return;
     }
     ch = toupper(ch);
-    if (!ishexnumber(ch)) return;
+    if (!isxdigit(ch)) return;
     
     unsigned digit_count = 0;
     const char *s = text_input + 1;
@@ -643,7 +643,7 @@ static void change_cheat_value_callback(char ch)
         SDL_StopTextInput();
         return;
     }
-    if (!ishexnumber(ch)) return;
+    if (!isxdigit(ch)) return;
     ch = toupper(ch);
     size_t len = strlen(text_input);
     if (len == 3) {
@@ -721,7 +721,7 @@ static void change_cheat_old_value_callback(char ch)
         SDL_StopTextInput();
         return;
     }
-    if (!ishexnumber(ch)) return;
+    if (!isxdigit(ch)) return;
     ch = toupper(ch);
     if (strcmp(text_input, "Any") == 0) {
         strcpy(text_input, "$");
@@ -813,7 +813,7 @@ static void import_cheat_callback(char ch)
         text_input[0] = 0;
         return;
     }
-    if (ch != '-' && !ishexnumber(ch)) return;
+    if (ch != '-' && !isxdigit(ch)) return;
     ch = toupper(ch);
     size_t len = strlen(text_input);
     if (len >= 12) {
