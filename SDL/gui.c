@@ -150,6 +150,17 @@ static void draw_char(uint32_t *buffer, unsigned width, unsigned height, unsigne
     if (ch < ' ' || ch > font_max) {
         ch = '?';
     }
+
+    // Huge dirty hack
+    if ((signed char)ch == CHECKBOX_ON_STRING[0] || (signed char)ch == CHECKBOX_OFF_STRING[0]) {
+        if (color == gui_palette_native[3]) {
+            color = gui_palette_native[0];
+        }
+        else if (color == gui_palette_native[0]) {
+            color = gui_palette_native[3];
+            ch = CHECKBOX_OFF_STRING[0];
+        }
+    }
     
     uint8_t *data = &font[(ch - ' ') * GLYPH_WIDTH * GLYPH_HEIGHT];
     
@@ -270,7 +281,14 @@ static enum {
     SHOWING_HELP,
     WAITING_FOR_KEY,
     WAITING_FOR_JBUTTON,
+    TEXT_INPUT,
 } gui_state;
+
+static char text_input_title[26];
+static char text_input_title2[26];
+static char text_input[26];
+
+static void (*text_input_callback)(char ch) = NULL;
 
 static unsigned joypad_configuration_progress = 0;
 static uint8_t joypad_axis_temp;
@@ -304,6 +322,9 @@ static void enter_options_menu(unsigned index);
 static void toggle_audio_recording(unsigned index);
 
 extern void set_filename(const char *new_filename, typeof(free) *new_free_function);
+
+static void nop(unsigned index){}
+
 static void open_rom(unsigned index)
 {
     char *filename = do_open_rom_dialog();
@@ -395,11 +416,480 @@ static void enter_options_menu(unsigned index)
     recalculate_menu_height();
 }
 
+static const GB_cheat_t *current_cheat = NULL;
+
+extern struct menu_item modify_cheat_menu[];
+
+static void save_cheats(void)
+{
+    extern char *filename;
+    size_t path_length = strlen(filename);
+    char cheat_path[path_length + 5];
+    replace_extension(filename, path_length, cheat_path, ".cht");
+    GB_save_cheats(&gb, cheat_path);
+}
+
+static void rename_callback(char ch)
+{
+    if (ch == '\b' && text_input[0]) {
+        text_input[strlen(text_input) - 1] = 0;
+        return;
+    }
+    if (ch == '\n') {
+        GB_update_cheat(&gb,
+                        current_cheat,
+                        text_input,
+                        current_cheat->address,
+                        current_cheat->bank,
+                        current_cheat->value,
+                        current_cheat->old_value,
+                        current_cheat->use_old_value,
+                        current_cheat->enabled);
+        modify_cheat_menu[0].string = current_cheat->description;
+        gui_state = SHOWING_MENU;
+        save_cheats();
+        SDL_StopTextInput();
+        return;
+    }
+    if (ch < ' ') return;
+    size_t len = strlen(text_input);
+    if (len < 21) {
+        text_input[len] = ch;
+        text_input[len + 1] = 0;
+    }
+}
+
+static void rename_cheat(unsigned index)
+{
+    strcpy(text_input_title, "Rename Cheat");
+    text_input_title2[0] = 0;
+    memcpy(text_input, current_cheat->description, 24);
+    text_input[24] = 0;
+    gui_state = TEXT_INPUT;
+    text_input_callback = rename_callback;
+    SDL_StartTextInput();
+    GB_update_cheat(&gb,
+                    current_cheat,
+                    current_cheat->description,
+                    current_cheat->address,
+                    current_cheat->bank,
+                    current_cheat->value,
+                    current_cheat->old_value,
+                    current_cheat->use_old_value,
+                    current_cheat->enabled);
+    save_cheats();
+}
+
+
+static void toggle_cheat(unsigned index)
+{
+    GB_update_cheat(&gb,
+                    current_cheat,
+                    current_cheat->description,
+                    current_cheat->address,
+                    current_cheat->bank,
+                    current_cheat->value,
+                    current_cheat->old_value,
+                    current_cheat->use_old_value,
+                    !current_cheat->enabled);
+    save_cheats();
+}
+
+static const char *active_cheat_checkbox(unsigned index)
+{
+    return current_cheat->enabled? CHECKBOX_ON_STRING : CHECKBOX_OFF_STRING;
+}
+
+static const char *get_cheat_address(unsigned index)
+{
+    static char ret[12];
+    if (current_cheat->bank == GB_CHEAT_ANY_BANK) {
+        sprintf(ret, "$%04X", current_cheat->address);
+    }
+    else {
+        sprintf(ret, "$%02X:$%04X", current_cheat->bank, current_cheat->address);
+    }
+    
+    return ret;
+}
+
+static void change_cheat_address_callback(char ch)
+{
+    if (ch == '\b' && text_input[1]) {
+        size_t len = strlen(text_input);
+        text_input[len - 1] = 0;
+        if (text_input[len - 2] == ':') {
+            text_input[len - 2] = 0;
+        }
+        return;
+    }
+    if (ch == '\n') {
+        uint16_t bank = GB_CHEAT_ANY_BANK;
+        uint16_t address = 0;
+        
+        const char *s = text_input + 1;
+        while (*s) {
+            if (*s == ':') {
+                bank = address;
+                address = 0;
+            }
+            else if (*s >= '0' && *s <= '9'){
+                address *= 0x10;
+                address += *s - '0';
+            }
+            else if (*s >= 'A' && *s <= 'F'){
+                address *= 0x10;
+                address += *s - 'A' + 10;
+            }
+            s++;
+        }
+        
+        GB_update_cheat(&gb,
+                        current_cheat,
+                        current_cheat->description,
+                        address,
+                        bank,
+                        current_cheat->value,
+                        current_cheat->old_value,
+                        current_cheat->use_old_value,
+                        current_cheat->enabled);
+        save_cheats();
+        gui_state = SHOWING_MENU;
+        SDL_StopTextInput();
+        return;
+    }
+    size_t len = strlen(text_input);
+    if (len >= 12) return;
+    if (ch == ':' && (len >= 2) && !strchr(text_input, ':')) {
+        text_input[len] = ':';
+        text_input[len + 1] = '$';
+        text_input[len + 2] = 0;
+        return;
+    }
+    ch = toupper(ch);
+    if (!ishexnumber(ch)) return;
+    
+    unsigned digit_count = 0;
+    const char *s = text_input + 1;
+    while (*s) {
+        if (*s == ':') {
+            s += 2;
+            digit_count = 0;
+        }
+        else {
+            s++;
+            digit_count++;
+        }
+    }
+    
+    if (digit_count == 4) return;
+
+    text_input[len] = ch;
+    text_input[len + 1] = 0;
+}
+
+static void change_cheat_address(unsigned index)
+{
+    strcpy(text_input_title, "Enter Cheat Address");
+    text_input_title2[0] = 0;
+    strcpy(text_input, get_cheat_address(0));
+    gui_state = TEXT_INPUT;
+    text_input_callback = change_cheat_address_callback;
+    SDL_StartTextInput();
+}
+
+static const char *get_cheat_value(unsigned index)
+{
+    static char ret[4];
+    sprintf(ret, "$%02X", current_cheat->value);
+    
+    return ret;
+}
+
+static void change_cheat_value_callback(char ch)
+{
+    if (ch == '\b' && text_input[1]) {
+        size_t len = strlen(text_input);
+        text_input[len - 1] = 0;
+        return;
+    }
+    if (ch == '\n') {
+        uint8_t value = 0;
+        
+        const char *s = text_input + 1;
+        while (*s) {
+            if (*s >= '0' && *s <= '9'){
+                value *= 0x10;
+                value += *s - '0';
+            }
+            else if (*s >= 'A' && *s <= 'F'){
+                value *= 0x10;
+                value += *s - 'A' + 10;
+            }
+            s++;
+        }
+        
+        GB_update_cheat(&gb,
+                        current_cheat,
+                        current_cheat->description,
+                        current_cheat->address,
+                        current_cheat->bank,
+                        value,
+                        current_cheat->old_value,
+                        current_cheat->use_old_value,
+                        current_cheat->enabled);
+        save_cheats();
+        gui_state = SHOWING_MENU;
+        SDL_StopTextInput();
+        return;
+    }
+    if (!ishexnumber(ch)) return;
+    ch = toupper(ch);
+    size_t len = strlen(text_input);
+    if (len == 3) {
+        text_input[1] = text_input[2];
+        text_input[2] = ch;
+        return;
+    }
+        
+    text_input[len] = ch;
+    text_input[len + 1] = 0;
+}
+
+static void change_cheat_value(unsigned index)
+{
+    strcpy(text_input_title, "Enter Cheat Value");
+    text_input_title2[0] = 0;
+    strcpy(text_input, get_cheat_value(0));
+    gui_state = TEXT_INPUT;
+    text_input_callback = change_cheat_value_callback;
+    SDL_StartTextInput();
+}
+
+static const char *get_cheat_old_value(unsigned index)
+{
+    if (!current_cheat->use_old_value) {
+        return "Any";
+    }
+    static char ret[4];
+    sprintf(ret, "$%02X", current_cheat->old_value);
+    
+    return ret;
+}
+
+static void change_cheat_old_value_callback(char ch)
+{
+    if (ch == '\b' && strcmp(text_input, "Any") != 0) {
+        size_t len = strlen(text_input);
+        if (len == 2) {
+            strcpy(text_input, "Any");
+            return;
+        }
+        text_input[len - 1] = 0;
+        return;
+    }
+    if (ch == '\n') {
+        uint8_t value = 0;
+        
+        bool use_old_value = strcmp(text_input, "Any") != 0;
+        if (use_old_value) {
+            const char *s = text_input + 1;
+            while (*s) {
+                if (*s >= '0' && *s <= '9'){
+                    value *= 0x10;
+                    value += *s - '0';
+                }
+                else if (*s >= 'A' && *s <= 'F'){
+                    value *= 0x10;
+                    value += *s - 'A' + 10;
+                }
+                s++;
+            }
+        }
+        
+        GB_update_cheat(&gb,
+                        current_cheat,
+                        current_cheat->description,
+                        current_cheat->address,
+                        current_cheat->bank,
+                        current_cheat->value,
+                        value,
+                        use_old_value,
+                        current_cheat->enabled);
+        save_cheats();
+        gui_state = SHOWING_MENU;
+        SDL_StopTextInput();
+        return;
+    }
+    if (!ishexnumber(ch)) return;
+    ch = toupper(ch);
+    if (strcmp(text_input, "Any") == 0) {
+        strcpy(text_input, "$");
+    }
+    size_t len = strlen(text_input);
+    if (len == 3) {
+        text_input[1] = text_input[2];
+        text_input[2] = ch;
+        return;
+    }
+    
+    text_input[len] = ch;
+    text_input[len + 1] = 0;
+}
+
+static void change_cheat_old_value(unsigned index)
+{
+    strcpy(text_input_title, "Enter Cheat Old Value");
+    text_input_title2[0] = 0;
+    strcpy(text_input, get_cheat_old_value(0));
+    gui_state = TEXT_INPUT;
+    text_input_callback = change_cheat_old_value_callback;
+    SDL_StartTextInput();
+}
+
+static void enter_cheats_menu(unsigned index);
+
+static void delete_cheat(unsigned index)
+{
+    GB_remove_cheat(&gb, current_cheat);
+    save_cheats();
+    enter_cheats_menu(0);
+}
+
+struct menu_item modify_cheat_menu[] = {
+    {"", rename_cheat},
+    {"Enable", toggle_cheat, active_cheat_checkbox},
+    {"Address:", change_cheat_address, get_cheat_address},
+    {"Value:", change_cheat_value, get_cheat_value},
+    {"Old Value:", change_cheat_old_value, get_cheat_old_value},
+    {"Delete Cheat", delete_cheat},
+    {"Back", enter_cheats_menu},
+    {NULL,}
+};
+
+static void toggle_cheats(unsigned index)
+{
+    GB_set_cheats_enabled(&gb, !GB_cheats_enabled(&gb));
+}
+
+static void add_cheat(unsigned index)
+{
+    current_cheat = GB_add_cheat(&gb, "New Cheat", 0, 0, 0, 0, false, true);
+    modify_cheat_menu[0].string = current_cheat->description;
+    current_menu = modify_cheat_menu;
+    current_selection = 0;
+    scroll = 0;
+    save_cheats();
+}
+
+static void import_cheat_callback(char ch)
+{
+    if (ch == '\b' && text_input[0]) {
+        size_t len = strlen(text_input);
+        text_input[len - 1] = 0;
+        return;
+    }
+    if (ch == '\n') {
+        if (!text_input[0]) {
+            gui_state = SHOWING_MENU;
+            SDL_StopTextInput();
+            return;
+        }
+        
+        current_cheat = GB_import_cheat(&gb, text_input, "Imported Cheat", true);
+        if (current_cheat) {
+            gui_state = SHOWING_MENU;
+            modify_cheat_menu[0].string = current_cheat->description;
+            current_menu = modify_cheat_menu;
+            current_selection = 0;
+            scroll = 0;
+            save_cheats();
+            SDL_StopTextInput();
+            return;
+        }
+        
+        strcpy(text_input_title, "Invalid Code.");
+        strcpy(text_input_title2, "Press Enter to Cancel");
+        text_input[0] = 0;
+        return;
+    }
+    if (ch != '-' && !ishexnumber(ch)) return;
+    ch = toupper(ch);
+    size_t len = strlen(text_input);
+    if (len >= 12) {
+        return;
+    }
+    
+    text_input[len] = ch;
+    text_input[len + 1] = 0;
+    if (text_input_title[0] != 'E') {
+        strcpy(text_input_title, "Enter a GameShark");
+        strcpy(text_input_title2, "or GameGenie Code");
+    }
+
+}
+
+
+static void import_cheat(unsigned index)
+{
+    strcpy(text_input_title, "Enter a GameShark");
+    strcpy(text_input_title2, "or GameGenie Code");
+    text_input[0] = 0;
+    gui_state = TEXT_INPUT;
+    text_input_callback = import_cheat_callback;
+    save_cheats();
+    SDL_StartTextInput();
+}
+
+static void modify_cheat(unsigned index)
+{
+    const GB_cheat_t *const *cheats = GB_get_cheats(&gb, NULL);
+    current_cheat = cheats[index - 3];
+    modify_cheat_menu[0].string = current_cheat->description;
+    current_menu = modify_cheat_menu;
+    current_selection = 0;
+    scroll = 0;
+}
+
+static const char *checkbox_for_cheat(unsigned index)
+{
+    const GB_cheat_t *const *cheats = GB_get_cheats(&gb, NULL);
+    return cheats[index - 3]->enabled? CHECKBOX_ON_STRING : CHECKBOX_OFF_STRING;
+}
+
+static const char *cheats_global_checkbox(unsigned index)
+{
+    return GB_cheats_enabled(&gb)? CHECKBOX_ON_STRING : CHECKBOX_OFF_STRING;
+}
+
+static void enter_cheats_menu(unsigned index)
+{
+    struct menu_item *cheats_menu = NULL;
+    if (cheats_menu) {
+        free(cheats_menu);
+    }
+    size_t cheat_count;
+    const GB_cheat_t *const *cheats = GB_get_cheats(&gb, &cheat_count);
+    cheats_menu = calloc(cheat_count + 5, sizeof(struct menu_item));
+    cheats_menu[0] = (struct menu_item){"New Cheat", add_cheat};
+    cheats_menu[1] = (struct menu_item){"Import Cheat", import_cheat};
+    cheats_menu[2] = (struct menu_item){"Enable Cheats", toggle_cheats, cheats_global_checkbox};
+    for (size_t i = 0; i < cheat_count; i++) {
+        cheats_menu[i + 3] = (struct menu_item){cheats[i]->description, modify_cheat, checkbox_for_cheat};
+    }
+    cheats_menu[cheat_count + 3] = (struct menu_item){"Back", return_to_root_menu};
+    current_menu = cheats_menu;
+    current_selection = 0;
+    scroll = 0;
+    recalculate_menu_height();
+}
+
 static const struct menu_item paused_menu[] = {
     {"Resume", NULL},
     {"Open ROM", open_rom},
     {"Hot Swap Cartridge", cart_swap},
     {"Options", enter_options_menu},
+    {"Cheats", enter_cheats_menu},
     {audio_recording_menu_item, toggle_audio_recording},
     {"Help & About", enter_help_menu},
     {"Sponsor SameBoy", sponsor},
@@ -407,14 +897,14 @@ static const struct menu_item paused_menu[] = {
     {NULL,}
 };
 
-static struct menu_item nonpaused_menu[sizeof(paused_menu) / sizeof(paused_menu[0]) - 2];
+static struct menu_item nonpaused_menu[sizeof(paused_menu) / sizeof(paused_menu[0]) - 3];
 
 static void __attribute__((constructor)) build_nonpaused_menu(void)
 {
     const struct menu_item *in = paused_menu;
     struct menu_item *out = nonpaused_menu;
     while (in->string) {
-        if (in->handler == NULL || in->handler == cart_swap) {
+        if (in->handler == NULL || in->handler == cart_swap || in->handler == enter_cheats_menu) {
             in++;
             continue;
         }
@@ -1222,8 +1712,6 @@ static void cycle_preferred_audio_driver_backwards(unsigned index)
     }
 }
 
-static void nop(unsigned index){}
-
 static struct menu_item audio_menu[] = {
     {"Highpass Filter:", cycle_highpass_filter, highpass_filter_string, cycle_highpass_filter_backwards},
     {"Volume:", increase_volume, volume_string, decrease_volume},
@@ -1697,7 +2185,7 @@ void run_gui(bool is_running)
     while (true) {
         SDL_WaitEvent(&event);
         /* Convert Joypad and mouse events (We only generate down events) */
-        if (gui_state != WAITING_FOR_KEY && gui_state != WAITING_FOR_JBUTTON) {
+        if (gui_state != WAITING_FOR_KEY && gui_state != WAITING_FOR_JBUTTON && gui_state != TEXT_INPUT) {
             switch (event.type) {
                 case SDL_KEYDOWN:
                     if (gui_state == WAITING_FOR_KEY) break;
@@ -1979,9 +2467,37 @@ void run_gui(bool is_running)
             }
                 
 
+            case SDL_TEXTINPUT:
+                if (gui_state == TEXT_INPUT) {
+                    char *s = event.text.text;
+                    while (*s) {
+                        text_input_callback(*(s++));
+                    }
+                    should_render = true;
+                }
+                break;
             case SDL_KEYDOWN:
                 scrollbar_drag = false;
-                if (gui_state == WAITING_FOR_KEY) {
+                if (gui_state == TEXT_INPUT) {
+                    if (event.key.keysym.sym == SDLK_v && (event.key.keysym.mod & MODIFIER)) {
+                        char *s = SDL_GetClipboardText();
+                        while (*s) {
+                            text_input_callback(*(s++));
+                        }
+                        should_render = true;
+                    }
+                    else if (event.key.keysym.scancode == SDL_SCANCODE_BACKSPACE) {
+                        text_input_callback('\b');
+                        should_render = true;
+                    }
+                    else if (event.key.keysym.scancode == SDL_SCANCODE_RETURN ||
+                             event.key.keysym.scancode == SDL_SCANCODE_RETURN2 ||
+                             event.key.keysym.scancode == SDL_SCANCODE_KP_ENTER) {
+                        text_input_callback('\n');
+                        should_render = true;
+                    }
+                }
+                else if (gui_state == WAITING_FOR_KEY) {
                     if (current_selection > 8) {
                         configuration.keys_2[current_selection - 9] = event.key.keysym.scancode;
                     }
@@ -2036,6 +2552,7 @@ void run_gui(bool is_running)
                         should_render = true;
                     }
                     else if (is_running) {
+                        SDL_StopTextInput();
                         return;
                     }
                     else {
@@ -2224,6 +2741,11 @@ void run_gui(bool is_running)
                                        } [joypad_configuration_progress],
                                        gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);
                     draw_styled_text(pixels, width, height, 104 + y_offset, "Press Enter to skip", gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);
+                    break;
+                case TEXT_INPUT:
+                    draw_styled_text(pixels, width, height, 32 + y_offset, text_input_title, gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);
+                    draw_styled_text(pixels, width, height, 44 + y_offset, text_input_title2, gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);
+                    draw_styled_text(pixels, width, height, 64 + y_offset, text_input, gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);
                     break;
             }
             

@@ -140,7 +140,7 @@ const GB_cheat_t *GB_import_cheat(GB_gameboy_t *gb, const char *cheat, const cha
     
     uint8_t dummy;
     /* GameShark */
-    {
+    if (strlen(cheat) == 8) {
         uint8_t bank;
         uint8_t value;
         uint16_t address;
@@ -170,6 +170,9 @@ const GB_cheat_t *GB_import_cheat(GB_gameboy_t *gb, const char *cheat, const cha
         uint8_t old_value;
         uint8_t value;
         uint16_t address;
+        if (strlen(stripped_cheat) != 8 && strlen(stripped_cheat) != 6) {
+            return NULL;
+        }
         if (sscanf(stripped_cheat, "%02hhx%04hx%02hhx%c", &value, &address, &old_value, &dummy) == 3) {
             address = (uint16_t)(address >> 4) | (uint16_t)(address << 12);
             address ^= 0xF000;

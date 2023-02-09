@@ -1149,6 +1149,28 @@ uint8_t font[] = {
     X, _, _, _, X, _,
     X, X, X, _, X, _,
     _, _, _, _, _, _,
+    
+    /* Checkbox */
+    
+    // Unchecked
+    _, _, _, _, _, _,
+    X, X, X, X, X, _,
+    X, X, X, X, X, _,
+    X, X, X, X, X, _,
+    X, X, X, X, X, _,
+    X, X, X, X, X, _,
+    X, X, X, X, X, _,
+    _, _, _, _, _, _,
+    
+    // Checked
+    _, _, _, _, _, _,
+    X, X, X, X, X, _,
+    X, X, X, X, _, _,
+    X, X, X, _, X, _,
+    _, X, _, X, X, _,
+    X, _, X, X, X, _,
+    X, X, X, X, X, _,
+    _, _, _, _, _, _,
 };
 
 const uint8_t font_max = sizeof(font) / GLYPH_HEIGHT / GLYPH_WIDTH + ' ';

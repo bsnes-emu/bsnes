@@ -27,7 +27,7 @@ static uint32_t *active_pixel_buffer = pixel_buffer_1, *previous_pixel_buffer = 
 static bool underclock_down = false, rewind_down = false, do_rewind = false, rewind_paused = false, turbo_down = false;
 static double clock_mutliplier = 1.0;
 
-static char *filename = NULL;
+char *filename = NULL;
 static typeof(free) *free_function = NULL;
 static char *battery_save_path_ptr = NULL;
 static SDL_GLContext gl_context = NULL;
@@ -780,6 +780,10 @@ restart:
             GB_log(&gb, "The save path for this ROM is not writeable, progress will not be saved.\n");
         }
     }
+    
+    char cheat_path[path_length + 5];
+    replace_extension(filename, path_length, cheat_path, ".cht");
+    GB_load_cheats(&gb, cheat_path);
     
     end_capturing_logs(true, error, SDL_MESSAGEBOX_WARNING, "Warning");
     
