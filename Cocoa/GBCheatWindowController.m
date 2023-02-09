@@ -92,10 +92,12 @@
                             self.importCodeField.stringValue.UTF8String,
                             self.importDescriptionField.stringValue.UTF8String,
                             true)) {
-            self.importCodeField.stringValue = @"";
-            self.importDescriptionField.stringValue = @"";
-            [self.cheatsTable reloadData];
-            [self tableViewSelectionDidChange:nil];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                self.importCodeField.stringValue = @"";
+                self.importDescriptionField.stringValue = @"";
+                [self.cheatsTable reloadData];
+                [self tableViewSelectionDidChange:nil];
+            });
         }
         else {
             dispatch_async(dispatch_get_main_queue(), ^{
