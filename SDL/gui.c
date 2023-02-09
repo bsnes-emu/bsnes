@@ -217,26 +217,35 @@ void show_osd_text(const char *text)
 }
 
 
-enum decoration {
-    DECORATION_NONE,
-    DECORATION_SELECTION,
-    DECORATION_ARROWS,
+enum style {
+    STYLE_LEFT,
+    STYLE_INDENT,
+    STYLE_CENTER,
+    STYLE_SELECTION,
+    STYLE_ARROWS,
 };
 
-static void draw_text_centered(uint32_t *buffer, unsigned width, unsigned height, unsigned y, const char *string, uint32_t color, uint32_t border, enum decoration decoration)
+static void draw_styled_text(uint32_t *buffer, unsigned width, unsigned height, unsigned y, const char *string, uint32_t color, uint32_t border, enum style style)
 {
-    unsigned x = width / 2 - (unsigned) strlen(string) * GLYPH_WIDTH / 2;
+    unsigned x = GLYPH_WIDTH * 2;
+    if (style == STYLE_CENTER || style == STYLE_ARROWS) {
+        x = width / 2 - (unsigned) strlen(string) * GLYPH_WIDTH / 2;
+    }
+    else if (style == STYLE_LEFT) {
+        x = 6;
+    }
+    
     draw_text(buffer, width, height, x, y, string, color, border, false);
-    switch (decoration) {
-        case DECORATION_SELECTION:
+    switch (style) {
+        case STYLE_SELECTION:
             draw_text(buffer, width, height, x - GLYPH_WIDTH, y, SELECTION_STRING, color, border, false);
             break;
-        case DECORATION_ARROWS:
+        case STYLE_ARROWS:
             draw_text(buffer, width, height, x - GLYPH_WIDTH, y, LEFT_ARROW_STRING, color, border, false);
             draw_text(buffer, width, height, width - x, y, RIGHT_ARROW_STRING, color, border, false);
             break;
             
-        case DECORATION_NONE:
+        default:
             break;
     }
 }
@@ -2105,12 +2114,12 @@ void run_gui(bool is_running)
             
             switch (gui_state) {
                 case SHOWING_DROP_MESSAGE:
-                    draw_text_centered(pixels, width, height, 8 + y_offset, "Press ESC for menu", gui_palette_native[3], gui_palette_native[0], false);
-                    draw_text_centered(pixels, width, height, 116 + y_offset, "Drop a GB or GBC", gui_palette_native[3], gui_palette_native[0], false);
-                    draw_text_centered(pixels, width, height, 128 + y_offset, "file to play", gui_palette_native[3], gui_palette_native[0], false);
+                    draw_styled_text(pixels, width, height, 8 + y_offset, "Press ESC for menu", gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);
+                    draw_styled_text(pixels, width, height, 116 + y_offset, "Drop a GB or GBC", gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);
+                    draw_styled_text(pixels, width, height, 128 + y_offset, "file to play", gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);
                     break;
                 case SHOWING_MENU:
-                    draw_text_centered(pixels, width, height, 8 + y_offset, "SameBoy", gui_palette_native[3], gui_palette_native[0], false);
+                    draw_styled_text(pixels, width, height, 8 + y_offset, "SameBoy", gui_palette_native[3], gui_palette_native[0], STYLE_LEFT);
                     unsigned i = 0, y = 24;
                     for (const struct menu_item *item = current_menu; item->string; item++, i++) {
                         if (i == current_selection && !mouse_scroling) {
@@ -2133,19 +2142,26 @@ void run_gui(bool is_running)
                         }
                         if (item->value_getter && !item->backwards_handler) {
                             char line[25];
-                            snprintf(line, sizeof(line), "%s%*s", item->string, 24 - (unsigned)strlen(item->string), item->value_getter(i));
-                            draw_text_centered(pixels, width, height, y + y_offset, line, gui_palette_native[3], gui_palette_native[0],
-                                               i == current_selection ? DECORATION_SELECTION : DECORATION_NONE);
+                            snprintf(line, sizeof(line), "%s%*s", item->string, 23 - (unsigned)strlen(item->string), item->value_getter(i));
+                            draw_styled_text(pixels, width, height, y + y_offset, line, gui_palette_native[3], gui_palette_native[0],
+                                               i == current_selection ? STYLE_SELECTION : STYLE_INDENT);
                             y += 12;
                             
                         }
                         else {
-                            draw_text_centered(pixels, width, height, y + y_offset, item->string, gui_palette_native[3], gui_palette_native[0],
-                                               i == current_selection && !item->value_getter ? DECORATION_SELECTION : DECORATION_NONE);
+                            if (item->value_getter) {
+                                draw_styled_text(pixels, width, height, y + y_offset, item->string, gui_palette_native[3], gui_palette_native[0],
+                                                 STYLE_LEFT);
+
+                            }
+                            else {
+                                draw_styled_text(pixels, width, height, y + y_offset, item->string, gui_palette_native[3], gui_palette_native[0],
+                                                   i == current_selection ? STYLE_SELECTION : STYLE_INDENT);
+                            }
                             y += 12;
                             if (item->value_getter) {
-                                draw_text_centered(pixels, width, height, y + y_offset - 1, item->value_getter(i), gui_palette_native[3], gui_palette_native[0],
-                                                   i == current_selection ? DECORATION_ARROWS : DECORATION_NONE);
+                                draw_styled_text(pixels, width, height, y + y_offset - 1, item->value_getter(i), gui_palette_native[3], gui_palette_native[0],
+                                                   i == current_selection ? STYLE_ARROWS : STYLE_CENTER);
                                 y += 12;
                             }
                         }
@@ -2181,13 +2197,13 @@ void run_gui(bool is_running)
                     draw_text(pixels, width, height, 2 + x_offset, 2 + y_offset, help[current_help_page], gui_palette_native[3], gui_palette_native[0], false);
                     break;
                 case WAITING_FOR_KEY:
-                    draw_text_centered(pixels, width, height, 68 + y_offset, "Press a Key", gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
+                    draw_styled_text(pixels, width, height, 68 + y_offset, "Press a Key", gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);
                     break;
                 case WAITING_FOR_JBUTTON:
-                    draw_text_centered(pixels, width, height, 68 + y_offset,
+                    draw_styled_text(pixels, width, height, 68 + y_offset,
                                        joypad_configuration_progress != JOYPAD_BUTTONS_MAX ? "Press button for" : "Move the Analog Stick",
-                                       gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
-                    draw_text_centered(pixels, width, height, 80 + y_offset,
+                                       gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);
+                    draw_styled_text(pixels, width, height, 80 + y_offset,
                                       (const char *[])
                                        {
                                            "Right",
@@ -2206,8 +2222,8 @@ void run_gui(bool is_running)
                                            "Hotkey 2",
                                            "",
                                        } [joypad_configuration_progress],
-                                       gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
-                    draw_text_centered(pixels, width, height, 104 + y_offset, "Press Enter to skip", gui_palette_native[3], gui_palette_native[0], DECORATION_NONE);
+                                       gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);
+                    draw_styled_text(pixels, width, height, 104 + y_offset, "Press Enter to skip", gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);
                     break;
             }
             
