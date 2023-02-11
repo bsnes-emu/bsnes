@@ -1527,14 +1527,30 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     GB_update_joyp(gb);
                 }
                 else if ((gb->io_registers[GB_IO_JOYP] & 0x30) != (value & 0x30)) {
-                    if (gb->model < GB_MODEL_SGB) { // DMG only
+                    if (!GB_is_cgb(gb) && !GB_is_sgb(gb)) {
                         if (gb->joyp_switching_delay) {
                             gb->io_registers[GB_IO_JOYP] = (gb->joyp_switch_value & 0xF0) | (gb->io_registers[GB_IO_JOYP] & 0x0F);
                         }
                         gb->joyp_switch_value = value;
-                        gb->joyp_switching_delay = 24;
-                        value &= gb->io_registers[GB_IO_JOYP];
-                        gb->joypad_is_stable = false;
+                        uint8_t delay = 0;
+                        switch (((gb->io_registers[GB_IO_JOYP] & 0x30) >> 4) |
+                                ((value & 0x30) >> 2)) {
+                            case 0x4: delay = 48; break;
+                            case 0x6: delay = gb->model == GB_MODEL_MGB? 56 : 48; break;
+                            case 0x8: delay = 24; break;
+                            case 0x9: delay = 24; break;
+                            case 0xC: delay = 48; break;
+                            case 0xD: delay = 24; break;
+                            case 0xE: delay = 48; break;
+                        }
+                        if (delay && gb->model == GB_MODEL_MGB) {
+                            delay -= 16;
+                        }
+                        if (delay) {
+                            gb->joyp_switching_delay = MAX(gb->joyp_switching_delay, delay);
+                            value &= gb->io_registers[GB_IO_JOYP];
+                            gb->joypad_is_stable = false;
+                        }
                     }
                     GB_sgb_write(gb, value);
                     gb->io_registers[GB_IO_JOYP] = (value & 0xF0) | (gb->io_registers[GB_IO_JOYP] & 0x0F);
