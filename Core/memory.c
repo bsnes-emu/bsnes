@@ -1546,8 +1546,8 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                         if (delay && gb->model == GB_MODEL_MGB) {
                             delay -= 16;
                         }
-                        if (delay) {
-                            gb->joyp_switching_delay = MAX(gb->joyp_switching_delay, delay);
+                        gb->joyp_switching_delay = MAX(gb->joyp_switching_delay, delay);
+                        if (gb->joyp_switching_delay) {
                             value &= gb->io_registers[GB_IO_JOYP];
                             gb->joypad_is_stable = false;
                         }
