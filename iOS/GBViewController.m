@@ -22,6 +22,8 @@
     
     volatile bool _running;
     volatile bool _stopping;
+    bool _rewind;
+    bool _rewindOver;
     bool _romLoaded;
     
     UIInterfaceOrientation _orientation;
@@ -38,7 +40,6 @@
     
     NSMutableSet *_defaultsObservers;
     GB_palette_t _palette;
-    bool _rewind;
     CMMotionManager *_motionManager;
     
     CVImageBufferRef _cameraImage;
@@ -540,13 +541,22 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         if (_rewind) {
             _rewind = false;
             GB_rewind_pop(&_gb);
-            for (unsigned i = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindSpeed"]; i--;)  {
+            if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBDynamicSpeed"]) {
                 if (!GB_rewind_pop(&_gb)) {
-                    self.runMode = GBRunModeRewindPaused;
+                    self.runMode = GBRunModePaused;
+                    _rewindOver = true;
+                }
+            }
+            else {
+                for (unsigned i = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindSpeed"]; i--;)  {
+                    if (!GB_rewind_pop(&_gb)) {
+                        self.runMode = GBRunModePaused;
+                        _rewindOver = true;
+                    }
                 }
             }
         }
-        if (_runMode != GBRunModeRewindPaused) {
+        if (_runMode != GBRunModePaused) {
             GB_run(&_gb);
         }
     }
@@ -705,23 +715,32 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)setRunMode:(GBRunMode)runMode
 {
+    if (runMode == GBRunModeRewind && _rewindOver) {
+        runMode = GBRunModePaused;
+    }
     if (runMode == _runMode) return;
-    if (_runMode == GBRunModeRewindPaused) {
+    if (_runMode == GBRunModePaused) {
         [_audioClient start];
     }
     _runMode = runMode;
-    if (_runMode == GBRunModeRewindPaused) {
+    if (_runMode == GBRunModePaused) {
         [_audioClient stop];
     }
     
-    if (_runMode == GBRunModeTurbo) {
-        double multiplier = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBTurboSpeed"];
-        GB_set_turbo_mode(&_gb, multiplier == 1, false);
-        GB_set_clock_multiplier(&_gb, multiplier);
+    if (_runMode == GBRunModeNormal || _runMode == GBRunModeTurbo) {
+        _rewindOver = false;
     }
-    else {
-        GB_set_turbo_mode(&_gb, false, false);
-        GB_set_clock_multiplier(&_gb, 1.0);
+    
+    if (_runMode == GBRunModeNormal || [[NSUserDefaults standardUserDefaults] boolForKey:@"GBDynamicSpeed"]) {
+        if (_runMode == GBRunModeTurbo) {
+            double multiplier = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBTurboSpeed"];
+            GB_set_turbo_mode(&_gb, multiplier == 1, false);
+            GB_set_clock_multiplier(&_gb, multiplier);
+        }
+        else {
+            GB_set_turbo_mode(&_gb, false, false);
+            GB_set_clock_multiplier(&_gb, 1.0);
+        }
     }
 }
 

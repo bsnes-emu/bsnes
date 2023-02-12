@@ -5,7 +5,7 @@ typedef enum {
     GBRunModeNormal,
     GBRunModeTurbo,
     GBRunModeRewind,
-    GBRunModeRewindPaused,
+    GBRunModePaused,
 } GBRunMode;
 
 @interface GBViewController : UIViewController <UIApplicationDelegate, AVCaptureVideoDataOutputSampleBufferDelegate>

@@ -87,6 +87,7 @@ static GB_key_mask_t angleToKeyMask(double angle)
     UITouch *_screenTouch;
     CGPoint _screenSwipeOrigin;
     bool _screenSwiped;
+    bool _inDynamicSpeedMode;
     
     UIImageView *_dpadView;
     UIImageView *_dpadShadowView;
@@ -146,6 +147,7 @@ static GB_key_mask_t angleToKeyMask(double angle)
     if (@available(iOS 13.0, *)) {
         _overlayViewContents = [[UIImageView alloc] init];
         _overlayViewContents.tintColor = [UIColor whiteColor];
+        _overlayViewContents.contentMode = UIViewContentModeCenter;
     }
     else {
         _overlayViewContents = [[UILabel alloc] init];
@@ -182,9 +184,14 @@ static GB_key_mask_t angleToKeyMask(double angle)
                 _screenTouch = touch;
                 _screenSwipeOrigin = point;
                 _screenSwiped = false;
+                _inDynamicSpeedMode = false;
                 _overlayView.alpha = 0;
                 [_fadeTimer invalidate];
                 _fadeTimer = nil;
+                if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBDynamicSpeed"]) {
+                    self.viewController.runMode = GBRunModePaused;
+                    [self displayOverlayWithImage:@"pause" orTitle:@"Paused"];
+                }
             }
         }
         
@@ -208,6 +215,10 @@ static GB_key_mask_t angleToKeyMask(double angle)
     
     if ([touches containsObject:_screenTouch]) {
         _screenTouch = nil;
+        if (self.viewController.runMode == GBRunModePaused) {
+            self.viewController.runMode = GBRunModeNormal;
+            [self fadeOverlayOut];
+        }
         if (!_screenSwiped) {
             [self.window.rootViewController presentViewController:[GBMenuViewController menu] animated:true completion:nil];
         }
@@ -264,6 +275,33 @@ static GB_key_mask_t angleToKeyMask(double angle)
         CGPoint point = [touch locationInView:self];
         
         if (touch == _screenTouch) {
+            if (_inDynamicSpeedMode) {
+                double delta = point.x - _screenSwipeOrigin.x;
+                if (fabs(delta) < 32) {
+                    self.viewController.runMode = GBRunModePaused;
+                    [self displayOverlayWithImage:@"pause" orTitle:@"Paused"];
+                    continue;
+                }
+                
+                double speed = fabs(delta / _gbView.frame.size.width * 3);
+                if (delta > 0) {
+                    if (speed > 1) {
+                        [self displayOverlayWithImage:@"forward" orTitle:@"Fast-forwarding…"];
+                    }
+                    else {
+                        [self displayOverlayWithImage:@"play" orTitle:@"Forward…"];
+                    }
+                    GB_set_clock_multiplier(_gbView.gb, speed);
+                    self.viewController.runMode = GBRunModeTurbo;
+                }
+                else {
+                    [self displayOverlayWithImage:@"backward" orTitle:@"Rewinding…"];
+                    GB_set_clock_multiplier(_gbView.gb, speed);
+                    self.viewController.runMode = GBRunModeRewind;
+
+                }
+                continue;
+            }
             if (_screenSwiped) continue;
             if (point.x - _screenSwipeOrigin.x > 32) {
                 [self turboSwipe];
@@ -397,11 +435,14 @@ static GB_key_mask_t angleToKeyMask(double angle)
     }
     [_overlayViewContents sizeToFit];
 
-    CGRect bounds = _overlayViewContents.bounds;
-    bounds.origin = (CGPoint){8, 8};
-    bounds.size.width += 16;
-    bounds.size.height += 16;
-    _overlayView.frame = bounds;
+    CGRect frame = _overlayViewContents.frame;
+    frame.size.width = MAX(frame.size.width, 25);
+    frame.size.height = MAX(frame.size.height, 22);
+    _overlayViewContents.frame = frame;
+    frame.origin = (CGPoint){8, 8};
+    frame.size.width += 16;
+    frame.size.height += 16;
+    _overlayView.frame = frame;
     
     _overlayView.alpha = 1.0;
 }
@@ -418,6 +459,9 @@ static GB_key_mask_t angleToKeyMask(double angle)
 - (void)turboSwipe
 {
     _screenSwiped = true;
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBDynamicSpeed"]) {
+        _inDynamicSpeedMode = true;
+    }
     [self displayOverlayWithImage:@"forward" orTitle:@"Fast-forwarding…"];
     self.viewController.runMode = GBRunModeTurbo;
 }
@@ -425,6 +469,9 @@ static GB_key_mask_t angleToKeyMask(double angle)
 - (void)rewindSwipe
 {
     _screenSwiped = true;
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBDynamicSpeed"]) {
+        _inDynamicSpeedMode = true;
+    }
     [self displayOverlayWithImage:@"backward" orTitle:@"Rewinding…"];
     self.viewController.runMode = GBRunModeRewind;
 }
@@ -437,7 +484,9 @@ static GB_key_mask_t angleToKeyMask(double angle)
 - (void)saveSwipe
 {
     _screenSwiped = true;
+    self.viewController.runMode = GBRunModeNormal;
     if (![[NSUserDefaults standardUserDefaults] boolForKey:@"GBSwipeState"]) {
+        [self fadeOverlayOut];
         return;
     }
     [self displayOverlayWithImage:@"square.and.arrow.down" orTitle:@"Saved state to Slot 1"];
@@ -452,7 +501,9 @@ static GB_key_mask_t angleToKeyMask(double angle)
 - (void)loadSwipe
 {
     _screenSwiped = true;
+    self.viewController.runMode = GBRunModeNormal;
     if (![[NSUserDefaults standardUserDefaults] boolForKey:@"GBSwipeState"]) {
+        [self fadeOverlayOut];
         return;
     }
     [self displayOverlayWithImage:@"square.and.arrow.up" orTitle:@"Loaded state from Slot 1"];

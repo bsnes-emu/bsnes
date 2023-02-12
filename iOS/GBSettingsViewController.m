@@ -136,7 +136,13 @@ static NSString const *typeLightTemp = @"typeLightTemp";
                     @{@"type": typeRadio, @"pref": @"GBTurboSpeed", @"title": @"200%",     @"value": @2,},
                     @{@"type": typeRadio, @"pref": @"GBTurboSpeed", @"title": @"400%",     @"value": @4,},
                     @{@"type": typeRadio, @"pref": @"GBTurboSpeed", @"title": @"Uncapped", @"value": @1,},
-            ]
+            ],
+            @"footer": ^NSString *(){
+                if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBDynamicSpeed"]) {
+                    return @"This setting will have no effect because horizontal swipes are configured to dynamically control speed in the “Controls” settings";
+                }
+                return @"";
+            },
         },
         @{
             @"header": @"Rewind Speed",
@@ -144,7 +150,13 @@ static NSString const *typeLightTemp = @"typeLightTemp";
                     @{@"type": typeRadio, @"pref": @"GBRewindSpeed", @"title": @"100%", @"value": @1,},
                     @{@"type": typeRadio, @"pref": @"GBRewindSpeed", @"title": @"200%", @"value": @2,},
                     @{@"type": typeRadio, @"pref": @"GBRewindSpeed", @"title": @"400%", @"value": @4,},
-            ]
+            ],
+            @"footer": ^NSString *(){
+                if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBDynamicSpeed"]) {
+                    return @"This setting will have no effect because horizontal swipes are configured to dynamically control speed in the “Controls” settings";
+                }
+                return @"";
+            }
         },
         @{
             @"header": @"Emulated Revisions",
@@ -310,15 +322,23 @@ static NSString const *typeLightTemp = @"typeLightTemp";
             },
         },
         @{
-            @"header": @"Fast-forward and Rewind Behavior",
+            @"header": @"Horizontal Swipe Behavior",
             @"items": @[
+                @{@"type": typeCheck, @"pref": @"GBDynamicSpeed", @"title": @"Dynamically Control Speed"},
                 @{@"type": typeCheck, @"pref": @"GBSwipeLock", @"title": @"Lock After Swiping"},
             ],
             @"footer": ^NSString *(){
                 if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBSwipeLock"]) {
-                    return @"Swipe right on the Game Boy screen to fast-forward, and swipe left to rewind. Tap on the Game Boy screen to return to normal.";
+                    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBDynamicSpeed"]) {
+                        return @"Swipe right on the Game Boy screen to play forward, and swipe left to rewind. Tap on the Game Boy screen to return to normal. The forward and rewind speeds are determinied by the swipe distance.";
+                    }
+                    return @"Swipe right on the Game Boy screen to fast-forward, and swipe left to rewind. Tap on the Game Boy screen to return to normal. The turbo and rewind speeds can be configured under “Emulation” settings.";
                 }
-                return @"Swipe right on the Game Boy screen to fast-forward, and swipe left to rewind. Raise the touch to return to normal.";
+                
+                if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBDynamicSpeed"]) {
+                    return @"Swipe right on the Game Boy screen to play forward, and swipe left to rewind. Raise the touch to return to normal. The forward and rewind speeds are determinied by the swipe distance.";
+                }
+                return @"Swipe right on the Game Boy screen to fast-forward, and swipe left to rewind. Raise the touch to return to normal. The turbo and rewind speeds can be configured under “Emulation” settings.";
             },
         },
         @{
