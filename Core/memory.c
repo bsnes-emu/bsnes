@@ -1491,7 +1491,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 /* Handle disabling objects while already fetching an object */
                 if ((gb->io_registers[GB_IO_LCDC] & GB_LCDC_OBJ_EN) && !(value & GB_LCDC_OBJ_EN)) {
                     if (gb->during_object_fetch) {
-                        gb->cycles_for_line += gb->display_cycles;
+                        gb->cycles_for_line += gb->display_cycles / 2;
                         gb->display_cycles = 0;
                         gb->object_fetch_aborted = true;
                     }
