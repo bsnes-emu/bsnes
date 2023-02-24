@@ -1155,6 +1155,9 @@ static bool is_path_writeable(const char *path)
         [[NSUserDefaults standardUserDefaults] setInteger:self.mainWindow.frame.size.height forKey:@"LastWindowHeight"];
     }
     [self stop];
+    [console_output_lock lock];
+    [console_output_timer invalidate];
+    [console_output_lock unlock];
     [self.consoleWindow close];
     [self.memoryWindow close];
     [self.vramWindow close];
