@@ -579,7 +579,6 @@ static uint8_t data_for_tile_sel_glitch(GB_gameboy_t *gb, bool *should_use, bool
         *should_use = false;
         gb->io_registers[GB_IO_LCDC] &= ~GB_LCDC_TILE_SEL;
         if (gb->fetcher_state == 3) {
-            *should_use = false;
             *cgb_d_glitch = true;
             return 0;
         }
@@ -929,7 +928,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
             }
             gb->last_tile_data_address = tile_address +  ((y & 7) ^ y_flip) * 2 + 1 - cgb_d_glitch;
             if (!use_glitched) {
-                gb->current_tile_data[1] =
+                gb->data_for_sel_glitch = gb->current_tile_data[1] =
                     vram_read(gb, gb->last_tile_data_address);
             }
             if ((gb->io_registers[GB_IO_LCDC] & GB_LCDC_TILE_SEL) && gb->tile_sel_glitch) {

@@ -24,11 +24,23 @@ typedef enum {
     GB_CONFLICT_CGB_LCDC,
     GB_CONFLICT_NR10,
     GB_CONFLICT_CGB_SCX,
+    GB_CONFLICT_CGB_DOUBLE_LCDC,
 } conflict_t;
 
-/* Todo: How does double speed mode affect these? */
 static const conflict_t cgb_conflict_map[0x80] = {
     [GB_IO_LCDC] = GB_CONFLICT_CGB_LCDC,
+    [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
+    [GB_IO_LYC] = GB_CONFLICT_WRITE_CPU,
+    [GB_IO_STAT] = GB_CONFLICT_STAT_CGB,
+    [GB_IO_BGP] = GB_CONFLICT_PALETTE_CGB,
+    [GB_IO_OBP0] = GB_CONFLICT_PALETTE_CGB,
+    [GB_IO_OBP1] = GB_CONFLICT_PALETTE_CGB,
+    [GB_IO_NR10] = GB_CONFLICT_NR10,
+    [GB_IO_SCX] = GB_CONFLICT_CGB_SCX,
+};
+
+static const conflict_t cgb_double_conflict_map[0x80] = {
+    [GB_IO_LCDC] = GB_CONFLICT_CGB_DOUBLE_LCDC,
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_LYC] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_STAT] = GB_CONFLICT_STAT_CGB,
@@ -112,7 +124,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     if ((addr & 0xFF80) == 0xFF00) {
         const conflict_t *map = NULL;
         if (GB_is_cgb(gb)) {
-            map = cgb_conflict_map;
+            map = gb->cgb_double_speed? cgb_double_conflict_map : cgb_conflict_map;
         }
         else if (GB_is_sgb(gb)) {
             map = sgb_conflict_map;
@@ -245,9 +257,10 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             gb->pending_cycles = 3;
             break;
             
-        case GB_CONFLICT_CGB_LCDC:
-            if ((~value & gb->io_registers[GB_IO_LCDC]) & GB_LCDC_TILE_SEL) {
-                // Todo: This is difference is because my timing is off in one of the models
+        case GB_CONFLICT_CGB_LCDC: {
+            uint8_t old = gb->io_registers[GB_IO_LCDC];
+            if ((~value & old) & GB_LCDC_TILE_SEL) {
+                // TODO: This is different is because my timing is off in CGB ≤ C
                 if (gb->model > GB_MODEL_CGB_C) {
                     GB_advance_cycles(gb, gb->pending_cycles);
                     GB_write_memory(gb, addr, value ^ GB_LCDC_TILE_SEL); // Write with the old TILE_SET first
@@ -273,6 +286,32 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 gb->pending_cycles = 4;
             }
             break;
+        }
+        case GB_CONFLICT_CGB_DOUBLE_LCDC: {
+            uint8_t old = gb->io_registers[GB_IO_LCDC];
+            // TODO: This is wrong for CGB ≤ C for TILE_SEL, BG_EN and BG_MAP.
+            // PPU timings for these models appear to be wrong and it'd make more sense to fix those first than hacking
+            // around them.
+            
+            // TODO: This condition is different from single speed mode. Why? What about odd modes?
+            if ((value ^ old) & GB_LCDC_TILE_SEL) {
+                GB_advance_cycles(gb, gb->pending_cycles - 2);
+                GB_write_memory(gb, addr, (value & (GB_LCDC_OBJ_EN | GB_LCDC_BG_EN)) | (old & ~(GB_LCDC_OBJ_EN | GB_LCDC_BG_EN)));
+                gb->tile_sel_glitch = true;
+                GB_advance_cycles(gb, 2);
+                gb->tile_sel_glitch = false;
+                GB_write_memory(gb, addr, value);
+                gb->pending_cycles = 4;
+            }
+            else {
+                GB_advance_cycles(gb, gb->pending_cycles - 2);
+                GB_write_memory(gb, addr, (value & (GB_LCDC_OBJ_EN | GB_LCDC_BG_EN)) | (old & ~(GB_LCDC_OBJ_EN | GB_LCDC_BG_EN)));
+                GB_advance_cycles(gb, 2);
+                GB_write_memory(gb, addr, value);
+                gb->pending_cycles = 4;
+            }
+            break;
+        }
         
         case GB_CONFLICT_NR10:
             /* Hack: Due to the coupling between DIV and the APU, GB_apu_run only runs at M-cycle
