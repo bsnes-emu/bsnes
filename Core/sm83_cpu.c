@@ -42,11 +42,9 @@ static const conflict_t cgb_conflict_map[0x80] = {
 static const conflict_t cgb_double_conflict_map[0x80] = {
     [GB_IO_LCDC] = GB_CONFLICT_CGB_DOUBLE_LCDC,
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
-    [GB_IO_LYC] = GB_CONFLICT_WRITE_CPU,
+    [GB_IO_LYC] = GB_CONFLICT_READ_OLD,
+    // Unconfirmed yet
     [GB_IO_STAT] = GB_CONFLICT_STAT_CGB,
-    [GB_IO_BGP] = GB_CONFLICT_PALETTE_CGB,
-    [GB_IO_OBP0] = GB_CONFLICT_PALETTE_CGB,
-    [GB_IO_OBP1] = GB_CONFLICT_PALETTE_CGB,
     [GB_IO_NR10] = GB_CONFLICT_NR10,
     [GB_IO_SCX] = GB_CONFLICT_CGB_SCX,
 };
