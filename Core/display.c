@@ -2040,7 +2040,6 @@ skip_slow_mode_3:
             GB_SLEEP(gb, display, 13, LINE_LENGTH - 5);
         }
         
-        /* TODO: Verified on SGB2 and CGB-E. Actual interrupt timings not tested. */
         /* Lines 153 */
         gb->ly_for_comparison = -1;
         GB_STAT_update(gb);

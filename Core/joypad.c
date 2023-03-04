@@ -43,7 +43,6 @@ void GB_update_joyp(GB_gameboy_t *gb)
     uint8_t key_selection = 0;
     uint8_t previous_state = 0;
 
-    /* Todo: add delay to key selection */
     previous_state = gb->io_registers[GB_IO_JOYP] & 0xF;
     key_selection = (gb->io_registers[GB_IO_JOYP] >> 4) & 3;
     gb->io_registers[GB_IO_JOYP] &= 0xF0;
