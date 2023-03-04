@@ -1504,14 +1504,23 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 return;
 
             case GB_IO_STAT:
-                /* Delete previous R/W bits */
                 gb->io_registers[GB_IO_STAT] &= 7;
-                /* Set them by value */
                 gb->io_registers[GB_IO_STAT] |= value & ~7;
-                /* Set unused bit to 1 */
                 gb->io_registers[GB_IO_STAT] |= 0x80;
                 
-                GB_STAT_update(gb);
+                /* Annoying edge timing case */
+                if (gb->cgb_double_speed &&
+                    gb->display_state == 8 &&
+                    gb->oam_search_index == 0 &&
+                    gb->display_cycles == 0 &&
+                    (value & 0x20)) {
+                    gb->mode_for_interrupt = 2;
+                    GB_STAT_update(gb);
+                    gb->mode_for_interrupt = -1;
+                }
+                else {
+                    GB_STAT_update(gb);
+                }
                 return;
 
             case GB_IO_DIV:

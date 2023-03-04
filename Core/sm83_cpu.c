@@ -21,14 +21,15 @@ typedef enum {
     GB_CONFLICT_DMG_LCDC,
     GB_CONFLICT_SGB_LCDC,
     GB_CONFLICT_WX,
-    GB_CONFLICT_CGB_LCDC,
+    GB_CONFLICT_LCDC_CGB,
     GB_CONFLICT_NR10,
-    GB_CONFLICT_CGB_SCX,
-    GB_CONFLICT_CGB_DOUBLE_LCDC,
+    GB_CONFLICT_SCX_CGB,
+    GB_CONFLICT_LCDC_CGB_DOUBLE,
+    GB_CONFLICT_STAT_CGB_DOUBLE,
 } conflict_t;
 
 static const conflict_t cgb_conflict_map[0x80] = {
-    [GB_IO_LCDC] = GB_CONFLICT_CGB_LCDC,
+    [GB_IO_LCDC] = GB_CONFLICT_LCDC_CGB,
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_LYC] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_STAT] = GB_CONFLICT_STAT_CGB,
@@ -36,17 +37,17 @@ static const conflict_t cgb_conflict_map[0x80] = {
     [GB_IO_OBP0] = GB_CONFLICT_PALETTE_CGB,
     [GB_IO_OBP1] = GB_CONFLICT_PALETTE_CGB,
     [GB_IO_NR10] = GB_CONFLICT_NR10,
-    [GB_IO_SCX] = GB_CONFLICT_CGB_SCX,
+    [GB_IO_SCX] = GB_CONFLICT_SCX_CGB,
 };
 
 static const conflict_t cgb_double_conflict_map[0x80] = {
-    [GB_IO_LCDC] = GB_CONFLICT_CGB_DOUBLE_LCDC,
+    [GB_IO_LCDC] = GB_CONFLICT_LCDC_CGB_DOUBLE,
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_LYC] = GB_CONFLICT_READ_OLD,
+    [GB_IO_STAT] = GB_CONFLICT_STAT_CGB_DOUBLE,
     // Unconfirmed yet
-    [GB_IO_STAT] = GB_CONFLICT_STAT_CGB,
     [GB_IO_NR10] = GB_CONFLICT_NR10,
-    [GB_IO_SCX] = GB_CONFLICT_CGB_SCX,
+    [GB_IO_SCX] = GB_CONFLICT_SCX_CGB,
 };
 
 /* Todo: verify on an MGB */
@@ -173,9 +174,19 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         case GB_CONFLICT_STAT_CGB: {
             /* Todo: Verify this with SCX adjustments */
             /* The LYC bit behaves differently */
-            uint8_t old_value = GB_read_memory(gb, addr);
+            uint8_t old_value = gb->io_registers[GB_IO_STAT];
             GB_advance_cycles(gb, gb->pending_cycles);
             GB_write_memory(gb, addr, (old_value & 0x40) | (value & ~0x40));
+            GB_advance_cycles(gb, 1);
+            GB_write_memory(gb, addr, value);
+            gb->pending_cycles = 3;
+            break;
+        }
+            
+        case GB_CONFLICT_STAT_CGB_DOUBLE: {
+            uint8_t old_value = gb->io_registers[GB_IO_STAT];
+            GB_advance_cycles(gb, gb->pending_cycles);
+            GB_write_memory(gb, addr, (value & ~8) | (old_value & 8));
             GB_advance_cycles(gb, 1);
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 3;
@@ -211,8 +222,6 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                and the object-fetching state machine, and both behave differently when it comes to access conflicts.
                Hacks ahead.
              */
-            
-            
             
             uint8_t old_value = GB_read_memory(gb, addr);
             GB_advance_cycles(gb, gb->pending_cycles - 2);
@@ -255,7 +264,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             gb->pending_cycles = 3;
             break;
             
-        case GB_CONFLICT_CGB_LCDC: {
+        case GB_CONFLICT_LCDC_CGB: {
             uint8_t old = gb->io_registers[GB_IO_LCDC];
             if ((~value & old) & GB_LCDC_TILE_SEL) {
                 // TODO: This is different is because my timing is off in CGB ≤ C
@@ -285,7 +294,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             }
             break;
         }
-        case GB_CONFLICT_CGB_DOUBLE_LCDC: {
+        case GB_CONFLICT_LCDC_CGB_DOUBLE: {
             uint8_t old = gb->io_registers[GB_IO_LCDC];
             // TODO: This is wrong for CGB ≤ C for TILE_SEL, BG_EN and BG_MAP.
             // PPU timings for these models appear to be wrong and it'd make more sense to fix those first than hacking
@@ -332,7 +341,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             gb->pending_cycles = 4;
             break;
             
-        case GB_CONFLICT_CGB_SCX:
+        case GB_CONFLICT_SCX_CGB:
             if (gb->cgb_double_speed) {
                 GB_advance_cycles(gb, gb->pending_cycles - 2);
                 GB_write_memory(gb, addr, value);
