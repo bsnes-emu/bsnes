@@ -70,10 +70,9 @@ windows-x86_64-binaries_task:
     bsnes-nightly_artifacts:
         path: "bsnes-nightly.zip"
 
-macOS-x86_64-binaries_task:
-    osx_instance:
-        image: mojave-base
-
+macOS-aarch64-binaries_task:
+    macos_instance:
+        image: ghcr.io/cirruslabs/macos-ventura-base:latest
     compile_script:
         - make -C bsnes local=false
 
