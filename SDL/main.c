@@ -859,6 +859,19 @@ static bool get_arg_flag(const char *flag, int *argc, char **argv)
     return false;
 }
 
+static const char *get_arg_option(const char *option, int *argc, char **argv)
+{
+    for (unsigned i = 1; i < *argc - 1; i++) {
+        if (strcmp(argv[i], option) == 0) {
+            const char *ret = argv[i + 1];
+            memmove(argv + i, argv + i + 2, (*argc - i - 2) * sizeof(argv[0]));
+            (*argc) -= 2;
+            return ret;
+        }
+    }
+    return NULL;
+}
+
 #ifdef __APPLE__
 #include <CoreFoundation/CoreFoundation.h>
 static void enable_smooth_scrolling(void)
@@ -866,6 +879,87 @@ static void enable_smooth_scrolling(void)
     CFPreferencesSetAppValue(CFSTR("AppleMomentumScrollSupported"), kCFBooleanTrue, kCFPreferencesCurrentApplication);
 }
 #endif
+
+static void handle_model_option(const char *model_string)
+{
+    static const struct {
+        const char *name;
+        GB_model_t model;
+        const char *description;
+    } name_to_model[] = {
+        {"dmg-b", GB_MODEL_DMG_B, "Game Boy, DMG-CPU B"},
+        {"dmg", GB_MODEL_DMG_B, "Alias of dmg-b"},
+        {"sgb-ntsc", GB_MODEL_SGB_NTSC, "Super Game Boy (NTSC)"},
+        {"sgb-pal", GB_MODEL_SGB_PAL, "Super Game Boy (PAL"},
+        {"sgb2", GB_MODEL_SGB2, "Super Game Boy 2"},
+        {"sgb", GB_MODEL_SGB, "Alias of sgb-ntsc"},
+        {"mgb", GB_MODEL_MGB, "Game Boy Pocket/Light"},
+        {"cgb-0", GB_MODEL_CGB_0, "Game Boy Color, CPU CGB 0"},
+        {"cgb-a", GB_MODEL_CGB_A, "Game Boy Color, CPU CGB A"},
+        {"cgb-b", GB_MODEL_CGB_B, "Game Boy Color, CPU CGB B"},
+        {"cgb-c", GB_MODEL_CGB_C, "Game Boy Color, CPU CGB C"},
+        {"cgb-d", GB_MODEL_CGB_D, "Game Boy Color, CPU CGB D"},
+        {"cgb-e", GB_MODEL_CGB_E, "Game Boy Color, CPU CGB E"},
+        {"cgb", GB_MODEL_CGB_E, "Alias of cgb-e"},
+        {"agb-a", GB_MODEL_AGB_A, "Game Boy Advance, CPU AGB A"},
+        {"agb", GB_MODEL_AGB_A, "Alias of agb-a"},
+        {"gbp-a", GB_MODEL_GBP_A, "Game Boy Player, CPU AGB A"},
+        {"gbp", GB_MODEL_GBP_A, "Alias of gbp-a"},
+    };
+    
+    GB_model_t model = -1;
+    for (unsigned i = 0; i < sizeof(name_to_model) / sizeof(name_to_model[0]); i++) {
+        if (strcmp(model_string, name_to_model[i].name) == 00) {
+            model = name_to_model[i].model;
+            break;
+        }
+    }
+    if (model == -1) {
+        fprintf(stderr, "'%s' is not a valid model. Valid options are:\n", model_string);
+        for (unsigned i = 0; i < sizeof(name_to_model) / sizeof(name_to_model[0]); i++) {
+            fprintf(stderr, "%s - %s\n", name_to_model[i].name, name_to_model[i].description);
+        }
+        exit(1);
+    }
+    
+    switch (model) {
+        case GB_MODEL_DMG_B:
+            configuration.model = MODEL_DMG;
+            break;
+        case GB_MODEL_SGB_NTSC:
+            configuration.model = MODEL_SGB;
+            configuration.sgb_revision = SGB_NTSC;
+            break;
+        case GB_MODEL_SGB_PAL:
+            configuration.model = MODEL_SGB;
+            configuration.sgb_revision = SGB_PAL;
+            break;
+        case GB_MODEL_SGB2:
+            configuration.model = MODEL_SGB;
+            configuration.sgb_revision = SGB_2;
+            break;
+        case GB_MODEL_MGB:
+            configuration.model = MODEL_DMG;
+            break;
+        case GB_MODEL_CGB_0:
+        case GB_MODEL_CGB_A:
+        case GB_MODEL_CGB_B:
+        case GB_MODEL_CGB_C:
+        case GB_MODEL_CGB_D:
+        case GB_MODEL_CGB_E:
+            configuration.model = MODEL_CGB;
+            configuration.cgb_revision = model - GB_MODEL_CGB_0;
+            break;
+        case GB_MODEL_AGB_A:
+        case GB_MODEL_GBP_A:
+            configuration.model = MODEL_AGB;
+            configuration.agb_revision = model;
+            break;
+            
+        default:
+            break;
+    }
+}
 
 int main(int argc, char **argv)
 {
@@ -876,13 +970,15 @@ int main(int argc, char **argv)
     enable_smooth_scrolling();
 #endif
 
+    const char *model_string = get_arg_option("--model", &argc, argv);
     bool fullscreen = get_arg_flag("--fullscreen", &argc, argv) || get_arg_flag("-f", &argc, argv);
     bool nogl = get_arg_flag("--nogl", &argc, argv);
     stop_on_start = get_arg_flag("--stop-debugger", &argc, argv) || get_arg_flag("-s", &argc, argv);
+    
 
     if (argc > 2 || (argc == 2 && argv[1][0] == '-')) {
         fprintf(stderr, "SameBoy v" GB_VERSION "\n");
-        fprintf(stderr, "Usage: %s [--fullscreen|-f] [--nogl] [--stop-debugger|-s] [rom]\n", argv[0]);
+        fprintf(stderr, "Usage: %s [--fullscreen|-f] [--nogl] [--stop-debugger|-s] [--model <model>] <rom>\n", argv[0]);
         exit(1);
     }
     
@@ -947,6 +1043,10 @@ int main(int argc, char **argv)
 
     if (configuration.default_scale == 0) {
         configuration.default_scale = 2;
+    }
+    
+    if (model_string) {
+        handle_model_option(model_string);
     }
     
     atexit(save_configuration);
