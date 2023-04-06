@@ -641,7 +641,7 @@ static void init_for_current_model(unsigned id)
     GB_set_lcd_status_callback(&gameboy[0], lcd_status_change_1);
     if (emulated_devices == 2) {
         GB_set_vblank_callback(&gameboy[1], (GB_vblank_callback_t) vblank2);
-        GB_set_lcd_status_callback(&gameboy[2], lcd_status_change_2);
+        GB_set_lcd_status_callback(&gameboy[1], lcd_status_change_2);
         if (link_cable_emulation) {
             set_link_cable_state(true);
         }
