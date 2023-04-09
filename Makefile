@@ -401,7 +401,7 @@ ifeq ($(CONF), release)
 endif
 
 $(BIN)/SameBoy.app/Contents/Resources/Base.lproj/%.nib: Cocoa/%.xib
-	ibtool --compile $@ $^ 2>&1 | cat -
+	ibtool --target-device mac --minimum-deployment-target 10.9 --compile $@ $^ 2>&1 | cat -
 	
 # Quick Look generator
 
