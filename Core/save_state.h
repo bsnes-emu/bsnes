@@ -19,7 +19,7 @@
 #ifdef GB_INTERNAL
 #define GB_SECTION_OFFSET(name) (offsetof(GB_gameboy_t, name##_section_start))
 #define GB_SECTION_SIZE(name) (offsetof(GB_gameboy_t, name##_section_end) - offsetof(GB_gameboy_t, name##_section_start))
-#define GB_GET_SECTION(gb, name) ((uint8_t (*)[GB_SECTION_SIZE(name)])&((gb)->name##_section_start))
+#define GB_GET_SECTION(gb, name) (void *)((uint8_t *)(gb) + GB_SECTION_OFFSET(name))
 #endif
 #endif
 
