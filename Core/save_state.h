@@ -15,11 +15,11 @@
 #define GB_SECTION(name, ...) _Pragma("GCC diagnostic push") _Pragma("GCC diagnostic ignored \"-Wpedantic\"") alignas(8) char _align_##name[0]; __VA_ARGS__ _Pragma("GCC diagnostic pop")
 #endif
 #else
-#define GB_SECTION(name, ...) union __attribute__ ((aligned (8))) {uint8_t name##_section_start[0]; struct {__VA_ARGS__};}; uint8_t name##_section_end[0];
+#define GB_SECTION(name, ...) union __attribute__ ((aligned (8))) {uint8_t name##_section_start; struct {__VA_ARGS__};}; uint8_t name##_section_end[0];
 #ifdef GB_INTERNAL
 #define GB_SECTION_OFFSET(name) (offsetof(GB_gameboy_t, name##_section_start))
 #define GB_SECTION_SIZE(name) (offsetof(GB_gameboy_t, name##_section_end) - offsetof(GB_gameboy_t, name##_section_start))
-#define GB_GET_SECTION(gb, name) ((void*)&((gb)->name##_section_start))
+#define GB_GET_SECTION(gb, name) ((uint8_t (*)[GB_SECTION_SIZE(name)])&((gb)->name##_section_start))
 #endif
 #endif
 
