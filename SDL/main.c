@@ -683,6 +683,36 @@ static bool is_path_writeable(const char *path)
     return true;
 }
 
+static void debugger_reload_callback(GB_gameboy_t *gb)
+{
+    size_t path_length = strlen(filename);
+    char extension[4] = {0,};
+    if (path_length > 4) {
+        if (filename[path_length - 4] == '.') {
+            extension[0] = tolower((unsigned char)filename[path_length - 3]);
+            extension[1] = tolower((unsigned char)filename[path_length - 2]);
+            extension[2] = tolower((unsigned char)filename[path_length - 1]);
+        }
+    }
+    if (strcmp(extension, "isx") == 0) {
+        GB_load_isx(gb, filename);
+    }
+    else {
+        GB_load_rom(gb, filename);
+    }
+    
+    GB_load_battery(gb, battery_save_path_ptr);
+    
+    GB_debugger_clear_symbols(gb);
+    GB_debugger_load_symbol_file(gb, resource_path("registers.sym"));
+    
+    char symbols_path[path_length + 5];
+    replace_extension(filename, path_length, symbols_path, ".sym");
+    GB_debugger_load_symbol_file(gb, symbols_path);
+    
+    GB_reset(gb);
+}
+
 static void run(void)
 {
     SDL_ShowCursor(SDL_DISABLE);
@@ -740,6 +770,8 @@ restart:
             GB_set_input_callback(&gb, input_callback);
             GB_set_async_input_callback(&gb, asyc_input_callback);
         }
+        
+        GB_set_debugger_reload_callback(&gb, debugger_reload_callback);
     }
     if (stop_on_start) {
         stop_on_start = false;

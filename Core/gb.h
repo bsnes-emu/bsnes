@@ -264,6 +264,7 @@ typedef enum {
 typedef void (*GB_vblank_callback_t)(GB_gameboy_t *gb, GB_vblank_type_t type);
 typedef void (*GB_log_callback_t)(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes);
 typedef char *(*GB_input_callback_t)(GB_gameboy_t *gb);
+typedef void (*GB_debugger_reload_callback_t)(GB_gameboy_t *gb);
 typedef uint32_t (*GB_rgb_encode_callback_t)(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b);
 typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on);
 typedef void (*GB_rumble_callback_t)(GB_gameboy_t *gb, double rumble_amplitude);
@@ -730,6 +731,8 @@ struct GB_gameboy_internal_s {
         GB_execution_callback_t execution_callback;
         GB_lcd_line_callback_t lcd_line_callback;
         GB_lcd_status_callback_t lcd_status_callback;
+        GB_debugger_reload_callback_t debugger_reload_callback;
+               
         /*** Debugger ***/
         volatile bool debug_stopped, debug_disable;
         bool debug_fin_command, debug_next_command;
@@ -930,6 +933,7 @@ void GB_set_vblank_callback(GB_gameboy_t *gb, GB_vblank_callback_t callback);
 void GB_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback);
 void GB_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
 void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
+void GB_set_debugger_reload_callback(GB_gameboy_t *gb, GB_debugger_reload_callback_t callback);
 void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback);
 void GB_set_infrared_callback(GB_gameboy_t *gb, GB_infrared_callback_t callback);
 void GB_set_rumble_callback(GB_gameboy_t *gb, GB_rumble_callback_t callback);

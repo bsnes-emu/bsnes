@@ -767,6 +767,61 @@ static bool interrupt(GB_gameboy_t *gb, char *arguments, char *modifiers, const 
     return true;
 }
 
+static char *reset_completer(GB_gameboy_t *gb, const char *string, uintptr_t *context)
+{
+    size_t length = strlen(string);
+    const char *suggestions[] = {"quick", "reload"};
+    while (*context < sizeof(suggestions) / sizeof(suggestions[0])) {
+        if (memcmp(string, suggestions[*context], length) == 0) {
+            return strdup(suggestions[(*context)++] + length);
+        }
+        (*context)++;
+    }
+    return NULL;
+}
+
+static bool reset(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
+{
+    NO_MODIFIERS
+    
+    const char *stripped_argument = lstrip(arguments);
+    
+    if (stripped_argument[0] == 0) {
+        GB_reset(gb);
+        if (gb->debug_stopped) {
+            GB_cpu_disassemble(gb, gb->pc, 5);
+        }
+        return true;
+    }
+    
+    if (strcmp(stripped_argument, "quick") == 0) {
+        GB_quick_reset(gb);
+        if (gb->debug_stopped) {
+            GB_cpu_disassemble(gb, gb->pc, 5);
+        }
+        return true;
+    }
+    
+    if (strcmp(stripped_argument, "reload") == 0) {
+        if (gb->debugger_reload_callback) {
+            gb->debugger_reload_callback(gb);
+            if (gb->undo_state) {
+                free(gb->undo_state);
+                gb->undo_state = NULL;
+            }
+            if (gb->debug_stopped) {
+                GB_cpu_disassemble(gb, gb->pc, 5);
+            }
+            return true;
+        }
+        GB_log(gb, "ROM reloading via the debugger is not supported in this frontend.\n");
+        return true;
+    }
+    
+    print_usage(gb, command);
+    return true;
+}
+
 static bool next(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
     NO_MODIFIERS
@@ -2022,6 +2077,10 @@ static bool help(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
 static const debugger_command_t commands[] = {
     {"continue", 1, cont, "Continue running until next stop"},
     {"interrupt", 1, interrupt, "Interrupt the program execution"},
+    {"reset", 3, reset, "Reset the program execution. "
+                        "Add 'quick' as an argument to perform a quick reset that does not reset RAM. "
+                        "Add 'reload' as an argument to reload the ROM and symbols before resetting.",
+                        "[quick|reload]", .argument_completer = reset_completer},
     {"next", 1, next, "Run the next instruction, skipping over function calls"},
     {"step", 1, step, "Run the next instruction, stepping into function calls"},
     {"finish", 1, finish, "Run until the current function returns"},
@@ -2029,7 +2088,7 @@ static const debugger_command_t commands[] = {
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"backtrace", 2, backtrace, "Display the current call stack"},
     {"bt", 2, }, /* Alias */
-    {"print", 1, print, "Evaluate and print an expression "
+    {"print", 1, print, "Evaluate and print an expression. "
                         "Use modifier to format as an address (a, default) or as a number in "
                         "decimal (d), hexadecimal (x), octal (o) or binary (b).",
                         "<expression>", "format", .argument_completer = symbol_completer, .modifiers_completer = format_completer},
@@ -2037,7 +2096,7 @@ static const debugger_command_t commands[] = {
     {"examine", 2, examine, "Examine values at address", "<expression>", "count", .argument_completer = symbol_completer},
     {"x", 1, }, /* Alias */
     {"disassemble", 1, disassemble, "Disassemble instructions at address", "<expression>", "count", .argument_completer = symbol_completer},
-    {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression "
+    {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression. "
                                   "Can also modify the condition of existing breakpoints. "
                                   "If the j modifier is used, the breakpoint will occur just before "
                                   "jumping to the target.",
@@ -2058,8 +2117,8 @@ static const debugger_command_t commands[] = {
                         "the count.", "(keep)", .argument_completer = keep_completer},
     {"cartridge", 2, mbc, "Display information about the MBC and cartridge"},
     {"mbc", 3, }, /* Alias */
-    {"apu", 3, apu, "Display information about the current state of the audio processing "
-                    "unit", "[channel (1-4, 5 for NR5x)]"},
+    {"apu", 3, apu, "Display information about the current state of the audio processing unit",
+                    "[channel (1-4, 5 for NR5x)]"},
     {"wave", 3, wave, "Print a visual representation of the wave RAM. "
                       "Modifiers can be used for a (f)ull print (the default), "
                       "a more (c)ompact one, or a one-(l)iner", "", "(f|c|l)", .modifiers_completer = wave_completer},

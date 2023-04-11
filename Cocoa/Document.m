@@ -226,6 +226,17 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
     [self infraredStateChanged:on];
 }
 
+static void debuggerReloadCallback(GB_gameboy_t *gb)
+{
+    Document *self = (__bridge Document *)GB_get_user_data(gb);
+    dispatch_sync(dispatch_get_main_queue(), ^{
+        bool wasRunning = self->running;
+        self->running = false; // Hack for output capture
+        [self loadROM];
+        self->running = wasRunning;
+        GB_reset(gb);
+    });
+}
 
 - (instancetype)init 
 {
@@ -320,6 +331,7 @@ static void infraredStateChanged(GB_gameboy_t *gb, bool on)
     GB_apu_set_sample_callback(&gb, audioCallback);
     GB_set_rumble_callback(&gb, rumbleCallback);
     GB_set_infrared_callback(&gb, infraredStateChanged);
+    GB_set_debugger_reload_callback(&gb, debuggerReloadCallback);
     [self updateRumbleMode];
 }
 

@@ -1253,6 +1253,11 @@ void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback)
 #endif
 }
 
+void GB_set_debugger_reload_callback(GB_gameboy_t *gb, GB_debugger_reload_callback_t callback)
+{
+    gb->debugger_reload_callback = callback;
+}
+
 void GB_set_execution_callback(GB_gameboy_t *gb, GB_execution_callback_t callback)
 {
     gb->execution_callback = callback;
