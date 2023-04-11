@@ -19,6 +19,8 @@
 #ifdef GB_INTERNAL
 #define GB_SECTION_OFFSET(name) (offsetof(GB_gameboy_t, name##_section_start))
 #define GB_SECTION_SIZE(name) (offsetof(GB_gameboy_t, name##_section_end) - offsetof(GB_gameboy_t, name##_section_start))
+/* This roundabout way to get the section offset is because GCC 9 is a bad compiler and will false-positively complain
+   about memset buffer overflows otherwise */
 #define GB_GET_SECTION(gb, name) (void *)((uint8_t *)(gb) + GB_SECTION_OFFSET(name))
 #endif
 #endif
