@@ -950,7 +950,7 @@ LD_X_Y(a,b) LD_X_Y(a,c) LD_X_Y(a,d) LD_X_Y(a,e) LD_X_Y(a,h) LD_X_Y(a,l) LD_X_DHL
 static void ld_b_b(GB_gameboy_t *gb, uint8_t opcode)
 {
     if (gb->has_software_breakpoints) {
-        gb->debug_stopped = true;
+        GB_debugger_break(gb);
     }
 }
 

@@ -11,6 +11,7 @@
 #define unlikely(x) GB_unlikely(x)
 
 #define internal __attribute__((visibility("internal")))
+#define noinline __attribute__((noinline))
 
 #if __clang__
 #define unrolled _Pragma("unroll")

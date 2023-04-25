@@ -736,6 +736,7 @@ struct GB_gameboy_internal_s {
         /*** Debugger ***/
         volatile bool debug_stopped, debug_disable;
         bool debug_fin_command, debug_next_command;
+        bool debug_active; // Cached value determining if GB_debugger_run does anything
         bool help_shown;
 
         /* Breakpoints */

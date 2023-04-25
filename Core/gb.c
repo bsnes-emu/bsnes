@@ -76,7 +76,7 @@ static char *default_input_callback(GB_gameboy_t *gb)
     }
     
     if (expression[0] == '\x03') {
-        gb->debug_stopped = true;
+        GB_debugger_break(gb);
         free(expression);
         return strdup("");
     }
@@ -1183,7 +1183,7 @@ unsigned GB_run(GB_gameboy_t *gb)
     GB_set_running_thread(gb);
     GB_cpu_run(gb);
     GB_clear_running_thread(gb);
-    if (gb->vblank_just_occured) {
+    if (unlikely(gb->vblank_just_occured)) {
         GB_debugger_handle_async_commands(gb);
         GB_set_running_thread(gb);
         GB_rewind_push(gb);

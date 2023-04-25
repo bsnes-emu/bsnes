@@ -685,6 +685,11 @@ exit:
     return ret;
 }
 
+static void update_debug_active(GB_gameboy_t *gb)
+{
+    gb->debug_active = !gb->debug_disable && (gb->debug_stopped || gb->debug_fin_command || gb->debug_next_command || gb->breakpoints);
+}
+
 struct debugger_command_s;
 typedef bool debugger_command_imp_t(GB_gameboy_t *gb, char *arguments, char *modifiers, const struct debugger_command_s *command);
 typedef char *debugger_completer_imp_t(GB_gameboy_t *gb, const char *string, uintptr_t *context);
@@ -763,7 +768,7 @@ static bool interrupt(GB_gameboy_t *gb, char *arguments, char *modifiers, const 
         return true;
     }
     
-    gb->debug_stopped = true;
+    GB_debugger_break(gb);
     return true;
 }
 
@@ -2253,7 +2258,7 @@ static bool _GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, value_t addr, u
             return false;
         }
         if (!gb->watchpoints[index].condition) {
-            gb->debug_stopped = true;
+            GB_debugger_break(gb);
             GB_log(gb, "Watchpoint: [%s] = $%02x\n", debugger_value_to_string(gb, addr, true), value);
             return true;
         }
@@ -2266,7 +2271,7 @@ static bool _GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, value_t addr, u
             return false;
         }
         if (condition) {
-            gb->debug_stopped = true;
+            GB_debugger_break(gb);
             GB_log(gb, "Watchpoint: [%s] = $%02x\n", debugger_value_to_string(gb, addr, true), value);
             return true;
         }
@@ -2298,7 +2303,7 @@ static bool _GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, value_t addr)
             return false;
         }
         if (!gb->watchpoints[index].condition) {
-            gb->debug_stopped = true;
+            GB_debugger_break(gb);
             GB_log(gb, "Watchpoint: [%s]\n", debugger_value_to_string(gb, addr, true));
             return true;
         }
@@ -2311,7 +2316,7 @@ static bool _GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, value_t addr)
             return false;
         }
         if (condition) {
-            gb->debug_stopped = true;
+            GB_debugger_break(gb);
             GB_log(gb, "Watchpoint: [%s]\n", debugger_value_to_string(gb, addr, true));
             return true;
         }
@@ -2464,10 +2469,8 @@ typedef enum {
 
 static jump_to_return_t test_jump_to_breakpoints(GB_gameboy_t *gb, uint16_t *address);
 
-void GB_debugger_run(GB_gameboy_t *gb)
+static void noinline debugger_run(GB_gameboy_t *gb)
 {
-    if (gb->debug_disable) return;
-    
     if (!gb->undo_state) {
         gb->undo_state = malloc(GB_get_save_state_size_no_bess(gb));
         GB_save_state_to_buffer_no_bess(gb, gb->undo_state);
@@ -2475,10 +2478,10 @@ void GB_debugger_run(GB_gameboy_t *gb)
 
     char *input = NULL;
     if (gb->debug_next_command && gb->debug_call_depth <= 0 && !gb->halted) {
-        gb->debug_stopped = true;
+        GB_debugger_break(gb);
     }
     if (gb->debug_fin_command && gb->debug_call_depth <= -1) {
-        gb->debug_stopped = true;
+        GB_debugger_break(gb);
     }
     if (gb->debug_stopped) {
         if (!gb->help_shown) {
@@ -2492,7 +2495,7 @@ next_command:
         free(input);
     }
     if (gb->breakpoints && !gb->debug_stopped && should_break(gb, gb->pc, false)) {
-        gb->debug_stopped = true;
+        GB_debugger_break(gb);
         GB_log(gb, "Breakpoint: PC = %s\n", value_to_string(gb, gb->pc, true));
         GB_cpu_disassemble(gb, gb->pc, 5);
     }
@@ -2511,11 +2514,11 @@ next_command:
                 GB_log(gb, "Jumping to breakpoint: PC = %s\n", value_to_string(gb, gb->pc, true));
                 GB_cpu_disassemble(gb, gb->pc, 5);
                 GB_load_state_from_buffer(gb, gb->nontrivial_jump_state, -1);
-                gb->debug_stopped = true;
+                GB_debugger_break(gb);
             }
         }
         else if (jump_to_result == JUMP_TO_BREAK) {
-            gb->debug_stopped = true;
+            GB_debugger_break(gb);
             GB_log(gb, "Jumping to breakpoint: PC = %s\n", value_to_string(gb, address, true));
             GB_cpu_disassemble(gb, gb->pc, 5);
             gb->non_trivial_jump_breakpoint_occured = false;
@@ -2548,6 +2551,7 @@ next_command:
         if (input == NULL) {
             /* Debugging is no currently available, continue running */
             gb->debug_stopped = false;
+            update_debug_active(gb);
             return;
         }
 
@@ -2557,6 +2561,12 @@ next_command:
 
         free(input);
     }
+    update_debug_active(gb);
+}
+void GB_debugger_run(GB_gameboy_t *gb)
+{
+    if (likely(!gb->debug_active)) return;
+    debugger_run(gb);
 }
 
 void GB_debugger_handle_async_commands(GB_gameboy_t *gb)
@@ -2675,6 +2685,7 @@ bool GB_debugger_evaluate(GB_gameboy_t *gb, const char *string, uint16_t *result
 void GB_debugger_break(GB_gameboy_t *gb)
 {
     gb->debug_stopped = true;
+    update_debug_active(gb);
 }
 
 bool GB_debugger_is_stopped(GB_gameboy_t *gb)
@@ -2685,6 +2696,7 @@ bool GB_debugger_is_stopped(GB_gameboy_t *gb)
 void GB_debugger_set_disabled(GB_gameboy_t *gb, bool disabled)
 {
     gb->debug_disable = disabled;
+    update_debug_active(gb);
 }
 
 /* Jump-to breakpoints */

@@ -30,10 +30,8 @@ static uint16_t bank_for_addr(GB_gameboy_t *gb, uint16_t addr)
     return 0;
 }
 
-void GB_apply_cheat(GB_gameboy_t *gb, uint16_t address, uint8_t *value)
+static noinline void apply_cheat(GB_gameboy_t *gb, uint16_t address, uint8_t *value)
 {
-    if (likely(!gb->cheat_enabled)) return;
-    if (likely(gb->cheat_count == 0)) return; // Optimization
     if (unlikely(!gb->boot_rom_finished)) return;
     const GB_cheat_hash_t *hash = gb->cheat_hash[hash_addr(address)];
     if (likely(!hash)) return;
@@ -47,6 +45,13 @@ void GB_apply_cheat(GB_gameboy_t *gb, uint16_t address, uint8_t *value)
             }
         }
     }
+}
+
+void GB_apply_cheat(GB_gameboy_t *gb, uint16_t address, uint8_t *value)
+{
+    if (likely(!gb->cheat_enabled)) return;
+    if (likely(gb->cheat_count == 0)) return; // Optimization
+    apply_cheat(gb, address, value);
 }
 
 bool GB_cheats_enabled(GB_gameboy_t *gb)
