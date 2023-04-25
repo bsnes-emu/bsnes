@@ -1163,7 +1163,7 @@ unsigned GB_run(GB_gameboy_t *gb)
     GB_ASSERT_NOT_RUNNING(gb)
     gb->vblank_just_occured = false;
 
-    if (gb->sgb && gb->sgb->intro_animation < 96) {
+    if (unlikely(gb->sgb && gb->sgb->intro_animation < 96)) {
         /* On the SGB, the GB is halted after finishing the boot ROM.
            Then, after the boot animation is almost done, it's reset.
            Since the SGB HLE does not perform any header validity checks,

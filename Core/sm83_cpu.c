@@ -1653,7 +1653,7 @@ static opcode_t *opcodes[256] = {
 };
 void GB_cpu_run(GB_gameboy_t *gb)
 {
-    if (gb->stopped) {
+    if (unlikely(gb->stopped)) {
         GB_timing_sync(gb);
         GB_advance_cycles(gb, 4);
         if ((gb->io_registers[GB_IO_JOYP] & 0x30) != 0x30) {
@@ -1699,7 +1699,7 @@ void GB_cpu_run(GB_gameboy_t *gb)
     }
     
     /* Call interrupt */
-    else if (effective_ime && interrupt_queue) {
+    else if (unlikely(effective_ime && interrupt_queue)) {
         gb->halted = false;
         if (gb->hdma_on_hblank && (gb->io_registers[GB_IO_STAT] & 3) == 0 && gb->allow_hdma_on_wake) {
             gb->hdma_on = true;
