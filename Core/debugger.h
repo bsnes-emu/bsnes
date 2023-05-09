@@ -5,7 +5,7 @@
 #include "defs.h"
 #include "symbol_hash.h"
 
-
+void GB_debugger_break(GB_gameboy_t *gb);
 #ifdef GB_INTERNAL
 #ifdef GB_DISABLE_DEBUGGER
 #define GB_debugger_run(gb) (void)0
@@ -15,6 +15,7 @@
 #define GB_debugger_test_write_watchpoint(gb, addr, value) ((void)addr, (void)value)
 #define GB_debugger_test_read_watchpoint(gb, addr) (void)addr
 #define GB_debugger_add_symbol(gb, bank, address, symbol) ((void)bank, (void)address, (void)symbol)
+#define GB_debugger_break(gb) (void)0
 
 #else
 internal void GB_debugger_run(GB_gameboy_t *gb);
@@ -39,7 +40,6 @@ char *GB_debugger_complete_substring(GB_gameboy_t *gb, char *input, uintptr_t *c
 void GB_debugger_load_symbol_file(GB_gameboy_t *gb, const char *path);
 const char *GB_debugger_name_for_address(GB_gameboy_t *gb, uint16_t addr);
 bool GB_debugger_evaluate(GB_gameboy_t *gb, const char *string, uint16_t *result, uint16_t *result_bank); /* result_bank is -1 if unused. */
-void GB_debugger_break(GB_gameboy_t *gb);
 bool GB_debugger_is_stopped(GB_gameboy_t *gb);
 void GB_debugger_set_disabled(GB_gameboy_t *gb, bool disabled);
 void GB_debugger_clear_symbols(GB_gameboy_t *gb);
