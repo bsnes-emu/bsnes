@@ -665,7 +665,8 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                 if (!gb->cgb_mode) {
                     return 0xFF;
                 }
-                return gb->cgb_ram_bank | ~0x7;
+
+                return gb->io_registers[GB_IO_SVBK];
             case GB_IO_VBK:
                 if (!GB_is_cgb(gb)) {
                     return 0xFF;
@@ -1593,6 +1594,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     if (!gb->cgb_ram_bank) {
                         gb->cgb_ram_bank++;
                     }
+                    gb->io_registers[GB_IO_SVBK] = value | ~0x7;
                 }
                 return;
             case GB_IO_VBK:
