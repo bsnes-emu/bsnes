@@ -1515,7 +1515,7 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_CGB_E:
         case GB_MODEL_AGB_A:
         case GB_MODEL_GBP_A:
-            for (unsigned i = 0; i < sizeof(gb->hram); i++) {
+            nounroll for (unsigned i = 0; i < sizeof(gb->hram); i++) {
                 gb->hram[i] = GB_random();
             }
             break;
@@ -1528,7 +1528,7 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_SGB_PAL_NO_SFC: /* Unverified */
         case GB_MODEL_SGB2:
         case GB_MODEL_SGB2_NO_SFC:
-            for (unsigned i = 0; i < sizeof(gb->hram); i++) {
+            nounroll for (unsigned i = 0; i < sizeof(gb->hram); i++) {
                 if (i & 1) {
                     gb->hram[i] = GB_random() | GB_random() | GB_random();
                 }
@@ -1568,7 +1568,7 @@ static void reset_ram(GB_gameboy_t *gb)
                     gb->oam[i] = GB_random() | GB_random() | GB_random();
                 }
             }
-            for (unsigned i = 8; i < sizeof(gb->oam); i++) {
+            nounroll for (unsigned i = 8; i < sizeof(gb->oam); i++) {
                 gb->oam[i] = gb->oam[i - 8];
             }
             break;
@@ -1587,7 +1587,7 @@ static void reset_ram(GB_gameboy_t *gb)
             /* Initialized by CGB-A and newer, 0s in CGB-0 */
             break;
         case GB_MODEL_MGB: {
-            for (unsigned i = 0; i < GB_IO_WAV_END - GB_IO_WAV_START; i++) {
+            nounroll for (unsigned i = 0; i < GB_IO_WAV_END - GB_IO_WAV_START; i++) {
                 if (i & 1) {
                     gb->io_registers[GB_IO_WAV_START + i] = GB_random() & GB_random();
                 }
@@ -1604,7 +1604,7 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_SGB_PAL_NO_SFC: /* Unverified */
         case GB_MODEL_SGB2:
         case GB_MODEL_SGB2_NO_SFC: {
-            for (unsigned i = 0; i < GB_IO_WAV_END - GB_IO_WAV_START; i++) {
+            nounroll for (unsigned i = 0; i < GB_IO_WAV_END - GB_IO_WAV_START; i++) {
                 if (i & 1) {
                     gb->io_registers[GB_IO_WAV_START + i] = GB_random() & GB_random() & GB_random();
                 }

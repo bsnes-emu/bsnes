@@ -403,7 +403,7 @@ void GB_set_color_correction_mode(GB_gameboy_t *gb, GB_color_correction_mode_t m
 {
     gb->color_correction_mode = mode;
     if (GB_is_cgb(gb)) {
-        for (unsigned i = 0; i < 32; i++) {
+        nounroll for (unsigned i = 0; i < 32; i++) {
             GB_palette_changed(gb, false, i * 2);
             GB_palette_changed(gb, true, i * 2);
         }
@@ -414,7 +414,7 @@ void GB_set_light_temperature(GB_gameboy_t *gb, double temperature)
 {
     gb->light_temperature = temperature;
     if (GB_is_cgb(gb)) {
-        for (unsigned i = 0; i < 32; i++) {
+        nounroll for (unsigned i = 0; i < 32; i++) {
             GB_palette_changed(gb, false, i * 2);
             GB_palette_changed(gb, true, i * 2);
         }
@@ -1172,7 +1172,7 @@ object_buffer_pointer++\
     data0 <<= fractional_scroll;
     data1 <<= fractional_scroll;
     bool check_window = gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE);
-    for (unsigned i = fractional_scroll; i < 8; i++) {
+    nounroll for (unsigned i = fractional_scroll; i < 8; i++) {
         if (check_window && gb->io_registers[GB_IO_WX] == pixels + 7) {
 activate_window:
             check_window = false;
@@ -1187,7 +1187,7 @@ activate_window:
     
     while (pixels < 160 - 8) {
         get_tile_data(gb, tile_x, y, map, &attributes, &data0, &data1);
-        for (unsigned i = 0; i < 8; i++) {
+        nounroll for (unsigned i = 0; i < 8; i++) {
             if (check_window && gb->io_registers[GB_IO_WX] == pixels + 7) {
                 goto activate_window;
             }
@@ -1313,7 +1313,7 @@ object_buffer_pointer++\
     data0 <<= fractional_scroll;
     data1 <<= fractional_scroll;
     bool check_window = gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE);
-    for (unsigned i = fractional_scroll; i < 8; i++) {
+    nounroll for (unsigned i = fractional_scroll; i < 8; i++) {
         if (check_window && gb->io_registers[GB_IO_WX] == pixels + 7) {
         activate_window:
             check_window = false;
@@ -1328,7 +1328,7 @@ object_buffer_pointer++\
     
     while (pixels < 160 - 8) {
         get_tile_data(gb, tile_x, y, map, &attributes, &data0, &data1);
-        for (unsigned i = 0; i < 8; i++) {
+        nounroll for (unsigned i = 0; i < 8; i++) {
             if (check_window && gb->io_registers[GB_IO_WX] == pixels + 7) {
                 goto activate_window;
             }

@@ -15,10 +15,13 @@
 
 #if __clang__
 #define unrolled _Pragma("unroll")
+#define nounroll _Pragma("clang loop unroll(disable)")
 #elif __GNUC__ >= 8
 #define unrolled _Pragma("GCC unroll 8")
+#define nounroll _Pragma("GCC unroll 0")
 #else
 #define unrolled
+#define nounroll
 #endif
 
 #define unreachable() __builtin_unreachable();

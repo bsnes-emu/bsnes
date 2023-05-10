@@ -1983,7 +1983,7 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
 
         GB_log(gb, "    LFSR in %u-step mode, current value ",
             gb->apu.noise_channel.narrow? 7 : 15);
-        for (uint16_t lfsr = gb->apu.noise_channel.lfsr, i = 15; i--; lfsr <<= 1) {
+        nounroll for (uint16_t lfsr = gb->apu.noise_channel.lfsr, i = 15; i--; lfsr <<= 1) {
             GB_log(gb, "%u%s", (lfsr >> 14) & 1, i%4 ? "" : " ");
         }
 
@@ -2166,9 +2166,9 @@ static void print_command_description(GB_gameboy_t *gb, const debugger_command_t
     
     const char *string = command->help_string;
     const unsigned width = 80 - 13;
-    while (strlen(string) > width) {
+    nounroll while (strlen(string) > width) {
         const char *space = string + width;
-        while (*space != ' ') {
+        nounroll while (*space != ' ') {
             space--;
             if (space == string) {
                 // This help string has some extra long word? Abort line-breaking, it's going to break anyway.
@@ -2202,7 +2202,7 @@ static bool help(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
         }
         return true;
     }
-    for (command = commands; command->command; command++) {
+    nounroll for (command = commands; command->command; command++) {
         if (command->help_string) {
             print_command_description(gb, command);
         }
