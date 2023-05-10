@@ -120,9 +120,11 @@ ifeq ($(shell $(CC) -x c -c $(NULL) -o $(NULL) -Werror -Wpartial-availability 2>
 WARNINGS += -Wpartial-availability
 endif
 
+SIZE_FLAG := z
 # GCC's implementation of this warning has false positives, so we skip it
 ifneq ($(shell $(CC) --version 2>&1 | grep "gcc"), )
 WARNINGS += -Wno-maybe-uninitialized
+SIZE_FLAG := s
 endif
 
 CFLAGS += $(WARNINGS)
@@ -217,7 +219,7 @@ CFLAGS += -g
 else ifeq ($(CONF), release)
 CFLAGS += -O3 -ffast-math -DNDEBUG
 # The frontend code is not time-critical, prefer reducing the size for less memory use and better cache utilization 
-FRONTEND_CFLAGS += -Oz
+FRONTEND_CFLAGS += -O$(SIZE_FLAG)
 STRIP := strip
 CODESIGN := true
 ifeq ($(PLATFORM),Darwin)
