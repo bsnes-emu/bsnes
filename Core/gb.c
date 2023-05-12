@@ -408,8 +408,11 @@ void GB_gbs_switch_track(GB_gameboy_t *gb, uint8_t track)
         gb->sgb->intro_animation = GB_SGB_INTRO_ANIMATION_LENGTH;
         gb->sgb->disable_commands = true;
     }
-    if (gb->gbs_header.TAC & 0x40) {
-        gb->interrupt_enable = true;
+    if (gb->gbs_header.TAC & 0x4) {
+        gb->interrupt_enable = 4;
+    }
+    else {
+        gb->interrupt_enable = 1;
     }
 }
 
