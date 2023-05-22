@@ -827,7 +827,7 @@ board: LOROM-RAM
 
 board: LOROM-RAM#A
   memory type=ROM content=Program
-    map address=00-3f,80-bf:8000-ffff mask=0x8000
+    map address=00-6f,80-ef:8000-ffff mask=0x8000
   memory type=RAM content=Save
     map address=70-7d,f0-ff:0000-ffff mask=0x8000
 
