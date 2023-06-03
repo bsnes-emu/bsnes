@@ -1,5 +1,6 @@
 #include "gb.h"
 #include <time.h>
+#include <string.h>
 
 static inline uint8_t int_to_bcd(uint8_t i)
 {

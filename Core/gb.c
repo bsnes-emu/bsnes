@@ -211,11 +211,19 @@ void GB_free(GB_gameboy_t *gb)
     if (gb->rom) {
         free(gb->rom);
     }
+    if (gb->sgb) {
+        free(gb->sgb);
+    }
+#ifndef GB_DISABLE_DEBUGGER
+    GB_debugger_clear_symbols(gb);
+#endif
+    GB_rewind_reset(gb);
+#ifndef GB_DISABLE_CHEATS
     if (gb->breakpoints) {
         free(gb->breakpoints);
     }
-    if (gb->sgb) {
-        free(gb->sgb);
+    if (gb->watchpoints) {
+        free(gb->watchpoints);
     }
     if (gb->nontrivial_jump_state) {
         free(gb->nontrivial_jump_state);
@@ -223,11 +231,6 @@ void GB_free(GB_gameboy_t *gb)
     if (gb->undo_state) {
         free(gb->undo_state);
     }
-#ifndef GB_DISABLE_DEBUGGER
-    GB_debugger_clear_symbols(gb);
-#endif
-    GB_rewind_reset(gb);
-#ifndef GB_DISABLE_CHEATS
     while (gb->cheats) {
         GB_remove_cheat(gb, gb->cheats[0]);
     }
@@ -1762,10 +1765,12 @@ static void GB_reset_internal(GB_gameboy_t *gb, bool quick)
     
     GB_set_internal_div_counter(gb, 8);
 
+#ifndef GB_DISABLE_DEBUGGER
     if (gb->nontrivial_jump_state) {
         free(gb->nontrivial_jump_state);
         gb->nontrivial_jump_state = NULL;
     }
+#endif
     
     if (!quick) {
         reset_ram(gb);
@@ -1812,10 +1817,12 @@ void GB_switch_model_and_reset(GB_gameboy_t *gb, GB_model_t model)
         gb->ram = realloc(gb->ram, gb->ram_size = 0x2000);
         gb->vram = realloc(gb->vram, gb->vram_size = 0x2000);
     }
+#ifndef GB_DISABLE_DEBUGGER
     if (gb->undo_state) {
         free(gb->undo_state);
         gb->undo_state = NULL;
     }
+#endif
     GB_rewind_reset(gb);
     GB_reset(gb);
     load_default_border(gb);

@@ -724,6 +724,7 @@ struct GB_gameboy_internal_s {
         GB_lcd_status_callback_t lcd_status_callback;
         GB_debugger_reload_callback_t debugger_reload_callback;
                
+#ifndef GB_DISABLE_DEBUGGER
         /*** Debugger ***/
         volatile bool debug_stopped, debug_disable;
         bool debug_fin_command, debug_next_command;
@@ -765,7 +766,9 @@ struct GB_gameboy_internal_s {
         /* Undo */
         uint8_t *undo_state;
         const char *undo_label;
+#endif
 
+#ifndef GB_DISABLE_REWIND
         /* Rewind */
         size_t rewind_buffer_length;
         size_t rewind_state_size;
@@ -775,6 +778,7 @@ struct GB_gameboy_internal_s {
             unsigned pos;
         } *rewind_sequences; // lasts about 4 seconds
         size_t rewind_pos;
+#endif
                
         /* SGB - saved and allocated optionally */
         GB_sgb_t *sgb;
@@ -783,11 +787,13 @@ struct GB_gameboy_internal_s {
         double sgb_intro_sweep_phase;
         double sgb_intro_sweep_previous_sample;
                
-        /* Cheats */
+#ifndef GB_DISABLE_CHEATS
+       /* Cheats */
         bool cheat_enabled;
         size_t cheat_count;
         GB_cheat_t **cheats;
         GB_cheat_hash_t *cheat_hash[256];
+#endif
 
         /* Misc */
         bool turbo;

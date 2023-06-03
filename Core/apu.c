@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <stdlib.h>
 #include "gb.h"
 
 static const uint8_t duties[] = {

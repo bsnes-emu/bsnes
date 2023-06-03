@@ -949,9 +949,11 @@ LD_X_Y(a,b) LD_X_Y(a,c) LD_X_Y(a,d) LD_X_Y(a,e) LD_X_Y(a,h) LD_X_Y(a,l) LD_X_DHL
 // fire the debugger if software breakpoints are enabled
 static void ld_b_b(GB_gameboy_t *gb, uint8_t opcode)
 {
+#ifndef GB_DISABLE_DEBUGGER
     if (gb->has_software_breakpoints) {
         GB_debugger_break(gb);
     }
+#endif
 }
 
 static void add_a_r(GB_gameboy_t *gb, uint8_t opcode)

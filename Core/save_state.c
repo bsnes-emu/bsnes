@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <errno.h>
 #include <assert.h>
+#include <string.h>
+#include <stdlib.h>
 
 #ifdef GB_BIG_ENDIAN
 #define BESS_NAME "SameBoy v" GB_VERSION " (Big Endian)"

@@ -1,6 +1,6 @@
 #ifndef symbol_hash_h
 #define symbol_hash_h
-
+#ifndef GB_DISABLE_DEBUGGER
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
@@ -34,5 +34,5 @@ internal const GB_bank_symbol_t *GB_map_find_symbol(GB_symbol_map_t *map, uint16
 internal GB_symbol_map_t *GB_map_alloc(void);
 internal void GB_map_free(GB_symbol_map_t *map);
 #endif
-
+#endif
 #endif

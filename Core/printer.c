@@ -1,4 +1,5 @@
 #include "gb.h"
+#include <string.h>
 
 /* TODO: Emulation is VERY basic and assumes the ROM correctly uses the printer's interface.
          Incorrect usage is not correctly emulated, as it's not well documented, nor do I

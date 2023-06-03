@@ -436,7 +436,9 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
         }
     }
         
+#ifndef GB_DISABLE_DEBUGGER
     gb->debugger_ticks += cycles;
+#endif
     
     if (gb->speed_switch_freeze) {
         if (gb->speed_switch_freeze >= cycles) {
@@ -451,7 +453,9 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
         cycles <<= 1;
     }
     
+#ifndef GB_DISABLE_DEBUGGER
     gb->absolute_debugger_ticks += cycles;
+#endif
     
     // Not affected by speed boost
     if (likely(gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE)) {

@@ -52,6 +52,46 @@ ifeq ($(MAKECMDGOALS),)
 MAKECMDGOALS := $(DEFAULT)
 endif
 
+ifneq ($(DISABLE_TIMEKEEPING),)
+CFLAGS += -DGB_DISABLE_TIMEKEEPING
+CPPP_FLAGS += -DGB_DISABLE_TIMEKEEPING
+else
+CPPP_FLAGS += -UGB_DISABLE_TIMEKEEPING
+endif
+
+ifneq ($(DISABLE_REWIND),)
+CFLAGS += -DGB_DISABLE_REWIND
+CPPP_FLAGS += -DGB_DISABLE_REWIND
+CORE_FILTER += Core/rewind.c
+else
+CPPP_FLAGS += -UGB_DISABLE_REWIND
+endif
+
+ifneq ($(DISABLE_DEBUGGER),)
+CFLAGS += -DGB_DISABLE_DEBUGGER
+CPPP_FLAGS += -DGB_DISABLE_DEBUGGER
+CORE_FILTER += Core/debugger.c Core/sm83_disassembler.c Core/symbol_hash.c
+else
+CPPP_FLAGS += -UGB_DISABLE_DEBUGGER
+endif
+
+ifneq ($(DISABLE_CHEATS),)
+CFLAGS += -DGB_DISABLE_CHEATS
+CPPP_FLAGS += -DGB_DISABLE_CHEATS
+CORE_FILTER += Core/cheats.c
+else
+CPPP_FLAGS += -UGB_DISABLE_CHEATS
+endif
+
+ifneq ($(CORE_FILTER)$(DISABLE_TIMEKEEPING),)
+ifneq ($(MAKECMDGOALS),lib)
+$(error SameBoy features can only be disabled when compiling the 'lib' target)
+endif
+endif
+
+CPPP_FLAGS += -UGB_INTERNAL
+
+
 include version.mk
 COPYRIGHT_YEAR := $(shell grep -oE "20[2-9][0-9]" LICENSE)
 export VERSION
@@ -284,7 +324,7 @@ endif
 
 # Get a list of our source files and their respective object file targets
 
-CORE_SOURCES := $(shell ls Core/*.c)
+CORE_SOURCES := $(filter-out $(CORE_FILTER),$(shell ls Core/*.c))
 CORE_HEADERS := $(shell ls Core/*.h)
 SDL_SOURCES := $(shell ls SDL/*.c) $(OPEN_DIALOG) $(patsubst %,SDL/audio/%.c,$(SDL_AUDIO_DRIVERS))
 TESTER_SOURCES := $(shell ls Tester/*.c)
@@ -673,7 +713,7 @@ $(LIB)/libsameboy.a: $(LIB)/libsameboy.o
 $(INC)/%.h: Core/%.h
 	-@$(MKDIR) -p $(dir $@)
 	-@# CPPP doesn't like multibyte characters, so we replace the single quote character before processing so it doesn't complain
-	sed "s/'/@SINGLE_QUOTE@/g" $^ | cppp -UGB_INTERNAL | sed "s/@SINGLE_QUOTE@/'/g" > $@
+	sed "s/'/@SINGLE_QUOTE@/g" $^ | cppp $(CPPP_FLAGS) | sed "s/@SINGLE_QUOTE@/'/g" > $@
 
 lib-unsupported:
 	@echo Due to limitations of lld-link, compiling SameBoy as a library on Windows is not supported.

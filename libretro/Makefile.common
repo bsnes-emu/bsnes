@@ -9,7 +9,6 @@ SOURCES_C   := $(CORE_DIR)/Core/gb.c \
                $(CORE_DIR)/Core/mbc.c \
                $(CORE_DIR)/Core/timing.c \
                $(CORE_DIR)/Core/display.c \
-               $(CORE_DIR)/Core/symbol_hash.c \
                $(CORE_DIR)/Core/camera.c \
                $(CORE_DIR)/Core/sm83_cpu.c \
                $(CORE_DIR)/Core/joypad.c \

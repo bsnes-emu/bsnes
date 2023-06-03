@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include "gb.h"
 
 typedef uint8_t read_function_t(GB_gameboy_t *gb, uint16_t addr);
@@ -758,9 +759,11 @@ uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
 {
     GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
     
+#ifndef GB_DISABLE_DEBUGGER
     if (unlikely(gb->n_watchpoints)) {
         GB_debugger_test_read_watchpoint(gb, addr);
     }
+#endif
     if (unlikely(is_addr_in_dma_use(gb, addr))) {
         if (GB_is_cgb(gb) && bus_for_addr(gb, addr) == GB_BUS_MAIN && gb->dma_current_src >= 0xE000) {
             /* This is cart specific! Everdrive 7X on a CGB-A or 0 behaves differently. */
@@ -1760,10 +1763,11 @@ void GB_set_write_memory_callback(GB_gameboy_t *gb, GB_write_memory_callback_t c
 void GB_write_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
-    
+#ifndef GB_DISABLE_DEBUGGER
     if (unlikely(gb->n_watchpoints)) {
         GB_debugger_test_write_watchpoint(gb, addr, value);
     }
+#endif
     if (bus_for_addr(gb, addr) == GB_BUS_MAIN && addr < 0xFF00) {
         gb->data_bus = value;
         gb->data_bus_decay_countdown = gb->data_bus_decay;
