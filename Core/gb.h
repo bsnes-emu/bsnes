@@ -1,6 +1,5 @@
 #ifndef GB_h
 #define GB_h
-#define typeof __typeof__
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdalign.h>
@@ -251,14 +250,6 @@ typedef enum {
 #define SGB_NTSC_FREQUENCY (21477272 / 5)
 #define SGB_PAL_FREQUENCY (21281370 / 5)
 #define DIV_CYCLES (0x100)
-
-#if !defined(MIN)
-#define MIN(A, B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __a : __b; })
-#endif
-
-#if !defined(MAX)
-#define MAX(A, B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __b : __a; })
-#endif
 #endif
 
 typedef void (*GB_vblank_callback_t)(GB_gameboy_t *gb, GB_vblank_type_t type);

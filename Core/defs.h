@@ -9,6 +9,15 @@
 // "Keyword" definitions
 #define likely(x)   GB_likely(x)
 #define unlikely(x) GB_unlikely(x)
+#define typeof __typeof__
+
+#if !defined(MIN)
+#define MIN(A, B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __a : __b; })
+#endif
+
+#if !defined(MAX)
+#define MAX(A, B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __b : __a; })
+#endif
 
 #if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 8)
 #define __builtin_bswap16(x) ({ typeof(x) _x = (x); _x >> 8 | _x << 8; })

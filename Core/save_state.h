@@ -28,7 +28,7 @@
 #if __clang_major__ >= 8 || __GNUC__ >= 13
 #define GB_ENUM(type, ...) enum : type __VA_ARGS__
 #else
-#define GB_ENUM(type, ...) typeof((type)((enum __VA_ARGS__)0))
+#define GB_ENUM(type, ...) __typeof__((type)((enum __VA_ARGS__)0))
 #endif
 
 /* Public calls related to save states */
