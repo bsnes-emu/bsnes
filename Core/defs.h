@@ -10,6 +10,10 @@
 #define likely(x)   GB_likely(x)
 #define unlikely(x) GB_unlikely(x)
 
+#if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 8)
+#define __builtin_bswap16(x) ({ typeof(x) _x = (x); _x >> 8 | _x << 8; })
+#endif
+
 #define internal __attribute__((visibility("internal")))
 #define noinline __attribute__((noinline))
 
@@ -42,10 +46,6 @@
 #define BE32(x) __builtin_bswap32(x)
 #define BE64(x) __builtin_bswap64(x)
 #endif
-#endif
-
-#if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 8)
-#define __builtin_bswap16(x) ({ typeof(x) _x = (x); _x >> 8 | _x << 8; })
 #endif
 
 struct GB_gameboy_s;

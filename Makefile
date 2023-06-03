@@ -33,7 +33,12 @@ else
 DEFAULT := sdl
 endif
 
-ifneq ($(shell which xdg-open)$(FREEDESKTOP),)
+NULL := /dev/null
+ifeq ($(PLATFORM),windows32)
+NULL := NUL
+endif
+
+ifneq ($(shell which xdg-open 2> $(NULL))$(FREEDESKTOP),)
 # Running on an FreeDesktop environment, configure for (optional) installation
 DESTDIR ?= 
 PREFIX ?= /usr/local
@@ -54,6 +59,9 @@ CONF ?= debug
 
 BIN := build/bin
 OBJ := build/obj
+INC := build/include/sameboy
+LIB := build/lib
+
 BOOTROMS_DIR ?= $(BIN)/BootROMs
 
 ifdef DATA_DIR
@@ -64,13 +72,13 @@ endif
 
 # Use clang if it's available.
 ifeq ($(origin CC),default)
-ifneq (, $(shell which clang))
+ifneq (, $(shell which clang 2> $(NULL)))
 CC := clang 
 endif
 endif
 
 # Find libraries with pkg-config if available.
-ifneq (, $(shell which pkg-config))
+ifneq (, $(shell which pkg-config 2> $(NULL)))
 # But not on macOS, it's annoying
 ifneq ($(PLATFORM),Darwin)
 PKG_CONFIG := pkg-config
@@ -100,11 +108,9 @@ endif
 # Set compilation and linkage flags based on target, platform and configuration
 
 OPEN_DIALOG = OpenDialog/gtk.c
-NULL := /dev/null
 
 ifeq ($(PLATFORM),windows32)
 OPEN_DIALOG = OpenDialog/windows.c
-NULL := NUL
 endif
 
 ifeq ($(PLATFORM),Darwin)
@@ -212,6 +218,11 @@ LDFLAGS += -Wl,/NODEFAULTLIB:libcmt.lib
 endif
 endif
 
+LIBFLAGS := -nostdlib -Wl,-r
+ifneq ($(PLATFORM),Darwin)
+LIBFLAGS += -no-pie
+endif
+
 ifeq ($(CONF),debug)
 CFLAGS += -g
 else ifeq ($(CONF), release)
@@ -241,6 +252,8 @@ else
 $(error Invalid value for CONF: $(CONF). Use "debug", "release" or "native_release")
 endif
 
+
+
 # Define our targets
 
 ifeq ($(PLATFORM),windows32)
@@ -259,11 +272,20 @@ tester: $(TESTER_TARGET) $(BIN)/tester/dmg_boot.bin $(BIN)/tester/cgb_boot.bin $
 _ios: $(BIN)/SameBoy-iOS.app $(OBJ)/reregister
 ios-ipa: $(BIN)/SameBoy-iOS.ipa
 ios-deb: $(BIN)/SameBoy-iOS.deb
-all: cocoa sdl tester libretro
+ifeq ($(PLATFORM),windows32)
+lib: lib-unsupported
+else
+lib: $(LIB)/libsameboy.o $(LIB)/libsameboy.a
+endif
+all: sdl tester libretro lib
+ifeq ($(PLATFORM),Darwin)
+all: cocoa ios-ipa ios-deb
+endif
 
 # Get a list of our source files and their respective object file targets
 
 CORE_SOURCES := $(shell ls Core/*.c)
+CORE_HEADERS := $(shell ls Core/*.h)
 SDL_SOURCES := $(shell ls SDL/*.c) $(OPEN_DIALOG) $(patsubst %,SDL/audio/%.c,$(SDL_AUDIO_DRIVERS))
 TESTER_SOURCES := $(shell ls Tester/*.c)
 IOS_SOURCES := $(filter-out iOS/reregister.m, $(shell ls iOS/*.m)) $(shell ls AppleCommon/*.m)
@@ -275,11 +297,14 @@ CORE_SOURCES += $(shell ls Windows/*.c)
 endif
 
 CORE_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(CORE_SOURCES))
+PUBLIC_HEADERS := $(patsubst Core/%,$(INC)/%,$(CORE_HEADERS))
 COCOA_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(COCOA_SOURCES))
 IOS_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(IOS_SOURCES))
 QUICKLOOK_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(QUICKLOOK_SOURCES))
 SDL_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(SDL_SOURCES))
 TESTER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(TESTER_SOURCES))
+
+lib: $(PUBLIC_HEADERS)
 
 # Automatic dependency generation
 
@@ -631,9 +656,31 @@ $(OBJ)/control.tar.gz: iOS/deb-postinst iOS/deb-control
 $(OBJ)/debian-binary:
 	-@$(MKDIR) -p $(dir $@)
 	echo 2.0 > $@
+    
+$(LIB)/libsameboy.o: $(CORE_OBJECTS)
+	-@$(MKDIR) -p $(dir $@)
+	@# This is a somewhat simple hack to force Clang and GCC to build a native object file out of one or many LTO objects
+	echo "static const char __attribute__((used)) x=0;"| $(CC) $(filter-out -flto,$(CFLAGS)) -c -x c - -o $(OBJ)/lto_hack.o
+	@# And this is a somewhat complicated hack to invoke the correct LTO-enabled LD command in a mostly cross-platform nature
+	$(CC) $(FAT_FLAGS) $(CFLAGS) $(LIBFLAGS) $^ $(OBJ)/lto_hack.o -o $@
+	-@rm $(OBJ)/lto_hack.o
+    
+$(LIB)/libsameboy.a: $(LIB)/libsameboy.o
+	-@$(MKDIR) -p $(dir $@)
+	-@rm -f $@
+	ar -crs $@ $^
+	
+$(INC)/%.h: Core/%.h
+	-@$(MKDIR) -p $(dir $@)
+	-@# CPPP doesn't like multibyte characters, so we replace the single quote character before processing so it doesn't complain
+	sed "s/'/@SINGLE_QUOTE@/g" $^ | cppp -UGB_INTERNAL | sed "s/@SINGLE_QUOTE@/'/g" > $@
+
+lib-unsupported:
+	@echo Due to limitations of lld-link, compiling SameBoy as a library on Windows is not supported.
+	@false
 	
 # Clean
 clean:
 	rm -rf build
 
-.PHONY: libretro tester cocoa ios _ios
+.PHONY: libretro tester cocoa ios _ios ios-ipa ios-deb liblib-unsupported

@@ -40,9 +40,10 @@ SameBoy is an open-source project licensed under the MIT license, and you're wel
 SameBoy requires the following tools and libraries to build:
  * clang (Recommended; required for macOS) or GCC
  * make
- * macOS Cocoa port: macOS SDK and Xcode (For command line tools and ibtool)
- * SDL port: libsdl2
+ * macOS Cocoa frontend: macOS SDK and Xcode (For command line tools and ibtool)
+ * SDL frontend: libsdl2
  * [rgbds](https://github.com/gbdev/rgbds/releases/), for boot ROM compilation
+ * [cppp](https://github.com/BR903/cppp), for cleaning up headers when compiling SameBoy as a library
 
 On Windows, SameBoy also requires:
  * Visual Studio (For headers, etc.)
@@ -52,7 +53,8 @@ On Windows, SameBoy also requires:
 To compile, simply run `make`. The targets are:
  * `cocoa` (Default for macOS)
  * `sdl` (Default for everything else)
- * `ios` (Plain iOS .app bundle), `ios-ipa` (iOS IPA archive for sideloading), `ios-deb` (iOS deb package for jailbroken devices)
+ * `lib` (Creates libsameboy.o and libsameboy.a for statically linking SameBoy, as well as a headers directory with corresponding headers; currently not supported on Windows due to linker limitations)
+ * `ios` (Plain iOS .app bundle), `ios-ipa` (iOS IPA archive for side-loading), `ios-deb` (iOS deb package for jailbroken devices)
  * `libretro`
  * `bootroms`
  * `tester` 

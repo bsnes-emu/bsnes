@@ -1452,7 +1452,7 @@ static int get_state_model_internal(virtual_file_t *file, GB_model_t *model)
         if (file->read(file, GB_GET_SECTION(&save, header), GB_SECTION_SIZE(header)) != GB_SECTION_SIZE(header)) return errno;
         fix_broken_windows_saves = true;
     }
-    if (save.magic != state_magic()) {
+    if (save.magic != GB_state_magic()) {
         return get_state_model_bess(file, model);
     }
     if (!READ_SECTION(&save, file, core_state)) return errno ?: EIO;
@@ -1499,7 +1499,7 @@ bool GB_is_save_state(const char *path)
     if (!f) return false;
     uint32_t magic = 0;
     fread(&magic, sizeof(magic), 1, f);
-    if (magic == state_magic()) {
+    if (magic == GB_state_magic()) {
         ret = true;
         goto exit;
     }
@@ -1507,7 +1507,7 @@ bool GB_is_save_state(const char *path)
     // Legacy corrupted Windows save state
     if (magic == 0) {
         fread(&magic, sizeof(magic), 1, f);
-        if (magic == state_magic()) {
+        if (magic == GB_state_magic()) {
             ret = true;
             goto exit;
         }

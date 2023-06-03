@@ -1402,7 +1402,7 @@ GB_accessory_t GB_get_built_in_accessory(GB_gameboy_t *gb)
 
 bool GB_is_inited(GB_gameboy_t *gb)
 {
-    return gb->magic == state_magic();
+    return gb->magic == GB_state_magic();
 }
 
 bool GB_is_cgb(const GB_gameboy_t *gb)
@@ -1784,7 +1784,7 @@ static void GB_reset_internal(GB_gameboy_t *gb, bool quick)
         gb->io_registers[GB_IO_OBP1] = preserved_state->obp1;
     }
     
-    gb->magic = state_magic();
+    gb->magic = GB_state_magic();
     request_boot_rom(gb);
 }
 

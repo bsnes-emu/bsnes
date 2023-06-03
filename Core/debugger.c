@@ -2723,17 +2723,17 @@ static bool is_in_trivial_memory(uint16_t addr)
 
 typedef uint16_t opcode_address_getter_t(GB_gameboy_t *gb, uint8_t opcode);
 
-uint16_t trivial_1(GB_gameboy_t *gb, uint8_t opcode)
+static uint16_t trivial_1(GB_gameboy_t *gb, uint8_t opcode)
 {
     return gb->pc + 1;
 }
 
-uint16_t trivial_2(GB_gameboy_t *gb, uint8_t opcode)
+static uint16_t trivial_2(GB_gameboy_t *gb, uint8_t opcode)
 {
     return gb->pc + 2;
 }
 
-uint16_t trivial_3(GB_gameboy_t *gb, uint8_t opcode)
+static uint16_t trivial_3(GB_gameboy_t *gb, uint8_t opcode)
 {
     return gb->pc + 3;
 }

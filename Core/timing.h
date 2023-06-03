@@ -48,13 +48,13 @@ if ((gb)->unit##_cycles <= 0) {\
     return;\
 }\
 switch ((gb)->unit##_state)
-#endif
 
 #define GB_BATCHABLE_STATE_MACHINE(gb, unit, cycles, divisor, allow_batching) \
 const bool __state_machine_allow_batching = (allow_batching); \
 GB_STATE_MACHINE(gb, unit, cycles, divisor)
 
 #define GB_STATE(gb, unit, state) case state: goto unit##state
+#endif
 
 #define GB_UNIT(unit) int32_t unit##_cycles, unit##_state
 

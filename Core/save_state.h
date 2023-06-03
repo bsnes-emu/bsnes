@@ -44,7 +44,7 @@ int GB_get_state_model(const char *path, GB_model_t *model);
 int GB_get_state_model_from_buffer(const uint8_t *buffer, size_t length, GB_model_t *model);
 
 #ifdef GB_INTERNAL
-static inline uint32_t state_magic(void)
+static inline uint32_t GB_state_magic(void)
 {
     if (sizeof(bool) == 1) return 'SAME';
     return 'S4ME';

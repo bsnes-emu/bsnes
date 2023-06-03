@@ -1,5 +1,13 @@
 #pragma once
+
+#ifdef noinline
+#undef noinline
 #include_next <stdio.h>
+#define noinline __attribute__((noinline))
+#else
+#include_next <stdio.h>
+#endif
+
 #include <stdlib.h>
 #include <stdarg.h>
 

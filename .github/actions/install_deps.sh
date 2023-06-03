@@ -12,9 +12,22 @@ case `echo $1 | cut -d '-' -f 1` in
                 cd ..
                 rm -rf *
                 )
+                
+                (
+                cd `mktemp -d`
+                curl -L https://github.com/BR903/cppp/archive/refs/heads/master.zip > cppp.zip
+                unzip cppp.zip
+                cd cppp-*
+                make -sj
+                sudo make install
+                cd ..
+                rm -rf *
+                )
+                
+                
                 ;;
         macos)
-                brew install rgbds sdl2
+                brew install rgbds sdl2 cppp
                 ;;
         *)
                 echo "Unsupported OS"
