@@ -38,4 +38,4 @@ jobs:
         uses: actions/upload-artifact@v1
         with:
           name: sameboy-canary-${{ matrix.os }}-${{ matrix.cc }}
-          path: build/bin
+          path: build/bin build/lib build/include
