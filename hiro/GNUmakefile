@@ -32,7 +32,7 @@ endif
 
 ifneq ($(filter $(platform),linux bsd),)
   ifeq ($(hiro),)
-    hiro := gtk2
+    hiro := gtk3
   endif
 
   ifeq ($(hiro),gtk2)
