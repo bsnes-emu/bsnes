@@ -23,9 +23,7 @@ jobs:
       if: matrix.os.name == 'ubuntu'
       run: |
         sudo apt-get update -y -qq
-        sudo apt-get install \
-          libgtk2.0-dev libpulse-dev mesa-common-dev libcairo2-dev \
-          libsdl2-dev libxv-dev libao-dev libopenal-dev libudev-dev
+        sudo apt-get install libsdl2-dev libgtk-3-dev gtksourceview-3.0 libao-dev libopenal-dev
     - name: Make
       run: make -j4 -C bsnes local=false
     - name: Upload

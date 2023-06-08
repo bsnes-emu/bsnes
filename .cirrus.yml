@@ -27,7 +27,7 @@ freebsd-x86_64-binaries_task:
         image_family: freebsd-12-2
 
     setup_script:
-        - pkg install --yes gmake gdb gcc8 pkgconf sdl2 openal-soft gtk2 libXv zip
+        - pkg install --yes gmake gdb gcc8 pkgconf sdl2 openal-soft gtk3 gtksourceview3 libXv zip
 
     compile_script:
         - gmake -C bsnes local=false
