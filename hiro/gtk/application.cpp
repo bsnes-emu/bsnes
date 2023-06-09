@@ -82,6 +82,8 @@ auto pApplication::state() -> State& {
 
 auto pApplication::initialize() -> void {
   #if defined(DISPLAY_XORG)
+  // If running on Wayland, force usage of XWayland
+  setenv("GDK_BACKEND", "x11", 1);
   state().display = XOpenDisplay(nullptr);
   state().screenSaverXDG = (bool)execute("xdg-screensaver", "--version").output.find("xdg-screensaver");
 
