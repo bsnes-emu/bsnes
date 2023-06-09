@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14868" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="15705" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14868"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="15705"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -67,40 +67,22 @@
                 </defaultToolbarItems>
             </toolbar>
             <connections>
-                <outlet property="OSDCheckbox" destination="quK-gY-Z6h" id="gxE-fd-1g7"/>
-                <outlet property="agbPopupButton" destination="3Dl-S6-O7c" id="Ffl-v0-b5S"/>
-                <outlet property="analogControlsCheckbox" destination="RuW-Db-dzW" id="FRE-hI-mnU"/>
-                <outlet property="aspectRatioCheckbox" destination="Vfj-tg-7OP" id="Yw0-xS-DBr"/>
-                <outlet property="autoUpdatesCheckbox" destination="ZVh-ob-6wl" id="qPS-53-3aW"/>
                 <outlet property="bootROMsButton" destination="T3Y-Ln-Onl" id="tdL-Yv-E2K"/>
                 <outlet property="bootROMsFolderItem" destination="Dzv-Gc-zoL" id="yhV-ZI-avD"/>
-                <outlet property="cgbPopupButton" destination="dlD-sk-SHO" id="4tg-SR-e17"/>
-                <outlet property="colorCorrectionPopupButton" destination="VEz-N4-uP6" id="EO2-Vt-JFJ"/>
+                <outlet property="colorCorrectionPopupButton" destination="VEz-N4-uP6" id="mmK-Ab-wCl"/>
                 <outlet property="colorPalettePopupButton" destination="Iwr-eI-SD1" id="Xzc-RZ-JtV"/>
                 <outlet property="configureJoypadButton" destination="Qa7-Z7-yfO" id="RaX-P3-oCX"/>
-                <outlet property="controllersFocusCheckbox" destination="I0d-Gm-KBg" id="yQ5-70-6oL"/>
                 <outlet property="controlsTableView" destination="UDd-IJ-fxX" id="a1D-Md-yXv"/>
                 <outlet property="delegate" destination="-2" id="ASc-vN-Zbq"/>
-                <outlet property="displayBorderPopupButton" destination="R9D-FV-bpd" id="VfO-b4-gqH"/>
-                <outlet property="dmgPopupButton" destination="LFw-Uk-cPR" id="KDw-i2-k4u"/>
-                <outlet property="frameBlendingModePopupButton" destination="lxk-db-Sxv" id="wzt-uo-TE6"/>
-                <outlet property="graphicsFilterPopupButton" destination="6pP-kK-EEC" id="LS7-HY-kHC"/>
-                <outlet property="highpassFilterPopupButton" destination="T69-6N-dhT" id="0p6-4m-hb1"/>
+                <outlet property="highpassFilterPopupButton" destination="T69-6N-dhT" id="B5V-sQ-JmR"/>
                 <outlet property="hotkey1PopupButton" destination="qsH-w5-Rja" id="TFr-p8-IYo"/>
                 <outlet property="hotkey2PopupButton" destination="Ryk-mD-c0y" id="m2J-O5-dng"/>
                 <outlet property="interferenceSlider" destination="FpE-5i-j5L" id="hfH-e8-7cx"/>
                 <outlet property="joyconsSheet" destination="bn1-MD-iQb" id="rOY-jn-trO"/>
-                <outlet property="joystickMBC7Checkbox" destination="i7F-1r-NkQ" id="msM-WX-w9H"/>
-                <outlet property="mouseMBC7Checkbox" destination="wUE-aB-ub1" id="mXX-mZ-sKJ"/>
                 <outlet property="paletteEditor" destination="g32-xe-7al" id="WLk-Hh-h5v"/>
                 <outlet property="paletteEditorController" destination="Zxl-vm-6c9" id="uPS-zn-osL"/>
                 <outlet property="playerListButton" destination="gWx-7h-0xq" id="zo6-82-JId"/>
                 <outlet property="preferredJoypadButton" destination="0Az-0R-oNw" id="7JM-tw-BhK"/>
-                <outlet property="rewindPopupButton" destination="7fg-Ww-JjR" id="Ka2-TP-B1x"/>
-                <outlet property="rtcPopupButton" destination="tFf-H1-XUL" id="zxb-4h-aqg"/>
-                <outlet property="rumbleModePopupButton" destination="Ogs-xG-b4b" id="vuw-VN-MTp"/>
-                <outlet property="screenshotFilterCheckbox" destination="spQ-Md-OFi" id="f9y-Ek-XQV"/>
-                <outlet property="sgbPopupButton" destination="dza-T7-RkX" id="B0o-Nb-pIH"/>
                 <outlet property="skipButton" destination="d2I-jU-sLb" id="udX-8K-0sK"/>
                 <outlet property="temperatureSlider" destination="NuA-mL-AJZ" id="w11-n7-Bmj"/>
                 <outlet property="volumeSlider" destination="LNs-v1-Eki" id="DU4-An-OrC"/>
@@ -120,7 +102,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6pP-kK-EEC">
+                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6pP-kK-EEC" customClass="GBPreferencePopUpButton">
                     <rect key="frame" x="30" y="359" width="262" height="26"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Nearest neighbor (Pixelated)" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="neN-eo-LA7" id="I1w-05-lGl">
@@ -128,45 +110,97 @@
                         <font key="font" metaFont="menu"/>
                         <menu key="menu" id="xDC-0T-Qg9">
                             <items>
-                                <menuItem title="Nearest neighbor (Pixelated)" state="on" id="neN-eo-LA7">
+                                <menuItem title="Nearest neighbor (Pixelated)" state="on" id="neN-eo-LA7" customClass="GBPreferenceMenuItem">
                                     <modifierMask key="keyEquivalentModifierMask"/>
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceValue" value="NearestNeighbor"/>
+                                    </userDefinedRuntimeAttributes>
                                 </menuItem>
-                                <menuItem title="Bilinear (Blurry)" id="iDe-si-atu"/>
-                                <menuItem title="Smooth bilinear (Less blurry)" id="1jN-pO-1iD"/>
-                                <menuItem title="Monochrome LCD display" id="b8u-LZ-UQf"/>
-                                <menuItem title="LCD display" id="pj3-Jt-bNU"/>
-                                <menuItem title="CRT display" id="FT9-FT-RZu"/>
-                                <menuItem title="Scale2x" id="C1I-L2-Up1"/>
-                                <menuItem title="Scale4x" id="uWA-Zp-JY9"/>
-                                <menuItem title="Anti-aliased Scale2x" id="iP6-DJ-CVH"/>
-                                <menuItem title="Anti-aliased Scale4x" id="zJR-ER-Ygo">
-                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                <menuItem title="Bilinear (Blurry)" id="iDe-si-atu" customClass="GBPreferenceMenuItem">
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceValue" value="Bilinear"/>
+                                    </userDefinedRuntimeAttributes>
                                 </menuItem>
-                                <menuItem title="HQ2x" id="gxB-Uj-wp2"/>
-                                <menuItem title="OmniScale (Any factor)" id="z6q-Jp-Z8R"/>
-                                <menuItem title="OmniScale Legacy" id="doe-kf-quG">
-                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                <menuItem title="Smooth bilinear (Less blurry)" id="1jN-pO-1iD" customClass="GBPreferenceMenuItem">
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceValue" value="SmoothBilinear"/>
+                                    </userDefinedRuntimeAttributes>
                                 </menuItem>
-                                <menuItem title="Anti-aliased OmniScale Legacy" id="uZy-BK-VyB">
+                                <menuItem title="Monochrome LCD display" id="b8u-LZ-UQf" customClass="GBPreferenceMenuItem">
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceValue" value="MonoLCD"/>
+                                    </userDefinedRuntimeAttributes>
+                                </menuItem>
+                                <menuItem title="LCD display" id="pj3-Jt-bNU" customClass="GBPreferenceMenuItem">
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceValue" value="LCD"/>
+                                    </userDefinedRuntimeAttributes>
+                                </menuItem>
+                                <menuItem title="CRT display" id="FT9-FT-RZu" customClass="GBPreferenceMenuItem">
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceValue" value="CRT"/>
+                                    </userDefinedRuntimeAttributes>
+                                </menuItem>
+                                <menuItem title="Scale2x" id="C1I-L2-Up1" customClass="GBPreferenceMenuItem">
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceValue" value="Scale2x"/>
+                                    </userDefinedRuntimeAttributes>
+                                </menuItem>
+                                <menuItem title="Scale4x" id="uWA-Zp-JY9" customClass="GBPreferenceMenuItem">
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceValue" value="Scale4x"/>
+                                    </userDefinedRuntimeAttributes>
+                                </menuItem>
+                                <menuItem title="Anti-aliased Scale2x" id="iP6-DJ-CVH" customClass="GBPreferenceMenuItem">
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceValue" value="AAScale2x"/>
+                                    </userDefinedRuntimeAttributes>
+                                </menuItem>
+                                <menuItem title="Anti-aliased Scale4x" id="zJR-ER-Ygo" customClass="GBPreferenceMenuItem">
                                     <modifierMask key="keyEquivalentModifierMask"/>
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceValue" value="AAScale4x"/>
+                                    </userDefinedRuntimeAttributes>
+                                </menuItem>
+                                <menuItem title="HQ2x" id="gxB-Uj-wp2" customClass="GBPreferenceMenuItem">
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceValue" value="HQ2x"/>
+                                    </userDefinedRuntimeAttributes>
+                                </menuItem>
+                                <menuItem title="OmniScale (Any factor)" id="z6q-Jp-Z8R" customClass="GBPreferenceMenuItem">
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceValue" value="OmniScale"/>
+                                    </userDefinedRuntimeAttributes>
+                                </menuItem>
+                                <menuItem title="OmniScale Legacy" id="doe-kf-quG" customClass="GBPreferenceMenuItem">
+                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceValue" value="OmniScaleLegacy"/>
+                                    </userDefinedRuntimeAttributes>
+                                </menuItem>
+                                <menuItem title="Anti-aliased OmniScale Legacy" id="uZy-BK-VyB" customClass="GBPreferenceMenuItem">
+                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceValue" value="AAOmniScaleLegacy"/>
+                                    </userDefinedRuntimeAttributes>
                                 </menuItem>
                             </items>
                         </menu>
                     </popUpButtonCell>
-                    <connections>
-                        <action selector="graphicFilterChanged:" target="QvC-M9-y7g" id="n87-t4-fbV"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBFilter"/>
+                    </userDefinedRuntimeAttributes>
                 </popUpButton>
-                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="spQ-Md-OFi">
+                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="spQ-Md-OFi" customClass="GBPreferenceButton">
                     <rect key="frame" x="32" y="338" width="259" height="18"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Apply filter to screenshots" bezelStyle="regularSquare" imagePosition="left" inset="2" id="JbP-bE-w8A">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
-                    <connections>
-                        <action selector="changeFilterScreenshots:" target="QvC-M9-y7g" id="t82-FI-eSe"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBFilterScreenshots"/>
+                    </userDefinedRuntimeAttributes>
                 </button>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Wc3-2K-6CD">
                     <rect key="frame" x="18" y="315" width="280" height="17"/>
@@ -177,7 +211,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VEz-N4-uP6">
+                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="VEz-N4-uP6" customClass="GBPreferencePopUpButton">
                     <rect key="frame" x="30" y="282" width="229" height="26"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Disabled" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="D2J-wV-1vu" id="fNJ-Fi-yOm">
@@ -199,9 +233,9 @@
                             </items>
                         </menu>
                     </popUpButtonCell>
-                    <connections>
-                        <action selector="colorCorrectionChanged:" target="QvC-M9-y7g" id="Oq4-B5-nO6"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBColorCorrection"/>
+                    </userDefinedRuntimeAttributes>
                 </popUpButton>
                 <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NuA-mL-AJZ">
                     <rect key="frame" x="32" y="226" width="259" height="28"/>
@@ -229,7 +263,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lxk-db-Sxv">
+                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="lxk-db-Sxv" customClass="GBPreferencePopUpButton">
                     <rect key="frame" x="30" y="169" width="262" height="26"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Disabled" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="iHP-Yz-fiH" id="aQ6-HN-7Aj">
@@ -240,14 +274,14 @@
                                 <menuItem title="Disabled" state="on" id="iHP-Yz-fiH">
                                     <modifierMask key="keyEquivalentModifierMask"/>
                                 </menuItem>
-                                <menuItem title="Simple" id="Hxy-jw-x6E"/>
-                                <menuItem title="Accurate" id="Aaq-uy-Csa"/>
+                                <menuItem title="Simple" tag="1" id="Hxy-jw-x6E"/>
+                                <menuItem title="Accurate" tag="2" id="Aaq-uy-Csa"/>
                             </items>
                         </menu>
                     </popUpButtonCell>
-                    <connections>
-                        <action selector="franeBlendingModeChanged:" target="QvC-M9-y7g" id="kE1-pm-MIp"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBFrameBlendingMode"/>
+                    </userDefinedRuntimeAttributes>
                 </popUpButton>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8fG-zm-hpr">
                     <rect key="frame" x="18" y="147" width="280" height="17"/>
@@ -288,7 +322,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="R9D-FV-bpd">
+                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="R9D-FV-bpd" customClass="GBPreferencePopUpButton">
                     <rect key="frame" x="30" y="59" width="262" height="26"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Never" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="1" imageScaling="proportionallyDown" inset="2" selectedItem="heL-AV-0az" id="DY9-2D-h1L">
@@ -304,20 +338,21 @@
                             </items>
                         </menu>
                     </popUpButtonCell>
-                    <connections>
-                        <action selector="displayBorderChanged:" target="QvC-M9-y7g" id="GoA-BU-v3h"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBBorderMode"/>
+                    </userDefinedRuntimeAttributes>
                 </popUpButton>
-                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Vfj-tg-7OP">
+                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Vfj-tg-7OP" customClass="GBPreferenceButton">
                     <rect key="frame" x="18" y="38" width="286" height="18"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Keep aspect ratio" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="lsj-rC-Eo6">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
-                    <connections>
-                        <action selector="changeAspectRatio:" target="QvC-M9-y7g" id="mQG-Ib-1jN"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBAspectRatioUnkept"/>
+                        <userDefinedRuntimeAttribute type="boolean" keyPath="invertValue" value="YES"/>
+                    </userDefinedRuntimeAttributes>
                 </button>
                 <button horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="qCy-Se-vsG">
                     <rect key="frame" x="266" y="281" width="25" height="25"/>
@@ -330,16 +365,16 @@
                         <action selector="displayColorCorrectionHelp:" target="QvC-M9-y7g" id="RIB-Qa-Fln"/>
                     </connections>
                 </button>
-                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="quK-gY-Z6h">
+                <button fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="quK-gY-Z6h" customClass="GBPreferenceButton">
                     <rect key="frame" x="18" y="18" width="286" height="18"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="On-screen display" bezelStyle="regularSquare" imagePosition="left" inset="2" id="oeT-cD-YRw">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
-                    <connections>
-                        <action selector="changeOSDEnabled:" target="QvC-M9-y7g" id="xUx-iN-jl6"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBOSDEnabled"/>
+                    </userDefinedRuntimeAttributes>
                 </button>
             </subviews>
             <point key="canvasLocation" x="-501" y="231.5"/>
@@ -384,7 +419,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LFw-Uk-cPR">
+                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LFw-Uk-cPR" customClass="GBPreferencePopUpButton">
                     <rect key="frame" x="30" y="182" width="262" height="26"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="DMG-CPU B" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="2" imageScaling="proportionallyDown" inset="2" autoenablesItems="NO" selectedItem="aXT-sE-m5Z" id="FuX-Hc-uO7">
@@ -399,9 +434,9 @@
                             </items>
                         </menu>
                     </popUpButtonCell>
-                    <connections>
-                        <action selector="dmgModelChanged:" target="QvC-M9-y7g" id="FIe-Wz-aSc"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBDMGModel"/>
+                    </userDefinedRuntimeAttributes>
                 </popUpButton>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="MAq-1X-Gpo">
                     <rect key="frame" x="18" y="105" width="280" height="17"/>
@@ -412,7 +447,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dlD-sk-SHO">
+                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dlD-sk-SHO" customClass="GBPreferencePopUpButton">
                     <rect key="frame" x="30" y="72" width="262" height="26"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="CPU CGB E" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="517" imageScaling="proportionallyDown" inset="2" autoenablesItems="NO" selectedItem="3lF-1Q-2SS" id="Edt-1S-dXz">
@@ -429,9 +464,9 @@
                             </items>
                         </menu>
                     </popUpButtonCell>
-                    <connections>
-                        <action selector="cgbModelChanged:" target="QvC-M9-y7g" id="SY1-oj-VWQ"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBCGBModel"/>
+                    </userDefinedRuntimeAttributes>
                 </popUpButton>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tAa-0A-0fP">
                     <rect key="frame" x="18" y="160" width="280" height="17"/>
@@ -446,7 +481,7 @@
                     <rect key="frame" x="12" y="238" width="296" height="5"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                 </box>
-                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tFf-H1-XUL">
+                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tFf-H1-XUL" customClass="GBPreferencePopUpButton">
                     <rect key="frame" x="30" y="254" width="262" height="26"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Sync to system clock" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="arp-Qi-Xix" id="uRs-Ag-Sbw">
@@ -457,13 +492,13 @@
                                 <menuItem title="Sync to system clock" state="on" id="arp-Qi-Xix">
                                     <modifierMask key="keyEquivalentModifierMask"/>
                                 </menuItem>
-                                <menuItem title="Accurate" id="H7h-S9-hvM"/>
+                                <menuItem title="Accurate" tag="1" id="H7h-S9-hvM"/>
                             </items>
                         </menu>
                     </popUpButtonCell>
-                    <connections>
-                        <action selector="rtcModeChanged:" target="QvC-M9-y7g" id="3fA-mo-MB1"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBRTCMode"/>
+                    </userDefinedRuntimeAttributes>
                 </popUpButton>
                 <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wC4-aJ-mhQ">
                     <rect key="frame" x="30" y="364" width="262" height="26"/>
@@ -489,7 +524,7 @@
                         </menu>
                     </popUpButtonCell>
                 </popUpButton>
-                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7fg-Ww-JjR">
+                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7fg-Ww-JjR" customClass="GBPreferencePopUpButton">
                     <rect key="frame" x="30" y="309" width="262" height="26"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Disabled" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="lxQ-4n-kEv" id="lvb-QF-0Ht">
@@ -509,9 +544,9 @@
                             </items>
                         </menu>
                     </popUpButtonCell>
-                    <connections>
-                        <action selector="rewindLengthChanged:" target="QvC-M9-y7g" id="5NQ-1T-RNc"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBRewindLength"/>
+                    </userDefinedRuntimeAttributes>
                 </popUpButton>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="5r5-qY-b8h">
                     <rect key="frame" x="18" y="50" width="280" height="17"/>
@@ -522,7 +557,7 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3Dl-S6-O7c">
+                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="3Dl-S6-O7c" customClass="GBPreferencePopUpButton">
                     <rect key="frame" x="30" y="17" width="262" height="26"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="CPU AGB A (GBA)" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="519" imageScaling="proportionallyDown" inset="2" autoenablesItems="NO" selectedItem="8bk-wP-Cbr" id="EhC-I2-5Th">
@@ -539,11 +574,11 @@
                             </items>
                         </menu>
                     </popUpButtonCell>
-                    <connections>
-                        <action selector="agbModelChanged:" target="QvC-M9-y7g" id="e97-J4-dmH"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBAGBModel"/>
+                    </userDefinedRuntimeAttributes>
                 </popUpButton>
-                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dza-T7-RkX">
+                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="dza-T7-RkX" customClass="GBPreferencePopUpButton">
                     <rect key="frame" x="30" y="127" width="262" height="26"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Super Game Boy (NTSC)" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" tag="4" imageScaling="proportionallyDown" inset="2" autoenablesItems="NO" selectedItem="x5A-7f-ef9" id="2Mt-ci-bB0">
@@ -557,9 +592,9 @@
                             </items>
                         </menu>
                     </popUpButtonCell>
-                    <connections>
-                        <action selector="sgbModelChanged:" target="QvC-M9-y7g" id="ybk-EV-WPS"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBSGBModel"/>
+                    </userDefinedRuntimeAttributes>
                 </popUpButton>
             </subviews>
             <point key="canvasLocation" x="-501" y="697"/>
@@ -585,7 +620,7 @@
                         <action selector="volumeChanged:" target="QvC-M9-y7g" id="4g3-NK-ay4"/>
                     </connections>
                 </slider>
-                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="T69-6N-dhT">
+                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="T69-6N-dhT" customClass="GBPreferencePopUpButton">
                     <rect key="frame" x="30" y="74" width="229" height="26"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Disabled (Keep DC offset)" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="Fgo-0S-zUG" id="om2-Bn-43B">
@@ -596,14 +631,14 @@
                                 <menuItem title="Disabled (Keep DC offset)" state="on" id="Fgo-0S-zUG">
                                     <modifierMask key="keyEquivalentModifierMask"/>
                                 </menuItem>
-                                <menuItem title="Accurate (Emulate hardware)" id="82j-Vv-nE6"/>
-                                <menuItem title="Preserve waveform" id="iUF-c2-fgt"/>
+                                <menuItem title="Accurate (Emulate hardware)" tag="1" id="82j-Vv-nE6"/>
+                                <menuItem title="Preserve waveform" tag="2" id="iUF-c2-fgt"/>
                             </items>
                         </menu>
                     </popUpButtonCell>
-                    <connections>
-                        <action selector="highpassFilterChanged:" target="QvC-M9-y7g" id="CYt-0v-sw0"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBHighpassFilter"/>
+                    </userDefinedRuntimeAttributes>
                 </popUpButton>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="WU3-oV-KHO">
                     <rect key="frame" x="18" y="107" width="280" height="17"/>
@@ -695,27 +730,27 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="i7F-1r-NkQ">
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="i7F-1r-NkQ" customClass="GBPreferenceButton">
                     <rect key="frame" x="342" y="319" width="272" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Prefer joysticks over motion controls" bezelStyle="regularSquare" imagePosition="left" lineBreakMode="charWrapping" inset="2" id="Szg-5G-j50">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
-                    <connections>
-                        <action selector="changeMBC7JoystickOverride:" target="QvC-M9-y7g" id="8Oy-4n-4Yl"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBMBC7JoystickOverride"/>
+                    </userDefinedRuntimeAttributes>
                 </button>
-                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wUE-aB-ub1">
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wUE-aB-ub1" customClass="GBPreferenceButton">
                     <rect key="frame" x="342" y="299" width="268" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Allow mouse controls" bezelStyle="regularSquare" imagePosition="left" lineBreakMode="charWrapping" state="on" inset="2" id="z0R-FZ-LfD">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
-                    <connections>
-                        <action selector="changeMBC7AllowMouse:" target="QvC-M9-y7g" id="jqY-Nc-x3Y"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBMBC7AllowMouse"/>
+                    </userDefinedRuntimeAttributes>
                 </button>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DZu-ts-deW">
                     <rect key="frame" x="330" y="166" width="280" height="17"/>
@@ -868,29 +903,29 @@
                         <action selector="hotkey2Changed:" target="QvC-M9-y7g" id="Cul-EW-jNz"/>
                     </connections>
                 </popUpButton>
-                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RuW-Db-dzW">
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="RuW-Db-dzW" customClass="GBPreferenceButton">
                     <rect key="frame" x="330" y="112" width="280" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Analog turbo and slow-motion controls" bezelStyle="regularSquare" imagePosition="left" lineBreakMode="charWrapping" inset="2" id="Mvp-oc-N3t">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
-                    <connections>
-                        <action selector="changeAnalogControls:" target="QvC-M9-y7g" id="1xR-gY-WKo"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBAnalogControls"/>
+                    </userDefinedRuntimeAttributes>
                 </button>
-                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="I0d-Gm-KBg">
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="I0d-Gm-KBg" customClass="GBPreferenceButton">
                     <rect key="frame" x="330" y="92" width="280" height="18"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Enable controllers while in background" bezelStyle="regularSquare" imagePosition="left" lineBreakMode="charWrapping" inset="2" id="mAi-1P-aSl">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
-                    <connections>
-                        <action selector="changeControllerFocus:" target="QvC-M9-y7g" id="Fmi-4C-2hg"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBAllowBackgroundControllers"/>
+                    </userDefinedRuntimeAttributes>
                 </button>
-                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ogs-xG-b4b">
+                <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ogs-xG-b4b" customClass="GBPreferencePopUpButton">
                     <rect key="frame" x="342" y="133" width="262" height="26"/>
                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
                     <popUpButtonCell key="cell" type="push" title="Never" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="jki-7x-bnM" id="o9b-MH-8kd">
@@ -904,9 +939,9 @@
                             </items>
                         </menu>
                     </popUpButtonCell>
-                    <connections>
-                        <action selector="rumbleModeChanged:" target="QvC-M9-y7g" id="AQe-vQ-mSl"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBRumbleMode"/>
+                    </userDefinedRuntimeAttributes>
                 </popUpButton>
                 <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Qa7-Z7-yfO">
                     <rect key="frame" x="326" y="46" width="221" height="32"/>
@@ -950,7 +985,7 @@
                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                     <clipView key="contentView" focusRingType="none" ambiguous="YES" drawsBackground="NO" id="AMs-PO-nid">
                         <rect key="frame" x="1" y="1" width="260" height="209"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <tableView focusRingType="none" verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" columnReordering="NO" columnResizing="NO" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" typeSelect="NO" id="UDd-IJ-fxX">
                                 <rect key="frame" x="0.0" y="0.0" width="260" height="209"/>
@@ -1035,16 +1070,16 @@
             <rect key="frame" x="0.0" y="0.0" width="320" height="95"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
             <subviews>
-                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZVh-ob-6wl">
+                <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ZVh-ob-6wl" customClass="GBPreferenceButton">
                     <rect key="frame" x="18" y="59" width="284" height="18"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <buttonCell key="cell" type="check" title="Check for updates on launch" bezelStyle="regularSquare" imagePosition="left" state="on" inset="2" id="euw-4z-Urd">
                         <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                         <font key="font" metaFont="system"/>
                     </buttonCell>
-                    <connections>
-                        <action selector="changeAutoUpdates:" target="QvC-M9-y7g" id="MrL-Zh-0Cc"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBAutoUpdatesEnabled"/>
+                    </userDefinedRuntimeAttributes>
                 </button>
                 <progressIndicator wantsLayer="YES" fixedFrame="YES" maxValue="100" displayedWhenStopped="NO" indeterminate="YES" controlSize="small" style="spinning" translatesAutoresizingMaskIntoConstraints="NO" id="fB8-sd-zrh">
                     <rect key="frame" x="285" y="23" width="16" height="16"/>
@@ -1078,7 +1113,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" heightSizable="YES"/>
                         <clipView key="contentView" ambiguous="YES" drawsBackground="NO" id="5Al-aC-tq8">
                             <rect key="frame" x="1" y="1" width="158" height="316"/>
-                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <autoresizingMask key="autoresizingMask"/>
                             <subviews>
                                 <tableView focusRingType="none" verticalHuggingPriority="750" ambiguous="YES" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" selectionHighlightStyle="sourceList" columnResizing="NO" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" id="ZVn-bk-duk">
                                     <rect key="frame" x="0.0" y="0.0" width="158" height="316"/>
@@ -1280,7 +1315,7 @@
                         </textFieldCell>
                     </textField>
                     <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tyc-KF-YTY">
-                        <rect key="frame" x="372.5" y="19" width="75" height="23"/>
+                        <rect key="frame" x="373" y="19" width="75" height="23"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                         <buttonCell key="cell" type="roundTextured" title="Close" bezelStyle="texturedRounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="Vhg-3I-evG">
                             <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -1319,24 +1354,30 @@
                 <rect key="frame" x="0.0" y="0.0" width="521" height="322"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <button focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xhI-kr-h3J">
+                    <button focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="xhI-kr-h3J" customClass="GBPreferenceButton">
                         <rect key="frame" x="18" y="287" width="485" height="18"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                         <buttonCell key="cell" type="check" title="Automatically pair together Joy-Cons to a dual-controller grip" bezelStyle="regularSquare" imagePosition="left" state="on" focusRingType="none" inset="2" id="dPv-XO-6Fp">
                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBJoyConAutoPair"/>
+                        </userDefinedRuntimeAttributes>
                         <connections>
-                            <action selector="toggleAutoPair:" target="fMo-Ht-Dis" id="Luy-Rm-C5j"/>
+                            <action selector="autopair" target="fMo-Ht-Dis" id="Luy-Rm-C5j"/>
                         </connections>
                     </button>
-                    <button focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DaV-H7-VVr">
+                    <button focusRingType="none" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="DaV-H7-VVr" customClass="GBPreferenceButton">
                         <rect key="frame" x="18" y="266" width="485" height="18"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                        <buttonCell key="cell" type="check" title="Single Joy-Cons default to horizontal group" bezelStyle="regularSquare" imagePosition="left" state="on" focusRingType="none" inset="2" id="18L-S2-0wg">
+                        <buttonCell key="cell" type="check" title="Single Joy-Cons default to horizontal grip" bezelStyle="regularSquare" imagePosition="left" state="on" focusRingType="none" inset="2" id="18L-S2-0wg">
                             <behavior key="behavior" changeContents="YES" doesNotDimImage="YES" lightByContents="YES"/>
                             <font key="font" metaFont="system"/>
                         </buttonCell>
+                        <userDefinedRuntimeAttributes>
+                            <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBJoyConsDefaultsToHorizontal"/>
+                        </userDefinedRuntimeAttributes>
                         <connections>
                             <action selector="toggleHorizontalDefault:" target="fMo-Ht-Dis" id="yhh-pY-XOq"/>
                         </connections>
@@ -1407,7 +1448,7 @@ Test</string>
                                             </tableHeaderCell>
                                             <popUpButtonCell key="dataCell" type="bevel" title="Horizontal Grip" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="bezel" imageScaling="proportionallyDown" inset="2" arrowPosition="arrowAtCenter" preferredEdge="maxY" selectedItem="IJX-Qq-TaU" id="rif-6W-xsN">
                                                 <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
-                                                <font key="font" metaFont="system"/>
+                                                <font key="font" metaFont="menu"/>
                                                 <menu key="menu" id="36b-lh-dDy">
                                                     <items>
                                                         <menuItem title="Default Grip" id="8im-vm-Bj9"/>
@@ -1441,8 +1482,6 @@ Test</string>
         </window>
         <customObject id="fMo-Ht-Dis" customClass="GBJoyConManager">
             <connections>
-                <outlet property="autoPairCheckbox" destination="xhI-kr-h3J" id="CaJ-9q-dUh"/>
-                <outlet property="horizontalCheckbox" destination="DaV-H7-VVr" id="bFm-Qm-CgL"/>
                 <outlet property="tableView" destination="XQa-0K-gl3" id="fhZ-wM-dnm"/>
             </connections>
         </customObject>

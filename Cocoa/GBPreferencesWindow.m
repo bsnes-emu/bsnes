@@ -15,57 +15,7 @@
     NSString *joystick_being_configured;
     bool joypad_wait;
 
-    NSPopUpButton *_graphicsFilterPopupButton;
-    NSPopUpButton *_highpassFilterPopupButton;
-    NSPopUpButton *_colorCorrectionPopupButton;
-    NSPopUpButton *_frameBlendingModePopupButton;
-    NSPopUpButton *_colorPalettePopupButton;
-    NSPopUpButton *_displayBorderPopupButton;
-    NSPopUpButton *_rewindPopupButton;
-    NSPopUpButton *_rtcPopupButton;
-    NSButton *_aspectRatioCheckbox;
-    NSButton *_analogControlsCheckbox;
-    NSButton *_controllersFocusCheckbox;
     NSEventModifierFlags previousModifiers;
-    
-    NSPopUpButton *_dmgPopupButton, *_sgbPopupButton, *_cgbPopupButton, *_agbPopupButton;
-    NSPopUpButton *_preferredJoypadButton;
-    NSPopUpButton *_rumbleModePopupButton;
-    NSPopUpButton *_hotkey1PopupButton;
-    NSPopUpButton *_hotkey2PopupButton;
-    NSSlider *_temperatureSlider;
-    NSSlider *_interferenceSlider;
-    NSSlider *_volumeSlider;
-    NSButton *_autoUpdatesCheckbox;
-    NSButton *_OSDCheckbox;
-    NSButton *_screenshotFilterCheckbox;
-    NSButton *_joystickMBC7Checkbox;
-    NSButton *_mouseMBC7Checkbox;
-}
-
-+ (NSArray *)filterList
-{
-    /* The filter list as ordered in the popup button */
-    static NSArray * filters = nil;
-    if (!filters) {
-        filters = @[
-                    @"NearestNeighbor",
-                    @"Bilinear",
-                    @"SmoothBilinear",
-                    @"MonoLCD",
-                    @"LCD",
-                    @"CRT",
-                    @"Scale2x",
-                    @"Scale4x",
-                    @"AAScale2x",
-                    @"AAScale4x",
-                    @"HQ2x",
-                    @"OmniScale",
-                    @"OmniScaleLegacy",
-                    @"AAOmniScaleLegacy",
-                    ];
-    }
-    return filters;
 }
 
 - (NSWindowToolbarStyle)toolbarStyle
@@ -82,190 +32,9 @@
     [super close];
 }
 
-- (NSPopUpButton *)graphicsFilterPopupButton
-{
-    return _graphicsFilterPopupButton;
-}
-
-- (void)setGraphicsFilterPopupButton:(NSPopUpButton *)graphicsFilterPopupButton
-{
-    _graphicsFilterPopupButton = graphicsFilterPopupButton;
-    NSString *filter = [[NSUserDefaults standardUserDefaults] objectForKey:@"GBFilter"];
-    [_graphicsFilterPopupButton selectItemAtIndex:[[[self class] filterList] indexOfObject:filter]];
-}
-
-- (NSPopUpButton *)highpassFilterPopupButton
-{
-    return _highpassFilterPopupButton;
-}
-
-- (void)setColorCorrectionPopupButton:(NSPopUpButton *)colorCorrectionPopupButton
-{
-    _colorCorrectionPopupButton = colorCorrectionPopupButton;
-    NSInteger mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorCorrection"];
-    [_colorCorrectionPopupButton selectItemWithTag:mode];
-}
-
-
-- (NSPopUpButton *)colorCorrectionPopupButton
-{
-    return _colorCorrectionPopupButton;
-}
-
-- (void)setTemperatureSlider:(NSSlider *)temperatureSlider
-{
-    _temperatureSlider = temperatureSlider;
-    [temperatureSlider setDoubleValue:[[NSUserDefaults standardUserDefaults] doubleForKey:@"GBLightTemperature"] * 256];
-}
-
-- (NSSlider *)temperatureSlider
-{
-    return _temperatureSlider;
-}
-
-- (void)setInterferenceSlider:(NSSlider *)interferenceSlider
-{
-    _interferenceSlider = interferenceSlider;
-    [interferenceSlider setDoubleValue:[[NSUserDefaults standardUserDefaults] doubleForKey:@"GBInterferenceVolume"] * 256];
-}
-
-- (NSSlider *)interferenceSlider
-{
-    return _interferenceSlider;
-}
-
-- (void)setVolumeSlider:(NSSlider *)volumeSlider
-{
-    _volumeSlider = volumeSlider;
-    [volumeSlider setDoubleValue:[[NSUserDefaults standardUserDefaults] doubleForKey:@"GBVolume"] * 256];
-}
-
-- (NSSlider *)volumeSlider
-{
-    return _volumeSlider;
-}
-
-- (void)setFrameBlendingModePopupButton:(NSPopUpButton *)frameBlendingModePopupButton
-{
-    _frameBlendingModePopupButton = frameBlendingModePopupButton;
-    NSInteger mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBFrameBlendingMode"];
-    [_frameBlendingModePopupButton selectItemAtIndex:mode];
-}
-
-- (NSPopUpButton *)frameBlendingModePopupButton
-{
-    return _frameBlendingModePopupButton;
-}
-
-- (void)setColorPalettePopupButton:(NSPopUpButton *)colorPalettePopupButton
-{
-    _colorPalettePopupButton = colorPalettePopupButton;
-    [self updatePalettesMenu];
-    NSInteger mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorPalette"];
-    if (mode >= 0) {
-        [_colorPalettePopupButton selectItemWithTag:mode];
-    }
-    else {
-        [_colorPalettePopupButton selectItemWithTitle:[[NSUserDefaults standardUserDefaults] stringForKey:@"GBCurrentTheme"] ?: @""];
-    }
-}
-
-- (NSPopUpButton *)colorPalettePopupButton
-{
-    return _colorPalettePopupButton;
-}
-
-- (void)setDisplayBorderPopupButton:(NSPopUpButton *)displayBorderPopupButton
-{
-    _displayBorderPopupButton = displayBorderPopupButton;
-    NSInteger mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBBorderMode"];
-    [_displayBorderPopupButton selectItemWithTag:mode];
-}
-
-- (NSPopUpButton *)displayBorderPopupButton
-{
-    return _displayBorderPopupButton;
-}
-
-- (void)setRumbleModePopupButton:(NSPopUpButton *)rumbleModePopupButton
-{
-    _rumbleModePopupButton = rumbleModePopupButton;
-    NSInteger mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRumbleMode"];
-    [_rumbleModePopupButton selectItemWithTag:mode];
-}
-
-- (NSPopUpButton *)rumbleModePopupButton
-{
-    return _rumbleModePopupButton;
-}
-
 static inline NSString *keyEquivalentString(NSMenuItem *item)
 {
     return [NSString stringWithFormat:@"%s%@", (item.keyEquivalentModifierMask & NSEventModifierFlagShift)? "^":"", item.keyEquivalent];
-}
-
-- (void)setHotkey1PopupButton:(NSPopUpButton *)hotkey1PopupButton
-{
-    _hotkey1PopupButton = hotkey1PopupButton;
-    NSString *keyEquivalent = [[NSUserDefaults standardUserDefaults] stringForKey:@"GBJoypadHotkey1"];
-    for (NSMenuItem *item in _hotkey1PopupButton.menu.itemArray) {
-        if ([keyEquivalent isEqualToString:keyEquivalentString(item)]) {
-            [_hotkey1PopupButton selectItem:item];
-            break;
-        }
-    }
-}
-
-- (NSPopUpButton *)hotkey1PopupButton
-{
-    return _hotkey1PopupButton;
-}
-
-- (void)setHotkey2PopupButton:(NSPopUpButton *)hotkey2PopupButton
-{
-    _hotkey2PopupButton = hotkey2PopupButton;
-    NSString *keyEquivalent = [[NSUserDefaults standardUserDefaults] stringForKey:@"GBJoypadHotkey2"];
-    for (NSMenuItem *item in _hotkey2PopupButton.menu.itemArray) {
-        if ([keyEquivalent isEqualToString:keyEquivalentString(item)]) {
-            [_hotkey2PopupButton selectItem:item];
-            break;
-        }
-    }
-}
-
-- (NSPopUpButton *)hotkey2PopupButton
-{
-    return _hotkey2PopupButton;
-}
-
-- (void)setRewindPopupButton:(NSPopUpButton *)rewindPopupButton
-{
-    _rewindPopupButton = rewindPopupButton;
-    NSInteger length = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindLength"];
-    [_rewindPopupButton selectItemWithTag:length];
-}
-
-- (NSPopUpButton *)rewindPopupButton
-{
-    return _rewindPopupButton;
-}
-
-- (NSPopUpButton *)rtcPopupButton
-{
-    return _rtcPopupButton;
-}
-
-- (void)setRtcPopupButton:(NSPopUpButton *)rtcPopupButton
-{
-    _rtcPopupButton = rtcPopupButton;
-    NSInteger mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRTCMode"];
-    [_rtcPopupButton selectItemAtIndex:mode];
-}
-
-- (void)setHighpassFilterPopupButton:(NSPopUpButton *)highpassFilterPopupButton
-{
-    _highpassFilterPopupButton = highpassFilterPopupButton;
-    [_highpassFilterPopupButton selectItemAtIndex:[[[NSUserDefaults standardUserDefaults] objectForKey:@"GBHighpassFilter"] unsignedIntegerValue]];
 }
 
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
@@ -356,54 +125,6 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
     previousModifiers = event.modifierFlags;
 }
 
-- (IBAction)graphicFilterChanged:(NSPopUpButton *)sender
-{
-    [[NSUserDefaults standardUserDefaults] setObject:[[self class] filterList][[sender indexOfSelectedItem]]
-                                              forKey:@"GBFilter"];
-}
-
-- (IBAction)highpassFilterChanged:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
-                                              forKey:@"GBHighpassFilter"];
-}
-
-
-- (IBAction)changeMBC7JoystickOverride:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] == NSOnState
-                                            forKey:@"GBMBC7JoystickOverride"];
-}
-
-- (IBAction)changeMBC7AllowMouse:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] == NSOnState
-                                            forKey:@"GBMBC7AllowMouse"];
-}
-
-- (IBAction)changeAnalogControls:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] == NSOnState
-                                            forKey:@"GBAnalogControls"];
-}
-
-- (IBAction)changeControllerFocus:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] == NSOnState
-                                            forKey:@"GBAllowBackgroundControllers"];
-}
-
-- (IBAction)changeAspectRatio:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] != NSOnState
-                                            forKey:@"GBAspectRatioUnkept"];
-}
-
-- (IBAction)colorCorrectionChanged:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedItem].tag)
-                                              forKey:@"GBColorCorrection"];
-}
 
 - (IBAction)lightTemperatureChanged:(id)sender
 {
@@ -421,12 +142,6 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender doubleValue] / 256.0)
                                               forKey:@"GBVolume"];
-}
-
-- (IBAction)franeBlendingModeChanged:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
-                                              forKey:@"GBFrameBlendingMode"];
 }
 
 - (void)updatePalettesMenu
@@ -477,18 +192,6 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
     [[NSNotificationCenter defaultCenter] postNotificationName:@"GBColorPaletteChanged" object:nil];
 }
 
-- (IBAction)displayBorderChanged:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedItem].tag)
-                                              forKey:@"GBBorderMode"];
-}
-
-- (IBAction)rumbleModeChanged:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedItem].tag)
-                                              forKey:@"GBRumbleMode"];
-}
-
 - (IBAction)hotkey1Changed:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setObject:keyEquivalentString([sender selectedItem])
@@ -501,23 +204,6 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
                                               forKey:@"GBJoypadHotkey2"];
 }
 
-- (IBAction)rewindLengthChanged:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
-                                              forKey:@"GBRewindLength"];
-}
-
-- (IBAction)rtcModeChanged:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
-                                              forKey:@"GBRTCMode"];
-}
-
-- (IBAction)changeAutoUpdates:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] == NSOnState
-                                            forKey:@"GBAutoUpdatesEnabled"];
-}
 
 - (IBAction) configureJoypad:(id)sender
 {
@@ -637,61 +323,6 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
     [self advanceConfigurationStateMachine];
 }
 
-- (NSButton *)joystickMBC7Checkbox
-{
-    return _joystickMBC7Checkbox;
-}
-
-- (void)setJoystickMBC7Checkbox:(NSButton *)joystickMBC7Checkbox
-{
-    _joystickMBC7Checkbox = joystickMBC7Checkbox;
-    [_joystickMBC7Checkbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBMBC7JoystickOverride"]];
-}
-
-- (NSButton *)mouseMBC7Checkbox
-{
-    return _mouseMBC7Checkbox;
-}
-
-- (void)setMouseMBC7Checkbox:(NSButton *)mouseMBC7Checkbox
-{
-    _mouseMBC7Checkbox = mouseMBC7Checkbox;
-    [_mouseMBC7Checkbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBMBC7AllowMouse"]];
-}
-
-- (NSButton *)analogControlsCheckbox
-{
-    return _analogControlsCheckbox;
-}
-
-- (void)setAnalogControlsCheckbox:(NSButton *)analogControlsCheckbox
-{
-    _analogControlsCheckbox = analogControlsCheckbox;
-    [_analogControlsCheckbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBAnalogControls"]];
-}
-
-- (NSButton *)controllersFocusCheckbox
-{
-    return _controllersFocusCheckbox;
-}
-
-- (void)setControllersFocusCheckbox:(NSButton *)controllersFocusCheckbox
-{
-    _controllersFocusCheckbox = controllersFocusCheckbox;
-    [_controllersFocusCheckbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBAllowBackgroundControllers"]];
-}
-
-- (NSButton *)aspectRatioCheckbox
-{
-    return _aspectRatioCheckbox;
-}
-
-- (void)setAspectRatioCheckbox:(NSButton *)aspectRatioCheckbox
-{
-    _aspectRatioCheckbox = aspectRatioCheckbox;
-    [_aspectRatioCheckbox setState: ![[NSUserDefaults standardUserDefaults] boolForKey:@"GBAspectRatioUnkept"]];
-}
-
 - (void)awakeFromNib
 {
     [super awakeFromNib];
@@ -699,6 +330,35 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
     [[NSDistributedNotificationCenter defaultCenter] addObserver:self.controlsTableView selector:@selector(reloadData) name:(NSString*)kTISNotifySelectedKeyboardInputSourceChanged object:nil];
     [JOYController registerListener:self];
     joystick_configuration_state = -1;
+    [self refreshJoypadMenu:nil];
+    
+    NSString *keyEquivalent = [[NSUserDefaults standardUserDefaults] stringForKey:@"GBJoypadHotkey1"];
+    for (NSMenuItem *item in _hotkey1PopupButton.menu.itemArray) {
+        if ([keyEquivalent isEqualToString:keyEquivalentString(item)]) {
+            [_hotkey1PopupButton selectItem:item];
+            break;
+        }
+    }
+    
+    keyEquivalent = [[NSUserDefaults standardUserDefaults] stringForKey:@"GBJoypadHotkey2"];
+    for (NSMenuItem *item in _hotkey2PopupButton.menu.itemArray) {
+        if ([keyEquivalent isEqualToString:keyEquivalentString(item)]) {
+            [_hotkey2PopupButton selectItem:item];
+            break;
+        }
+    }
+    
+    [self updatePalettesMenu];
+    NSInteger mode = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorPalette"];
+    if (mode >= 0) {
+        [_colorPalettePopupButton selectItemWithTag:mode];
+    }
+    else {
+        [_colorPalettePopupButton selectItemWithTitle:[[NSUserDefaults standardUserDefaults] stringForKey:@"GBCurrentTheme"] ?: @""];
+    }
+    [_volumeSlider setDoubleValue:[[NSUserDefaults standardUserDefaults] doubleForKey:@"GBVolume"] * 256];
+    [_interferenceSlider setDoubleValue:[[NSUserDefaults standardUserDefaults] doubleForKey:@"GBInterferenceVolume"] * 256];
+    [_temperatureSlider setDoubleValue:[[NSUserDefaults standardUserDefaults] doubleForKey:@"GBLightTemperature"] * 256];
 }
 
 - (void)dealloc
@@ -749,91 +409,6 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
 {
     [[NSUserDefaults standardUserDefaults] setURL:nil forKey:@"GBBootROMsFolder"];
     [self updateBootROMFolderButton];
-}
-
-- (void)setDmgPopupButton:(NSPopUpButton *)dmgPopupButton
-{
-    _dmgPopupButton = dmgPopupButton;
-    [_dmgPopupButton selectItemWithTag:[[NSUserDefaults standardUserDefaults] integerForKey:@"GBDMGModel"]];
-}
-
-- (NSPopUpButton *)dmgPopupButton
-{
-    return _dmgPopupButton;
-}
-
-- (void)setSgbPopupButton:(NSPopUpButton *)sgbPopupButton
-{
-    _sgbPopupButton = sgbPopupButton;
-    [_sgbPopupButton selectItemWithTag:[[NSUserDefaults standardUserDefaults] integerForKey:@"GBSGBModel"]];
-}
-
-- (NSPopUpButton *)sgbPopupButton
-{
-    return _sgbPopupButton;
-}
-
-- (void)setCgbPopupButton:(NSPopUpButton *)cgbPopupButton
-{
-    _cgbPopupButton = cgbPopupButton;
-    [_cgbPopupButton selectItemWithTag:[[NSUserDefaults standardUserDefaults] integerForKey:@"GBCGBModel"]];
-}
-
-- (NSPopUpButton *)cgbPopupButton
-{
-    return _cgbPopupButton;
-}
-
-- (void)setAgbPopupButton:(NSPopUpButton *)agbPopupButton
-{
-    _agbPopupButton = agbPopupButton;
-    [_agbPopupButton selectItemWithTag:[[NSUserDefaults standardUserDefaults] integerForKey:@"GBAGBModel"]];
-}
-
-- (NSPopUpButton *)agbPopupButton
-{
-    return _agbPopupButton;
-}
-
-- (IBAction)dmgModelChanged:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
-                                              forKey:@"GBDMGModel"];
-
-}
-
-- (IBAction)sgbModelChanged:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
-                                              forKey:@"GBSGBModel"];
-}
-
-- (IBAction)cgbModelChanged:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
-                                              forKey:@"GBCGBModel"];
-}
-
-- (IBAction)agbModelChanged:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
-                                              forKey:@"GBAGBModel"];
-}
-
-- (IBAction)reloadButtonsData:(id)sender
-{
-    [self.controlsTableView reloadData];
-}
-
-- (void)setPreferredJoypadButton:(NSPopUpButton *)preferredJoypadButton
-{
-    _preferredJoypadButton = preferredJoypadButton;
-    [self refreshJoypadMenu:nil];
-}
-
-- (NSPopUpButton *)preferredJoypadButton
-{
-    return _preferredJoypadButton;
 }
 
 - (void)controllerConnected:(JOYController *)controller
@@ -899,57 +474,6 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
     [[NSUserDefaults standardUserDefaults] setObject:default_joypads forKey:@"JoyKitDefaultControllers"];
 }
 
-- (NSButton *)autoUpdatesCheckbox
-{
-    return _autoUpdatesCheckbox;
-}
-
-- (void)setAutoUpdatesCheckbox:(NSButton *)autoUpdatesCheckbox
-{
-    _autoUpdatesCheckbox = autoUpdatesCheckbox;
-    [_autoUpdatesCheckbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBAutoUpdatesEnabled"]];
-}
-
-- (NSButton *)OSDCheckbox
-{
-    return _OSDCheckbox;
-}
-
-- (void)setOSDCheckbox:(NSButton *)OSDCheckbox
-{
-    _OSDCheckbox = OSDCheckbox;
-    [_OSDCheckbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBOSDEnabled"]];
-}
-
-- (IBAction)changeOSDEnabled:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setBool:[(NSButton *)sender state] == NSOnState
-                                            forKey:@"GBOSDEnabled"];
-
-}
-
-- (IBAction)changeFilterScreenshots:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setBool:[(NSButton *)sender state] == NSOnState
-                                            forKey:@"GBFilterScreenshots"];
-}
-
-- (NSButton *)screenshotFilterCheckbox
-{
-    return _screenshotFilterCheckbox;
-}
-
-- (void)setScreenshotFilterCheckbox:(NSButton *)screenshotFilterCheckbox
-{
-    _screenshotFilterCheckbox = screenshotFilterCheckbox;
-    if (![GBViewMetal isSupported]) {
-        [_screenshotFilterCheckbox setEnabled:false];
-    }
-    else {
-        [_screenshotFilterCheckbox setState: [[NSUserDefaults standardUserDefaults] boolForKey:@"GBFilterScreenshots"]];
-    }
-}
-
 - (IBAction)displayColorCorrectionHelp:(id)sender
 {
     [GBWarningPopover popoverWithContents:
@@ -959,7 +483,7 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
             [GB_COLOR_CORRECTION_MODERN_BALANCED] = @"Emulates a modern display. Blue contrast is moderately enhanced at the cost of slight hue inaccuracy.",
             [GB_COLOR_CORRECTION_MODERN_BOOST_CONTRAST] = @"Like Modern – Balanced, but further boosts the contrast of greens and magentas that is lacking on the original hardware.",
             [GB_COLOR_CORRECTION_REDUCE_CONTRAST] = @"Slightly reduce the contrast to better represent the tint and contrast of the original display.",
-            [GB_COLOR_CORRECTION_LOW_CONTRAST] = @"Harshly reduce the contrast to accurately represent the tint low constrast of the original display.",
+            [GB_COLOR_CORRECTION_LOW_CONTRAST] = @"Harshly reduce the contrast to accurately represent the tint and low constrast of the original display.",
             [GB_COLOR_CORRECTION_MODERN_ACCURATE] = @"Emulates a modern display. Colors have their hues and brightness corrected.",
          } [self.colorCorrectionPopupButton.selectedItem.tag]
                                    title:self.colorCorrectionPopupButton.selectedItem.title
@@ -975,7 +499,7 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
         [GB_HIGHPASS_OFF] = @"No high-pass filter will be applied. DC offset will be kept, pausing and resuming will trigger audio pops.",
         [GB_HIGHPASS_ACCURATE] = @"An accurate high-pass filter will be applied, removing the DC offset while somewhat attenuating the bass.",
         [GB_HIGHPASS_REMOVE_DC_OFFSET] = @"A high-pass filter will be applied to the DC offset itself, removing the DC offset while preserving the waveform.",
-    } [self.highpassFilterPopupButton.indexOfSelectedItem]
+    } [self.highpassFilterPopupButton.selectedItem.tag]
                                     title:self.highpassFilterPopupButton.selectedItem.title
                                    onView:sender
                                   timeout:6

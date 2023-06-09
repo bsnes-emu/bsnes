@@ -8,7 +8,6 @@
     NSImageCell *_imageCell;
     NSMutableDictionary<NSString *, NSString *> *_pairings;
     NSMutableDictionary<NSString *, NSNumber *> *_gripSettings;
-    NSButton *_autoPairCheckbox;
     bool _unpairing;
 }
 
@@ -193,14 +192,14 @@
         }
     }
     if (controller.joyconType == JOYJoyConTypeLeft || controller.joyconType == JOYJoyConTypeRight) {
-        [self autopair];
+        [self autopair:nil];
     }
     if (_arrangementMode) {
         [self.tableView reloadData];
     }
 }
 
-- (void)autopair
+- (IBAction)autopair:(id)sender
 {
     if (_unpairing) return;
     if (![[NSUserDefaults standardUserDefaults] boolForKey:@"GBJoyConAutoPair"]) return;
@@ -283,27 +282,8 @@
     }
 }
 
-- (void)setAutoPairCheckbox:(NSButton *)autoPairCheckbox
-{
-    _autoPairCheckbox = autoPairCheckbox;
-    [_autoPairCheckbox setState:[[NSUserDefaults standardUserDefaults] boolForKey:@"GBJoyConAutoPair"]];
-}
-
-- (IBAction)toggleAutoPair:(NSButton *)sender
-{
-    [[NSUserDefaults standardUserDefaults] setBool:sender.state forKey:@"GBJoyConAutoPair"];
-    [self autopair];
-}
-
-- (void)setHorizontalCheckbox:(NSButton *)horizontalCheckbox
-{
-    _horizontalCheckbox = horizontalCheckbox;
-    [_horizontalCheckbox setState:[[NSUserDefaults standardUserDefaults] boolForKey:@"GBJoyConsDefaultsToHorizontal"]];
-}
-
 - (IBAction)toggleHorizontalDefault:(NSButton *)sender
 {
-    [[NSUserDefaults standardUserDefaults] setBool:sender.state forKey:@"GBJoyConsDefaultsToHorizontal"];
     for (JOYController *controller in self.joycons) {
         [self updateGripForController:controller];
     }
