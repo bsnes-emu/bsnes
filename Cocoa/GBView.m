@@ -5,6 +5,7 @@
 #import "GBViewMetal.h"
 #import "GBButtons.h"
 #import "NSString+StringForKey.h"
+#import "NSObject+DefaultsObserver.h"
 #import "Document.h"
 
 #define JOYSTICK_HIGH 0x4000
@@ -138,7 +139,10 @@ static const uint8_t workboy_vk_to_key[] = {
 {
     [self registerForDraggedTypes:[NSArray arrayWithObjects: NSFilenamesPboardType, nil]];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(ratioKeepingChanged) name:@"GBAspectChanged" object:nil];
+    __unsafe_unretained GBView *weakSelf = self;
+    [self observeStandardDefaultsKey:@"GBAspectRatioUnkept" withBlock:^(id newValue) {
+        [weakSelf setFrame:weakSelf.superview.frame];
+    }];
     tracking_area = [ [NSTrackingArea alloc] initWithRect:(NSRect){}
                                                   options:NSTrackingMouseEnteredAndExited | NSTrackingActiveAlways | NSTrackingInVisibleRect | NSTrackingMouseMoved
                                                     owner:self
@@ -159,11 +163,6 @@ static const uint8_t workboy_vk_to_key[] = {
     dispatch_async(dispatch_get_main_queue(), ^{
         [self setFrame:self.superview.frame];
     });
-}
-
-- (void) ratioKeepingChanged
-{
-    [self setFrame:self.superview.frame];
 }
 
 - (void)dealloc

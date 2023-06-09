@@ -360,14 +360,12 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
 {
     [[NSUserDefaults standardUserDefaults] setObject:[[self class] filterList][[sender indexOfSelectedItem]]
                                               forKey:@"GBFilter"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBFilterChanged" object:nil];
 }
 
 - (IBAction)highpassFilterChanged:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
                                               forKey:@"GBHighpassFilter"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBHighpassFilterChanged" object:nil];
 }
 
 
@@ -399,43 +397,36 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
 {
     [[NSUserDefaults standardUserDefaults] setBool: [(NSButton *)sender state] != NSOnState
                                             forKey:@"GBAspectRatioUnkept"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBAspectChanged" object:nil];
 }
 
 - (IBAction)colorCorrectionChanged:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedItem].tag)
                                               forKey:@"GBColorCorrection"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBColorCorrectionChanged" object:nil];
 }
 
 - (IBAction)lightTemperatureChanged:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender doubleValue] / 256.0)
                                               forKey:@"GBLightTemperature"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBLightTemperatureChanged" object:nil];
 }
 
 - (IBAction)interferenceVolumeChanged:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender doubleValue] / 256.0)
                                               forKey:@"GBInterferenceVolume"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBInterferenceVolumeChanged" object:nil];
 }
 
 - (IBAction)volumeChanged:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender doubleValue] / 256.0)
                                               forKey:@"GBVolume"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBVolumeChanged" object:nil];
 }
 
 - (IBAction)franeBlendingModeChanged:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
                                               forKey:@"GBFrameBlendingMode"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBFrameBlendingModeChanged" object:nil];
-    
 }
 
 - (void)updatePalettesMenu
@@ -490,14 +481,12 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedItem].tag)
                                               forKey:@"GBBorderMode"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBBorderModeChanged" object:nil];
 }
 
 - (IBAction)rumbleModeChanged:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedItem].tag)
                                               forKey:@"GBRumbleMode"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBRumbleModeChanged" object:nil];
 }
 
 - (IBAction)hotkey1Changed:(id)sender
@@ -516,15 +505,12 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
                                               forKey:@"GBRewindLength"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBRewindLengthChanged" object:nil];
 }
 
 - (IBAction)rtcModeChanged:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender indexOfSelectedItem])
                                               forKey:@"GBRTCMode"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBRTCModeChanged" object:nil];
-
 }
 
 - (IBAction)changeAutoUpdates:(id)sender
@@ -813,7 +799,6 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
                                               forKey:@"GBDMGModel"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBDMGModelChanged" object:nil];
 
 }
 
@@ -821,21 +806,18 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
                                               forKey:@"GBSGBModel"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBSGBModelChanged" object:nil];
 }
 
 - (IBAction)cgbModelChanged:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
                                               forKey:@"GBCGBModel"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBCGBModelChanged" object:nil];
 }
 
 - (IBAction)agbModelChanged:(id)sender
 {
     [[NSUserDefaults standardUserDefaults] setObject:@([sender selectedTag])
                                               forKey:@"GBAGBModel"];
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBAGBModelChanged" object:nil];
 }
 
 - (IBAction)reloadButtonsData:(id)sender

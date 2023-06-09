@@ -1,7 +1,9 @@
 #import <CoreImage/CoreImage.h>
 #import "GBViewMetal.h"
 #pragma clang diagnostic ignored "-Wpartial-availability"
-
+#if !TARGET_OS_IPHONE
+#import "../Cocoa/NSObject+DefaultsObserver.h"
+#endif
 
 static const vector_float2 rect[] =
 {
@@ -74,8 +76,13 @@ static const vector_float2 rect[] =
                                                   options:MTLResourceStorageModeShared];
     
     output_resolution = (simd_float2){view.drawableSize.width, view.drawableSize.height};
+    /* TODO: NSObject+DefaultsObserver can replace the less flexible `addDefaultObserver` in iOS */
+#if TARGET_OS_IPHONE
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(loadShader) name:@"GBFilterChanged" object:nil];
     [self loadShader];
+#else
+    [self observeStandardDefaultsKey:@"GBFilter" selector:@selector(loadShader)];
+#endif
 }
 
 - (void) loadShader

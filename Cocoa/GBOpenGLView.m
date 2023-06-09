@@ -1,5 +1,6 @@
 #import "GBOpenGLView.h"
 #import "GBView.h"
+#import "NSObject+DefaultsObserver.h"
 #import <OpenGL/gl.h>
 
 @implementation GBOpenGLView
@@ -27,13 +28,12 @@
 
 - (instancetype)initWithFrame:(NSRect)frameRect pixelFormat:(NSOpenGLPixelFormat *)format
 {
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(filterChanged) name:@"GBFilterChanged" object:nil];
-    return [super initWithFrame:frameRect pixelFormat:format];
-}
+    __unsafe_unretained GBOpenGLView *weakSelf = self;
+    [self observeStandardDefaultsKey:@"GBFilter" withBlock:^(id newValue) {
+        weakSelf.shader = nil;
+        [weakSelf setNeedsDisplay:true];
 
-- (void) filterChanged
-{
-    self.shader = nil;
-    [self setNeedsDisplay:true];
+    }];
+    return [super initWithFrame:frameRect pixelFormat:format];
 }
 @end

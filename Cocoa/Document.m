@@ -13,6 +13,7 @@
 #import "GBPaletteEditorController.h"
 #import "GBObjectView.h"
 #import "GBPaletteView.h"
+#import "NSObject+DefaultsObserver.h"
 
 #define likely(x)   GB_likely(x)
 #define unlikely(x) GB_unlikely(x)
@@ -298,16 +299,6 @@ static void debuggerReloadCallback(GB_gameboy_t *gb)
     GB_set_palette(&_gb, [GBPaletteEditorController userPalette]);
 }
 
-- (void) updateBorderMode
-{
-    _borderModeChanged = true;
-}
-
-- (void) updateRumbleMode
-{
-    GB_set_rumble_mode(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRumbleMode"]);
-}
-
 - (void) initCommon
 {
     GB_init(&_gb, [self internalModel]);
@@ -317,22 +308,52 @@ static void debuggerReloadCallback(GB_gameboy_t *gb)
     GB_set_log_callback(&_gb, (GB_log_callback_t) consoleLog);
     GB_set_input_callback(&_gb, (GB_input_callback_t) consoleInput);
     GB_set_async_input_callback(&_gb, (GB_input_callback_t) asyncConsoleInput);
-    GB_set_color_correction_mode(&_gb, (GB_color_correction_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorCorrection"]);
-    GB_set_light_temperature(&_gb, [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBLightTemperature"]);
-    GB_set_interference_volume(&_gb, [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBInterferenceVolume"]);
-    GB_set_border_mode(&_gb, (GB_border_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBBorderMode"]);
     [self updatePalette];
     GB_set_rgb_encode_callback(&_gb, rgbEncode);
     GB_set_camera_get_pixel_callback(&_gb, cameraGetPixel);
     GB_set_camera_update_request_callback(&_gb, cameraRequestUpdate);
-    GB_set_highpass_filter_mode(&_gb, (GB_highpass_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBHighpassFilter"]);
-    GB_set_rewind_length(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindLength"]);
-    GB_set_rtc_mode(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRTCMode"]);
     GB_apu_set_sample_callback(&_gb, audioCallback);
     GB_set_rumble_callback(&_gb, rumbleCallback);
     GB_set_infrared_callback(&_gb, infraredStateChanged);
     GB_set_debugger_reload_callback(&_gb, debuggerReloadCallback);
-    [self updateRumbleMode];
+    
+    GB_gameboy_t *gb = &_gb;
+    __unsafe_unretained Document *weakSelf = self;
+    
+    [self observeStandardDefaultsKey:@"GBColorCorrection" withBlock:^(NSNumber *value) {
+        GB_set_color_correction_mode(gb, value.unsignedIntValue);
+    }];
+    
+    [self observeStandardDefaultsKey:@"GBLightTemperature" withBlock:^(NSNumber *value) {
+        GB_set_light_temperature(gb, value.doubleValue);
+    }];
+    
+    [self observeStandardDefaultsKey:@"GBInterferenceVolume" withBlock:^(NSNumber *value) {
+        GB_set_interference_volume(gb, value.doubleValue);
+    }];
+    
+    GB_set_border_mode(&_gb, (GB_border_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBBorderMode"]);
+    [self observeStandardDefaultsKey:@"GBBorderMode" withBlock:^(NSNumber *value) {
+        _borderModeChanged = true;
+    }];
+    
+    [self observeStandardDefaultsKey:@"GBHighpassFilter" withBlock:^(NSNumber *value) {
+        GB_set_highpass_filter_mode(gb, value.unsignedIntValue);
+    }];
+    
+    [self observeStandardDefaultsKey:@"GBRewindLength" withBlock:^(NSNumber *value) {
+        [weakSelf performAtomicBlock:^{
+            GB_set_rewind_length(gb, value.unsignedIntValue);
+        }];
+    }];
+    
+    [self observeStandardDefaultsKey:@"GBRTCMode" withBlock:^(NSNumber *value) {
+        GB_set_rtc_mode(gb, value.unsignedIntValue);
+    }];
+    
+    [self observeStandardDefaultsKey:@"GBRumbleMode" withBlock:^(NSNumber *value) {
+        GB_set_rumble_mode(gb, value.unsignedIntValue);
+    }];
 }
 
 - (void) updateMinSize
@@ -766,82 +787,54 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
                       accessibilityDescription:@"Print"];
     }
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(updateHighpassFilter)
-                                                 name:@"GBHighpassFilterChanged"
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(updateColorCorrectionMode)
-                                                 name:@"GBColorCorrectionChanged"
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(updateLightTemperature)
-                                                 name:@"GBLightTemperatureChanged"
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(updateInterferenceVolume)
-                                                 name:@"GBInterferenceVolumeChanged"
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(updateFrameBlendingMode)
-                                                 name:@"GBFrameBlendingModeChanged"
-                                               object:nil];
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(updatePalette)
                                                  name:@"GBColorPaletteChanged"
                                                object:nil];
-
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(updateBorderMode)
-                                                 name:@"GBBorderModeChanged"
-                                               object:nil];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(updateRumbleMode)
-                                                 name:@"GBRumbleModeChanged"
-                                               object:nil];
+    __unsafe_unretained Document *weakSelf = self;
+    [self observeStandardDefaultsKey:@"GBFrameBlendingMode"
+                           withBlock:^(NSNumber *value) {
+        weakSelf.view.frameBlendingMode = (GB_frame_blending_mode_t)value.unsignedIntValue;
+    }];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(updateRewindLength)
-                                                 name:@"GBRewindLengthChanged"
-                                               object:nil];
+    [self observeStandardDefaultsKey:@"GBDMGModel" withBlock:^(id newValue) {
+        weakSelf->_modelsChanging = true;
+        if (weakSelf->_currentModel == MODEL_DMG) {
+            [weakSelf reset:nil];
+        }
+        weakSelf->_modelsChanging = false;
+    }];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(updateRTCMode)
-                                                 name:@"GBRTCModeChanged"
-                                               object:nil];
-
+    [self observeStandardDefaultsKey:@"GBSGBModel" withBlock:^(id newValue) {
+        weakSelf->_modelsChanging = true;
+        if (weakSelf->_currentModel == MODEL_SGB) {
+            [weakSelf reset:nil];
+        }
+        weakSelf->_modelsChanging = false;
+    }];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(dmgModelChanged)
-                                                 name:@"GBDMGModelChanged"
-                                               object:nil];
+    [self observeStandardDefaultsKey:@"GBCGBModel" withBlock:^(id newValue) {
+        weakSelf->_modelsChanging = true;
+        if (weakSelf->_currentModel == MODEL_CGB) {
+            [weakSelf reset:nil];
+        }
+        weakSelf->_modelsChanging = false;
+    }];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(sgbModelChanged)
-                                                 name:@"GBSGBModelChanged"
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(cgbModelChanged)
-                                                 name:@"GBCGBModelChanged"
-                                               object:nil];
-    
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(agbModelChanged)
-                                                 name:@"GBAGBModelChanged"
-                                               object:nil];
+    [self observeStandardDefaultsKey:@"GBAGBModel" withBlock:^(id newValue) {
+        weakSelf->_modelsChanging = true;
+        if (weakSelf->_currentModel == MODEL_AGB) {
+            [weakSelf reset:nil];
+        }
+        weakSelf->_modelsChanging = false;
+    }];
     
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(updateVolume)
-                                                 name:@"GBVolumeChanged"
-                                               object:nil];
+    [self observeStandardDefaultsKey:@"GBVolume" withBlock:^(id newValue) {
+        weakSelf->_volume = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBVolume"];
+    }];
         
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"EmulateDMG"]) {
         _currentModel = MODEL_DMG;
@@ -2171,96 +2164,6 @@ static bool is_path_writeable(const char *path)
     [self performAtomicBlock:^{
         GB_connect_workboy(&_gb, setWorkboyTime, getWorkboyTime);
     }];
-}
-
-- (void) updateVolume
-{
-    _volume = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBVolume"];
-}
-
-- (void) updateHighpassFilter
-{
-    if (GB_is_inited(&_gb)) {
-        GB_set_highpass_filter_mode(&_gb, (GB_highpass_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBHighpassFilter"]);
-    }
-}
-
-- (void) updateColorCorrectionMode
-{
-    if (GB_is_inited(&_gb)) {
-        GB_set_color_correction_mode(&_gb, (GB_color_correction_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBColorCorrection"]);
-    }
-}
-
-- (void) updateLightTemperature
-{
-    if (GB_is_inited(&_gb)) {
-        GB_set_light_temperature(&_gb, [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBLightTemperature"]);
-    }
-}
-
-- (void) updateInterferenceVolume
-{
-    if (GB_is_inited(&_gb)) {
-        GB_set_interference_volume(&_gb, [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBInterferenceVolume"]);
-    }
-}
-
-- (void) updateFrameBlendingMode
-{
-    self.view.frameBlendingMode = (GB_frame_blending_mode_t) [[NSUserDefaults standardUserDefaults] integerForKey:@"GBFrameBlendingMode"];
-}
-
-- (void) updateRewindLength
-{
-    [self performAtomicBlock:^{
-        if (GB_is_inited(&_gb)) {
-            GB_set_rewind_length(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindLength"]);
-        }
-    }];
-}
-
-- (void) updateRTCMode
-{
-    if (GB_is_inited(&_gb)) {
-        GB_set_rtc_mode(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRTCMode"]);
-    }
-}
-
-- (void)dmgModelChanged
-{
-    _modelsChanging = true;
-    if (_currentModel == MODEL_DMG) {
-        [self reset:nil];
-    }
-    _modelsChanging = false;
-}
-
-- (void)sgbModelChanged
-{
-    _modelsChanging = true;
-    if (_currentModel == MODEL_SGB) {
-        [self reset:nil];
-    }
-    _modelsChanging = false;
-}
-
-- (void)cgbModelChanged
-{
-    _modelsChanging = true;
-    if (_currentModel == MODEL_CGB) {
-        [self reset:nil];
-    }
-    _modelsChanging = false;
-}
-
-- (void)agbModelChanged
-{
-    _modelsChanging = true;
-    if (_currentModel == MODEL_AGB) {
-        [self reset:nil];
-    }
-    _modelsChanging = false;
 }
 
 - (void)setFileURL:(NSURL *)fileURL
