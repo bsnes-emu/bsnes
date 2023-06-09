@@ -1,5 +1,5 @@
 #import <Foundation/Foundation.h>
-#include <IOKit/hid/IOHIDLib.h>
+#import <IOKit/hid/IOHIDLib.h>
 
 @interface JOYElement : NSObject<NSCopying>
 - (instancetype)initWithElement:(IOHIDElementRef)element;

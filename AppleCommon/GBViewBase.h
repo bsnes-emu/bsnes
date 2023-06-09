@@ -1,5 +1,5 @@
-#include <TargetConditionals.h>
-#include <Core/gb.h>
+#import <TargetConditionals.h>
+#import <Core/gb.h>
 
 #if TARGET_OS_IPHONE
 #define NSView UIView

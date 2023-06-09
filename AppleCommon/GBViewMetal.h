@@ -1,4 +1,4 @@
-#include <TargetConditionals.h>
+#import <TargetConditionals.h>
 #import <MetalKit/MetalKit.h>
 #if TARGET_OS_IPHONE
 #import "../iOS/GBView.h"

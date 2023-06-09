@@ -1,6 +1,6 @@
 #import "GBOpenGLView.h"
 #import "GBView.h"
-#include <OpenGL/gl.h>
+#import <OpenGL/gl.h>
 
 @implementation GBOpenGLView
 

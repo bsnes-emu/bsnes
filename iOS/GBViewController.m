@@ -13,7 +13,7 @@
 #import "GBSettingsViewController.h"
 #import "GBStatesViewController.h"
 #import <CoreMotion/CoreMotion.h>
-#include <Core/gb.h>
+#import <Core/gb.h>
 
 @implementation GBViewController
 {

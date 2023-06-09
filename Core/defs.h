@@ -1,5 +1,4 @@
-#ifndef defs_h
-#define defs_h
+#pragma once
 
 #define GB_likely(x)   __builtin_expect((bool)(x), 1)
 #define GB_unlikely(x) __builtin_expect((bool)(x), 0)
@@ -59,4 +58,3 @@
 
 struct GB_gameboy_s;
 typedef struct GB_gameboy_s GB_gameboy_t;
-#endif 

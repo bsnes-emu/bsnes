@@ -5,9 +5,9 @@
 #import "JOYFullReportElement.h"
 #import "JOYButton.h"
 #import "JOYEmulatedButton.h"
-#include <IOKit/hid/IOHIDLib.h>
+#import <IOKit/hid/IOHIDLib.h>
 
-#include <AppKit/AppKit.h>
+#import <AppKit/AppKit.h>
 extern NSTextField *globalDebugField;
 
 #define PWM_RESOLUTION 16
@@ -1199,7 +1199,7 @@ typedef union {
 
 + (void)load
 {
-#include "ControllerConfiguration.inc"
+#import "ControllerConfiguration.inc"
 }
 
 +(void)registerListener:(id<JOYListener>)listener

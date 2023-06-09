@@ -1,5 +1,5 @@
 #import "JOYFullReportElement.h"
-#include <IOKit/hid/IOHIDLib.h>
+#import <IOKit/hid/IOHIDLib.h>
 
 @implementation JOYFullReportElement
 {

@@ -1,5 +1,4 @@
-#ifndef model_h
-#define model_h
+#pragma once
 
 #define GB_MODEL_FAMILY_MASK 0xF00
 #define GB_MODEL_DMG_FAMILY 0x000
@@ -38,6 +37,3 @@ typedef enum {
     //GB_MODEL_AGB_E = 0x209
     //GB_MODEL_GBP_E = GB_MODEL_AGB_E | GB_MODEL_GBP_BIT, // AGB-E inside a Game Boy Player
 } GB_model_t;
-
-
-#endif

@@ -1,5 +1,5 @@
 #import <UIKit/UIKit.h>
-#include <Core/gb.h>
+#import <Core/gb.h>
 
 @interface GBSettingsViewController : UITableViewController
 + (UIViewController *)settingsViewControllerWithLeftButton:(UIBarButtonItem *)button;

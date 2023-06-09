@@ -1,5 +1,4 @@
-#ifndef joypad_h
-#define joypad_h
+#pragma once
 #include "defs.h"
 #include <stdbool.h>
 
@@ -42,5 +41,4 @@ void GB_set_emulate_joypad_bouncing(GB_gameboy_t *gb, bool emulate);
 #ifdef GB_INTERNAL
 internal void GB_update_joyp(GB_gameboy_t *gb);
 internal void GB_joypad_run(GB_gameboy_t *gb, unsigned cycles);
-#endif
 #endif

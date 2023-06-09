@@ -1,5 +1,4 @@
-#ifndef display_h
-#define display_h
+#pragma once
 
 #include "gb.h"
 #include <stdbool.h>
@@ -78,6 +77,3 @@ void GB_set_object_rendering_disabled(GB_gameboy_t *gb, bool disabled);
 void GB_set_background_rendering_disabled(GB_gameboy_t *gb, bool disabled);
 bool GB_is_object_rendering_disabled(GB_gameboy_t *gb);
 bool GB_is_background_rendering_disabled(GB_gameboy_t *gb);
-
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef font_h
-#define font_h
+#pragma once
 
 #include <stdint.h>
 extern uint8_t font[];
@@ -20,6 +19,3 @@ extern const uint8_t font_max;
 #define COPYRIGHT_STRING "\x90"
 #define CHECKBOX_OFF_STRING "\x93"
 #define CHECKBOX_ON_STRING "\x94"
-
-#endif
-

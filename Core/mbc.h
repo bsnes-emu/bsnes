@@ -1,5 +1,4 @@
-#ifndef mbc_h
-#define mbc_h
+#pragma once
 #include "defs.h"
 #include <stdbool.h>
 
@@ -28,6 +27,4 @@ internal extern const GB_cartridge_t GB_cart_defs[256];
 internal void GB_update_mbc_mappings(GB_gameboy_t *gb);
 internal void GB_configure_cart(GB_gameboy_t *gb);
 internal void GB_reset_mbc(GB_gameboy_t *gb);
-#endif
-
 #endif

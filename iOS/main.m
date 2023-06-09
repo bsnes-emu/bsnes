@@ -1,5 +1,5 @@
 #import <UIKit/UIKit.h>
-#include <Core/gb.h>
+#import <Core/gb.h>
 #import "GBViewController.h"
 #import "GBView.h"
 

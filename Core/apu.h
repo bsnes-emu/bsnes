@@ -1,5 +1,4 @@
-#ifndef apu_h
-#define apu_h
+#pragma once
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
@@ -197,6 +196,3 @@ internal void GB_apu_div_secondary_event(GB_gameboy_t *gb);
 internal void GB_apu_init(GB_gameboy_t *gb);
 internal void GB_apu_run(GB_gameboy_t *gb, bool force);
 #endif
-
-#endif
-

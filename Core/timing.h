@@ -1,5 +1,5 @@
-#ifndef timing_h
-#define timing_h
+#pragma once
+
 #include "defs.h"
 
 typedef enum {
@@ -57,5 +57,3 @@ GB_STATE_MACHINE(gb, unit, cycles, divisor)
 #endif
 
 #define GB_UNIT(unit) int32_t unit##_cycles, unit##_state
-
-#endif

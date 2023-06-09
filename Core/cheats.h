@@ -1,5 +1,4 @@
-#ifndef cheats_h
-#define cheats_h
+#pragma once
 #ifndef GB_DISABLE_CHEATS
 #include "defs.h"
 
@@ -40,4 +39,3 @@ struct GB_cheat_s {
 #define GB_apply_cheat(...)
 #endif // GB_INTERNAL
 #endif // GB_DISABLE_CHEATS
-#endif

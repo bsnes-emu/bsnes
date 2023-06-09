@@ -1,5 +1,4 @@
-#ifndef camera_h
-#define camera_h
+#pragma once
 #include <stdint.h>
 #include "defs.h"
 
@@ -24,6 +23,4 @@ enum {
     GB_CAMERA_DITHERING_PATTERN_START = 6,
     GB_CAMERA_DITHERING_PATTERN_END = 0x35,
 };
-#endif
-
 #endif

@@ -1,5 +1,4 @@
-#ifndef sdl_audio_h
-#define sdl_audio_h
+#pragma once
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -41,5 +40,3 @@ typedef struct {
 }
 
 #define GB_AUDIO_DRIVER_REF(name) ({extern const GB_audio_driver_t name##driver; &name##driver;})
-
-#endif

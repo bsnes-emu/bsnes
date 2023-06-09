@@ -1,5 +1,4 @@
-#ifndef configuration_h
-#define configuration_h
+#pragma once
 
 #include <SDL.h>
 #include <Core/gb.h>
@@ -136,5 +135,3 @@ typedef struct {
 } configuration_t;
 
 extern configuration_t configuration;
-
-#endif

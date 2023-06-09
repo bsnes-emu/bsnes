@@ -1,5 +1,4 @@
-#ifndef opengl_compat_h
-#define opengl_compat_h
+#pragma once
 
 #define GL_GLEXT_PROTOTYPES
 #include <SDL_opengl.h>
@@ -40,6 +39,4 @@ if (!GL_COMPAT_NAME(func)) GL_COMPAT_NAME(func) = SDL_GL_GetProcAddress(#func); 
 #define glCompileShader GL_COMPAT_WRAPPER(glCompileShader)
 #define glGetShaderiv GL_COMPAT_WRAPPER(glGetShaderiv)
 #define glGetShaderInfoLog GL_COMPAT_WRAPPER(glGetShaderInfoLog)
-#endif
-
 #endif

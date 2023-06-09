@@ -1,5 +1,4 @@
-#ifndef GB_h
-#define GB_h
+#pragma once
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdalign.h>
@@ -1015,5 +1014,4 @@ internal void GB_clear_running_thread(GB_gameboy_t *gb);
 #define GB_clear_running_thread(gb)
 #endif
     
-#endif
 #endif

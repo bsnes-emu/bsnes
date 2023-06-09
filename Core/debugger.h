@@ -1,5 +1,4 @@
-#ifndef debugger_h
-#define debugger_h
+#pragma once
 #ifndef GB_DISABLE_DEBUGGER
 #include <stdbool.h>
 #include <stdint.h>
@@ -45,5 +44,3 @@ internal void GB_debugger_add_symbol(GB_gameboy_t *gb, uint16_t bank, uint16_t a
 #endif // GB_INTERNAL
 
 #endif // GB_DISABLE_DEBUGGER
-
-#endif

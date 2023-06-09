@@ -1,5 +1,4 @@
-#ifndef gui_h
-#define gui_h
+#pragma once
 
 #include <SDL.h>
 #include <Core/gb.h>
@@ -66,5 +65,3 @@ extern unsigned osd_countdown;
 extern unsigned osd_text_lines;
 void convert_mouse_coordinates(signed *x, signed *y);
 const GB_palette_t *current_dmg_palette(void);
-
-#endif

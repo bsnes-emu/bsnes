@@ -1,6 +1,6 @@
 #import "JOYElement.h"
-#include <IOKit/hid/IOHIDLib.h>
-#include <objc/runtime.h>
+#import <IOKit/hid/IOHIDLib.h>
+#import <objc/runtime.h>
 
 @implementation JOYElement
 {

@@ -1,5 +1,5 @@
-#ifndef printer_h
-#define printer_h
+#pragma once
+
 #include <stdint.h>
 #include <stdbool.h>
 #include "defs.h"
@@ -62,4 +62,3 @@ typedef struct
 
 
 void GB_connect_printer(GB_gameboy_t *gb, GB_print_image_callback_t callback, GB_printer_done_callback_t done_callback);
-#endif

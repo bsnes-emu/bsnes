@@ -1,5 +1,5 @@
-#ifndef sgb_h
-#define sgb_h
+#pragma once
+
 #include "defs.h"
 #include <stdint.h>
 #include <stdbool.h>
@@ -65,7 +65,5 @@ struct GB_sgb_s {
 internal void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
 internal void GB_sgb_render(GB_gameboy_t *gb);
 internal void GB_sgb_load_default_data(GB_gameboy_t *gb);
-
-#endif
 
 #endif

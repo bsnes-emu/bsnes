@@ -1,6 +1,6 @@
+#pragma once
+
 /* Macros to make the GB_gameboy_t struct more future compatible when state saving */
-#ifndef save_state_h
-#define save_state_h
 #include <stddef.h>
 
 #define GB_PADDING(type, old_usage) type old_usage##__do_not_use
@@ -53,6 +53,4 @@ static inline uint32_t GB_state_magic(void)
 /* For internal in-memory save states (rewind, debugger) that do not need BESS */
 internal size_t GB_get_save_state_size_no_bess(GB_gameboy_t *gb);
 internal void GB_save_state_to_buffer_no_bess(GB_gameboy_t *gb, uint8_t *buffer);
-#endif
-
 #endif
