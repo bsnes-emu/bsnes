@@ -3,8 +3,6 @@
 //multi-precision arithmetic
 //warning: each size is quadratically more expensive than the size before it!
 
-#include <stdexcept>
-
 #include <nall/stdint.hpp>
 #include <nall/string.hpp>
 #include <nall/range.hpp>
