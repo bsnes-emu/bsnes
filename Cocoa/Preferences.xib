@@ -77,15 +77,12 @@
                 <outlet property="highpassFilterPopupButton" destination="T69-6N-dhT" id="B5V-sQ-JmR"/>
                 <outlet property="hotkey1PopupButton" destination="qsH-w5-Rja" id="TFr-p8-IYo"/>
                 <outlet property="hotkey2PopupButton" destination="Ryk-mD-c0y" id="m2J-O5-dng"/>
-                <outlet property="interferenceSlider" destination="FpE-5i-j5L" id="hfH-e8-7cx"/>
                 <outlet property="joyconsSheet" destination="bn1-MD-iQb" id="rOY-jn-trO"/>
                 <outlet property="paletteEditor" destination="g32-xe-7al" id="WLk-Hh-h5v"/>
                 <outlet property="paletteEditorController" destination="Zxl-vm-6c9" id="uPS-zn-osL"/>
                 <outlet property="playerListButton" destination="gWx-7h-0xq" id="zo6-82-JId"/>
                 <outlet property="preferredJoypadButton" destination="0Az-0R-oNw" id="7JM-tw-BhK"/>
                 <outlet property="skipButton" destination="d2I-jU-sLb" id="udX-8K-0sK"/>
-                <outlet property="temperatureSlider" destination="NuA-mL-AJZ" id="w11-n7-Bmj"/>
-                <outlet property="volumeSlider" destination="LNs-v1-Eki" id="DU4-An-OrC"/>
             </connections>
             <point key="canvasLocation" x="183" y="354"/>
         </window>
@@ -237,13 +234,16 @@
                         <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBColorCorrection"/>
                     </userDefinedRuntimeAttributes>
                 </popUpButton>
-                <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NuA-mL-AJZ">
+                <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="NuA-mL-AJZ" customClass="GBPreferencesSlider">
                     <rect key="frame" x="32" y="226" width="259" height="28"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <sliderCell key="cell" continuous="YES" state="on" alignment="left" minValue="-256" maxValue="256" tickMarkPosition="below" numberOfTickMarks="3" sliderType="linear" id="KX7-G9-k0O"/>
-                    <connections>
-                        <action selector="lightTemperatureChanged:" target="QvC-M9-y7g" id="he8-ib-I3Y"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="number" keyPath="denominator">
+                            <integer key="value" value="256"/>
+                        </userDefinedRuntimeAttribute>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBLightTemperature"/>
+                    </userDefinedRuntimeAttributes>
                 </slider>
                 <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="cCm-Oa-FbN">
                     <rect key="frame" x="18" y="260" width="280" height="17"/>
@@ -612,13 +612,16 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LNs-v1-Eki">
+                <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="LNs-v1-Eki" customClass="GBPreferencesSlider">
                     <rect key="frame" x="30" y="130" width="262" height="28"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="256" doubleValue="256" tickMarkPosition="below" sliderType="linear" id="Xvk-Vj-NHx"/>
-                    <connections>
-                        <action selector="volumeChanged:" target="QvC-M9-y7g" id="4g3-NK-ay4"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBVolume"/>
+                        <userDefinedRuntimeAttribute type="number" keyPath="denominator">
+                            <integer key="value" value="256"/>
+                        </userDefinedRuntimeAttribute>
+                    </userDefinedRuntimeAttributes>
                 </slider>
                 <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="T69-6N-dhT" customClass="GBPreferencePopUpButton">
                     <rect key="frame" x="30" y="74" width="229" height="26"/>
@@ -658,13 +661,16 @@
                         <color key="backgroundColor" name="controlColor" catalog="System" colorSpace="catalog"/>
                     </textFieldCell>
                 </textField>
-                <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FpE-5i-j5L">
+                <slider verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="FpE-5i-j5L" customClass="GBPreferencesSlider">
                     <rect key="frame" x="30" y="18" width="262" height="28"/>
                     <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                     <sliderCell key="cell" continuous="YES" state="on" alignment="left" maxValue="256" tickMarkPosition="below" sliderType="linear" id="Rbx-DU-xYf"/>
-                    <connections>
-                        <action selector="interferenceVolumeChanged:" target="QvC-M9-y7g" id="HFU-0q-hj1"/>
-                    </connections>
+                    <userDefinedRuntimeAttributes>
+                        <userDefinedRuntimeAttribute type="string" keyPath="preferenceName" value="GBInterferenceVolume"/>
+                        <userDefinedRuntimeAttribute type="number" keyPath="denominator">
+                            <integer key="value" value="256"/>
+                        </userDefinedRuntimeAttribute>
+                    </userDefinedRuntimeAttributes>
                 </slider>
                 <button horizontalHuggingPriority="750" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="8Ub-0B-W2H">
                     <rect key="frame" x="266" y="74" width="25" height="25"/>

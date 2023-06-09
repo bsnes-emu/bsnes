@@ -125,25 +125,6 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
     previousModifiers = event.modifierFlags;
 }
 
-
-- (IBAction)lightTemperatureChanged:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setObject:@([sender doubleValue] / 256.0)
-                                              forKey:@"GBLightTemperature"];
-}
-
-- (IBAction)interferenceVolumeChanged:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setObject:@([sender doubleValue] / 256.0)
-                                              forKey:@"GBInterferenceVolume"];
-}
-
-- (IBAction)volumeChanged:(id)sender
-{
-    [[NSUserDefaults standardUserDefaults] setObject:@([sender doubleValue] / 256.0)
-                                              forKey:@"GBVolume"];
-}
-
 - (void)updatePalettesMenu
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -356,9 +337,6 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
     else {
         [_colorPalettePopupButton selectItemWithTitle:[[NSUserDefaults standardUserDefaults] stringForKey:@"GBCurrentTheme"] ?: @""];
     }
-    [_volumeSlider setDoubleValue:[[NSUserDefaults standardUserDefaults] doubleForKey:@"GBVolume"] * 256];
-    [_interferenceSlider setDoubleValue:[[NSUserDefaults standardUserDefaults] doubleForKey:@"GBInterferenceVolume"] * 256];
-    [_temperatureSlider setDoubleValue:[[NSUserDefaults standardUserDefaults] doubleForKey:@"GBLightTemperature"] * 256];
 }
 
 - (void)dealloc

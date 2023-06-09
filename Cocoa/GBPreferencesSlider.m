@@ -1,18 +1,18 @@
-#import "GBPreferenceButton.h"
+#import "GBPreferencesSlider.h"
 #import "NSObject+DefaultsObserver.h"
 
-@implementation GBPreferenceButton
+@implementation GBPreferencesSlider
 
 - (BOOL)sendAction:(SEL)action to:(id)target
 {
-    [[NSUserDefaults standardUserDefaults] setBool:self.state ^ self.invertValue forKey:_preferenceName];
+    [[NSUserDefaults standardUserDefaults] setDouble:self.doubleValue / (self.denominator ?: 1) forKey:_preferenceName];
     return [super sendAction:action to:target];
 }
 
 - (void)updateValue
 {
     if (!_preferenceName) return;
-    self.state = [[NSUserDefaults standardUserDefaults] boolForKey:_preferenceName]  ^ self.invertValue;
+    self.doubleValue = [[NSUserDefaults standardUserDefaults] doubleForKey:_preferenceName] * (self.denominator ?: 1);
 }
 
 - (void)setPreferenceName:(NSString *)preferenceName
@@ -26,5 +26,4 @@
     [super viewDidMoveToWindow];
     [self updateValue];
 }
-
 @end
