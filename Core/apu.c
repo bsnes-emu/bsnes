@@ -1750,3 +1750,49 @@ bool GB_is_channel_muted(GB_gameboy_t *gb, GB_channel_t channel)
 {
     return gb->apu_output.channel_muted[channel];
 }
+
+uint8_t GB_get_channel_volume(GB_gameboy_t *gb, GB_channel_t channel) {
+    switch (channel) {
+        case GB_SQUARE_1:
+        case GB_SQUARE_2:
+            return gb->apu.square_channels[channel].current_volume;
+
+        case GB_WAVE:
+            return (const uint8_t[]){0, 4, 8, 0, 0xF}[gb->apu.wave_channel.shift];
+
+        case GB_NOISE:
+            return gb->apu.noise_channel.current_volume;
+
+        default:
+            return 0;
+    }
+}
+
+uint8_t GB_get_channel_amplitude(GB_gameboy_t *gb, GB_channel_t channel) {
+    return gb->apu.is_active[channel] ? gb->apu.samples[channel] : 0;
+}
+
+uint16_t GB_get_channel_period(GB_gameboy_t *gb, GB_channel_t channel) {
+    switch (channel) {
+        case GB_SQUARE_1:
+        case GB_SQUARE_2:
+            return gb->apu.square_channels[channel].sample_length;
+
+        case GB_WAVE:
+            return gb->apu.wave_channel.sample_length;
+
+        case GB_NOISE:
+            return (gb->io_registers[GB_IO_NR43] & 7) << (gb->io_registers[GB_IO_NR43] >> 4);
+
+        default:
+            return 0;
+    }
+}
+
+// wave_table is a user allocated uint8_t[32] array
+void GB_get_apu_wave_table(GB_gameboy_t *gb, uint8_t *wave_table) {
+    for (unsigned i = GB_IO_WAV_START; i <= GB_IO_WAV_END; i++) {
+        wave_table[2 * (i - GB_IO_WAV_START)] = gb->io_registers[i] >> 4;
+        wave_table[2 * (i - GB_IO_WAV_START) + 1] = gb->io_registers[i] & 0xF;
+    }
+}
