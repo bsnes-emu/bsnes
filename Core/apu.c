@@ -726,8 +726,10 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
                         gb->apu.pcm_mask[0] &= i == GB_SQUARE_1? 0xF0 : 0x0F;
                     }
                     gb->apu.square_channels[i].did_tick = true;
-                    gb->apu.square_channels[i].edge_triggered = true;
                     update_square_sample(gb, i);
+                    if (gb->apu.square_channels[i].current_sample_index == 0) {
+                        gb->apu.square_channels[i].edge_triggered = true;
+                    }
                 }
                 if (cycles_left) {
                     gb->apu.square_channels[i].sample_countdown -= cycles_left;
@@ -747,7 +749,9 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
                     gb->io_registers[GB_IO_WAV_START + (gb->apu.wave_channel.current_sample_index >> 1)];
                 update_wave_sample(gb, cycles - cycles_left);
                 gb->apu.wave_channel.wave_form_just_read = true;
-                gb->apu.wave_channel.edge_triggered = true;
+                if (gb->apu.wave_channel.current_sample_index == 0) {
+                    gb->apu.wave_channel.edge_triggered = true;
+                }
             }
             if (cycles_left) {
                 gb->apu.wave_channel.sample_countdown -= cycles_left;
