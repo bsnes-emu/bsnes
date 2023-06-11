@@ -727,7 +727,10 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
                     }
                     gb->apu.square_channels[i].did_tick = true;
                     update_square_sample(gb, i);
-                    if (gb->apu.square_channels[i].current_sample_index == 0) {
+
+                    uint8_t duty = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR11 :GB_IO_NR21] >> 6;
+                    uint8_t edge_sample_index = (const uint8_t[]){7, 7, 5, 1}[duty];
+                    if (gb->apu.square_channels[i].current_sample_index == edge_sample_index) {
                         gb->apu.square_channels[i].edge_triggered = true;
                     }
                 }
