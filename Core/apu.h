@@ -92,6 +92,8 @@ typedef struct
         GB_envelope_clock_t envelope_clock;
         uint8_t delay; // Hack for CGB D/E phantom step due to how sample_countdown is implemented in SameBoy
         bool did_tick;
+
+        bool edge_triggered;
     } square_channels[2];
 
     struct {
@@ -107,6 +109,8 @@ typedef struct
         bool wave_form_just_read;
         bool pulsed;
         uint8_t bugged_read_countdown;
+
+        bool edge_triggered;
     } wave_channel;
 
     struct {
@@ -127,6 +131,8 @@ typedef struct
         bool countdown_reloaded;
         uint8_t dmg_delayed_start;
         GB_envelope_clock_t envelope_clock;
+
+        bool edge_triggered;
     } noise_channel;
 
     GB_ENUM(uint8_t, {
@@ -192,6 +198,7 @@ uint8_t GB_get_channel_volume(GB_gameboy_t *gb, GB_channel_t channel);
 uint8_t GB_get_channel_amplitude(GB_gameboy_t *gb, GB_channel_t channel);
 uint16_t GB_get_channel_period(GB_gameboy_t *gb, GB_channel_t channel);
 void GB_get_apu_wave_table(GB_gameboy_t *gb, uint8_t *wave_table);
+bool GB_get_channel_edge_triggered(GB_gameboy_t *gb, GB_channel_t channel);
 #ifdef GB_INTERNAL
 internal bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, GB_channel_t index);
 internal void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);

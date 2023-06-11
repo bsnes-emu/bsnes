@@ -726,6 +726,7 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
                         gb->apu.pcm_mask[0] &= i == GB_SQUARE_1? 0xF0 : 0x0F;
                     }
                     gb->apu.square_channels[i].did_tick = true;
+                    gb->apu.square_channels[i].edge_triggered = true;
                     update_square_sample(gb, i);
                 }
                 if (cycles_left) {
@@ -746,6 +747,7 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
                     gb->io_registers[GB_IO_WAV_START + (gb->apu.wave_channel.current_sample_index >> 1)];
                 update_wave_sample(gb, cycles - cycles_left);
                 gb->apu.wave_channel.wave_form_just_read = true;
+                gb->apu.wave_channel.edge_triggered = true;
             }
             if (cycles_left) {
                 gb->apu.wave_channel.sample_countdown -= cycles_left;
@@ -805,6 +807,7 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
             }
             else {
                 gb->apu.noise_channel.countdown_reloaded = true;
+                gb->apu.noise_channel.edge_triggered = true;
             }
         }
     }
@@ -1795,4 +1798,29 @@ void GB_get_apu_wave_table(GB_gameboy_t *gb, uint8_t *wave_table) {
         wave_table[2 * (i - GB_IO_WAV_START)] = gb->io_registers[i] >> 4;
         wave_table[2 * (i - GB_IO_WAV_START) + 1] = gb->io_registers[i] & 0xF;
     }
+}
+
+bool GB_get_channel_edge_triggered(GB_gameboy_t *gb, GB_channel_t channel) {
+    bool edge_triggered;
+    switch (channel) {
+        case GB_SQUARE_1:
+        case GB_SQUARE_2:
+            edge_triggered = gb->apu.square_channels[channel].edge_triggered;
+            gb->apu.square_channels[channel].edge_triggered = false;
+            break;
+
+        case GB_WAVE:
+            edge_triggered = gb->apu.wave_channel.edge_triggered;
+            gb->apu.wave_channel.edge_triggered = false;
+            break;
+
+        case GB_NOISE:
+            edge_triggered = gb->apu.noise_channel.edge_triggered;
+            gb->apu.noise_channel.edge_triggered = false;
+            break;
+
+        default:
+            return false;
+    }
+    return edge_triggered;
 }
