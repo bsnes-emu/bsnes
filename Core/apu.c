@@ -1768,7 +1768,7 @@ uint8_t GB_get_channel_volume(GB_gameboy_t *gb, GB_channel_t channel) {
             return gb->apu.square_channels[channel].current_volume;
 
         case GB_WAVE:
-            return (const uint8_t[]){0, 4, 8, 0, 0xF}[gb->apu.wave_channel.shift];
+            return (const uint8_t[]){0xF, 8, 4, 0, 0}[gb->apu.wave_channel.shift];
 
         case GB_NOISE:
             return gb->apu.noise_channel.current_volume;
