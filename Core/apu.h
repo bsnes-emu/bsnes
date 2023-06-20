@@ -92,8 +92,6 @@ typedef struct
         GB_envelope_clock_t envelope_clock;
         uint8_t delay; // Hack for CGB D/E phantom step due to how sample_countdown is implemented in SameBoy
         bool did_tick;
-
-        bool edge_triggered;
     } square_channels[2];
 
     struct {
@@ -109,8 +107,6 @@ typedef struct
         bool wave_form_just_read;
         bool pulsed;
         uint8_t bugged_read_countdown;
-
-        bool edge_triggered;
     } wave_channel;
 
     struct {
@@ -131,8 +127,6 @@ typedef struct
         bool countdown_reloaded;
         uint8_t dmg_delayed_start;
         GB_envelope_clock_t envelope_clock;
-
-        bool edge_triggered;
     } noise_channel;
 
     GB_ENUM(uint8_t, {
@@ -168,6 +162,7 @@ typedef struct {
     GB_sample_t summed_samples[GB_N_CHANNELS];
     double dac_discharge[GB_N_CHANNELS];
     bool channel_muted[GB_N_CHANNELS];
+    bool edge_triggered[GB_N_CHANNELS];
 
     GB_highpass_mode_t highpass_mode;
     double highpass_rate;

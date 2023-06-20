@@ -731,7 +731,7 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
                     uint8_t duty = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR11 :GB_IO_NR21] >> 6;
                     uint8_t edge_sample_index = (const uint8_t[]){7, 7, 5, 1}[duty];
                     if (gb->apu.square_channels[i].current_sample_index == edge_sample_index) {
-                        gb->apu.square_channels[i].edge_triggered = true;
+                        gb->apu_output.edge_triggered[i] = true;
                     }
                 }
                 if (cycles_left) {
@@ -753,7 +753,7 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
                 update_wave_sample(gb, cycles - cycles_left);
                 gb->apu.wave_channel.wave_form_just_read = true;
                 if (gb->apu.wave_channel.current_sample_index == 0) {
-                    gb->apu.wave_channel.edge_triggered = true;
+                    gb->apu_output.edge_triggered[GB_WAVE] = true;
                 }
             }
             if (cycles_left) {
@@ -814,7 +814,7 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
             }
             else {
                 gb->apu.noise_channel.countdown_reloaded = true;
-                gb->apu.noise_channel.edge_triggered = true;
+                gb->apu_output.edge_triggered[GB_NOISE] = true;
             }
         }
     }
@@ -1808,26 +1808,7 @@ void GB_get_apu_wave_table(GB_gameboy_t *gb, uint8_t *wave_table) {
 }
 
 bool GB_get_channel_edge_triggered(GB_gameboy_t *gb, GB_channel_t channel) {
-    bool edge_triggered;
-    switch (channel) {
-        case GB_SQUARE_1:
-        case GB_SQUARE_2:
-            edge_triggered = gb->apu.square_channels[channel].edge_triggered;
-            gb->apu.square_channels[channel].edge_triggered = false;
-            break;
-
-        case GB_WAVE:
-            edge_triggered = gb->apu.wave_channel.edge_triggered;
-            gb->apu.wave_channel.edge_triggered = false;
-            break;
-
-        case GB_NOISE:
-            edge_triggered = gb->apu.noise_channel.edge_triggered;
-            gb->apu.noise_channel.edge_triggered = false;
-            break;
-
-        default:
-            return false;
-    }
+    bool edge_triggered = gb->apu_output.edge_triggered[channel];
+    gb->apu_output.edge_triggered[channel] = false;
     return edge_triggered;
 }
