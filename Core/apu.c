@@ -1762,7 +1762,8 @@ bool GB_is_channel_muted(GB_gameboy_t *gb, GB_channel_t channel)
 }
 
 // Note: this intentionally does not check to see if the channel is muted.
-uint8_t GB_get_channel_volume(GB_gameboy_t *gb, GB_channel_t channel) {
+uint8_t GB_get_channel_volume(GB_gameboy_t *gb, GB_channel_t channel)
+{
     switch (channel) {
         case GB_SQUARE_1:
         case GB_SQUARE_2:
