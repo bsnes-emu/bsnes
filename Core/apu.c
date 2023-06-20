@@ -727,6 +727,12 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
                     }
                     gb->apu.square_channels[i].did_tick = true;
                     update_square_sample(gb, i);
+
+                    uint8_t duty = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR11 :GB_IO_NR21] >> 6;
+                    uint8_t edge_sample_index = (const uint8_t[]){7, 7, 5, 1}[duty];
+                    if (gb->apu.square_channels[i].current_sample_index == edge_sample_index) {
+                        gb->apu_output.edge_triggered[i] = true;
+                    }
                 }
                 if (cycles_left) {
                     gb->apu.square_channels[i].sample_countdown -= cycles_left;
@@ -746,6 +752,9 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
                     gb->io_registers[GB_IO_WAV_START + (gb->apu.wave_channel.current_sample_index >> 1)];
                 update_wave_sample(gb, cycles - cycles_left);
                 gb->apu.wave_channel.wave_form_just_read = true;
+                if (gb->apu.wave_channel.current_sample_index == 0) {
+                    gb->apu_output.edge_triggered[GB_WAVE] = true;
+                }
             }
             if (cycles_left) {
                 gb->apu.wave_channel.sample_countdown -= cycles_left;
@@ -805,6 +814,7 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
             }
             else {
                 gb->apu.noise_channel.countdown_reloaded = true;
+                gb->apu_output.edge_triggered[GB_NOISE] = true;
             }
         }
     }
@@ -1749,4 +1759,62 @@ void GB_set_channel_muted(GB_gameboy_t *gb, GB_channel_t channel, bool muted)
 bool GB_is_channel_muted(GB_gameboy_t *gb, GB_channel_t channel)
 {
     return gb->apu_output.channel_muted[channel];
+}
+
+// Note: this intentionally does not check to see if the channel is muted.
+uint8_t GB_get_channel_volume(GB_gameboy_t *gb, GB_channel_t channel)
+{
+    switch (channel) {
+        case GB_SQUARE_1:
+        case GB_SQUARE_2:
+            return gb->apu.square_channels[channel].current_volume;
+
+        case GB_WAVE:
+            return (const uint8_t[]){0xF, 8, 4, 0, 0}[gb->apu.wave_channel.shift];
+
+        case GB_NOISE:
+            return gb->apu.noise_channel.current_volume;
+
+        default:
+            return 0;
+    }
+}
+
+uint8_t GB_get_channel_amplitude(GB_gameboy_t *gb, GB_channel_t channel)
+{
+    return gb->apu.is_active[channel] ? gb->apu.samples[channel] : 0;
+}
+
+uint16_t GB_get_channel_period(GB_gameboy_t *gb, GB_channel_t channel)
+{
+    switch (channel) {
+        case GB_SQUARE_1:
+        case GB_SQUARE_2:
+            return gb->apu.square_channels[channel].sample_length;
+
+        case GB_WAVE:
+            return gb->apu.wave_channel.sample_length;
+
+        case GB_NOISE:
+            return (gb->io_registers[GB_IO_NR43] & 7) << (gb->io_registers[GB_IO_NR43] >> 4);
+
+        default:
+            return 0;
+    }
+}
+
+// wave_table is a user allocated uint8_t[32] array
+void GB_get_apu_wave_table(GB_gameboy_t *gb, uint8_t *wave_table)
+{
+    for (unsigned i = GB_IO_WAV_START; i <= GB_IO_WAV_END; i++) {
+        wave_table[2 * (i - GB_IO_WAV_START)] = gb->io_registers[i] >> 4;
+        wave_table[2 * (i - GB_IO_WAV_START) + 1] = gb->io_registers[i] & 0xF;
+    }
+}
+
+bool GB_get_channel_edge_triggered(GB_gameboy_t *gb, GB_channel_t channel)
+{
+    bool edge_triggered = gb->apu_output.edge_triggered[channel];
+    gb->apu_output.edge_triggered[channel] = false;
+    return edge_triggered;
 }

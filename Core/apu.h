@@ -162,6 +162,7 @@ typedef struct {
     GB_sample_t summed_samples[GB_N_CHANNELS];
     double dac_discharge[GB_N_CHANNELS];
     bool channel_muted[GB_N_CHANNELS];
+    bool edge_triggered[GB_N_CHANNELS];
 
     GB_highpass_mode_t highpass_mode;
     double highpass_rate;
@@ -188,6 +189,11 @@ void GB_set_interference_volume(GB_gameboy_t *gb, double volume);
 void GB_apu_set_sample_callback(GB_gameboy_t *gb, GB_sample_callback_t callback);
 int GB_start_audio_recording(GB_gameboy_t *gb, const char *path, GB_audio_format_t format);
 int GB_stop_audio_recording(GB_gameboy_t *gb);
+uint8_t GB_get_channel_volume(GB_gameboy_t *gb, GB_channel_t channel);
+uint8_t GB_get_channel_amplitude(GB_gameboy_t *gb, GB_channel_t channel);
+uint16_t GB_get_channel_period(GB_gameboy_t *gb, GB_channel_t channel);
+void GB_get_apu_wave_table(GB_gameboy_t *gb, uint8_t *wave_table);
+bool GB_get_channel_edge_triggered(GB_gameboy_t *gb, GB_channel_t channel);
 #ifdef GB_INTERNAL
 internal bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, GB_channel_t index);
 internal void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);
