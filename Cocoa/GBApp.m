@@ -590,7 +590,7 @@ static uint32_t color_to_int(NSColor *color)
     
     JOYButtonUsage usage = ((JOYButtonUsage)[mapping[n2s(button.uniqueID)] unsignedIntValue]) ?: -1;
     if (!mapping && usage >= JOYButtonUsageGeneric0) {
-        usage = (const JOYButtonUsage[]){JOYButtonUsageY, JOYButtonUsageA, JOYButtonUsageB, JOYButtonUsageX}[(usage - JOYButtonUsageGeneric0) & 3];
+        usage = GB_inline_const(JOYButtonUsage[], {JOYButtonUsageY, JOYButtonUsageA, JOYButtonUsageB, JOYButtonUsageX})[(usage - JOYButtonUsageGeneric0) & 3];
     }
     
     if (usage == GBJoyKitHotkey1 || usage == GBJoyKitHotkey2) {

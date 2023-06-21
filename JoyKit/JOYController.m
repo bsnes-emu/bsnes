@@ -587,8 +587,8 @@ typedef union {
     }
     
     if (_isSwitch) {
-        [self sendReport:[NSData dataWithBytes:(uint8_t[]){0x80, 0x04} length:2]];
-        [self sendReport:[NSData dataWithBytes:(uint8_t[]){0x80, 0x02} length:2]];
+        [self sendReport:[NSData dataWithBytes:inline_const(uint8_t[], {0x80, 0x04}) length:2]];
+        [self sendReport:[NSData dataWithBytes:inline_const(uint8_t[], {0x80, 0x02}) length:2]];
         
         _lastVendorSpecificOutput.switchPacket.reportID = 0x1; // Rumble and LEDs
         _lastVendorSpecificOutput.switchPacket.sequence++;

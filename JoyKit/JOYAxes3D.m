@@ -17,12 +17,12 @@
 + (NSString *)usageToString: (JOYAxes3DUsage) usage
 {
     if (usage < JOYAxes3DUsageNonGenericMax) {
-        return (NSString *[]) {
+        return inline_const(NSString *[], {
             @"None",
             @"Acceleretion",
             @"Orientation",
             @"Gyroscope",
-        }[usage];
+        })[usage];
     }
     if (usage >= JOYAxes3DUsageGeneric0) {
         return [NSString stringWithFormat:@"Generic 3D Analog Control %d", usage - JOYAxes3DUsageGeneric0];

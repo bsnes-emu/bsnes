@@ -17,13 +17,13 @@
 + (NSString *)usageToString: (JOYAxes2DUsage) usage
 {
     if (usage < JOYAxes2DUsageNonGenericMax) {
-        return (NSString *[]) {
+        return inline_const(NSString *[], {
             @"None",
             @"Left Stick",
             @"Right Stick",
             @"Middle Stick",
             @"Pointer",
-        }[usage];
+        })[usage];
     }
     if (usage >= JOYAxes2DUsageGeneric0) {
         return [NSString stringWithFormat:@"Generic 2D Analog Control %d", usage - JOYAxes2DUsageGeneric0];

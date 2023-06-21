@@ -2,12 +2,14 @@
 
 #define GB_likely(x)   __builtin_expect((bool)(x), 1)
 #define GB_unlikely(x) __builtin_expect((bool)(x), 0)
+#define GB_inline_const(type, ...) (*({static const typeof(type) _= __VA_ARGS__; &_;}))
 
 #ifdef GB_INTERNAL
 
 // "Keyword" definitions
 #define likely(x)   GB_likely(x)
 #define unlikely(x) GB_unlikely(x)
+#define inline_const GB_inline_const
 #define typeof __typeof__
 
 #if !defined(MIN)

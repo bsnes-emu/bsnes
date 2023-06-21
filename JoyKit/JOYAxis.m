@@ -11,7 +11,7 @@
 + (NSString *)usageToString: (JOYAxisUsage) usage
 {
     if (usage < JOYAxisUsageNonGenericMax) {
-        return (NSString *[]) {
+        return inline_const(NSString *[], {
             @"None",
             @"Analog L1",
             @"Analog L2",
@@ -26,7 +26,7 @@
             @"Throttle",
             @"Accelerator",
             @"Brake",
-        }[usage];
+        })[usage];
     }
     if (usage >= JOYAxisUsageGeneric0) {
         return [NSString stringWithFormat:@"Generic Analog Control %d", usage - JOYAxisUsageGeneric0];

@@ -1834,7 +1834,7 @@ static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
     GB_log(gb, "Window position: %d, %d\n", (signed) gb->io_registers[GB_IO_WX] - 7, gb->io_registers[GB_IO_WY]);
     GB_log(gb, "Interrupt line: %s\n", gb->stat_interrupt_line? "On" : "Off");
     GB_log(gb, "Background shifter size: %d\n", gb->bg_fifo.size);
-    GB_log(gb, "Background fetcher state: %s\n", (const char *[]){
+    GB_log(gb, "Background fetcher state: %s\n", inline_const(const char *[], {
         "Tile (1/2)",
         "Tile (2/2)",
         "Low data (1/2)",
@@ -1843,7 +1843,7 @@ static bool lcd(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
         "High data (2/2)",
         "Push (1/2)",
         "Push (2/2)",
-    }[gb->fetcher_state & 7]);
+    })[gb->fetcher_state & 7]);
 
     return true;
 }
@@ -1919,8 +1919,8 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
 
         uint8_t duty = gb->io_registers[channel == GB_SQUARE_1? GB_IO_NR11 :GB_IO_NR21] >> 6;
         GB_log(gb, "    Duty cycle %s%% (%s), current index %u/8%s\n",
-               duty > 3? "" : (const char *const[]){"12.5", "  25", "  50", "  75"}[duty],
-               duty > 3? "" : (const char *const[]){"_______-", "-______-", "-____---", "_------_"}[duty],
+               duty > 3? "" : inline_const(const char *[], {"12.5", "  25", "  50", "  75"})[duty],
+               duty > 3? "" : inline_const(const char *[], {"_______-", "-______-", "-____---", "_------_"})[duty],
                gb->apu.square_channels[channel].current_sample_index,
                gb->apu.square_channels[channel].sample_surpressed ? " (suppressed)" : "");
 
@@ -1955,7 +1955,7 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
         GB_log(gb, "    Current position: %u\n", gb->apu.wave_channel.current_sample_index);
 
         GB_log(gb, "    Volume %s (right-shifted %u times)\n",
-               gb->apu.wave_channel.shift > 4? "" : (const char *const[]){"100%", "50%", "25%", "", "muted"}[gb->apu.wave_channel.shift],
+               gb->apu.wave_channel.shift > 4? "" : inline_const(const char *[], {"100%", "50%", "25%", "", "muted"})[gb->apu.wave_channel.shift],
                gb->apu.wave_channel.shift);
 
         GB_log(gb, "    Current sample length: %u APU ticks (next in %u ticks)\n",

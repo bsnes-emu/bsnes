@@ -536,7 +536,7 @@ static const uint8_t workboy_vk_to_key[] = {
         
         JOYButtonUsage usage = ((JOYButtonUsage)[mapping[n2s(button.uniqueID)] unsignedIntValue]) ?: button.usage;
         if (!mapping && usage >= JOYButtonUsageGeneric0) {
-            usage = (const JOYButtonUsage[]){JOYButtonUsageY, JOYButtonUsageA, JOYButtonUsageB, JOYButtonUsageX}[(usage - JOYButtonUsageGeneric0) & 3];
+            usage = GB_inline_const(JOYButtonUsage[], {JOYButtonUsageY, JOYButtonUsageA, JOYButtonUsageB, JOYButtonUsageX})[(usage - JOYButtonUsageGeneric0) & 3];
         }
         
         GB_gameboy_t *effectiveGB = _gb;

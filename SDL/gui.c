@@ -952,7 +952,7 @@ static void cycle_model_backwards(unsigned index)
 
 static const char *current_model_string(unsigned index)
 {
-    return (const char *[]){"Game Boy", "Game Boy Color", "Game Boy Advance", "Super Game Boy", "Game Boy Pocket"}
+    return GB_inline_const(const char *[], {"Game Boy", "Game Boy Color", "Game Boy Advance", "Super Game Boy", "Game Boy Pocket"})
         [configuration.model];
 }
 
@@ -981,14 +981,14 @@ static void cycle_cgb_revision_backwards(unsigned index)
 
 static const char *current_cgb_revision_string(unsigned index)
 {
-    return (const char *[]){
+    return GB_inline_const(const char *[], {
         "CPU CGB 0 (Exp.)",
         "CPU CGB A (Exp.)",
         "CPU CGB B (Exp.)",
         "CPU CGB C (Exp.)",
         "CPU CGB D",
         "CPU CGB E",
-    }
+    })
     [configuration.cgb_revision];
 }
 
@@ -1013,8 +1013,8 @@ static void cycle_sgb_revision_backwards(unsigned index)
 
 static const char *current_sgb_revision_string(unsigned index)
 {
-    return (const char *[]){"Super Game Boy NTSC", "Super Game Boy PAL", "Super Game Boy 2"}
-    [configuration.sgb_revision];
+    return GB_inline_const(const char *[], {"Super Game Boy NTSC", "Super Game Boy PAL", "Super Game Boy 2"})
+        [configuration.sgb_revision];
 }
 
 static const uint32_t rewind_lengths[] = {0, 10, 30, 60, 60 * 2, 60 * 5, 60 * 10};
@@ -1154,19 +1154,19 @@ static void enter_emulation_menu(unsigned index)
 
 static const char *current_scaling_mode(unsigned index)
 {
-    return (const char *[]){"Fill Entire Window", "Retain Aspect Ratio", "Retain Integer Factor"}
+    return GB_inline_const(const char *[], {"Fill Entire Window", "Retain Aspect Ratio", "Retain Integer Factor"})
         [configuration.scaling_mode];
 }
 
 static const char *current_default_scale(unsigned index)
 {
-    return (const char *[]){"1x", "2x", "3x", "4x", "5x", "6x", "7x", "8x"}
+    return GB_inline_const(const char *[], {"1x", "2x", "3x", "4x", "5x", "6x", "7x", "8x"})
         [configuration.default_scale - 1];
 }
 
 const char *current_color_correction_mode(unsigned index)
 {
-    return (const char *[]){"Disabled", "Correct Color Curves", "Modern - Balanced", "Modern - Boost Contrast", "Reduce Contrast", "Harsh Reality", "Modern - Accurate"}
+    return GB_inline_const(const char *[], {"Disabled", "Correct Color Curves", "Modern - Balanced", "Modern - Boost Contrast", "Reduce Contrast", "Harsh Reality", "Modern - Accurate"})
         [configuration.color_correction_mode];
 }
 
@@ -1184,13 +1184,13 @@ const char *current_palette(unsigned index)
     if (configuration.dmg_palette == 4) {
         return configuration.dmg_palette_name;
     }
-    return (const char *[]){"Greyscale", "Lime (Game Boy)", "Olive (Pocket)", "Teal (Light)"}
+    return GB_inline_const(const char *[], {"Greyscale", "Lime (Game Boy)", "Olive (Pocket)", "Teal (Light)"})
         [configuration.dmg_palette];
 }
 
 const char *current_border_mode(unsigned index)
 {
-    return (const char *[]){"SGB Only", "Never", "Always"}
+    return GB_inline_const(const char *[], {"SGB Only", "Never", "Always"})
         [configuration.border_mode];
 }
 
@@ -1538,8 +1538,8 @@ static void cycle_blending_mode_backwards(unsigned index)
 static const char *blending_mode_string(unsigned index)
 {
     if (!uses_gl()) return "Requires OpenGL 3.2+";
-    return (const char *[]){"Disabled", "Simple", "Accurate"}
-    [configuration.blending_mode];
+    return GB_inline_const(const char *[], {"Disabled", "Simple", "Accurate"})
+        [configuration.blending_mode];
 }
 
 static void toggle_osd(unsigned index)
@@ -1577,7 +1577,7 @@ static void enter_graphics_menu(unsigned index)
 
 static const char *highpass_filter_string(unsigned index)
 {
-    return (const char *[]){"None (Keep DC Offset)", "Accurate", "Preserve Waveform"}
+    return GB_inline_const(const char *[], {"None (Keep DC Offset)", "Accurate", "Preserve Waveform"})
         [configuration.highpass_mode];
 }
 
@@ -1891,8 +1891,8 @@ static void cycle_rumble_mode_backwards(unsigned index)
 
 static const char *current_rumble_mode(unsigned index)
 {
-    return (const char *[]){"Disabled", "Rumble Game Paks Only", "All Games"}
-    [configuration.rumble_mode];
+    return GB_inline_const(const char *[], {"Disabled", "Rumble Game Paks Only", "All Games"})
+        [configuration.rumble_mode];
 }
 
 static void toggle_allow_background_controllers(unsigned index)
@@ -1930,7 +1930,7 @@ static void cycle_hotkey_backwards(unsigned index)
 
 static const char *current_hotkey(unsigned index)
 {
-    return (const char *[]){
+    return GB_inline_const(const char *[], {
         "None",
         "Toggle Pause",
         "Toggle Mute",
@@ -1956,8 +1956,7 @@ static const char *current_hotkey(unsigned index)
         "Load State Slot 9",
         "Save State Slot 10",
         "Load State Slot 10",
-    }
-    [configuration.hotkey_actions[index - 2]];
+    }) [configuration.hotkey_actions[index - 2]];
 }
 
 static const struct menu_item joypad_menu[] = {
@@ -2721,8 +2720,7 @@ void run_gui(bool is_running)
                                        joypad_configuration_progress != JOYPAD_BUTTONS_MAX ? "Press button for" : "Move the Analog Stick",
                                        gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);
                     draw_styled_text(pixels, width, height, 80 + y_offset,
-                                      (const char *[])
-                                       {
+                                      GB_inline_const(const char *[], {
                                            "Right",
                                            "Left",
                                            "Up",
@@ -2738,8 +2736,8 @@ void run_gui(bool is_running)
                                            "Hotkey 1",
                                            "Hotkey 2",
                                            "",
-                                       } [joypad_configuration_progress],
-                                       gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);
+                                      }) [joypad_configuration_progress],
+                                      gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);
                     draw_styled_text(pixels, width, height, 104 + y_offset, "Press Enter to skip", gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);
                     break;
                 case TEXT_INPUT:

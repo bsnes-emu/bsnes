@@ -15,7 +15,7 @@
 + (NSString *)usageToString: (JOYButtonUsage) usage
 {
     if (usage < JOYButtonUsageNonGenericMax) {
-        return (NSString *[]) {
+        return inline_const(NSString *[], {
             @"None",
             @"A",
             @"B",
@@ -39,7 +39,7 @@
             @"D-Pad Right",
             @"D-Pad Up",
             @"D-Pad Down",
-        }[usage];
+        })[usage];
     }
     if (usage >= JOYButtonUsageGeneric0) {
         return [NSString stringWithFormat:@"Generic Button %d", usage - JOYButtonUsageGeneric0];
