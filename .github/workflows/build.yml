@@ -114,6 +114,10 @@ jobs:
         {
           github_rest DELETE "/repos/${GITHUB_REPOSITORY}/releases/${1}"
         }
+        github_delete_tag()
+        {
+          github_rest DELETE "/repos/${GITHUB_REPOSITORY}/git/refs/tags/${1}"
+        }
         github_create_release()
         {
           local payload="{
@@ -156,7 +160,12 @@ jobs:
             { release_id=$(github_get_release_id_for_tag nightly); status=$?; } || true
             # Delete existing nightly release if it exists.
             case ${status} in
-              0) github_delete_release_by_id "${release_id}" ;;
+              0)
+                  github_delete_release_by_id "${release_id}"
+                  # Deleting the 'nightly' release doesn't delete
+                  # the 'nightly' tag, so let's do it manually.
+                  github_delete_tag nightly
+                  ;;
               22) >&2 echo "No current nightly release; skipping tag deletion." ;;
               *) >&2 echo "API call failed unexpectedly." && exit 1 ;;
             esac
