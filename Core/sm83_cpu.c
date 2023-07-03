@@ -372,16 +372,6 @@ static void cycle_oam_bug(GB_gameboy_t *gb, uint8_t register_id)
     gb->pending_cycles = 4;
 }
 
-static void cycle_oam_bug_pc(GB_gameboy_t *gb)
-{
-    if (gb->pending_cycles) {
-        GB_advance_cycles(gb, gb->pending_cycles);
-    }
-    gb->address_bus = gb->pc;
-    GB_trigger_oam_bug(gb, gb->pc); /* Todo: test T-cycle timing */
-    gb->pending_cycles = 4;
-}
-
 static void flush_pending_cycles(GB_gameboy_t *gb)
 {
     if (gb->pending_cycles) {
@@ -722,7 +712,7 @@ static void rra(GB_gameboy_t *gb, uint8_t opcode)
 static void jr_r8(GB_gameboy_t *gb, uint8_t opcode)
 {
     int8_t offset = (int8_t)cycle_read(gb, gb->pc++);
-    cycle_oam_bug_pc(gb);
+    cycle_oam_bug(gb, GB_REGISTER_PC);
     gb->pc += offset;
 }
 
@@ -748,7 +738,7 @@ static void jr_cc_r8(GB_gameboy_t *gb, uint8_t opcode)
     int8_t offset = cycle_read(gb, gb->pc++);
     if (condition_code(gb, opcode)) {
         gb->pc += offset;
-        cycle_oam_bug_pc(gb);
+        cycle_oam_bug(gb, GB_REGISTER_PC);
     }
 }
 
@@ -1713,7 +1703,7 @@ void GB_cpu_run(GB_gameboy_t *gb)
         uint16_t call_addr = gb->pc;
         
         cycle_read(gb, gb->pc++);
-        cycle_oam_bug_pc(gb);
+        cycle_oam_bug(gb, GB_REGISTER_PC);
         gb->pc--;
         GB_trigger_oam_bug(gb, gb->sp); /* Todo: test T-cycle timing */
         cycle_no_access(gb);
