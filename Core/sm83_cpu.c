@@ -721,9 +721,9 @@ static void rra(GB_gameboy_t *gb, uint8_t opcode)
 
 static void jr_r8(GB_gameboy_t *gb, uint8_t opcode)
 {
-    /* Todo: Verify timing */
-    gb->pc += (int8_t)cycle_read(gb, gb->pc) + 1;
-    cycle_no_access(gb);
+    int8_t offset = (int8_t)cycle_read(gb, gb->pc++);
+    cycle_oam_bug_pc(gb);
+    gb->pc += offset;
 }
 
 static bool condition_code(GB_gameboy_t *gb, uint8_t opcode)
@@ -748,7 +748,7 @@ static void jr_cc_r8(GB_gameboy_t *gb, uint8_t opcode)
     int8_t offset = cycle_read(gb, gb->pc++);
     if (condition_code(gb, opcode)) {
         gb->pc += offset;
-        cycle_no_access(gb);
+        cycle_oam_bug_pc(gb);
     }
 }
 
