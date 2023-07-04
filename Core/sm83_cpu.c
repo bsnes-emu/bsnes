@@ -424,6 +424,7 @@ static void leave_stop_mode(GB_gameboy_t *gb)
 static void stop(GB_gameboy_t *gb, uint8_t opcode)
 {
     flush_pending_cycles(gb);
+    GB_read_memory(gb, gb->pc); // Timing is completely unverified, and only affects STOP triggering the OAM bug
     if ((gb->io_registers[GB_IO_JOYP] & 0x30) != 0x30) {
         gb->joyp_accessed = true;
     }
@@ -1071,9 +1072,9 @@ static void cp_a_r(GB_gameboy_t *gb, uint8_t opcode)
 
 static void halt(GB_gameboy_t *gb, uint8_t opcode)
 {
+    cycle_read(gb, gb->pc);
     assert(gb->pending_cycles == 4);
     gb->pending_cycles = 0;
-    GB_advance_cycles(gb, 4);
     
     /* Despite what some online documentations say, the HALT bug also happens on a CGB, in both CGB and DMG modes. */
     if (((gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F) != 0)) {
