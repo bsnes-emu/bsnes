@@ -421,15 +421,6 @@ void GB_set_light_temperature(GB_gameboy_t *gb, double temperature)
     }
 }
 
-/*
- STAT interrupt is implemented based on this finding:
- http://board.byuu.org/phpbb3/viewtopic.php?p=25527#p25531
- 
- General timing is based on GiiBiiAdvance's documents:
- https://github.com/AntonioND/giibiiadvance
- 
- */
-
 void GB_STAT_update(GB_gameboy_t *gb)
 {
     if (!(gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE)) return;
