@@ -51,7 +51,7 @@
 
 - (bool)updateState
 {
-    unsigned state = ([_element value] - _element.min) * 360.0 / self.resolution;
+    signed state = ([_element value] - _element.min) * 360.0 / self.resolution;
     if (_state != state) {
         _state = state;
         return true;
