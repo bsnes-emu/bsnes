@@ -144,6 +144,7 @@ static uint32_t color_to_int(NSColor *color)
                                                               },
                                                               
                                                               @"NSToolbarItemForcesStandardSize": @YES, // Forces Monterey to resepect toolbar item sizes
+                                                              @"NSToolbarItemWarnOnMinMaxSize": @NO, // Not going to use Constraints, Apple
                                                               }];
     
     [JOYController startOnRunLoop:[NSRunLoop currentRunLoop] withOptions:@{
