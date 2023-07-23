@@ -1,6 +1,6 @@
-#define COLOR_LOW 0.8
+#define COLOR_LOW 0.6
 #define COLOR_HIGH 1.0
-#define SCANLINE_DEPTH 0.1
+#define SCANLINE_DEPTH 0.2
 
 STATIC vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
