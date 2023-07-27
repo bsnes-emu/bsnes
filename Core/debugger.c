@@ -2853,7 +2853,7 @@ static jump_to_return_t test_jump_to_breakpoints(GB_gameboy_t *gb, uint16_t *add
     if (!gb->has_jump_to_breakpoints) return JUMP_TO_NONE;
 
     if (!is_in_trivial_memory(gb->pc) || !is_in_trivial_memory(gb->pc + 2) ||
-        !is_in_trivial_memory(gb->sp) || !is_in_trivial_memory(gb->sp + 1)) {
+        !is_in_trivial_memory(gb->sp) || !is_in_trivial_memory(gb->sp - 1)) {
         return JUMP_TO_NONTRIVIAL;
     }
 
