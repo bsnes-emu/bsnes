@@ -2512,8 +2512,8 @@ next_command:
             else {
                 gb->non_trivial_jump_breakpoint_occured = true;
                 GB_log(gb, "Jumping to breakpoint: PC = %s\n", value_to_string(gb, gb->pc, true));
-                GB_cpu_disassemble(gb, gb->pc, 5);
                 GB_load_state_from_buffer(gb, gb->nontrivial_jump_state, -1);
+                GB_cpu_disassemble(gb, gb->pc, 5);
                 GB_debugger_break(gb);
             }
         }
