@@ -4,7 +4,7 @@
 #include <string.h>
 #include <sys/types.h>
 
-static size_t map_find_symbol_index(GB_symbol_map_t *map, uint16_t addr)
+static size_t map_find_symbol_index(GB_symbol_map_t *map, uint16_t addr, bool is_local)
 {
     if (!map->symbols) {
         return 0;
@@ -13,8 +13,8 @@ static size_t map_find_symbol_index(GB_symbol_map_t *map, uint16_t addr)
     ssize_t max = map->n_symbols;
     while (min < max) {
         size_t pivot = (min + max) / 2;
-        if (map->symbols[pivot].addr == addr) return pivot;
-        if (map->symbols[pivot].addr > addr) {
+        if (map->symbols[pivot].addr == addr && map->symbols[pivot].is_local == is_local) return pivot;
+        if ((map->symbols[pivot].addr * 2 + !map->symbols[pivot].is_local) > (addr * 2 + !is_local)) {
             max = pivot;
         }
         else {
@@ -26,25 +26,27 @@ static size_t map_find_symbol_index(GB_symbol_map_t *map, uint16_t addr)
 
 GB_bank_symbol_t *GB_map_add_symbol(GB_symbol_map_t *map, uint16_t addr, const char *name)
 {
-    size_t index = map_find_symbol_index(map, addr);
+    bool is_local = strchr(name, '.');
+    size_t index = map_find_symbol_index(map, addr, is_local);
 
     map->symbols = realloc(map->symbols, (map->n_symbols + 1) * sizeof(map->symbols[0]));
     memmove(&map->symbols[index + 1], &map->symbols[index], (map->n_symbols - index) * sizeof(map->symbols[0]));
     map->symbols[index].addr = addr;
     map->symbols[index].name = strdup(name);
+    map->symbols[index].is_local = is_local;
     map->n_symbols++;
     return &map->symbols[index];
 }
 
-const GB_bank_symbol_t *GB_map_find_symbol(GB_symbol_map_t *map, uint16_t addr)
+const GB_bank_symbol_t *GB_map_find_symbol(GB_symbol_map_t *map, uint16_t addr, bool prefer_local)
 {
     if (!map) return NULL;
-    size_t index = map_find_symbol_index(map, addr);
+    size_t index = map_find_symbol_index(map, addr, prefer_local);
     if (index >= map->n_symbols || map->symbols[index].addr != addr) {
         index--;
     }
     if (index < map->n_symbols) {
-        while (index && map->symbols[index].addr == map->symbols[index - 1].addr) {
+        while (index && map->symbols[index].addr == map->symbols[index - 1].addr && map->symbols[index].is_local == map->symbols[index - 1].is_local) {
             index--;
         }
         return &map->symbols[index];

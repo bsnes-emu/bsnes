@@ -758,7 +758,7 @@ static opcode_t *opcodes[256] = {
 
 void GB_cpu_disassemble(GB_gameboy_t *gb, uint16_t pc, uint16_t count)
 {
-    const GB_bank_symbol_t *function_symbol = GB_debugger_find_symbol(gb, pc);
+    const GB_bank_symbol_t *function_symbol = GB_debugger_find_symbol(gb, pc, false);
 
     if (function_symbol && pc - function_symbol->addr > 0x1000) {
         function_symbol = NULL;
@@ -771,7 +771,7 @@ void GB_cpu_disassemble(GB_gameboy_t *gb, uint16_t pc, uint16_t count)
     uint16_t current_function = function_symbol? function_symbol->addr : 0;
 
     while (count--) {
-        function_symbol = GB_debugger_find_symbol(gb, pc);
+        function_symbol = GB_debugger_find_symbol(gb, pc, false);
         if (function_symbol && function_symbol->addr == pc) {
             if (current_function != function_symbol->addr) {
                 GB_log(gb, "\n");

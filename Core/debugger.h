@@ -27,7 +27,7 @@ internal void GB_debugger_call_hook(GB_gameboy_t *gb, uint16_t call_addr);
 internal void GB_debugger_ret_hook(GB_gameboy_t *gb);
 internal void GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, uint16_t addr, uint8_t value);
 internal void GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, uint16_t addr);
-internal const GB_bank_symbol_t *GB_debugger_find_symbol(GB_gameboy_t *gb, uint16_t addr);
+internal const GB_bank_symbol_t *GB_debugger_find_symbol(GB_gameboy_t *gb, uint16_t addr, bool prefer_local);
 internal void GB_debugger_add_symbol(GB_gameboy_t *gb, uint16_t bank, uint16_t address, const char *symbol);
 #endif
 

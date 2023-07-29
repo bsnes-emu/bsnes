@@ -8,6 +8,7 @@
 typedef struct {
     char *name;
     uint16_t addr;
+    bool is_local;
 } GB_bank_symbol_t;
 
 typedef struct GB_symbol_s {
@@ -30,7 +31,7 @@ typedef struct {
 internal void GB_reversed_map_add_symbol(GB_reversed_symbol_map_t *map, uint16_t bank, GB_bank_symbol_t *symbol);
 internal const GB_symbol_t *GB_reversed_map_find_symbol(GB_reversed_symbol_map_t *map, const char *name);
 internal GB_bank_symbol_t *GB_map_add_symbol(GB_symbol_map_t *map, uint16_t addr, const char *name);
-internal const GB_bank_symbol_t *GB_map_find_symbol(GB_symbol_map_t *map, uint16_t addr);
+internal const GB_bank_symbol_t *GB_map_find_symbol(GB_symbol_map_t *map, uint16_t addr, bool prefer_local);
 internal GB_symbol_map_t *GB_map_alloc(void);
 internal void GB_map_free(GB_symbol_map_t *map);
 #endif
