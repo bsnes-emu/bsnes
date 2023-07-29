@@ -37,6 +37,7 @@ struct GB_breakpoint_s {
     char *condition;
     bool is_jump_to;
     uint16_t length;
+    bool inclusive;
 };
 
 #define BP_KEY(x) (((struct GB_breakpoint_s){.addr = ((x).value), .bank = (x).has_bank? (x).bank : -1 }).key)
@@ -56,6 +57,7 @@ struct GB_watchpoint_s {
     char *condition;
     uint8_t flags;
     uint16_t length;
+    bool inclusive;
 };
 
 #define WP_KEY(x) (((struct GB_watchpoint_s){.addr = ((x).value), .bank = (x).has_bank? (x).bank : -1 }).key)
@@ -989,6 +991,24 @@ static char *j_completer(GB_gameboy_t *gb, const char *string, uintptr_t *contex
     return NULL;
 }
 
+static bool check_inclusive(char *to)
+{
+    size_t length = strlen(to);
+    while (length > strlen("inclusive")) {
+        if (to[length - 1] == ' ') {
+            to[length - 1] = 0;
+            length--;
+            continue;
+        }
+        if (strcmp(to + length - strlen("inclusive"), "inclusive") == 0) {
+            to[length - strlen("inclusive")] = 0;
+            return true;
+        }
+        return false;
+    }
+    return false;
+}
+
 static bool breakpoint(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
     bool is_jump_to = true;
@@ -1022,9 +1042,11 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments, char *modifiers, const
     }
     
     char *to = NULL;
+    bool inclusive = false;
     if ((to = strstr(arguments, " to "))) {
         *to = 0;
         to += strlen(" to ");
+        inclusive = check_inclusive(to);
     }
 
     bool error;
@@ -1060,7 +1082,8 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments, char *modifiers, const
         .key = key,
         .condition = condition? strdup(condition) : NULL,
         .is_jump_to = is_jump_to,
-        .length = length
+        .length = length,
+        .inclusive = inclusive,
     };
 
     if (is_jump_to) {
@@ -1069,7 +1092,7 @@ static bool breakpoint(GB_gameboy_t *gb, char *arguments, char *modifiers, const
 
     GB_log(gb, "Breakpoint %u set at %s", id, debugger_value_to_string(gb, result, true, false));
     if (length) {
-        GB_log(gb, " - %s\n", debugger_value_to_string(gb, end, true, true));
+        GB_log(gb, " - %s%s\n", debugger_value_to_string(gb, end, true, true), inclusive? " (inclusive)" : "");
     }
     else {
         GB_log(gb, "\n");
@@ -1196,9 +1219,11 @@ static bool watch(GB_gameboy_t *gb, char *arguments, char *modifiers, const debu
     }
     
     char *to = NULL;
+    bool inclusive = false;
     if ((to = strstr(arguments, " to "))) {
         *to = 0;
         to += strlen(" to ");
+        inclusive = check_inclusive(to);
     }
 
     bool error;
@@ -1237,11 +1262,12 @@ static bool watch(GB_gameboy_t *gb, char *arguments, char *modifiers, const debu
         .condition = condition? strdup(condition) : NULL,
         .flags = flags,
         .length = length,
+        .inclusive = inclusive,
     };
 
     GB_log(gb, "Watchpoint %u set at %s", id, debugger_value_to_string(gb, result, true, false));
     if (length) {
-        GB_log(gb, " - %s\n", debugger_value_to_string(gb, end, true, true));
+        GB_log(gb, " - %s%s\n", debugger_value_to_string(gb, end, true, true), inclusive? " (inclusive)" : "");
     }
     else {
         GB_log(gb, "\n");
@@ -1314,18 +1340,20 @@ static bool list(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
                 end_string = strdup(debugger_value_to_string(gb, end, addr.has_bank, true));
             }
             if (gb->breakpoints[i].condition) {
-                GB_log(gb, " %d. %s%s%s (%sCondition: %s)\n", gb->breakpoints[i].id,
+                GB_log(gb, " %d. %s%s%s%s (%sCondition: %s)\n", gb->breakpoints[i].id,
                                                         debugger_value_to_string(gb, addr, addr.has_bank, false),
                                                         end_string? " - " : "",
                                                         end_string ?: "",
+                                                        gb->breakpoints[i].inclusive? " (inclusive)" : "",
                                                         gb->breakpoints[i].is_jump_to? "Jump to, ": "",
                                                         gb->breakpoints[i].condition);
             }
             else {
-                GB_log(gb, " %d. %s%s%s%s\n", gb->breakpoints[i].id,
+                GB_log(gb, " %d. %s%s%s%s%s\n", gb->breakpoints[i].id,
                                           debugger_value_to_string(gb, addr, addr.has_bank, false),
                                           end_string? " - " : "",
                                           end_string ?: "",
+                                          gb->breakpoints[i].inclusive? " (inclusive)" : "",
                                           gb->breakpoints[i].is_jump_to? " (Jump to)" : "");
             }
             if (end_string) {
@@ -1348,15 +1376,17 @@ static bool list(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
                 end_string = strdup(debugger_value_to_string(gb, end, addr.has_bank, true));
             }
             if (gb->watchpoints[i].condition) {
-                GB_log(gb, " %d. %s%s%s (%c%c, Condition: %s)\n", gb->watchpoints[i].id, debugger_value_to_string(gb, addr, addr.has_bank, false),
+                GB_log(gb, " %d. %s%s%s%s (%c%c, Condition: %s)\n", gb->watchpoints[i].id, debugger_value_to_string(gb, addr, addr.has_bank, false),
                                                                   end_string? " - " : "", end_string ?: "",
+                                                                  gb->watchpoints[i].inclusive? " (inclusive)" : "",
                                                                   (gb->watchpoints[i].flags & WATCHPOINT_READ)? 'r' : '-',
                                                                   (gb->watchpoints[i].flags & WATCHPOINT_WRITE)? 'w' : '-',
                                                                   gb->watchpoints[i].condition);
             }
             else {
-                GB_log(gb, " %d. %s%s%s (%c%c)\n", gb->watchpoints[i].id, debugger_value_to_string(gb, addr, addr.has_bank, false),
+                GB_log(gb, " %d. %s%s%s%s (%c%c)\n", gb->watchpoints[i].id, debugger_value_to_string(gb, addr, addr.has_bank, false),
                                                    end_string? " - " : "", end_string ?: "",
+                                                   gb->watchpoints[i].inclusive? " (inclusive)" : "",
                                                    (gb->watchpoints[i].flags & WATCHPOINT_READ)? 'r' : '-',
                                                    (gb->watchpoints[i].flags & WATCHPOINT_WRITE)? 'w' : '-');
             }
@@ -1378,7 +1408,7 @@ static unsigned should_break(GB_gameboy_t *gb, uint16_t addr, bool jump_to)
         }
         if (breakpoint->is_jump_to != jump_to) continue;
         if (addr < breakpoint->addr) continue;
-        if (addr > breakpoint->addr + breakpoint->length) continue;
+        if (addr > (uint32_t)breakpoint->addr + breakpoint->length + breakpoint->inclusive) continue;
         if (!breakpoint->condition) return breakpoint->id;
         bool error;
         bool condition = debugger_evaluate(gb, breakpoint->condition,
@@ -2060,17 +2090,17 @@ static const debugger_command_t commands[] = {
     {"examine", 2, examine, "Examine values at address", "<expression>", "count", .argument_completer = symbol_completer},
     {"x", 1, }, /* Alias */
     {"disassemble", 1, disassemble, "Disassemble instructions at address", "<expression>", "count", .argument_completer = symbol_completer},
-    {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression. "
-                                  "Can also modify the condition of existing breakpoints. "
+    {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression or range. "
+                                  "Ranges are exlusive by default, unless \"inclusive\" is used. "
                                   "If the j modifier is used, the breakpoint will occur just before "
                                   "jumping to the target.",
-                                  "<expression>[ to <end expression>][ if <condition expression>]", "j",
+                                  "<expression> [to <end expression> [inclusive]] [if <condition expression>]", "j",
                                   .argument_completer = symbol_completer, .modifiers_completer = j_completer},
     {"delete", 2, delete, "Delete a breakpoint by its identifier, or all breakpoints", "[<breakpoint id>]"},
-    {"watch", 1, watch, "Add a new watchpoint at the specified address/expression. "
-                        "Can also modify the condition and type of existing watchpoints. "
-                        "Default watchpoint type is write-only.",
-                        "<expression>[ to <end expression>][ if <condition expression>]", "(r|w|rw)",
+    {"watch", 1, watch, "Add a new watchpoint at the specified address/expression or range. "
+                        "Ranges are exlusive by default, unless \"inclusive\" is used. "
+                        "The default watchpoint type is write-only.",
+                        "<expression> [to <end expression> [inclusive]] [if <condition expression>]", "(r|w|rw)",
                         .argument_completer = symbol_completer, .modifiers_completer = rw_completer
     },
     {"unwatch", 3, unwatch, "Delete a watchpoint by its identifier, or all watchpoints", "[<watchpoint id>]"},
@@ -2219,7 +2249,7 @@ static void test_watchpoint(GB_gameboy_t *gb, uint16_t addr, uint8_t flags, uint
         }
         if (!(watchpoint->flags & flags)) continue;
         if (addr < watchpoint->addr) continue;
-        if (addr > watchpoint->addr + watchpoint->length) continue;
+        if (addr > (uint32_t)watchpoint->addr + watchpoint->length + watchpoint->inclusive) continue;
         if (!watchpoint->condition) {
         condition_ok:
             GB_debugger_break(gb);
