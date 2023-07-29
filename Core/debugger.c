@@ -2496,6 +2496,7 @@ void GB_debugger_handle_async_commands(GB_gameboy_t *gb)
 
     while (gb->async_input_callback && (input = gb->async_input_callback(gb))) {
         GB_debugger_execute_command(gb, input);
+        update_debug_active(gb);
         free(input);
     }
 }
