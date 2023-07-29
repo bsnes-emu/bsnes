@@ -282,6 +282,81 @@ void GB_set_rtc_multiplier(GB_gameboy_t *gb, double multiplier)
     gb->rtc_second_length = GB_get_unmultiplied_clock_rate(gb) * 2 * multiplier;
 }
 
+void GB_rtc_set_time(GB_gameboy_t *gb, uint64_t current_time)
+{
+    if (gb->cartridge_type->mbc_type == GB_HUC3) {
+        while (gb->last_rtc_second / 60 < current_time / 60) {
+            gb->last_rtc_second += 60;
+            gb->huc3.minutes++;
+            if (gb->huc3.minutes == 60 * 24) {
+                gb->huc3.days++;
+                gb->huc3.minutes = 0;
+            }
+        }
+        return;
+    }
+    
+    bool running = false;
+    if (gb->cartridge_type->mbc_type == GB_TPP1) {
+        running = gb->tpp1_mr4 & 0x4;
+    }
+    else {
+        running = (gb->rtc_real.high & 0x40) == 0;
+    }
+    
+    if (!running) return;
+    
+    while (gb->last_rtc_second + 60 * 60 * 24 < current_time) {
+        gb->last_rtc_second += 60 * 60 * 24;
+        if (gb->cartridge_type->mbc_type == GB_TPP1) {
+            if (++gb->rtc_real.tpp1.weekday == 7) {
+                gb->rtc_real.tpp1.weekday = 0;
+                if (++gb->rtc_real.tpp1.weeks == 0) {
+                    gb->tpp1_mr4 |= 8; /* Overflow bit */
+                }
+            }
+        }
+        else if (++gb->rtc_real.days == 0) {
+            if (gb->rtc_real.high & 1) { /* Bit 8 of days*/
+                gb->rtc_real.high |= 0x80; /* Overflow bit */
+            }
+            
+            gb->rtc_real.high ^= 1;
+        }
+    }
+    
+    while (gb->last_rtc_second < current_time) {
+        gb->last_rtc_second++;
+        if (++gb->rtc_real.seconds != 60) continue;
+        gb->rtc_real.seconds = 0;
+        
+        if (++gb->rtc_real.minutes != 60) continue;
+        gb->rtc_real.minutes = 0;
+        
+        if (gb->cartridge_type->mbc_type == GB_TPP1) {
+            if (++gb->rtc_real.tpp1.hours != 24) continue;
+            gb->rtc_real.tpp1.hours = 0;
+            if (++gb->rtc_real.tpp1.weekday != 7) continue;
+            gb->rtc_real.tpp1.weekday = 0;
+            if (++gb->rtc_real.tpp1.weeks == 0) {
+                gb->tpp1_mr4 |= 8; /* Overflow bit */
+            }
+        }
+        else {
+            if (++gb->rtc_real.hours != 24) continue;
+            gb->rtc_real.hours = 0;
+            
+            if (++gb->rtc_real.days != 0) continue;
+            
+            if (gb->rtc_real.high & 1) { /* Bit 8 of days*/
+                gb->rtc_real.high |= 0x80; /* Overflow bit */
+            }
+            
+            gb->rtc_real.high ^= 1;
+        }
+    }
+}
+
 static void rtc_run(GB_gameboy_t *gb, uint8_t cycles)
 {
     if (likely(gb->cartridge_type->mbc_type != GB_HUC3 && !gb->cartridge_type->has_rtc)) return;
@@ -307,76 +382,7 @@ static void rtc_run(GB_gameboy_t *gb, uint8_t cycles)
             break;
     }
 
-    if (gb->cartridge_type->mbc_type == GB_HUC3) {
-        while (gb->last_rtc_second / 60 < current_time / 60) {
-            gb->last_rtc_second += 60;
-            gb->huc3.minutes++;
-            if (gb->huc3.minutes == 60 * 24) {
-                gb->huc3.days++;
-                gb->huc3.minutes = 0;
-            }
-        }
-        return;
-    }
-    bool running = false;
-    if (gb->cartridge_type->mbc_type == GB_TPP1) {
-        running = gb->tpp1_mr4 & 0x4;
-    }
-    else {
-        running = (gb->rtc_real.high & 0x40) == 0;
-    }
-    
-    if (running) { /* is timer running? */
-        while (gb->last_rtc_second + 60 * 60 * 24 < current_time) {
-            gb->last_rtc_second += 60 * 60 * 24;
-            if (gb->cartridge_type->mbc_type == GB_TPP1) {
-                if (++gb->rtc_real.tpp1.weekday == 7) {
-                    gb->rtc_real.tpp1.weekday = 0;
-                    if (++gb->rtc_real.tpp1.weeks == 0) {
-                        gb->tpp1_mr4 |= 8; /* Overflow bit */
-                    }
-                }
-            }
-            else if (++gb->rtc_real.days == 0) {
-                if (gb->rtc_real.high & 1) { /* Bit 8 of days*/
-                    gb->rtc_real.high |= 0x80; /* Overflow bit */
-                }
-                
-                gb->rtc_real.high ^= 1;
-            }
-        }
-        
-        while (gb->last_rtc_second < current_time) {
-            gb->last_rtc_second++;
-            if (++gb->rtc_real.seconds != 60) continue;
-            gb->rtc_real.seconds = 0;
-            
-            if (++gb->rtc_real.minutes != 60) continue;
-            gb->rtc_real.minutes = 0;
-            
-            if (gb->cartridge_type->mbc_type == GB_TPP1) {
-                if (++gb->rtc_real.tpp1.hours != 24) continue;
-                gb->rtc_real.tpp1.hours = 0;
-                if (++gb->rtc_real.tpp1.weekday != 7) continue;
-                gb->rtc_real.tpp1.weekday = 0;
-                if (++gb->rtc_real.tpp1.weeks == 0) {
-                    gb->tpp1_mr4 |= 8; /* Overflow bit */
-                }
-            }
-            else {
-                if (++gb->rtc_real.hours != 24) continue;
-                gb->rtc_real.hours = 0;
-                
-                if (++gb->rtc_real.days != 0) continue;
-                
-                if (gb->rtc_real.high & 1) { /* Bit 8 of days*/
-                    gb->rtc_real.high |= 0x80; /* Overflow bit */
-                }
-                
-                gb->rtc_real.high ^= 1;
-            }
-        }
-    }
+    GB_rtc_set_time(gb, current_time);
 }
 
 static void camera_run(GB_gameboy_t *gb, uint8_t cycles)

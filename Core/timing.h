@@ -20,7 +20,7 @@ internal bool GB_timing_sync_turbo(GB_gameboy_t *gb); /* Returns true if should 
 internal void GB_timing_sync(GB_gameboy_t *gb);
 internal void GB_set_internal_div_counter(GB_gameboy_t *gb, uint16_t value);
 internal void GB_serial_master_edge(GB_gameboy_t *gb);
-
+internal void GB_rtc_set_time(GB_gameboy_t *gb, uint64_t time);
 
 #define GB_SLEEP(gb, unit, state, cycles) do {\
     (gb)->unit##_cycles -= (cycles) * __state_machine_divisor; \

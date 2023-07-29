@@ -1040,7 +1040,9 @@ void GB_load_battery_from_buffer(GB_gameboy_t *gb, const uint8_t *buffer, size_t
                                             really RTC data. */
         goto reset_rtc;
     }
+    GB_rtc_set_time(gb, time(NULL));
     goto exit;
+    
 reset_rtc:
     gb->last_rtc_second = time(NULL);
     gb->rtc_real.high |= 0x80; /* This gives the game a hint that the clock should be reset. */
@@ -1150,7 +1152,9 @@ void GB_load_battery(GB_gameboy_t *gb, const char *path)
                                             really RTC data. */
         goto reset_rtc;
     }
+    GB_rtc_set_time(gb, time(NULL));
     goto exit;
+    
 reset_rtc:
     gb->last_rtc_second = time(NULL);
     gb->rtc_real.high |= 0x80; /* This gives the game a hint that the clock should be reset. */
