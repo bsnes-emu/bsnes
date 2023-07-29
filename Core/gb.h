@@ -192,7 +192,7 @@ enum {
     /* Missing */
 
     GB_IO_VBK        = 0x4F, // CGB Mode Only - VRAM Bank
-    GB_IO_BANK       = 0x50, // Write to disable the BIOS mapping
+    GB_IO_BANK       = 0x50, // Write to disable the boot ROM mapping
 
     /* CGB DMA */
     GB_IO_HDMA1      = 0x51, // CGB Mode Only - New DMA Source, High

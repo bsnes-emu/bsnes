@@ -702,7 +702,8 @@ static uint8_t read_high_memory(GB_gameboy_t *gb, uint16_t addr)
                     return 0xFF;
                 }
                 return (gb->io_registers[GB_IO_KEY1] & 0x7F) | (gb->cgb_double_speed? 0xFE : 0x7E);
-
+            case GB_IO_BANK:
+                return 0xFE | gb->boot_rom_finished;
             case GB_IO_RP: {
                 if (!gb->cgb_mode) return 0xFF;
                 /* You will read your own IR LED if it's on. */
@@ -1572,7 +1573,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 return;
 
             case GB_IO_BANK:
-                gb->boot_rom_finished = true;
+                gb->boot_rom_finished |= value & 1;
                 return;
 
             case GB_IO_KEY0:
