@@ -2606,16 +2606,37 @@ const GB_bank_symbol_t *GB_debugger_find_symbol(GB_gameboy_t *gb, uint16_t addr,
 
     const GB_bank_symbol_t *symbol = GB_map_find_symbol(get_symbol_map(gb, bank), addr, prefer_local);
     if (symbol) return symbol;
-    if (bank != 0) return GB_map_find_symbol(get_symbol_map(gb, 0), addr, false); /* Maybe the symbol incorrectly uses bank 0? */
+    if (bank != 0) return GB_map_find_symbol(get_symbol_map(gb, 0), addr, prefer_local); /* Maybe the symbol incorrectly uses bank 0? */
 
     return NULL;
 }
 
 const char *GB_debugger_name_for_address(GB_gameboy_t *gb, uint16_t addr)
 {
-    const GB_bank_symbol_t *symbol = GB_debugger_find_symbol(gb, addr, false);
-    if (symbol && symbol->addr == addr) return symbol->name;
-    return NULL;
+    return GB_debugger_describe_address(gb, addr, -1, true, false);
+}
+
+const char *GB_debugger_describe_address(GB_gameboy_t *gb,
+                                         uint16_t addr, uint16_t bank,
+                                         bool exact_match, bool prefer_local)
+{
+    if (bank == (uint16_t)-1) {
+        bank = bank_for_addr(gb, addr);
+    }
+    if (exact_match) {
+        const GB_bank_symbol_t *symbol = GB_map_find_symbol(get_symbol_map(gb, bank), addr, prefer_local);
+        if (symbol && symbol->addr == addr) return symbol->name;
+        if (bank != 0) symbol = GB_map_find_symbol(get_symbol_map(gb, 0), addr, prefer_local); /* Maybe the symbol incorrectly uses bank 0? */
+        if (symbol && symbol->addr == addr) return symbol->name;
+        
+        return NULL;
+    }
+    
+    return debugger_value_to_string(gb, (value_t){
+        .value = addr,
+        .bank = bank,
+        .has_bank = true,
+    }, true, prefer_local);
 }
 
 /* The public version of debugger_evaluate */

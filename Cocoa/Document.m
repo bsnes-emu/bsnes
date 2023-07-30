@@ -13,6 +13,7 @@
 #import "GBPaletteEditorController.h"
 #import "GBObjectView.h"
 #import "GBPaletteView.h"
+#import "GBHexStatusBarRepresenter.h"
 #import "NSObject+DefaultsObserver.h"
 
 #define likely(x)   GB_likely(x)
@@ -82,6 +83,7 @@ enum model {
     
     NSString *_lastConsoleInput;
     HFLineCountingRepresenter *_lineRep;
+    GBHexStatusBarRepresenter *_statusRep;
     
     CVImageBufferRef _cameraImage;
     AVCaptureSession *_cameraSession;
@@ -878,7 +880,9 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     HFStringEncodingTextRepresenter *asciiRep = [[HFStringEncodingTextRepresenter alloc] init];
     HFVerticalScrollerRepresenter *scrollRep = [[HFVerticalScrollerRepresenter alloc] init];
     _lineRep = [[HFLineCountingRepresenter alloc] init];
-    HFStatusBarRepresenter *statusRep = [[HFStatusBarRepresenter alloc] init];
+    _statusRep = [[GBHexStatusBarRepresenter alloc] init];
+    _statusRep.gb = &_gb;
+    _statusRep.bankForDescription = -1;
 
     _lineRep.lineNumberFormat = HFLineNumberFormatHexadecimal;
 
@@ -888,14 +892,14 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     [_hexController addRepresenter:asciiRep];
     [_hexController addRepresenter:scrollRep];
     [_hexController addRepresenter:_lineRep];
-    [_hexController addRepresenter:statusRep];
+    [_hexController addRepresenter:_statusRep];
 
     /* Tell the layout rep which reps it should lay out. */
     [layoutRep addRepresenter:hexRep];
     [layoutRep addRepresenter:scrollRep];
     [layoutRep addRepresenter:asciiRep];
     [layoutRep addRepresenter:_lineRep];
-    [layoutRep addRepresenter:statusRep];
+    [layoutRep addRepresenter:_statusRep];
 
 
     [(NSView *)[hexRep view] setAutoresizingMask:NSViewWidthSizable | NSViewHeightSizable];
@@ -1827,6 +1831,7 @@ static bool is_path_writeable(const char *path)
 
         [sender setStringValue:[NSString stringWithFormat:@"$%x", bank]];
         [(GBMemoryByteArray *)(_hexController.byteArray) setSelectedBank:bank];
+        _statusRep.bankForDescription = bank;
         dispatch_async(dispatch_get_main_queue(), ^{
             [_hexController reloadData];
         });
@@ -1846,33 +1851,37 @@ static bool is_path_writeable(const char *path)
 - (IBAction)hexUpdateSpace:(NSPopUpButtonCell *)sender
 {
     self.memoryBankItem.enabled = [sender indexOfSelectedItem] != GBMemoryEntireSpace;
+    [_hexController setSelectedContentsRanges:@[[HFRangeWrapper withRange:HFRangeMake(0, 0)]]];
     GBMemoryByteArray *byteArray = (GBMemoryByteArray *)(_hexController.byteArray);
     [byteArray setMode:(GB_memory_mode_t)[sender indexOfSelectedItem]];
-    uint16_t bank;
+    uint16_t bank = -1;
     switch ((GB_memory_mode_t)[sender indexOfSelectedItem]) {
         case GBMemoryEntireSpace:
+            _statusRep.baseAddress = _lineRep.valueOffset = 0;
+            break;
         case GBMemoryROM:
-            _lineRep.valueOffset = 0;
+            _statusRep.baseAddress = _lineRep.valueOffset = 0;
             GB_get_direct_access(&_gb, GB_DIRECT_ACCESS_ROM, NULL, &bank);
-            byteArray.selectedBank = bank;
             break;
         case GBMemoryVRAM:
-            _lineRep.valueOffset = 0x8000;
+            _statusRep.baseAddress = _lineRep.valueOffset = 0x8000;
             GB_get_direct_access(&_gb, GB_DIRECT_ACCESS_VRAM, NULL, &bank);
-            byteArray.selectedBank = bank;
             break;
         case GBMemoryExternalRAM:
-            _lineRep.valueOffset = 0xA000;
+            _statusRep.baseAddress = _lineRep.valueOffset = 0xA000;
             GB_get_direct_access(&_gb, GB_DIRECT_ACCESS_CART_RAM, NULL, &bank);
-            byteArray.selectedBank = bank;
             break;
         case GBMemoryRAM:
-            _lineRep.valueOffset = 0xC000;
+            _statusRep.baseAddress = _lineRep.valueOffset = 0xC000;
             GB_get_direct_access(&_gb, GB_DIRECT_ACCESS_RAM, NULL, &bank);
-            byteArray.selectedBank = bank;
             break;
     }
-    [self.memoryBankInput setStringValue:[NSString stringWithFormat:@"$%x", byteArray.selectedBank]];
+    byteArray.selectedBank = bank;
+    _statusRep.bankForDescription = bank;
+    if (bank != (uint16_t)-1) {
+        [self.memoryBankInput setStringValue:[NSString stringWithFormat:@"$%x", byteArray.selectedBank]];
+    }
+    
     [_hexController reloadData];
     for (NSView *view in self.memoryView.subviews) {
         [view setNeedsDisplay:true];
