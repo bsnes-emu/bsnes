@@ -2629,7 +2629,7 @@ bool GB_debugger_evaluate(GB_gameboy_t *gb, const char *string, uint16_t *result
         *result = value.value;
     }
     if (result_bank) {
-        *result_bank = value.has_bank? value.value : -1;
+        *result_bank = value.has_bank? value.bank : -1;
     }
     return error;
 }
