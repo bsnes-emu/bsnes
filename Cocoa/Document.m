@@ -1721,8 +1721,48 @@ static bool is_path_writeable(const char *path)
 {
     NSString *error = [self captureOutputForBlock:^{
         uint16_t addr;
-        if (GB_debugger_evaluate(&_gb, [[sender stringValue] UTF8String], &addr, NULL)) {
+        uint16_t bank;
+        if (GB_debugger_evaluate(&_gb, [[sender stringValue] UTF8String], &addr, &bank)) {
             return;
+        }
+        
+        if (bank != (typeof(bank))-1) {
+            GB_memory_mode_t mode = [(GBMemoryByteArray *)(_hexController.byteArray) mode];
+            if (addr < 0x4000) {
+                if (bank == 0) {
+                    if (mode != GBMemoryROM && mode != GBMemoryEntireSpace) {
+                        mode = GBMemoryEntireSpace;
+                    }
+                }
+                else {
+                    addr |= 0x4000;
+                    mode = GBMemoryROM;
+                }
+            }
+            else if (addr < 0x8000) {
+                mode = GBMemoryROM;
+            }
+            else if (addr < 0xA000) {
+                mode = GBMemoryVRAM;
+            }
+            else if (addr < 0xC000) {
+                mode = GBMemoryExternalRAM;
+            }
+            else if (addr < 0xD000) {
+                if (mode != GBMemoryRAM && mode != GBMemoryEntireSpace) {
+                    mode = GBMemoryEntireSpace;
+                }
+            }
+            else if (addr < 0xE000) {
+                mode = GBMemoryRAM;
+            }
+            else {
+                mode = GBMemoryEntireSpace;
+            }
+            [_memorySpaceButton selectItemAtIndex:mode];
+            [self hexUpdateSpace:_memorySpaceButton.cell];
+            [_memoryBankInput setStringValue:[NSString stringWithFormat:@"$%02x", bank]];
+            [self hexUpdateBank:_memoryBankInput];
         }
         addr -= _lineRep.valueOffset;
         if (addr >= _hexController.byteArray.length) {
