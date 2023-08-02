@@ -555,6 +555,11 @@ static void debugger_interrupt(int ignore)
     GB_debugger_break(&gb);
 }
 
+static void debugger_reset(int ignore)
+{
+    pending_command = GB_SDL_RESET_COMMAND;
+}
+
 static void gb_audio_callback(GB_gameboy_t *gb, GB_sample_t *sample)
 {    
     if (turbo_down) {
@@ -1019,6 +1024,7 @@ int main(int argc, char **argv)
     }
 
     signal(SIGINT, debugger_interrupt);
+    signal(SIGHUP, debugger_reset);
 
     SDL_Init(SDL_INIT_EVERYTHING & ~SDL_INIT_AUDIO);
     if ((console_supported = CON_start(completer))) {
