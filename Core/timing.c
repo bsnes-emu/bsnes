@@ -42,6 +42,9 @@ static void nsleep(uint64_t nanoseconds)
 
 bool GB_timing_sync_turbo(GB_gameboy_t *gb)
 {
+#ifndef GB_DISABLE_DEBUGGER
+    if (unlikely(gb->backstep_instructions)) return false;
+#endif
     if (!gb->turbo_dont_skip) {
         int64_t nanoseconds = get_nanoseconds();
         if (nanoseconds <= gb->last_sync + (1000000000LL * LCDC_PERIOD / GB_get_clock_rate(gb))) {
@@ -54,6 +57,9 @@ bool GB_timing_sync_turbo(GB_gameboy_t *gb)
 
 void GB_timing_sync(GB_gameboy_t *gb)
 {
+#ifndef GB_DISABLE_DEBUGGER
+    if (unlikely(gb->backstep_instructions)) return;
+#endif
     /* Prevent syncing if not enough time has passed.*/
     if (gb->cycles_since_last_sync < LCDC_PERIOD / 3) return;
 
@@ -95,6 +101,9 @@ bool GB_timing_sync_turbo(GB_gameboy_t *gb)
 
 void GB_timing_sync(GB_gameboy_t *gb)
 {
+#ifndef GB_DISABLE_DEBUGGER
+    if (unlikely(gb->backstep_instructions)) return;
+#endif
     if (gb->cycles_since_last_sync < LCDC_PERIOD / 3) return;
     gb->cycles_since_last_sync = 0;
 

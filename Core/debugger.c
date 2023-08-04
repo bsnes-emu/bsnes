@@ -1399,6 +1399,7 @@ static bool list(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
 // Returns the id or 0
 static unsigned should_break(GB_gameboy_t *gb, uint16_t addr, bool jump_to)
 {
+    if (unlikely(gb->backstep_instructions)) return false;
     uint16_t bank = bank_for_addr(gb, addr);
     for (unsigned i = 0; i < gb->n_breakpoints; i++) {
         struct GB_breakpoint_s *breakpoint = &gb->breakpoints[i];
@@ -2064,6 +2065,59 @@ static bool undo(GB_gameboy_t *gb, char *arguments, char *modifiers, const debug
     return true;
 }
 
+#ifndef DISABLE_REWIND
+static bool backstep(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
+{
+    NO_MODIFIERS
+    STOPPED_ONLY
+    
+    if (strlen(lstrip(arguments))) {
+        print_usage(gb, command);
+        return true;
+    }
+    
+    bool didPop = false;
+retry:;
+    typeof(gb->rewind_sequences[0]) *sequence = &gb->rewind_sequences[gb->rewind_pos];
+    if (!gb->rewind_sequences || !sequence->key_state) {
+        if (gb->rewind_buffer_length  == 0) {
+            GB_log(gb, "Backstepping requires enabling rewinding\n");
+        }
+        else {
+            GB_log(gb, "Reached the end of the rewind buffer\n");
+            if (didPop) {
+                GB_rewind_push(gb);
+                sequence = &gb->rewind_sequences[gb->rewind_pos];
+                sequence->instruction_count[sequence->pos] = 1;
+            }
+        }
+        return true;
+    }
+    
+    gb->backstep_instructions = sequence->instruction_count[sequence->pos] - 2;
+    if (gb->backstep_instructions == (uint32_t)-1) { // This frame was just pushed, pop it and try again
+        GB_rewind_pop(gb);
+        gb->backstep_instructions = 0;
+        didPop = true;
+        goto retry;
+    }
+    else if (gb->backstep_instructions > 0x20000) {
+        GB_log(gb, "Backstepping is currently not available\n");
+        gb->backstep_instructions = 0;
+        return true;
+    }
+    GB_rewind_pop(gb);
+    GB_rewind_push(gb);
+    sequence = &gb->rewind_sequences[gb->rewind_pos];
+    sequence->instruction_count[sequence->pos] = 1;
+    while (gb->backstep_instructions) {
+        GB_run(gb);
+    }
+    GB_cpu_disassemble(gb, gb->pc, 5);
+    return true;
+}
+#endif
+
 static bool help(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command);
 
 
@@ -2078,6 +2132,10 @@ static const debugger_command_t commands[] = {
     {"next", 1, next, "Run the next instruction, skipping over function calls"},
     {"step", 1, step, "Run the next instruction, stepping into function calls"},
     {"finish", 1, finish, "Run until the current function returns"},
+#ifndef DISABLE_REWIND
+    {"backstep", 5, backstep, "Step one instruction backwards, assuming constant inputs"},
+    {"bs", 2, }, /* Alias */
+#endif
     {"undo", 1, undo, "Revert the last command"},
     {"registers", 1, registers, "Print values of processor registers and other important registers"},
     {"backtrace", 2, backtrace, "Display the current call stack"},
@@ -2205,7 +2263,7 @@ void GB_debugger_call_hook(GB_gameboy_t *gb, uint16_t call_addr)
 
     if (gb->backtrace_size < sizeof(gb->backtrace_sps) / sizeof(gb->backtrace_sps[0])) {
         while (gb->backtrace_size) {
-            if (gb->backtrace_sps[gb->backtrace_size - 1] < gb->sp) {
+            if (gb->backtrace_sps[gb->backtrace_size - 1] <= gb->sp) {
                 gb->backtrace_size--;
                 gb->debug_call_depth--;
             }
@@ -2241,6 +2299,7 @@ void GB_debugger_ret_hook(GB_gameboy_t *gb)
 // Returns the id or 0
 static void test_watchpoint(GB_gameboy_t *gb, uint16_t addr, uint8_t flags, uint8_t value)
 {
+    if (unlikely(gb->backstep_instructions)) return;
     uint16_t bank = bank_for_addr(gb, addr);
     for (unsigned i = 0; i < gb->n_watchpoints; i++) {
         struct GB_watchpoint_s *watchpoint = &gb->watchpoints[i];
@@ -2470,6 +2529,7 @@ next_command:
                 gb->non_trivial_jump_breakpoint_occured = true;
                 GB_log(gb, "Jumping to breakpoint %u: %s\n", breakpoint_id, value_to_string(gb, gb->pc, true, false));
                 GB_load_state_from_buffer(gb, gb->nontrivial_jump_state, -1);
+                GB_rewind_push(gb);
                 GB_cpu_disassemble(gb, gb->pc, 5);
                 GB_debugger_break(gb);
             }
@@ -2516,6 +2576,16 @@ next_command:
 }
 void GB_debugger_run(GB_gameboy_t *gb)
 {
+#ifndef DISABLE_REWIND
+    if (gb->rewind_sequences && gb->rewind_sequences[gb->rewind_pos].key_state) {
+        typeof(gb->rewind_sequences[0]) *sequence = &gb->rewind_sequences[gb->rewind_pos];
+        sequence->instruction_count[sequence->pos]++;
+    }
+    if (unlikely(gb->backstep_instructions)) {
+        gb->backstep_instructions--;
+        return;
+    }
+#endif
     if (likely(!gb->debug_active)) return;
     debugger_run(gb);
 }

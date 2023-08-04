@@ -13,12 +13,6 @@
 #include "gb.h"
 
 
-#ifdef GB_DISABLE_REWIND
-#define GB_rewind_reset(...)
-#define GB_rewind_push(...)
-#endif
-
-
 void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, va_list args)
 {
     char *string = NULL;
@@ -1795,6 +1789,7 @@ static void GB_reset_internal(GB_gameboy_t *gb, bool quick)
     
     gb->magic = GB_state_magic();
     request_boot_rom(gb);
+    GB_rewind_push(gb);
 }
 
 void GB_reset(GB_gameboy_t *gb)

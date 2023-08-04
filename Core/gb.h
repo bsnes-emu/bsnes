@@ -249,6 +249,13 @@ typedef enum {
 #define SGB_NTSC_FREQUENCY (21477272 / 5)
 #define SGB_PAL_FREQUENCY (21281370 / 5)
 #define DIV_CYCLES (0x100)
+
+#ifdef GB_DISABLE_REWIND
+#define GB_rewind_reset(...)
+#define GB_rewind_push(...)
+#define GB_rewind_invalidate_for_backstepping(...)
+#endif
+
 #endif
 
 typedef void (*GB_vblank_callback_t)(GB_gameboy_t *gb, GB_vblank_type_t type);
@@ -729,6 +736,7 @@ struct GB_gameboy_internal_s {
         bool debug_fin_command, debug_next_command;
         bool debug_active; // Cached value determining if GB_debugger_run does anything
         bool help_shown;
+        uint32_t backstep_instructions;
 
         /* Breakpoints */
         uint16_t n_breakpoints;
@@ -774,9 +782,11 @@ struct GB_gameboy_internal_s {
         struct {
             uint8_t *key_state;
             uint8_t *compressed_states[GB_REWIND_FRAMES_PER_KEY];
+            uint32_t instruction_count[GB_REWIND_FRAMES_PER_KEY + 1];
             unsigned pos;
         } *rewind_sequences; // lasts about 4 seconds
         size_t rewind_pos;
+        bool rewind_disable_invalidation;
 #endif
                
         /* SGB - saved and allocated optionally */

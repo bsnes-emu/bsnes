@@ -1352,7 +1352,7 @@ static int load_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
     gb->ram_size = orig_ram_size;
     
     sanitize_state(gb);
-    
+    GB_rewind_invalidate_for_backstepping(gb);
     return 0;
 }
 
