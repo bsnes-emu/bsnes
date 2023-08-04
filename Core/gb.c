@@ -210,9 +210,6 @@ void GB_free(GB_gameboy_t *gb)
     }
 #ifndef GB_DISABLE_DEBUGGER
     GB_debugger_clear_symbols(gb);
-#endif
-    GB_rewind_reset(gb);
-#ifndef GB_DISABLE_CHEATS
     if (gb->breakpoints) {
         free(gb->breakpoints);
     }
@@ -225,6 +222,9 @@ void GB_free(GB_gameboy_t *gb)
     if (gb->undo_state) {
         free(gb->undo_state);
     }
+#endif
+    GB_rewind_reset(gb);
+#ifndef GB_DISABLE_CHEATS
     while (gb->cheats) {
         GB_remove_cheat(gb, gb->cheats[0]);
     }

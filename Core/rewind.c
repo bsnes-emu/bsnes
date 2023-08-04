@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <assert.h>
+#include <string.h>
 
 static uint8_t *state_compress(const uint8_t *prev, const uint8_t *data, size_t uncompressed_size)
 {

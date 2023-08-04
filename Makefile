@@ -229,7 +229,8 @@ SYSROOT := $(shell xcodebuild -sdk iphoneos -version Path 2> $(NULL))
 ifeq ($(SYSROOT),)
 $(error Could not find an iOS SDK)
 endif
-CFLAGS += -arch arm64 -miphoneos-version-min=11.0 -isysroot $(SYSROOT) -IAppleCommon
+CFLAGS += -arch arm64 -miphoneos-version-min=11.0 -isysroot $(SYSROOT) -IAppleCommon -DGB_DISABLE_DEBUGGER
+CORE_FILTER += Core/debugger.c Core/sm83_disassembler.c Core/symbol_hash.c
 LDFLAGS += -arch arm64
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT)
 LDFLAGS += -miphoneos-version-min=11.0  -isysroot $(SYSROOT)

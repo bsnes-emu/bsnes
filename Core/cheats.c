@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include <errno.h>
+#include <string.h>
+#include <stdlib.h>
 
 static inline uint8_t hash_addr(uint16_t addr)
 {
