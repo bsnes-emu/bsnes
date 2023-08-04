@@ -1024,7 +1024,7 @@ int main(int argc, char **argv)
     }
 
     signal(SIGINT, debugger_interrupt);
-    signal(SIGHUP, debugger_reset);
+    signal(SIGUSR1, debugger_reset);
 
     SDL_Init(SDL_INIT_EVERYTHING & ~SDL_INIT_AUDIO);
     if ((console_supported = CON_start(completer))) {
