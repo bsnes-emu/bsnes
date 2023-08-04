@@ -24,7 +24,7 @@
 #define __builtin_bswap16(x) ({ typeof(x) _x = (x); _x >> 8 | _x << 8; })
 #endif
 
-#define internal __attribute__((visibility("internal")))
+#define internal __attribute__((visibility("hidden")))
 #define noinline __attribute__((noinline))
 
 #if __clang__
