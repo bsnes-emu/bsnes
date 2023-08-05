@@ -287,7 +287,32 @@ static void flush_variables()
 		else
 			run_ahead_frames = atoi(variable.value);
 	}
-	
+
+	variable = { "bsnes_video_filter", nullptr };
+	if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &variable) && variable.value)
+	{
+		if (strcmp(variable.value, "None") == 0) {
+			program->filterRender = &Filter::None::render;
+			program->filterSize = &Filter::None::size;
+		}
+		else if (strcmp(variable.value, "NTSC (RF)") == 0) {
+			program->filterRender = &Filter::NTSC_RF::render;
+			program->filterSize = &Filter::NTSC_RF::size;
+		}
+		else if (strcmp(variable.value, "NTSC (Composite)") == 0) {
+			program->filterRender = &Filter::NTSC_Composite::render;
+			program->filterSize = &Filter::NTSC_Composite::size;
+		}
+		else if (strcmp(variable.value, "NTSC (S-Video)") == 0) {
+			program->filterRender = &Filter::NTSC_SVideo::render;
+			program->filterSize = &Filter::NTSC_SVideo::size;
+		}
+		else if (strcmp(variable.value, "NTSC (RGB)") == 0) {
+			program->filterRender = &Filter::NTSC_RGB::render;
+			program->filterSize = &Filter::NTSC_RGB::size;
+		}
+	}
+
 	// Refresh Geometry
 	struct retro_system_av_info avinfo;
 	retro_get_system_av_info(&avinfo);
@@ -483,6 +508,7 @@ static void set_environment_info(retro_environment_t cb)
 		{ "bsnes_coprocessor_prefer_hle", "Coprocessor Prefer HLE; ON|OFF" },
 		{ "bsnes_sgb_bios", "Preferred Super GameBoy BIOS (restart); SGB1.sfc|SGB2.sfc" },
 		{ "bsnes_run_ahead_frames", "Amount of frames for run-ahead; OFF|1|2|3|4" },
+		{ "bsnes_video_filter", "Video Filter; None|NTSC (RF)|NTSC (Composite)|NTSC (S-Video)|NTSC (RGB)" },
 		{ nullptr },
 	};
 	cb(RETRO_ENVIRONMENT_SET_VARIABLES, const_cast<retro_variable *>(vars));
@@ -653,13 +679,14 @@ RETRO_API void retro_cheat_set(unsigned index, bool enabled, const char *code)
 
 RETRO_API bool retro_load_game(const retro_game_info *game)
 {
-	// bsnes uses 0RGB1555 internally but it is deprecated
-	// let software conversion happen in frontend
-	/*retro_pixel_format fmt = RETRO_PIXEL_FORMAT_0RGB1555;
+	retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
 	if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
-		return false;*/
+		return false;
 
 	emulator->configure("Audio/Frequency", SAMPLERATE);
+	program->filterRender = &Filter::None::render;
+	program->filterSize = &Filter::None::size;
+	program->updateVideoPalette();
 
 	flush_variables();
 
