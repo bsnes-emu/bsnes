@@ -1206,7 +1206,6 @@ static size_t unionAndCleanLists(NSRect *rectList, id *valueList, size_t count) 
     /* Start us off with the horizontal inset and move the baseline down by the ascender so our glyphs just graze the top of our view */
     textTransform.tx += [self horizontalContainerInset];
     textTransform.ty += [fontObject ascender] - lineHeight * [self verticalOffset];
-    NSUInteger lineIndex = 0;
     const NSUInteger maxGlyphCount = [self maximumGlyphCountForByteCount:bytesPerLine];
     NEW_ARRAY(struct HFGlyph_t, glyphs, maxGlyphCount);
     NEW_ARRAY(CGSize, advances, maxGlyphCount);
@@ -1269,7 +1268,6 @@ static size_t unionAndCleanLists(NSRect *rectList, id *valueList, size_t count) 
         else if (NSMinY(lineRectInBoundsSpace) > NSMaxY(clip)) {
             break;
         }
-        lineIndex++;
     }
     FREE_ARRAY(glyphs);
     FREE_ARRAY(advances);
