@@ -718,7 +718,14 @@ RETRO_API bool retro_load_game(const retro_game_info *game)
 RETRO_API bool retro_load_game_special(unsigned game_type,
 		const struct retro_game_info *info, size_t num_info)
 {
+	retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
+	if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
+		return false;
+
 	emulator->configure("Audio/Frequency", SAMPLERATE);
+	program->filterRender = &Filter::None::render;
+	program->filterSize = &Filter::None::size;
+	program->updateVideoPalette();
 
 	flush_variables();
 
