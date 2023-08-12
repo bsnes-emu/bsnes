@@ -67,6 +67,7 @@
 @property IBOutlet GBDebuggerButton *debuggerNextButton;
 @property IBOutlet GBDebuggerButton *debuggerStepButton;
 @property IBOutlet GBDebuggerButton *debuggerFinishButton;
+@property (strong) IBOutlet GBDebuggerButton *debuggerBackstepButton;
 
 
 + (NSImage *) imageFromData:(NSData *)data width:(NSUInteger) width height:(NSUInteger) height scale:(double) scale;

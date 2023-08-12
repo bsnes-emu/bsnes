@@ -15,6 +15,7 @@
                 <outlet property="consoleInput" destination="l22-S8-uji" id="Heu-am-YgB"/>
                 <outlet property="consoleOutput" destination="doS-dM-hnl" id="Gn5-ju-Wb0"/>
                 <outlet property="consoleWindow" destination="21F-Ah-yHX" id="eQ4-ug-LsT"/>
+                <outlet property="debuggerBackstepButton" destination="onn-R8-3vg" id="gi1-dC-tJj"/>
                 <outlet property="debuggerContinueButton" destination="G4h-KO-Z3g" id="Dad-5e-XYM"/>
                 <outlet property="debuggerFinishButton" destination="vtb-n5-Qlz" id="9vv-fJ-gxp"/>
                 <outlet property="debuggerNextButton" destination="cOi-Rs-9gS" id="Xjx-uM-D0u"/>
@@ -219,6 +220,18 @@
                                         <connections>
                                             <action selector="debuggerButtonPressed:" target="-2" id="PwN-rf-AcB"/>
                                             <outlet property="textField" destination="l22-S8-uji" id="blK-B3-MWI"/>
+                                        </connections>
+                                    </button>
+                                    <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="onn-R8-3vg" customClass="GBDebuggerButton">
+                                        <rect key="frame" x="102" y="26" width="26" height="26"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <buttonCell key="cell" type="bevel" title="Step Backwards" alternateTitle="backstep" bezelStyle="rounded" image="BackstepTemplate" imagePosition="only" alignment="center" enabled="NO" imageScaling="proportionallyDown" inset="2" id="WtK-kD-bf6">
+                                            <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
+                                            <font key="font" metaFont="system"/>
+                                        </buttonCell>
+                                        <connections>
+                                            <action selector="debuggerButtonPressed:" target="-2" id="S9a-jV-Z6g"/>
+                                            <outlet property="textField" destination="l22-S8-uji" id="1gw-Lc-QFS"/>
                                         </connections>
                                     </button>
                                 </subviews>
@@ -786,7 +799,7 @@
                                 </connections>
                             </textField>
                             <button verticalHuggingPriority="750" id="C3V-Ep-bMj">
-                                <rect key="frame" x="202.5" y="12" width="83" height="23"/>
+                                <rect key="frame" x="203" y="12" width="83" height="23"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
                                 <buttonCell key="cell" type="roundTextured" title="Import" bezelStyle="texturedRounded" alignment="center" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="mMP-KW-YNy">
                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -857,7 +870,7 @@
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" heightSizable="YES"/>
                         <clipView key="contentView" id="mzf-yu-RID">
                             <rect key="frame" x="1" y="1" width="398" height="273"/>
-                            <autoresizingMask key="autoresizingMask"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                             <subviews>
                                 <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="none" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" emptySelection="NO" autosaveColumns="NO" typeSelect="NO" headerView="pvX-uJ-qK5" id="tA3-8T-bxb">
                                     <rect key="frame" x="0.0" y="0.0" width="398" height="256"/>
@@ -866,7 +879,7 @@
                                     <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
                                     <color key="gridColor" name="gridColor" catalog="System" colorSpace="catalog"/>
                                     <tableColumns>
-                                        <tableColumn width="52" minWidth="32" maxWidth="1000" id="JNd-HW-LvS">
+                                        <tableColumn width="32" minWidth="32" maxWidth="1000" id="JNd-HW-LvS">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border">
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -888,7 +901,7 @@
                                             </buttonCell>
                                             <tableColumnResizingMask key="resizingMask" resizeWithTable="YES" userResizable="YES"/>
                                         </tableColumn>
-                                        <tableColumn editable="NO" width="151" minWidth="40" maxWidth="1000" id="4Qa-FQ-QWY">
+                                        <tableColumn editable="NO" width="142" minWidth="40" maxWidth="1000" id="4Qa-FQ-QWY">
                                             <tableHeaderCell key="headerCell" lineBreakMode="truncatingTail" borderStyle="border" title="Description">
                                                 <color key="textColor" name="headerTextColor" catalog="System" colorSpace="catalog"/>
                                                 <color key="backgroundColor" name="headerColor" catalog="System" colorSpace="catalog"/>
@@ -928,7 +941,7 @@
                             <rect key="frame" x="224" y="17" width="15" height="102"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
-                        <tableHeaderView key="headerView" id="pvX-uJ-qK5">
+                        <tableHeaderView key="headerView" wantsLayer="YES" id="pvX-uJ-qK5">
                             <rect key="frame" x="0.0" y="0.0" width="398" height="17"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </tableHeaderView>
@@ -952,6 +965,7 @@
         </customObject>
     </objects>
     <resources>
+        <image name="BackstepTemplate" width="14" height="14"/>
         <image name="FinishTemplate" width="14" height="14"/>
         <image name="HelpTemplate" width="14" height="14"/>
         <image name="InterruptTemplate" width="14" height="14"/>

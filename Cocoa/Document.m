@@ -2617,6 +2617,7 @@ static bool is_path_writeable(const char *path)
         self.debuggerNextButton.enabled = true;
         self.debuggerStepButton.enabled = true;
         self.debuggerFinishButton.enabled = true;
+        self.debuggerBackstepButton.enabled = true;
     }
     else {
         self.debuggerContinueButton.toolTip = self.debuggerContinueButton.title = @"Interrupt";
@@ -2630,6 +2631,7 @@ static bool is_path_writeable(const char *path)
         self.debuggerNextButton.enabled = false;
         self.debuggerStepButton.enabled = false;
         self.debuggerFinishButton.enabled = false;
+        self.debuggerBackstepButton.enabled = false;
     }
     if (updateContinue) {
         [self.debuggerContinueButton mouseEntered:nil];
