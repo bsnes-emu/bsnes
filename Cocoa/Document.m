@@ -125,6 +125,7 @@ enum model {
     void (^ volatile _pendingAtomicBlock)();
     
     NSDate *_fileModificationTime;
+    __weak NSThread *_emulationThread;
 }
 
 static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
@@ -606,7 +607,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     }
     if (_running) return;
     _running = true;
-    [[[NSThread alloc] initWithTarget:self selector:@selector(run) object:nil] start];
+    [_emulationThread = [[NSThread alloc] initWithTarget:self selector:@selector(run) object:nil] start];
 }
 
 - (void) stop
@@ -1584,7 +1585,7 @@ static bool is_path_writeable(const char *path)
     GB_write_memory(&_gb, addr, value);
 }
 
-- (void) performAtomicBlock: (void (^)())block
+- (void)performAtomicBlock: (void (^)())block
 {
     while (!GB_is_inited(&_gb));
     bool isRunning = _running && !GB_debugger_is_stopped(&_gb);
@@ -1598,6 +1599,11 @@ static bool is_path_writeable(const char *path)
     
     if (_master) {
         [_master performAtomicBlock:block];
+        return;
+    }
+    
+    if ([NSThread currentThread] == _emulationThread) {
+        block();
         return;
     }
     
