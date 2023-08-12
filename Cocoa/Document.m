@@ -607,7 +607,9 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     }
     if (_running) return;
     _running = true;
-    [_emulationThread = [[NSThread alloc] initWithTarget:self selector:@selector(run) object:nil] start];
+    NSThread *emulationThraed = [[NSThread alloc] initWithTarget:self selector:@selector(run) object:nil];
+    _emulationThread = emulationThraed;
+    [emulationThraed start];
 }
 
 - (void) stop
