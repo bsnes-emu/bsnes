@@ -783,7 +783,7 @@ static char *reset_completer(GB_gameboy_t *gb, const char *string, uintptr_t *co
     size_t length = strlen(string);
     const char *suggestions[] = {"quick", "reload"};
     while (*context < sizeof(suggestions) / sizeof(suggestions[0])) {
-        if (memcmp(string, suggestions[*context], length) == 0) {
+        if (strncmp(string, suggestions[*context], length) == 0) {
             return strdup(suggestions[(*context)++] + length);
         }
         (*context)++;
@@ -906,7 +906,7 @@ static char *on_off_completer(GB_gameboy_t *gb, const char *string, uintptr_t *c
     size_t length = strlen(string);
     const char *suggestions[] = {"on", "off"};
     while (*context < sizeof(suggestions) / sizeof(suggestions[0])) {
-        if (memcmp(string, suggestions[*context], length) == 0) {
+        if (strncmp(string, suggestions[*context], length) == 0) {
             return strdup(suggestions[(*context)++] + length);
         }
         (*context)++;
@@ -971,7 +971,7 @@ static char *symbol_completer(GB_gameboy_t *gb, const char *string, uintptr_t *_
             continue;
         }
         const char *candidate = map->symbols[context->symbol++].name;
-        if (memcmp(symbol_prefix, candidate, length) == 0) {
+        if (strncmp(symbol_prefix, candidate, length) == 0) {
             return strdup(candidate + length);
         }
     }
@@ -983,7 +983,7 @@ static char *j_completer(GB_gameboy_t *gb, const char *string, uintptr_t *contex
     size_t length = strlen(string);
     const char *suggestions[] = {"j"};
     while (*context < sizeof(suggestions) / sizeof(suggestions[0])) {
-        if (memcmp(string, suggestions[*context], length) == 0) {
+        if (strncmp(string, suggestions[*context], length) == 0) {
             return strdup(suggestions[(*context)++] + length);
         }
         (*context)++;
@@ -1160,7 +1160,7 @@ static char *rw_completer(GB_gameboy_t *gb, const char *string, uintptr_t *conte
     size_t length = strlen(string);
     const char *suggestions[] = {"r", "rw", "w"};
     while (*context < sizeof(suggestions) / sizeof(suggestions[0])) {
-        if (memcmp(string, suggestions[*context], length) == 0) {
+        if (strncmp(string, suggestions[*context], length) == 0) {
             return strdup(suggestions[(*context)++] + length);
         }
         (*context)++;
@@ -1430,7 +1430,7 @@ static char *format_completer(GB_gameboy_t *gb, const char *string, uintptr_t *c
     size_t length = strlen(string);
     const char *suggestions[] = {"a", "b", "d", "o", "x"};
     while (*context < sizeof(suggestions) / sizeof(suggestions[0])) {
-        if (memcmp(string, suggestions[*context], length) == 0) {
+        if (strncmp(string, suggestions[*context], length) == 0) {
             return strdup(suggestions[(*context)++] + length);
         }
         (*context)++;
@@ -1678,7 +1678,7 @@ static char *keep_completer(GB_gameboy_t *gb, const char *string, uintptr_t *con
     size_t length = strlen(string);
     const char *suggestions[] = {"keep"};
     while (*context < sizeof(suggestions) / sizeof(suggestions[0])) {
-        if (memcmp(string, suggestions[*context], length) == 0) {
+        if (strncmp(string, suggestions[*context], length) == 0) {
             return strdup(suggestions[(*context)++] + length);
         }
         (*context)++;
@@ -1994,7 +1994,7 @@ static char *wave_completer(GB_gameboy_t *gb, const char *string, uintptr_t *con
     size_t length = strlen(string);
     const char *suggestions[] = {"c", "f", "l"};
     while (*context < sizeof(suggestions) / sizeof(suggestions[0])) {
-        if (memcmp(string, suggestions[*context], length) == 0) {
+        if (strncmp(string, suggestions[*context], length) == 0) {
             return strdup(suggestions[(*context)++] + length);
         }
         (*context)++;
@@ -2187,7 +2187,7 @@ static const debugger_command_t *find_command(const char *string)
     size_t length = strlen(string);
     for (const debugger_command_t *command = commands; command->command; command++) {
         if (command->min_length > length) continue;
-        if (memcmp(command->command, string, length) == 0) { /* Is a substring? */
+        if (strncmp(command->command, string, length) == 0) { /* Is a substring? */
             /* Aliases */
             while (!command->implementation) {
                 command--;
@@ -2445,7 +2445,7 @@ char *GB_debugger_complete_substring(GB_gameboy_t *gb, char *input, uintptr_t *c
         }
         for (const debugger_command_t *command = &commands[*context]; command->command; command++) {
             (*context)++;
-            if (memcmp(command->command, command_string, length) == 0) { /* Is a substring? */
+            if (strncmp(command->command, command_string, length) == 0) { /* Is a substring? */
                 return strdup(command->command + length);
             }
         }
