@@ -1054,7 +1054,7 @@ static void render_line(GB_gameboy_t *gb)
 
         while (gb->n_visible_objs) {
             unsigned object_index = gb->visible_objs[gb->n_visible_objs - 1];
-            unsigned priority = gb->object_priority == GB_OBJECT_PRIORITY_X? 0 : object_index;
+            unsigned priority = (gb->object_priority == GB_OBJECT_PRIORITY_X)? 0 : object_index;
             const object_t *object = &objects[object_index];
             gb->n_visible_objs--;
             
