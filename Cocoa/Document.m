@@ -783,13 +783,18 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     if (@available(macOS 11.0, *)) {
         self.memoryWindow.toolbarStyle = NSWindowToolbarStyleExpanded;
         self.printerFeedWindow.toolbarStyle = NSWindowToolbarStyleUnifiedCompact;
-        [self.printerFeedWindow.toolbar removeItemAtIndex:1];
-        self.printerFeedWindow.toolbar.items.firstObject.image =
+        self.printerFeedWindow.toolbar.items[0].image =
             [NSImage imageWithSystemSymbolName:@"square.and.arrow.down"
                       accessibilityDescription:@"Save"];
-        self.printerFeedWindow.toolbar.items.lastObject.image =
+        self.printerFeedWindow.toolbar.items[1].image =
             [NSImage imageWithSystemSymbolName:@"printer"
                       accessibilityDescription:@"Print"];
+        self.printerFeedWindow.toolbar.items[0].bordered = false;
+        self.printerFeedWindow.toolbar.items[1].bordered = false;
+    }
+    else {
+        [self.printerFeedWindow.toolbar insertItemWithItemIdentifier:NSToolbarFlexibleSpaceItemIdentifier
+                                                             atIndex:2];
     }
     
     
