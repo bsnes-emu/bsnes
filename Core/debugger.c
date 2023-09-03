@@ -1919,8 +1919,8 @@ static bool apu(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugg
                    ((gb->io_registers[GB_IO_NR10] & 0x7) && (gb->io_registers[GB_IO_NR10] & 0x70))? "active" : "inactive",
                    (gb->io_registers[GB_IO_NR10] & 0x8) ? "decreasing" : "increasing");
             if (gb->apu.square_sweep_calculate_countdown) {
-                GB_log(gb, "    On going frequency calculation will be ready in %u APU ticks\n",
-                       gb->apu.square_sweep_calculate_countdown);
+                GB_log(gb, "    On-going frequency calculation will be ready in %u APU ticks\n",
+                       gb->apu.square_sweep_calculate_countdown * 2 + 1 - gb->apu.lf_div);
             }
             else {
                 GB_log(gb, "    Shadow frequency register: 0x%03x\n", gb->apu.shadow_sweep_sample_length);

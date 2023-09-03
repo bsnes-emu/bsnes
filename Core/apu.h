@@ -70,11 +70,12 @@ typedef struct
                     // need to divide the signal.
 
     uint8_t square_sweep_countdown; // In 128Hz
-    uint8_t square_sweep_calculate_countdown; // In 2 MHz
+    uint8_t square_sweep_calculate_countdown; // In 1 MHz
+    uint8_t square_sweep_calculate_countdown_reload_timer; // In 1 Mhz, for glitches related to reloading square_sweep_calculate_countdown
     uint16_t sweep_length_addend;
     uint16_t shadow_sweep_sample_length;
     bool unshifted_sweep;
-    bool enable_zombie_calculate_stepping;
+    bool square_sweep_stop_calc_if_no_zombie_write;
     
     uint8_t channel_1_restart_hold;
     uint16_t channel1_completed_addend;

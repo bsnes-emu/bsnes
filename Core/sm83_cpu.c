@@ -22,7 +22,6 @@ typedef enum {
     GB_CONFLICT_SGB_LCDC,
     GB_CONFLICT_WX,
     GB_CONFLICT_LCDC_CGB,
-    GB_CONFLICT_NR10,
     GB_CONFLICT_SCX_CGB,
     GB_CONFLICT_LCDC_CGB_DOUBLE,
     GB_CONFLICT_STAT_CGB_DOUBLE,
@@ -36,7 +35,6 @@ static const conflict_t cgb_conflict_map[0x80] = {
     [GB_IO_BGP] = GB_CONFLICT_PALETTE_CGB,
     [GB_IO_OBP0] = GB_CONFLICT_PALETTE_CGB,
     [GB_IO_OBP1] = GB_CONFLICT_PALETTE_CGB,
-    [GB_IO_NR10] = GB_CONFLICT_NR10,
     [GB_IO_SCX] = GB_CONFLICT_SCX_CGB,
 };
 
@@ -46,7 +44,6 @@ static const conflict_t cgb_double_conflict_map[0x80] = {
     [GB_IO_LYC] = GB_CONFLICT_READ_OLD,
     [GB_IO_STAT] = GB_CONFLICT_STAT_CGB_DOUBLE,
     // Unconfirmed yet
-    [GB_IO_NR10] = GB_CONFLICT_NR10,
     [GB_IO_SCX] = GB_CONFLICT_SCX_CGB,
 };
 
@@ -63,7 +60,6 @@ static const conflict_t dmg_conflict_map[0x80] = {
     [GB_IO_OBP1] = GB_CONFLICT_PALETTE_DMG,
     [GB_IO_WY] = GB_CONFLICT_READ_OLD,
     [GB_IO_WX] = GB_CONFLICT_WX,
-    [GB_IO_NR10] = GB_CONFLICT_NR10,
     
     /* Todo: these were not verified at all */
     [GB_IO_SCX] = GB_CONFLICT_READ_NEW,
@@ -82,7 +78,6 @@ static const conflict_t sgb_conflict_map[0x80] = {
     [GB_IO_OBP1] = GB_CONFLICT_READ_NEW,
     [GB_IO_WY] = GB_CONFLICT_READ_OLD,
     [GB_IO_WX] = GB_CONFLICT_WX,
-    [GB_IO_NR10] = GB_CONFLICT_NR10,
     
     /* Todo: these were not verified at all */
     [GB_IO_SCX] = GB_CONFLICT_READ_NEW,
@@ -216,11 +211,11 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         }
             
         case GB_CONFLICT_DMG_LCDC: {
-            /* Similar to the palette registers, these interact directly with the LCD, so they appear to be affected by it. Both my DMG (B, blob) and Game Boy Light behave this way though.
+            /* Similar to the palette registers, these interact directly with the LCD, so they appear to be affected by
+               it. Both my DMG (B, blob) and Game Boy Light behave this way though.
              
-               Additionally, LCDC.1 is very nasty because on the it is read both by the FIFO when popping pixels,
-               and the object-fetching state machine, and both behave differently when it comes to access conflicts.
-               Hacks ahead.
+               Additionally, LCDC.1 is very nasty because it is read both by the FIFO when popping pixels, and the
+               object-fetching state machine, and both behave differently when it comes to access conflicts. Hacks ahead.
              */
             
             uint8_t old_value = GB_read_memory(gb, addr);
@@ -319,27 +314,6 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             }
             break;
         }
-        
-        case GB_CONFLICT_NR10:
-            /* Hack: Due to the coupling between DIV and the APU, GB_apu_run only runs at M-cycle
-                     resolutions, but this quirk requires 2MHz even in single speed mode. To work
-                     around this, we specifically just step the calculate countdown if needed. */
-            GB_advance_cycles(gb, gb->pending_cycles);
-            if (gb->model <= GB_MODEL_CGB_C) {
-                // TODO: Double speed mode? This logic is also a bit weird, it needs more tests
-                GB_apu_run(gb, true);
-                if (gb->apu.square_sweep_calculate_countdown > 3 && gb->apu.enable_zombie_calculate_stepping) {
-                    gb->apu.square_sweep_calculate_countdown -= 2;
-                }
-                gb->apu.enable_zombie_calculate_stepping = true;
-                /* TODO: this causes audio regressions in the Donkey Kong Land series.
-                   The exact behavior of this quirk should be further investigated, as it seems
-                   more complicated than a single FF pseudo-write. */
-                // GB_write_memory(gb, addr, 0xFF);
-            }
-            GB_write_memory(gb, addr, value);
-            gb->pending_cycles = 4;
-            break;
             
         case GB_CONFLICT_SCX_CGB:
             if (gb->cgb_double_speed) {
