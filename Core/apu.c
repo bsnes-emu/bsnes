@@ -477,7 +477,7 @@ static void trigger_sweep_calculation(GB_gameboy_t *gb)
         
         /* Recalculation and overflow check only occurs after a delay */
         gb->apu.square_sweep_calculate_countdown = gb->io_registers[GB_IO_NR10] & 0x7;
-        gb->apu.square_sweep_calculate_countdown_reload_timer = 3 + (gb->model <= GB_MODEL_CGB_C);
+        gb->apu.square_sweep_calculate_countdown_reload_timer = 2 + (gb->model <= GB_MODEL_CGB_C);
         gb->apu.square_sweep_stop_calc_if_no_zombie_write = false;
         gb->apu.unshifted_sweep = !(gb->io_registers[GB_IO_NR10] & 0x7);
         gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7) ^ 7;
@@ -638,7 +638,7 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
     if (force ||
         (gb->apu.apu_cycles > 0x1000) ||
         (gb->apu_output.sample_cycles >= clock_rate) ||
-        (gb->apu.square_sweep_calculate_countdown || gb->apu.channel_1_restart_hold) ||
+        (gb->apu.square_sweep_calculate_countdown || gb->apu.channel_1_restart_hold || gb->apu.square_sweep_calculate_countdown_reload_timer) ||
         (gb->model <= GB_MODEL_CGB_E && (gb->apu.wave_channel.bugged_read_countdown || (gb->apu.wave_channel.enable && gb->apu.wave_channel.pulsed)))) {
         force = true;
     }
@@ -693,11 +693,11 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
         if (gb->apu.square_sweep_calculate_countdown_reload_timer > sweep_cycles) {
             gb->apu.square_sweep_calculate_countdown_reload_timer -= sweep_cycles;
             sweep_cycles = 0;
-            if (gb->io_registers[GB_IO_NR10] & 0x7) {
-                gb->apu.square_sweep_calculate_countdown = gb->io_registers[GB_IO_NR10] & 0x7;
-            }
         }
         else {
+            if (gb->apu.square_sweep_calculate_countdown_reload_timer && !gb->apu.square_sweep_calculate_countdown) {
+                sweep_calculation_done(gb, cycles);
+            }
             sweep_cycles -= gb->apu.square_sweep_calculate_countdown_reload_timer;
             gb->apu.square_sweep_calculate_countdown_reload_timer = 0;
             if (gb->apu.square_sweep_stop_calc_if_no_zombie_write) {
@@ -1125,6 +1125,8 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                             // static const uint8_t corruption[8] = {0, 1, 1, 3, 3, 5, 5, 7}; // My CGB-B
                             // static const uint8_t corruption[8] = {0, 7, 1, *, 3, 3, 5, 7}; // My CGB-0
                             
+                            // TODO: How does this affect actual frequency calculation?
+                            
                             gb->apu.square_sweep_calculate_countdown = corruption[gb->apu.square_sweep_calculate_countdown & 7];
                             gb->apu.square_sweep_calculate_countdown_reload_timer = 0;
                         }
@@ -1132,6 +1134,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     }
                     case 2:
                         if (gb->apu.lf_div) {
+                            // TODO: How does this affect actual frequency calculation?
                             gb->apu.square_sweep_calculate_countdown = value & 7; // TODO: Confirm for non-zero?
                             gb->apu.square_sweep_calculate_countdown_reload_timer = 0;
                         }
@@ -1151,14 +1154,10 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     // Countdown just reloaded, re-reload it
                     gb->apu.square_sweep_calculate_countdown = value & 0x7;
                     if (!gb->apu.square_sweep_calculate_countdown) {
-                        sweep_calculation_done(gb, 0);
+                        gb->apu.square_sweep_calculate_countdown_reload_timer = 0;
                     }
-                }
-                else if (gb->apu.square_sweep_calculate_countdown_reload_timer == 1 && (value & 7) == 0) {
-                    // TODO: Odd glitch? Check schematics what the hell
-                    gb->apu.square_sweep_calculate_countdown--;
-                    if (!gb->apu.square_sweep_calculate_countdown) {
-                        sweep_calculation_done(gb, 0);
+                    else {
+                        // TODO: How does this affect actual frequency calculation?
                     }
                 }
                 if ((value & 7) && !(gb->io_registers[GB_IO_NR10] & 7) && !gb->apu.lf_div && gb->apu.square_sweep_calculate_countdown > 1) {
@@ -1311,10 +1310,10 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     if (gb->io_registers[GB_IO_NR10] & 7) {
                         /* APU bug: if shift is nonzero, overflow check also occurs on trigger */
                         gb->apu.square_sweep_calculate_countdown = gb->io_registers[GB_IO_NR10] & 0x7;
-                        gb->apu.square_sweep_calculate_countdown_reload_timer = 3 + (gb->model <= GB_MODEL_CGB_C);
+                        gb->apu.square_sweep_calculate_countdown_reload_timer = 2 + (gb->model <= GB_MODEL_CGB_C);
                         gb->apu.unshifted_sweep = false;
                         if (!was_active) {
-                            gb->apu.square_sweep_calculate_countdown += 1;
+                            gb->apu.square_sweep_calculate_countdown_reload_timer++;
                         }
                         gb->apu.sweep_length_addend = gb->apu.square_channels[GB_SQUARE_1].sample_length;
                         gb->apu.sweep_length_addend >>= (gb->io_registers[GB_IO_NR10] & 7);
