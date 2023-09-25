@@ -75,8 +75,8 @@ typedef struct
     uint16_t sweep_length_addend;
     uint16_t shadow_sweep_sample_length;
     bool unshifted_sweep;
-    bool square_sweep_stop_calc_if_no_zombie_write;
-    
+    bool square_sweep_countdown_just_reloaded;
+
     uint8_t channel_1_restart_hold;
     uint16_t channel1_completed_addend;
     struct {
@@ -177,6 +177,8 @@ typedef struct {
     GB_audio_format_t output_format;
     int output_error;
     
+    /* Not output related, but it's temp state so I'll put it here */
+    bool square_sweep_disable_stepping;
 } GB_apu_output_t;
 
 void GB_set_channel_muted(GB_gameboy_t *gb, GB_channel_t channel, bool muted);

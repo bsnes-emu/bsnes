@@ -477,8 +477,7 @@ static void trigger_sweep_calculation(GB_gameboy_t *gb)
         
         /* Recalculation and overflow check only occurs after a delay */
         gb->apu.square_sweep_calculate_countdown = gb->io_registers[GB_IO_NR10] & 0x7;
-        gb->apu.square_sweep_calculate_countdown_reload_timer = 2 + (gb->model <= GB_MODEL_CGB_C);
-        gb->apu.square_sweep_stop_calc_if_no_zombie_write = false;
+        gb->apu.square_sweep_calculate_countdown_reload_timer = 2;
         gb->apu.unshifted_sweep = !(gb->io_registers[GB_IO_NR10] & 0x7);
         gb->apu.square_sweep_countdown = ((gb->io_registers[GB_IO_NR10] >> 4) & 7) ^ 7;
     }
@@ -690,23 +689,26 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
         if ((cycles & 1) && !gb->apu.lf_div) {
             sweep_cycles++;
         }
+        
+        if (gb->apu.square_sweep_calculate_countdown_reload_timer == 0 && !gb->cgb_double_speed) {
+            gb->apu.square_sweep_calculate_countdown = 0;
+        }
+        gb->apu.square_sweep_countdown_just_reloaded = false;
         if (gb->apu.square_sweep_calculate_countdown_reload_timer > sweep_cycles) {
             gb->apu.square_sweep_calculate_countdown_reload_timer -= sweep_cycles;
             sweep_cycles = 0;
         }
         else {
-            if (gb->apu.square_sweep_calculate_countdown_reload_timer && !gb->apu.square_sweep_calculate_countdown) {
+            if (gb->apu.square_sweep_calculate_countdown_reload_timer && !gb->apu.square_sweep_calculate_countdown && gb->model > GB_MODEL_CGB_C) {
                 sweep_calculation_done(gb, cycles);
             }
+            gb->apu.square_sweep_countdown_just_reloaded = gb->apu.square_sweep_calculate_countdown_reload_timer == sweep_cycles && sweep_cycles;
             sweep_cycles -= gb->apu.square_sweep_calculate_countdown_reload_timer;
             gb->apu.square_sweep_calculate_countdown_reload_timer = 0;
-            if (gb->apu.square_sweep_stop_calc_if_no_zombie_write) {
-                gb->apu.square_sweep_stop_calc_if_no_zombie_write = 0;
-                gb->apu.square_sweep_calculate_countdown = 0;
-            }
         }
 
         if (gb->apu.square_sweep_calculate_countdown &&
+            !gb->apu_output.square_sweep_disable_stepping &&
             (((gb->io_registers[GB_IO_NR10] & 7) || gb->apu.unshifted_sweep) ||
              gb->apu.square_sweep_calculate_countdown <= 1)) { // Calculation is paused if the lower bits are 0
             if (gb->apu.square_sweep_calculate_countdown > sweep_cycles) {
@@ -714,7 +716,6 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
             }
             else {
                 sweep_calculation_done(gb, cycles);
-                
                 gb->apu.square_sweep_calculate_countdown = 0;
             }
         }
@@ -1103,50 +1104,38 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR10: {
             bool old_negate = gb->io_registers[GB_IO_NR10] & 8;
             // TODO: Check all of these in APU odd mode
+            if (gb->apu.square_sweep_calculate_countdown_reload_timer || gb->apu.square_sweep_countdown_just_reloaded) {
+                GB_log(gb, "%04x: Glitch NR10 write at %d.%d (%d, %d)\n", gb->de, gb->apu.square_sweep_calculate_countdown, gb->apu.lf_div, gb->apu.square_sweep_calculate_countdown_reload_timer, gb->apu.square_sweep_countdown_just_reloaded);
+            }
             if (gb->model <= GB_MODEL_CGB_C) {
-                bool zombie_tick = !(gb->io_registers[GB_IO_NR10] & 7) &&
-                (gb->apu.lf_div ^ gb->cgb_double_speed) &&
-                gb->apu.square_sweep_calculate_countdown &&
-                !gb->apu.square_sweep_calculate_countdown_reload_timer;
-                gb->apu.square_sweep_stop_calc_if_no_zombie_write = false;
-                if (zombie_tick) {
-                    gb->apu.square_sweep_calculate_countdown--;
-                    if (!gb->apu.square_sweep_calculate_countdown) {
-                        sweep_calculation_done(gb, 0);
+                if (gb->apu.square_sweep_calculate_countdown_reload_timer) {
+                    if (gb->cgb_double_speed) {
+                        // TODO: How does this affect actual frequency calculation?
+                        gb->apu.square_sweep_calculate_countdown = value & 7;
                     }
                 }
-                switch (gb->apu.square_sweep_calculate_countdown_reload_timer) {
-                    case 1: {
-                        if (!gb->apu.lf_div) {
-                            /* This is some instance-specific data corruption. It might also be affect by revision.
-                             At least for my CGB-0 (haven't tested any other CGB-0s), the '3' case is non-deterministic. */
-                            static const uint8_t corruption[8] = {0, 7, 5, 7, 3, 3, 5, 7}; // Two of my CGB-Cs, CGB-A
-                            // static const uint8_t corruption[8] = {0, 7, 1, 3, 3, 3, 5, 7}; // My other CGB-C
-                            // static const uint8_t corruption[8] = {0, 1, 1, 3, 3, 5, 5, 7}; // My CGB-B
-                            // static const uint8_t corruption[8] = {0, 7, 1, *, 3, 3, 5, 7}; // My CGB-0
-                            
-                            // TODO: How does this affect actual frequency calculation?
-                            
-                            gb->apu.square_sweep_calculate_countdown = corruption[gb->apu.square_sweep_calculate_countdown & 7];
-                            gb->apu.square_sweep_calculate_countdown_reload_timer = 0;
+                else if (gb->apu.square_sweep_countdown_just_reloaded) {
+                    GB_log(gb, "%04x: Glitch NR10 write at %d.%d (%d, %d)\n", gb->de, gb->apu.square_sweep_calculate_countdown, gb->apu.lf_div, gb->apu.square_sweep_calculate_countdown_reload_timer, gb->apu.square_sweep_countdown_just_reloaded);
+                    /* This is some instance-specific data corruption. It might also be affect by revision.
+                     At least for my CGB-0 (haven't tested any other CGB-0s), the '3' case is non-deterministic. */
+                    static const uint8_t corruption[8] = {7, 7, 5, 7, 3, 3, 5, 7}; // Two of my CGB-Cs, CGB-A
+                    // static const uint8_t corruption[8] = {7, 7, 1, 3, 3, 3, 5, 7}; // My other CGB-C
+                    // static const uint8_t corruption[8] = {7, 1, 1, 3, 3, 5, 5, 7}; // My CGB-B
+                    // static const uint8_t corruption[8] = {7, 7, 1, *, 3, 3, 5, 7}; // My CGB-0
+                    
+                    // TODO: How does this affect actual frequency calculation?
+                    
+                    gb->apu.square_sweep_calculate_countdown = corruption[gb->apu.square_sweep_calculate_countdown & 7];
+                }
+                else {
+                    if (!(gb->io_registers[GB_IO_NR10] & 7) &&
+                        (gb->apu.lf_div ^ gb->cgb_double_speed) &&
+                        gb->apu.square_sweep_calculate_countdown) {
+                        gb->apu.square_sweep_calculate_countdown--;
+                        if (!gb->apu.square_sweep_calculate_countdown) {
+                            sweep_calculation_done(gb, 0);
                         }
-                        break;
                     }
-                    case 2:
-                        if (gb->apu.lf_div) {
-                            // TODO: How does this affect actual frequency calculation?
-                            gb->apu.square_sweep_calculate_countdown = value & 7; // TODO: Confirm for non-zero?
-                            gb->apu.square_sweep_calculate_countdown_reload_timer = 0;
-                        }
-                        else {
-                        case 3:
-                            // Countdown just reloaded, re-reload it with glitch value (FF & 7)
-                            gb->apu.square_sweep_calculate_countdown = 7;
-                            gb->apu.square_sweep_stop_calc_if_no_zombie_write = true;
-
-                        }
-                        break;
-                    default:;
                 }
             }
             else {
@@ -1255,10 +1244,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     }
                     gb->apu.square_channels[index].delay = 6 - gb->apu.lf_div;
                     gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + gb->apu.square_channels[index].delay;
-                    if (gb->model <= GB_MODEL_CGB_C && gb->apu.lf_div) {
-                        gb->apu.square_channels[index].sample_countdown += 2;
-                        gb->apu.square_channels[index].delay += 2;
-                    }
                 }
                 else {
                     unsigned extra_delay = 0;
@@ -1278,10 +1263,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     /* Timing quirk: if already active, sound starts 2 (2MHz) ticks earlier.*/
                     gb->apu.square_channels[index].delay = 4 - gb->apu.lf_div + extra_delay;
                     gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + gb->apu.square_channels[index].delay;
-                    if (gb->model <= GB_MODEL_CGB_C && gb->apu.lf_div) {
-                        gb->apu.square_channels[index].sample_countdown += 2;
-                        gb->apu.square_channels[index].delay += 2;
-                    }
                 }
                 gb->apu.square_channels[index].current_volume = gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] >> 4;
                 /* The volume changes caused by NRX4 sound start take effect instantly (i.e. the effect the previously
@@ -1306,11 +1287,10 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 if (index == GB_SQUARE_1) {
                     gb->apu.shadow_sweep_sample_length = 0;
                     gb->apu.channel1_completed_addend = 0;
-                    gb->apu.square_sweep_stop_calc_if_no_zombie_write = false;
                     if (gb->io_registers[GB_IO_NR10] & 7) {
                         /* APU bug: if shift is nonzero, overflow check also occurs on trigger */
                         gb->apu.square_sweep_calculate_countdown = gb->io_registers[GB_IO_NR10] & 0x7;
-                        gb->apu.square_sweep_calculate_countdown_reload_timer = 2 + (gb->model <= GB_MODEL_CGB_C);
+                        gb->apu.square_sweep_calculate_countdown_reload_timer = 2;
                         gb->apu.unshifted_sweep = false;
                         if (!was_active) {
                             gb->apu.square_sweep_calculate_countdown_reload_timer++;
