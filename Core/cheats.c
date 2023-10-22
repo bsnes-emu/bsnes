@@ -132,7 +132,7 @@ void GB_remove_cheat(GB_gameboy_t *gb, const GB_cheat_t *cheat)
                 *hash = NULL;
             }
             else {
-                *hash = malloc(sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
+                *hash = realloc(*hash, sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
             }
             break;
         }
@@ -228,7 +228,7 @@ void GB_update_cheat(GB_gameboy_t *gb, const GB_cheat_t *_cheat, const char *des
                     *hash = NULL;
                 }
                 else {
-                    *hash = malloc(sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
+                    *hash = realloc(*hash, sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
                 }
                 break;
             }
