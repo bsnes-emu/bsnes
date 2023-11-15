@@ -148,10 +148,30 @@ jobs:
             false \
             false
         }
+        attach_release_asset()
+        {
+          # The upload URL may have a {template} in it,
+          # which is hard to deal with from shell,
+          # so we'll strip it.
+          local upload_url="${1%{*}"
+          local filename="$2"
+          shift 2
+          >&2 echo "Attach ${filename} to ${upload_url}"
+          curl \
+            --fail \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${GITHUB_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            -H "Content-Type: application/zip" \
+            -X "POST" \
+            "${upload_url}?name=${filename}" \
+            --data-binary "@${filename}"
+        }
+        UPLOAD_URL=""
         case ${GITHUB_REF} in
           refs/tags/*)
             # Create a new version release using the current revision.
-            echo "UPLOAD_URL=$(make_version_release ${GITHUB_REF#refs/tags/} | jq -r .upload_url)" >> $GITHUB_ENV
+            UPLOAD_URL="$(make_version_release ${GITHUB_REF#refs/tags/} | jq -r .upload_url)"
             ;;
           refs/heads/master)
             # Check for an existing nightly release.
@@ -168,18 +188,13 @@ jobs:
               *) >&2 echo "API call failed unexpectedly." && exit 1 ;;
             esac
             # Create a new nightly release using the current revision.
-            echo "UPLOAD_URL=$(make_nightly_release | jq -r .upload_url)" >> $GITHUB_ENV
+            UPLOAD_URL="$(make_nightly_release | jq -r .upload_url)"
             ;;
         esac
-    - name: Upload bsnes-ubuntu
-      uses: actions/upload-release-asset@v1
-      env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
-      with: { upload_url: '${{ env.UPLOAD_URL }}', asset_path: 'bsnes-ubuntu.zip', asset_name: 'bsnes-ubuntu.zip', asset_content_type: 'application/zip' }
-    - name: Upload bsnes-windows
-      uses: actions/upload-release-asset@v1
-      env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
-      with: { upload_url: '${{ env.UPLOAD_URL }}', asset_path: 'bsnes-windows.zip', asset_name: 'bsnes-windows.zip', asset_content_type: 'application/zip' }
-    - name: Upload bsnes-macos
-      uses: actions/upload-release-asset@v1
-      env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
-      with: { upload_url: '${{ env.UPLOAD_URL }}', asset_path: 'bsnes-macos.zip', asset_name: 'bsnes-macos.zip', asset_content_type: 'application/zip' }
+        if [ -n "$UPLOAD_URL" ]; then
+          attach_release_asset "$UPLOAD_URL" "bsnes-ubuntu.zip"
+          attach_release_asset "$UPLOAD_URL" "bsnes-windows.zip"
+          attach_release_asset "$UPLOAD_URL" "bsnes-macos.zip"
+        else
+          >&2 echo "Did not get an asset upload URL, not attaching assets."
+        fi
