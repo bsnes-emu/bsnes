@@ -5,6 +5,8 @@ on:
     tags: [ 'v*' ]
   pull_request:
     branches: [ master ]
+permissions:
+  contents: write
 jobs:
   build:
     strategy:
@@ -18,7 +20,7 @@ jobs:
           version: latest
     runs-on: ${{ matrix.os.name }}-${{ matrix.os.version }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
     - name: Install Dependencies
       if: matrix.os.name == 'ubuntu'
       run: |
@@ -27,22 +29,24 @@ jobs:
     - name: Make
       run: make -j4 -C bsnes local=false
     - name: Upload
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: bsnes-${{ matrix.os.name }}
         path: bsnes/out/bsnes*
 
   release:
     if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+    # Prevent multiple conflicting release jobs from running at once.
+    concurrency: release-${{ github.ref == 'refs/heads/master' && 'nightly' || github.ref }}
     runs-on: ubuntu-latest
     needs:
     - build
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         path: 'src'
     - name: Download Artifacts
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         path: 'bin'
     - name: Package Artifacts
@@ -83,103 +87,53 @@ jobs:
 
           cd -
         done
-    - name: Create Release
-      id: release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Calculate release info
+      id: relinfo
       run: |
-        set -eu
-        github_rest()
-        {
-          local method="${1}"
-          local url="https://api.github.com${2}"
-          shift 2
-          >&2 echo "${method} ${url}"
-          curl \
-            --fail \
-            -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token ${GITHUB_TOKEN}" \
-            -X "${method}" \
-            "${url}" \
-            "$@"
-        }
-        github_get_release_id_for_tag()
-        {
-          payload=$(github_rest GET "/repos/${GITHUB_REPOSITORY}/releases/tags/${1}") || return
-          echo "${payload}" | jq .id
-        }
-        github_delete_release_by_id()
-        {
-          github_rest DELETE "/repos/${GITHUB_REPOSITORY}/releases/${1}"
-        }
-        github_delete_tag()
-        {
-          github_rest DELETE "/repos/${GITHUB_REPOSITORY}/git/refs/tags/${1}"
-        }
-        github_create_release()
-        {
-          local payload="{
-            \"tag_name\": \"${1}\",
-            \"target_commitish\": \"${2}\",
-            \"name\": \"${3}\",
-            \"body\": \"${4}\",
-            \"draft\": ${5},
-            \"prerelease\": ${6}
-          }"
-          github_rest POST "/repos/${GITHUB_REPOSITORY}/releases" -d "${payload}"
-        }
-        make_nightly_release()
-        {
-          github_create_release \
-            nightly \
-            "${GITHUB_SHA}" \
-            "bsnes nightly $(date +"%Y-%m-%d")" \
-            "Auto-generated nightly release on $(date -u +"%Y-%m-%d %T %Z")" \
-            false \
-            true
-        }
-        make_version_release()
-        {
-          github_create_release \
-            "${1}" \
-            "${GITHUB_SHA}" \
-            "bsnes ${1}" \
-            "This is bsnes ${1}, released on $(date +"%Y-%m-%d")." \
-            false \
-            false
-        }
-        case ${GITHUB_REF} in
-          refs/tags/*)
-            # Create a new version release using the current revision.
-            echo "UPLOAD_URL=$(make_version_release ${GITHUB_REF#refs/tags/} | jq -r .upload_url)" >> $GITHUB_ENV
-            ;;
-          refs/heads/master)
-            # Check for an existing nightly release.
-            { release_id=$(github_get_release_id_for_tag nightly); status=$?; } || true
-            # Delete existing nightly release if it exists.
-            case ${status} in
-              0)
-                  github_delete_release_by_id "${release_id}"
-                  # Deleting the 'nightly' release doesn't delete
-                  # the 'nightly' tag, so let's do it manually.
-                  github_delete_tag nightly
-                  ;;
-              22) >&2 echo "No current nightly release; skipping tag deletion." ;;
-              *) >&2 echo "API call failed unexpectedly." && exit 1 ;;
-            esac
-            # Create a new nightly release using the current revision.
-            echo "UPLOAD_URL=$(make_nightly_release | jq -r .upload_url)" >> $GITHUB_ENV
-            ;;
-        esac
-    - name: Upload bsnes-ubuntu
-      uses: actions/upload-release-asset@v1
-      env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
-      with: { upload_url: '${{ env.UPLOAD_URL }}', asset_path: 'bsnes-ubuntu.zip', asset_name: 'bsnes-ubuntu.zip', asset_content_type: 'application/zip' }
-    - name: Upload bsnes-windows
-      uses: actions/upload-release-asset@v1
-      env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
-      with: { upload_url: '${{ env.UPLOAD_URL }}', asset_path: 'bsnes-windows.zip', asset_name: 'bsnes-windows.zip', asset_content_type: 'application/zip' }
-    - name: Upload bsnes-macos
-      uses: actions/upload-release-asset@v1
-      env: { GITHUB_TOKEN: '${{ secrets.GITHUB_TOKEN }}' }
-      with: { upload_url: '${{ env.UPLOAD_URL }}', asset_path: 'bsnes-macos.zip', asset_name: 'bsnes-macos.zip', asset_content_type: 'application/zip' }
+        echo "datetime=$(date -u +"%Y-%m-%d %T %Z")" >> $GITHUB_OUTPUT
+        echo "date=$(date +"%Y-%m-%d")" >> $GITHUB_OUTPUT
+    - name: Delete old nightly release
+      uses: actions/github-script@v7
+      id: release
+      if: ${{!startsWith(github.ref, 'refs/tags/')}}
+      with:
+        retries: 3
+        script: |
+          const {owner, repo} = context.repo;
+          try {
+            const release = await github.rest.repos.getReleaseByTag({owner, repo, tag: "nightly"});
+            if (release && release.status === 200) {
+              await github.rest.repos.deleteRelease({owner, repo, release_id: release.data.id});
+            }
+          } catch (e) {
+            console.log(`error deleting old release: ${e}`);
+          }
+          try {
+            await github.rest.git.deleteRef({owner, repo, ref: "tags/nightly"});
+          } catch (e) {
+            console.log(`error trying to delete ref: ${e}`);
+          }
+          await github.rest.git.createTag({
+            owner,
+            repo,
+            tag: "nightly",
+            message: "nightly release",
+            object: context.sha,
+            type: "commit",
+          })
+    - name: Create nightly release
+      uses: softprops/action-gh-release@v1
+      if: ${{!startsWith(github.ref, 'refs/tags/')}}
+      with:
+        tag_name: nightly
+        name: bsnes nightly ${{steps.relinfo.outputs.date}}
+        body: Auto-generated nightly release on ${{steps.relinfo.outputs.datetime}}
+        files: bsnes*.zip
+        prerelease: true
+    - name: Create version release
+      uses: softprops/action-gh-release@v1
+      if: ${{startsWith(github.ref, 'refs/tags/')}}
+      with:
+        name: bsnes ${{github.ref_name}}
+        body: This is bsnes ${{github.ref_name}}, released on ${{steps.relinfo.outputs.date}}.
+        files: bsnes*.zip
