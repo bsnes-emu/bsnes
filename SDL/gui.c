@@ -96,8 +96,8 @@ static const char *help[] = {
 "Version " GB_VERSION "\n\n"
 "Copyright " COPYRIGHT_STRING " 2015-" GB_COPYRIGHT_YEAR "\n"
 "Lior Halphon\n\n"
-"Licensed under the MIT\n"
-"license, see LICENSE for\n"
+"Licensed under the X11\n"
+"License, see LICENSE for\n"
 "more details."
 };
 
