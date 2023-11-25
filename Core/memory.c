@@ -1529,7 +1529,9 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 return;
 
             case GB_IO_DIV:
+                gb->during_div_write = true;
                 GB_set_internal_div_counter(gb, 0);
+                gb->during_div_write = false;
                 /* Reset the div state machine */
                 gb->div_state = 0;
                 gb->div_cycles = 0;

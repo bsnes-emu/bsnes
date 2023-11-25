@@ -75,7 +75,7 @@ typedef struct
     uint16_t sweep_length_addend;
     uint16_t shadow_sweep_sample_length;
     bool unshifted_sweep;
-    bool square_sweep_countdown_just_reloaded;
+    bool square_sweep_instant_calculation_done;
 
     uint8_t channel_1_restart_hold;
     uint16_t channel1_completed_addend;

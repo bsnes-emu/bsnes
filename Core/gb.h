@@ -824,6 +824,7 @@ struct GB_gameboy_internal_s {
         bool hdma_in_progress;
         bool returned_open_bus;
         uint16_t addr_for_hdma_conflict;
+        bool during_div_write;
                
         /* Thread safety (debug only) */
         void *running_thread_id;
