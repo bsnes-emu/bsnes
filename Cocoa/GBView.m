@@ -117,6 +117,8 @@ static const uint8_t workboy_vk_to_key[] = {
     JOYController *lastController;
     bool _turbo;
     bool _mouseControlEnabled;
+    NSMutableDictionary<NSNumber *, JOYController *> *_controllerMapping;
+    unsigned _lastPlayerCount;
 }
 
 + (instancetype)alloc
@@ -143,6 +145,9 @@ static const uint8_t workboy_vk_to_key[] = {
     [self observeStandardDefaultsKey:@"GBAspectRatioUnkept" withBlock:^(id newValue) {
         [weakSelf setFrame:weakSelf.superview.frame];
     }];
+    [self observeStandardDefaultsKey:@"JoyKitDefaultControllers" withBlock:^(id newValue) {
+        [weakSelf reassignControllers];
+    }];
     tracking_area = [ [NSTrackingArea alloc] initWithRect:(NSRect){}
                                                   options:NSTrackingMouseEnteredAndExited | NSTrackingActiveAlways | NSTrackingInVisibleRect | NSTrackingMouseMoved
                                                     owner:self
@@ -154,6 +159,84 @@ static const uint8_t workboy_vk_to_key[] = {
     self.internalView.autoresizingMask = NSViewWidthSizable | NSViewHeightSizable;
     [JOYController registerListener:self];
     _mouseControlEnabled = true;
+    [self reassignControllers];
+}
+
+- (void)controllerConnected:(JOYController *)controller
+{
+    [self reassignControllers];
+}
+
+- (void)controllerDisconnected:(JOYController *)controller
+{
+    [self reassignControllers];
+}
+
+- (unsigned)playerCount
+{
+    if (self.document.partner) {
+        return 2;
+    }
+    if (!_gb) {
+        return 1;
+    }
+    return GB_get_player_count(_gb);
+}
+
+- (void)reassignControllers
+{
+    unsigned playerCount = self.playerCount;
+    /* Don't assign controlelrs if there's only one player, allow all controllers. */
+    if (playerCount == 1) {
+        _controllerMapping = [NSMutableDictionary dictionary];
+        return;
+    }
+    
+    if (!_controllerMapping) {
+        _controllerMapping = [NSMutableDictionary dictionary];
+    }
+    
+    for (NSNumber *player in [_controllerMapping copy]) {
+        if (player.unsignedIntValue >= playerCount || !_controllerMapping[player].connected) {
+            [_controllerMapping removeObjectForKey:player];
+        }
+    }
+    
+    _lastPlayerCount = playerCount;
+    for (unsigned i = 0; i < playerCount; i++) {
+        NSString *preferredJoypad = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"JoyKitDefaultControllers"]
+                                      objectForKey:n2s(i)];
+        for (JOYController *controller in [JOYController allControllers]) {
+            if (!controller.connected) continue;
+            if ([controller.uniqueID isEqual:preferredJoypad]) {
+                _controllerMapping[@(i)] = controller;
+                break;
+            }
+        }
+    }
+}
+
+- (void)tryAssigningController:(JOYController *)controller
+{
+    unsigned playerCount = self.playerCount;
+    if (playerCount == 1) return;
+    if (_controllerMapping.count == playerCount) return;
+    if ([_controllerMapping.allValues containsObject:controller]) return;
+    for (unsigned i = 0; i < playerCount; i++) {
+        if (!_controllerMapping[@(i)]) {
+            _controllerMapping[@(i)] = controller;
+            return;
+        }
+    }
+}
+
+- (NSDictionary<NSNumber *, JOYController *> *)controllerMapping
+{
+    if (_lastPlayerCount != self.playerCount) {
+        [self reassignControllers];
+    }
+    
+    return _controllerMapping;
 }
 
 - (void)screenSizeChanged
@@ -486,6 +569,19 @@ static const uint8_t workboy_vk_to_key[] = {
             }
         }
     }
+    
+    NSDictionary<NSNumber *, JOYController *> *controllerMapping = [self controllerMapping];
+    GB_gameboy_t *effectiveGB = _gb;
+    
+    if (self.document.partner) {
+        if (controllerMapping[@1] == controller) {
+            effectiveGB = self.document.partner.gb;
+        }
+        if (controllerMapping[@0] != controller) {
+            return;
+        }
+        
+    }
 
     if (axes.usage == JOYAxes3DUsageOrientation) {
         for (JOYAxes3D *axes in controller.axes3D) {
@@ -495,11 +591,11 @@ static const uint8_t workboy_vk_to_key[] = {
             }
         }
         JOYPoint3D point = axes.normalizedValue;
-        GB_set_accelerometer_values(_gb, point.x, point.z);
+        GB_set_accelerometer_values(effectiveGB, point.x, point.z);
     }
     else if (axes.usage == JOYAxes3DUsageAcceleration) {
         JOYPoint3D point = axes.gUnitsValue;
-        GB_set_accelerometer_values(_gb, point.x, point.z);
+        GB_set_accelerometer_values(effectiveGB, point.x, point.z);
     }
 }
 
@@ -510,22 +606,20 @@ static const uint8_t workboy_vk_to_key[] = {
     _mouseControlEnabled = false;
     if (button.type == JOYButtonTypeAxes2DEmulated && [self shouldControllerUseJoystickForMotion:controller]) return;
     
-    unsigned player_count = GB_get_player_count(_gb);
-    if (self.document.partner) {
-        player_count = 2;
-    }
+    [self tryAssigningController:controller];
+    
+    unsigned playerCount = self.playerCount;
 
     IOPMAssertionID assertionID;
     IOPMAssertionDeclareUserActivity(CFSTR(""), kIOPMUserActiveLocal, &assertionID);
     
-    for (unsigned player = 0; player < player_count; player++) {
-        NSString *preferred_joypad = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"JoyKitDefaultControllers"]
-                                      objectForKey:n2s(player)];
-        if (player_count != 1 && // Single player, accpet inputs from all joypads
-            !(player == 0 && !preferred_joypad) && // Multiplayer, but player 1 has no joypad configured, so it takes inputs from all joypads
-            ![preferred_joypad isEqualToString:controller.uniqueID]) {
-            continue;
-        }
+    
+    NSDictionary<NSNumber *, JOYController *> *controllerMapping = [self controllerMapping];
+    for (unsigned player = 0; player < playerCount; player++) {
+        JOYController *preferredJoypad = controllerMapping[@(player)];
+        if (preferredJoypad && preferredJoypad != controller) continue; // The player has a different assigned controller
+        if (!preferredJoypad && playerCount != 1) continue; // The player has no assigned controller in multiplayer mode, prevent controller inputs
+        
         dispatch_async(dispatch_get_main_queue(), ^{
             [controller setPlayerLEDs:[controller LEDMaskForPlayer:player]];
         });
