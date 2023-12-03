@@ -1259,6 +1259,12 @@ static bool is_path_writeable(const char *path)
     else if ([anItem action] == @selector(toggleAudioChannel:)) {
         [(NSMenuItem *)anItem setState:!GB_is_channel_muted(&_gb, [anItem tag])];
     }
+    else if ([anItem action] == @selector(increaseWindowSize:)) {
+        return [self newRect:NULL forWindow:_mainWindow action:GBWindowResizeActionIncrease];
+    }
+    else if ([anItem action] == @selector(decreaseWindowSize:)) {
+        return [self newRect:NULL forWindow:_mainWindow action:GBWindowResizeActionDecrease];
+    }
     
     return [super validateUserInterfaceItem:anItem];
 }
@@ -1276,35 +1282,114 @@ static bool is_path_writeable(const char *path)
     self.view.mouseHidingEnabled = false;
 }
 
+enum GBWindowResizeAction
+{
+    GBWindowResizeActionZoom,
+    GBWindowResizeActionIncrease,
+    GBWindowResizeActionDecrease,
+};
+
+- (bool)newRect:(NSRect *)rect forWindow:(NSWindow *)window action:(enum GBWindowResizeAction)action
+{
+    if (_fullScreen) return false;
+    if (!rect) {
+        rect = alloca(sizeof(*rect));
+    }
+    
+    size_t width  = GB_get_screen_width(&_gb),
+    height = GB_get_screen_height(&_gb);
+    
+    *rect = window.contentView.frame;
+    
+    unsigned titlebarSize = window.contentView.superview.frame.size.height - rect->size.height;
+    
+    unsigned stepX = width / [[window screen] backingScaleFactor];
+    unsigned stepY = height / [[window screen] backingScaleFactor];
+    
+    if (action == GBWindowResizeActionDecrease) {
+        if (rect->size.width <= width || rect->size.height <= height) {
+            return false;
+        }
+    }
+    
+    typeof(floor) *roundFunc = action == GBWindowResizeActionDecrease? ceil : floor;
+    unsigned currentFactor = MIN(roundFunc(rect->size.width / stepX), roundFunc(rect->size.height / stepY));
+    
+    rect->size.width = currentFactor * stepX;
+    rect->size.height = currentFactor * stepY + titlebarSize;
+    
+    if (action == GBWindowResizeActionDecrease) {
+        rect->size.width -= stepX;
+        rect->size.height -= stepY;
+    }
+    else {
+        rect->size.width += stepX;
+        rect->size.height += stepY;
+    }
+    
+    NSRect maxRect = [_mainWindow screen].visibleFrame;
+    
+    if (rect->size.width > maxRect.size.width ||
+        rect->size.height > maxRect.size.height) {
+        if (action == GBWindowResizeActionIncrease) {
+            return false;
+        }
+        rect->size.width = width;
+        rect->size.height = height + titlebarSize;
+    }
+    
+    rect->origin = window.frame.origin;
+    if (action == GBWindowResizeActionZoom) {
+        rect->origin.y -= rect->size.height - window.frame.size.height;
+    }
+    else {
+        rect->origin.y -= (rect->size.height - window.frame.size.height) / 2;
+        rect->origin.x -= (rect->size.width - window.frame.size.width) / 2;
+    }
+    
+    if (rect->origin.x < maxRect.origin.x) {
+        rect->origin.x = maxRect.origin.x;
+    }
+    
+    if (rect->origin.y < maxRect.origin.y) {
+        rect->origin.y = maxRect.origin.y;
+    }
+    
+    if (rect->origin.x + rect->size.width > maxRect.origin.x + maxRect.size.width) {
+        rect->origin.x = maxRect.origin.x + maxRect.size.width - rect->size.width;
+    }
+    
+    if (rect->origin.y + rect->size.height > maxRect.origin.y + maxRect.size.height) {
+        rect->origin.y = maxRect.origin.y + maxRect.size.height - rect->size.height;
+    }
+    
+    return true;
+}
+
 - (NSRect)windowWillUseStandardFrame:(NSWindow *)window defaultFrame:(NSRect)newFrame
 {
     if (_fullScreen) {
         return newFrame;
     }
-    size_t width  = GB_get_screen_width(&_gb),
-           height = GB_get_screen_height(&_gb);
-    
-    NSRect rect = window.contentView.frame;
+    [self newRect:&newFrame forWindow:window action:GBWindowResizeActionZoom];
+    return newFrame;
+}
 
-    unsigned titlebarSize = window.contentView.superview.frame.size.height - rect.size.height;
-    unsigned step = width / [[window screen] backingScaleFactor];
 
-    rect.size.width = floor(rect.size.width / step) * step + step;
-    rect.size.height = rect.size.width * height / width + titlebarSize;
-
-    if (rect.size.width > newFrame.size.width) {
-        rect.size.width = width;
-        rect.size.height = height + titlebarSize;
+- (IBAction)increaseWindowSize:(id)sender
+{
+    NSRect rect;
+    if ([self newRect:&rect forWindow:_mainWindow action:GBWindowResizeActionIncrease]) {
+        [_mainWindow setFrame:rect display:true animate:true];
     }
-    else if (rect.size.height > newFrame.size.height) {
-        rect.size.width = width;
-        rect.size.height = height + titlebarSize;
+}
+
+- (IBAction)decreaseWindowSize:(id)sender
+{
+    NSRect rect;
+    if ([self newRect:&rect forWindow:_mainWindow action:GBWindowResizeActionDecrease]) {
+        [_mainWindow setFrame:rect display:true animate:true];
     }
-
-    rect.origin = window.frame.origin;
-    rect.origin.y -= rect.size.height - window.frame.size.height;
-
-    return rect;
 }
 
 - (void) appendPendingOutput
