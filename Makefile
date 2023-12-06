@@ -143,6 +143,11 @@ override CONF := release
 FAT_FLAGS += -arch x86_64 -arch arm64
 endif
 
+# Support out-of-PATH RGBDS
+RGBASM  := $(RGBDS)rgbasm
+RGBLINK := $(RGBDS)rgblink
+RGBGFX  := $(RGBDS)rgbgfx
+
 
 
 # Set compilation and linkage flags based on target, platform and configuration
@@ -596,7 +601,7 @@ $(BIN)/SDL/Palettes: Misc/Palettes
 
 $(OBJ)/%.2bpp: %.png
 	-@$(MKDIR) -p $(dir $@)
-	rgbgfx $(if $(filter $(shell echo 'print __RGBDS_MAJOR__ || (!__RGBDS_MAJOR__ && __RGBDS_MINOR__ > 5)' | rgbasm -), $$0), -h -u, -Z -u -c embedded) -o $@ $<
+	$(RGBGFX) $(if $(filter $(shell echo 'print __RGBDS_MAJOR__ || (!__RGBDS_MAJOR__ && __RGBDS_MINOR__ > 5)' | $(RGBASM) -), $$0), -h -u, -Z -u -c embedded) -o $@ $<
 
 $(OBJ)/BootROMs/SameBoyLogo.pb12: $(OBJ)/BootROMs/SameBoyLogo.2bpp $(PB12_COMPRESS)
 	-@$(MKDIR) -p $(dir $@)
@@ -613,8 +618,8 @@ $(BIN)/BootROMs/sgb2_boot: BootROMs/sgb_boot.asm
 
 $(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameBoyLogo.pb12
 	-@$(MKDIR) -p $(dir $@)
-	rgbasm -i $(OBJ)/BootROMs/ -i BootROMs/ -o $@.tmp $<
-	rgblink -o $@.tmp2 $@.tmp
+	$(RGBASM) -i $(OBJ)/BootROMs/ -i BootROMs/ -o $@.tmp $<
+	$(RGBLINK) -o $@.tmp2 $@.tmp
 	dd if=$@.tmp2 of=$@ count=1 bs=$(if $(findstring dmg,$@)$(findstring sgb,$@)$(findstring mgb,$@),256,2304) 2> $(NULL)
 	@rm $@.tmp $@.tmp2
 
@@ -724,4 +729,4 @@ lib-unsupported:
 clean:
 	rm -rf build
 
-.PHONY: libretro tester cocoa ios _ios ios-ipa ios-deb liblib-unsupported
+.PHONY: libretro tester cocoa ios _ios ios-ipa ios-deb liblib-unsupported bootroms
