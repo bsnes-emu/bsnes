@@ -605,7 +605,7 @@ $(OBJ)/%.2bpp: %.png
 
 $(OBJ)/BootROMs/SameBoyLogo.pb12: $(OBJ)/BootROMs/SameBoyLogo.2bpp $(PB12_COMPRESS)
 	-@$(MKDIR) -p $(dir $@)
-	$(realpath $(PB12_COMPRESS)) < $< > $@
+	"$(realpath $(PB12_COMPRESS))" < $< > $@
 	
 $(PB12_COMPRESS): BootROMs/pb12.c
 	-@$(MKDIR) -p $(dir $@)
