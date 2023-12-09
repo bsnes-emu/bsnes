@@ -1678,6 +1678,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 return;
             case GB_IO_HDMA5:
                 if (!gb->cgb_mode) return;
+                gb->hdma_steps_left = (value & 0x7F) + 1;
                 if ((value & 0x80) == 0 && gb->hdma_on_hblank) {
                     gb->hdma_on_hblank = false;
                     return;
@@ -1687,8 +1688,6 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 if (gb->hdma_on_hblank && (gb->io_registers[GB_IO_STAT] & 3) == 0 && gb->display_state != 7) {
                     gb->hdma_on = true;
                 }
-                gb->io_registers[GB_IO_HDMA5] = value;
-                gb->hdma_steps_left = (gb->io_registers[GB_IO_HDMA5] & 0x7F) + 1;
                 return;
 
             /*  TODO: What happens when starting a transfer during external clock?
@@ -1918,7 +1917,6 @@ void GB_hdma_run(GB_gameboy_t *gb)
             if (--gb->hdma_steps_left == 0 || gb->hdma_current_dest == 0) {
                 gb->hdma_on = false;
                 gb->hdma_on_hblank = false;
-                gb->io_registers[GB_IO_HDMA5] &= 0x7F;
             }
             else if (gb->hdma_on_hblank) {
                 gb->hdma_on = false;
