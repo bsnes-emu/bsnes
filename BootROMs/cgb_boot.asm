@@ -665,8 +665,8 @@ ReadCGBLogoHalfTile:
 ; LoadTileset using PB12 codec, 2020 Jakub Kądziołka
 ; (based on PB8 codec, 2019 Damian Yerrick)
 
-SameBoyLogo_dst = $8080
-SameBoyLogo_length = (128 * 24) / 64
+DEF SameBoyLogo_dst = $8080
+DEF SameBoyLogo_length = (128 * 24) / 64
 
 LoadTileset:
     ld hl, SameBoyLogo

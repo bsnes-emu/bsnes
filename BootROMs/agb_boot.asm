@@ -1,2 +1,2 @@
-AGB EQU 1
+DEF AGB = 1
 include "cgb_boot.asm"

@@ -1,2 +1,2 @@
-SGB2 EQU 1
+DEF SGB2 = 1
 include "sgb_boot.asm"

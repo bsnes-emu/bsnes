@@ -1,2 +1,2 @@
-MGB EQU 1
+DEF MGB = 1
 include "dmg_boot.asm"
