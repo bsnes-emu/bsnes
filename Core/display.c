@@ -1820,13 +1820,10 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                                                                           gb->objects_y[gb->n_visible_objs - 1],
                                                                           gb->mode2_y_bus,
                                                                           gb->object_flags);
-                    GB_SLEEP(gb, display, 40, 1);
-                    
-                    /* TODO: timing not verified. Probably happens a cycle earlier, but needs to verify it doesn't
-                             break any DMA tests. { */
+
                     dma_sync(gb, &cycles);
                     gb->object_tile_data[1] = vram_read(gb, gb->object_low_line_address + 1);
-                    /* } */
+                    GB_SLEEP(gb, display, 40, 1);
 
                     
                     uint8_t palette = (gb->object_flags & 0x10) ? 1 : 0;
