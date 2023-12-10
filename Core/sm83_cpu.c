@@ -45,7 +45,6 @@ static const conflict_t cgb_double_conflict_map[0x80] = {
     [GB_IO_LYC] = GB_CONFLICT_READ_OLD,
     [GB_IO_STAT] = GB_CONFLICT_STAT_CGB_DOUBLE,
     [GB_IO_NR10] = GB_CONFLICT_NR10_CGB_DOUBLE,
-    // Unconfirmed yet
     [GB_IO_SCX] = GB_CONFLICT_SCX_CGB,
 };
 
