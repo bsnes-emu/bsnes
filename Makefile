@@ -456,7 +456,7 @@ $(BIN)/SameBoy.app: $(BIN)/SameBoy.app/Contents/MacOS/SameBoy \
                     $(BIN)/SameBoy.app/Contents/Resources/agb_boot.bin \
                     $(BIN)/SameBoy.app/Contents/Resources/sgb_boot.bin \
                     $(BIN)/SameBoy.app/Contents/Resources/sgb2_boot.bin \
-                    $(patsubst %.xib,%.nib,$(addprefix $(BIN)/SameBoy.app/Contents/Resources/Base.lproj/,$(shell cd Cocoa;ls *.xib))) \
+                    $(patsubst %.xib,%.nib,$(addprefix $(BIN)/SameBoy.app/Contents/Resources/,$(shell cd Cocoa;ls *.xib))) \
                     $(BIN)/SameBoy.qlgenerator \
                     Shaders
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Resources
@@ -478,7 +478,7 @@ ifeq ($(CONF), release)
 	$(STRIP) $@
 endif
 
-$(BIN)/SameBoy.app/Contents/Resources/Base.lproj/%.nib: Cocoa/%.xib
+$(BIN)/SameBoy.app/Contents/Resources/%.nib: Cocoa/%.xib
 	ibtool --target-device mac --minimum-deployment-target 10.9 --compile $@ $^ 2>&1 | cat -
 	
 # Quick Look generator
