@@ -298,28 +298,42 @@ static uint8_t read_vram(GB_gameboy_t *gb, uint16_t addr)
         GB_display_sync(gb);
     }
     else {
-        if ((gb->dma_current_dest & 0xE000) == 0x8000) {
+        if (unlikely((gb->dma_current_dest & 0xE000) == 0x8000)) {
             // TODO: verify conflict behavior
-            return gb->vram[(addr & 0x1FFF) + (gb->cgb_vram_bank? 0x2000 : 0)];
+            return gb->cpu_vram_bus = gb->vram[(addr & 0x1FFF) + (gb->cgb_vram_bank? 0x2000 : 0)];
         }
     }
     
     if (unlikely(gb->vram_read_blocked && !gb->in_dma_read)) {
         return 0xFF;
     }
-    if (unlikely(gb->display_state == 22 && GB_is_cgb(gb) && !gb->cgb_double_speed)) {
-        if (addr & 0x1000) {
-            addr = gb->last_tile_index_address;
+    if (unlikely(gb->display_state == 22)) {
+        if (!GB_is_cgb(gb)) {
+            if (addr & 0x1000 && !(gb->last_tile_data_address & 0x1000)) {
+                addr &= ~0x1000; // TODO: verify
+            }
         }
-        else if (gb->last_tile_data_address & 0x1000) {
-            /* TODO: This is case is more complicated then the rest and differ between revisions
-               It's probably affected by how VRAM is layed out, might be easier after a decap is done*/
-        }
-        else {
-            addr = gb->last_tile_data_address;
+        else if (!gb->cgb_double_speed) {
+            if (addr & 0x1000) {
+                if (gb->model <= GB_MODEL_CGB_C && !(gb->last_tile_data_address & 0x1000)) {
+                    return 0;
+                }
+                addr = gb->last_tile_index_address;
+            }
+            else if (gb->last_tile_data_address & 0x1000) {
+                if (gb->model >= GB_MODEL_CGB_E) {
+                    uint8_t ret = gb->cpu_vram_bus;
+                    gb->cpu_vram_bus = gb->vram[(addr & 0x1FFF) + (gb->cgb_vram_bank? 0x2000 : 0)];
+                    return ret;
+                }
+                return gb->cpu_vram_bus;
+            }
+            else {
+                addr = gb->last_tile_data_address;
+            }
         }
     }
-    return gb->vram[(addr & 0x1FFF) + (gb->cgb_vram_bank? 0x2000 : 0)];
+    return gb->cpu_vram_bus = gb->vram[(addr & 0x1FFF) + (gb->cgb_vram_bank? 0x2000 : 0)];
 }
 
 static uint8_t read_mbc7_ram(GB_gameboy_t *gb, uint16_t addr)
@@ -989,6 +1003,7 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 static void write_vram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     GB_display_sync(gb);
+    gb->cpu_vram_bus = value; // TODO: Verify if the open bus data is updated even when writes are blocked, or at all
     if (unlikely(gb->vram_write_blocked)) {
         //GB_log(gb, "Wrote %02x to %04x (VRAM) during mode 3\n", value, addr);
         return;
