@@ -555,10 +555,12 @@ static void debugger_interrupt(int ignore)
     GB_debugger_break(&gb);
 }
 
+#ifndef _WIN32
 static void debugger_reset(int ignore)
 {
     pending_command = GB_SDL_RESET_COMMAND;
 }
+#endif
 
 static void gb_audio_callback(GB_gameboy_t *gb, GB_sample_t *sample)
 {    
@@ -1024,7 +1026,9 @@ int main(int argc, char **argv)
     }
 
     signal(SIGINT, debugger_interrupt);
+#ifndef _WIN32
     signal(SIGUSR1, debugger_reset);
+#endif
 
     SDL_Init(SDL_INIT_EVERYTHING & ~SDL_INIT_AUDIO);
     if ((console_supported = CON_start(completer))) {

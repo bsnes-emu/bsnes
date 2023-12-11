@@ -56,7 +56,7 @@ char *do_open_folder_dialog(void)
         if (SHGetPathFromIDListW(list, filename)) {
             ret = wc_to_utf8_alloc(filename);
         }
-        CoTaskMemFree(list);
+        CoTaskMemFree((void *)list);
     }
 
     if (SUCCEEDED(hrOleInit)) OleUninitialize();

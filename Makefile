@@ -16,7 +16,7 @@ endif
 ifeq ($(PLATFORM),windows32)
 _ := $(shell chcp 65001)
 EXESUFFIX:=.exe
-NATIVE_CC = clang -IWindows -Wno-deprecated-declarations --target=i386-pc-windows
+NATIVE_CC = clang -IWindows -Wno-deprecated-declarations --target=x86_64-pc-windows
 SDL_AUDIO_DRIVERS ?= xaudio2 xaudio2_7 sdl
 else
 EXESUFFIX:=
@@ -220,8 +220,8 @@ GL_LDFLAGS := $(shell $(PKG_CONFIG) --libs gl || echo -lGL)
 endif
 
 ifeq ($(PLATFORM),windows32)
-CFLAGS += -IWindows -Drandom=rand --target=i386-pc-windows
-LDFLAGS += -lmsvcrt -lcomdlg32 -luser32 -lshell32 -lole32 -lSDL2main -Wl,/MANIFESTFILE:NUL --target=i386-pc-windows
+CFLAGS += -IWindows -Drandom=rand --target=x86_64-pc-windows
+LDFLAGS += -lmsvcrt -lcomdlg32 -luser32 -lshell32 -lole32 -lSDL2main -Wl,/MANIFESTFILE:NUL --target=x86_64-pc-windows
 SDL_LDFLAGS := -lSDL2
 GL_LDFLAGS := -lopengl32
 else

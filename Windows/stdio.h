@@ -11,6 +11,10 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+#if _WIN64
+#define fseek(...) _fseeki64(__VA_ARGS__)
+#endif
+
 int access(const char *filename, int mode);
 #define R_OK 4
 #define W_OK 2
