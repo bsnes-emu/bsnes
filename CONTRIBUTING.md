@@ -24,7 +24,7 @@ SameBoy's main target compiler is Clang, but GCC is also supported when targetin
 
 ### Third Party Libraries and Tools
 
-Avoid adding new required dependencies; run-time and compile-time dependencies alike. Most importantly, avoid linking against GPL licensed libraries (LGPL libraries are fine), so SameBoy can retain its X11 license.
+Avoid adding new required dependencies; run-time and compile-time dependencies alike. Most importantly, avoid linking against GPL licensed libraries (LGPL libraries are fine), so SameBoy can retain its Expat license.
 
 ### Spacing, Indentation and Formatting
 
