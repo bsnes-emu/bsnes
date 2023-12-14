@@ -1003,7 +1003,6 @@ static void write_mbc(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 static void write_vram(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
 {
     GB_display_sync(gb);
-    gb->cpu_vram_bus = value; // TODO: Verify if the open bus data is updated even when writes are blocked, or at all
     if (unlikely(gb->vram_write_blocked)) {
         //GB_log(gb, "Wrote %02x to %04x (VRAM) during mode 3\n", value, addr);
         return;
