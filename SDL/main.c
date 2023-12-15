@@ -249,6 +249,15 @@ static void handle_events(GB_gameboy_t *gb)
                 break;
             }
                 
+            case SDL_JOYDEVICEREMOVED:
+                if (joystick && event.jdevice.which == SDL_JoystickInstanceID(joystick)) {
+                    SDL_JoystickClose(joystick);
+                    joystick = NULL;
+                }
+            case SDL_JOYDEVICEADDED:
+                connect_joypad();
+                break;
+                
             case SDL_JOYBUTTONUP:
             case SDL_JOYBUTTONDOWN: {
                 joypad_button_t button = get_joypad_button(event.jbutton.button);

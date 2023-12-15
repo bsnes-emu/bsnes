@@ -1776,9 +1776,9 @@ static void enter_keyboard_menu(unsigned index)
 }
 
 static unsigned joypad_index = 0;
-static SDL_Joystick *joystick = NULL;
 static SDL_GameController *controller = NULL;
 SDL_Haptic *haptic = NULL;
+SDL_Joystick *joystick = NULL;
 
 static const char *current_joypad_name(unsigned index)
 {
@@ -1830,7 +1830,8 @@ static void cycle_joypads(unsigned index)
     }
     if (joystick) {
         haptic = SDL_HapticOpenFromJoystick(joystick);
-    }}
+    }
+}
 
 static void cycle_joypads_backwards(unsigned index)
 {

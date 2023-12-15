@@ -21,6 +21,7 @@ extern SDL_Window *window;
 extern SDL_Renderer *renderer;
 extern SDL_Texture *texture;
 extern SDL_PixelFormat *pixel_format;
+extern SDL_Joystick *joystick;
 extern SDL_Haptic *haptic;
 extern shader_t shader;
 
