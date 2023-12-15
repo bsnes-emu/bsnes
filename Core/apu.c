@@ -65,7 +65,6 @@ static uint8_t agb_bias_for_channel(GB_gameboy_t *gb, GB_channel_t index)
             
         nodefault;
     }
-    return 0;
 }
 
 static void update_sample(GB_gameboy_t *gb, GB_channel_t index, int8_t value, unsigned cycles_offset)
@@ -80,20 +79,22 @@ static void update_sample(GB_gameboy_t *gb, GB_channel_t index, int8_t value, un
         if (gb->apu_output.sample_rate) {
             unsigned right_volume = (gb->io_registers[GB_IO_NR50] & 7) + 1;
             unsigned left_volume = ((gb->io_registers[GB_IO_NR50] >> 4) & 7) + 1;
-            
+            int8_t silence = 0;
             if (index == GB_WAVE) {
-                /* For some reason, channel 3 is inverted on the AGB */
+                /* For some reason, channel 3 is inverted on the AGB, and has a different "silence" value */
                 value ^= 0xF;
+                silence = 7;
             }
             
-            GB_sample_t output;
             uint8_t bias = agb_bias_for_channel(gb, index);
             
-            bool right = gb->io_registers[GB_IO_NR51] & (1 << index);
             bool left = gb->io_registers[GB_IO_NR51] & (0x10 << index);
+            bool right = gb->io_registers[GB_IO_NR51] & (1 << index);
             
-            output.right = (0xF - (right? value : 7) * 2 + bias) * right_volume;
-            output.left = (0xF - (left? value : 7) * 2 + bias) * left_volume;
+            GB_sample_t output = {
+                .left = (0xF - (left? value : silence) * 2 + bias) * left_volume,
+                .right = (0xF - (right? value : silence) * 2 + bias) * right_volume
+            };
             
             if (unlikely(gb->apu_output.channel_muted[index])) {
                 output.left = output.right = 0;
