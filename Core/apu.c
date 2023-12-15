@@ -89,19 +89,11 @@ static void update_sample(GB_gameboy_t *gb, GB_channel_t index, int8_t value, un
             GB_sample_t output;
             uint8_t bias = agb_bias_for_channel(gb, index);
             
-            if (gb->io_registers[GB_IO_NR51] & (1 << index)) {
-                output.right = (0xF - value * 2 + bias) * right_volume;
-            }
-            else {
-                output.right = 0xF * right_volume;
-            }
+            bool right = gb->io_registers[GB_IO_NR51] & (1 << index);
+            bool left = gb->io_registers[GB_IO_NR51] & (0x10 << index);
             
-            if (gb->io_registers[GB_IO_NR51] & (0x10 << index)) {
-                output.left = (0xF - value * 2 + bias) * left_volume;
-            }
-            else {
-                output.left = 0xF * left_volume;
-            }
+            output.right = (0xF - (right? value : 7) * 2 + bias) * right_volume;
+            output.left = (0xF - (left? value : 7) * 2 + bias) * left_volume;
             
             if (unlikely(gb->apu_output.channel_muted[index])) {
                 output.left = output.right = 0;
