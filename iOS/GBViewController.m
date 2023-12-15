@@ -244,6 +244,8 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
                               action:@selector(rotateCamera)
                     forControlEvents:UIControlEventTouchUpInside];
     [_backgroundView addSubview:_cameraPositionButton];
+    
+    [UNUserNotificationCenter currentNotificationCenter].delegate = self;
 
     return true;
 }
@@ -532,6 +534,18 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
             GB_set_accelerometer_values(&_gb, -data.x, data.y);
         }];
     }
+    
+    /* Clear pending alarms, don't play alarms while playing */
+    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBNotificationsUsed"]) {
+        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+        [center removeDeliveredNotificationsWithIdentifiers:@[[GBROMManager sharedManager].romFile]];
+        [center removePendingNotificationRequestsWithIdentifiers:@[[GBROMManager sharedManager].romFile]];
+    }
+    
+    if (GB_rom_supports_alarms(&_gb)) {
+        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+        [center requestAuthorizationWithOptions:UNAuthorizationOptionBadge | UNAuthorizationOptionSound | UNAuthorizationOptionAlert completionHandler:nil];
+    }
 }
 
 - (void)run
@@ -562,6 +576,18 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     }
     [self postRun];
     _stopping = false;
+}
+
+- (void)userNotificationCenter:(UNUserNotificationCenter *)center
+didReceiveNotificationResponse:(UNNotificationResponse *)response
+         withCompletionHandler:(void (^)(void))completionHandler
+{
+    if (![response.notification.request.identifier isEqual:[GBROMManager sharedManager].currentROM]) {
+        [self application:[UIApplication sharedApplication]
+                  openURL:[NSURL fileURLWithPath:response.notification.request.identifier]
+                  options:@{}];
+    }
+    completionHandler();
 }
 
 - (UIImage *)imageFromData:(NSData *)data width:(unsigned)width height:(unsigned)height
@@ -605,6 +631,30 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [self saveStateToFile:[GBROMManager sharedManager].autosaveStateFile];
     [[GBHapticManager sharedManager] setRumbleStrength:0];
     [_motionManager stopAccelerometerUpdates];
+    
+    unsigned timeToAlarm = GB_time_to_alarm(&_gb);
+    
+    if (timeToAlarm) {
+        UNUserNotificationCenter *center = [UNUserNotificationCenter currentNotificationCenter];
+                
+        UNMutableNotificationContent *notificationContent = [[UNMutableNotificationContent alloc] init];
+        NSString *friendlyName = [[[GBROMManager sharedManager].romFile lastPathComponent] stringByDeletingPathExtension];
+        NSRegularExpression *regex = [NSRegularExpression regularExpressionWithPattern:@"\\([^)]+\\)|\\[[^\\]]+\\]" options:0 error:nil];
+        friendlyName = [regex stringByReplacingMatchesInString:friendlyName options:0 range:NSMakeRange(0, [friendlyName length]) withTemplate:@""];
+        friendlyName = [friendlyName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+        
+        notificationContent.title = [NSString stringWithFormat:@"%@ Played an Alarm", friendlyName];
+        notificationContent.body = [NSString stringWithFormat:@"%@ requested your attention by playing a scheduled alarm", friendlyName];
+        notificationContent.sound = UNNotificationSound.defaultSound;
+        
+        UNNotificationRequest *request = [UNNotificationRequest requestWithIdentifier:[GBROMManager sharedManager].romFile
+                                                                              content:notificationContent
+                                                                              trigger:[UNTimeIntervalNotificationTrigger triggerWithTimeInterval:timeToAlarm repeats:false]];
+        
+        
+        [center addNotificationRequest:request withCompletionHandler:nil];
+        [[NSUserDefaults standardUserDefaults] setBool:true forKey:@"GBNotificationsUsed"];
+    }
 }
 
 - (void)start

@@ -1,5 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <AVFoundation/AVFoundation.h>
+#import <UserNotifications/UserNotifications.h>
 
 typedef enum {
     GBRunModeNormal,
@@ -8,7 +9,9 @@ typedef enum {
     GBRunModePaused,
 } GBRunMode;
 
-@interface GBViewController : UIViewController <UIApplicationDelegate, AVCaptureVideoDataOutputSampleBufferDelegate>
+@interface GBViewController : UIViewController <UIApplicationDelegate,
+                                                AVCaptureVideoDataOutputSampleBufferDelegate,
+                                                UNUserNotificationCenterDelegate>
 @property (nonatomic, strong) UIWindow *window;
 - (void)reset;
 - (void)openLibrary;

@@ -2018,6 +2018,11 @@ unsigned GB_time_to_alarm(GB_gameboy_t *gb)
     return alarm_time - current_time;
 }
 
+bool GB_rom_supports_alarms(GB_gameboy_t *gb)
+{
+    return gb->cartridge_type->mbc_type == GB_HUC3;
+}
+
 bool GB_has_accelerometer(GB_gameboy_t *gb)
 {
     return gb->cartridge_type->mbc_type == GB_MBC7;
