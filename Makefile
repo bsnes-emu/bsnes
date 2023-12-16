@@ -689,14 +689,14 @@ $(OBJ)/data.tar.gz: ios iOS/jailbreak.entitlements
 	cp -rf $(BIN)/SameBoy-iOS.app $(OBJ)/Applications/SameBoy-iOS.app
 	cp build/obj-ios/reregister iOS/reregister.entitlements $(OBJ)/Applications/SameBoy-iOS.app
 	codesign -fs - --entitlements iOS/jailbreak.entitlements $(OBJ)/Applications/SameBoy-iOS.app
-	(cd $(OBJ) && tar -czf $(abspath $@) ./Applications)
+	(cd $(OBJ) && tar -czf $(abspath $@) --format ustar ./Applications)
 	rm -rf $(OBJ)/Applications
 	
 $(OBJ)/control.tar.gz: iOS/deb-postinst iOS/deb-control
 	-@$(MKDIR) -p $(dir $@)
 	sed "s/@VERSION/$(VERSION)/" < iOS/deb-control > $(OBJ)/control
 	ln iOS/deb-postinst $(OBJ)/postinst
-	(cd $(OBJ) && tar -czf $(abspath $@) ./control ./postinst)
+	(cd $(OBJ) && tar -czf $(abspath $@) --format ustar ./control ./postinst)
 	rm $(OBJ)/control $(OBJ)/postinst
 	
 $(OBJ)/debian-binary:
