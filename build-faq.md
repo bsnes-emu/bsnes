@@ -15,11 +15,11 @@ For the various tools and libraries, follow the below guide to ensure easy, prop
 
 ### SDL2
 
-For [libSDL2](https://libsdl.org/download-2.0.php), download the Visual C++ Development Library pack. Place the extracted files within a known folder for later. Both the `\x86\` and `\include\` paths will be needed.  
+For [libSDL2](https://libsdl.org/download-2.0.php), download the Visual C++ Development Library pack. Place the extracted files within a known folder for later. Both the `\x64\` and `\include\` paths will be needed.  
 
 The following examples will be referenced later: 
 
-- `C:\SDL2\lib\x86\*`
+- `C:\SDL2\lib\x64\*`
 - `C:\SDL2\include\*`
 
 ### rgbds
@@ -35,8 +35,8 @@ Ensure that the `gnuwin32\bin\` directory is included in `%PATH%`. Like rgbds ab
 Within a command prompt in the project directory:
 
 ```
-vcvars32
-set lib=%lib%;C:\SDL2\lib\x86
+vcvars64
+set lib=%lib%;C:\SDL2\lib\x64
 set include=%include%;C:\SDL2\include
 make
 ```

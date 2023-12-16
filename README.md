@@ -48,7 +48,7 @@ SameBoy requires the following tools and libraries to build:
 On Windows, SameBoy also requires:
  * Visual Studio (For headers, etc.)
  * [GnuWin](http://gnuwin32.sourceforge.net/)
- * Running vcvars32 before running make. Make sure all required tools and libraries are in %PATH% and %lib%, respectively. (see [Build FAQ](https://github.com/LIJI32/SameBoy/blob/master/build-faq.md) for more details on Windows compilation)
+ * Running vcvars64 before running make. Make sure all required tools and libraries are in %PATH% and %lib%, respectively. (see [Build FAQ](https://github.com/LIJI32/SameBoy/blob/master/build-faq.md) for more details on Windows compilation)
 
 To compile, simply run `make`. The targets are:
  * `cocoa` (Default for macOS)
