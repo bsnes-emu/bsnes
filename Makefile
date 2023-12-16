@@ -676,7 +676,7 @@ ios:
 $(BIN)/SameBoy-iOS.ipa: ios
 	$(MKDIR) -p $(OBJ)/Payload
 	cp -rf $(BIN)/SameBoy-iOS.app $(OBJ)/Payload/SameBoy-iOS.app
-	(cd $(OBJ) && zip $(abspath $@) -r Payload)
+	(cd $(OBJ) && zip -q $(abspath $@) -r Payload)
 	rm -rf $(OBJ)/Payload
 
     
