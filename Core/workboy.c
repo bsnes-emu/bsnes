@@ -153,11 +153,13 @@ void GB_connect_workboy(GB_gameboy_t *gb,
 
 bool GB_workboy_is_enabled(GB_gameboy_t *gb)
 {
-    return gb->workboy.mode;
+    return gb->accessory == GB_ACCESSORY_WORKBOY && gb->workboy.mode;
 }
 
 void GB_workboy_set_key(GB_gameboy_t *gb, uint8_t key)
 {
+    if (gb->accessory != GB_ACCESSORY_WORKBOY) return;
+    
     if (gb->workboy.user_shift_down != gb->workboy.shift_down &&
         (key & (GB_WORKBOY_REQUIRE_SHIFT | GB_WORKBOY_FORBID_SHIFT)) == 0) {
         if (gb->workboy.user_shift_down) {
