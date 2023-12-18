@@ -694,21 +694,27 @@
                             <action selector="savePrinterFeed:" target="-2" id="Dm3-h0-ch4"/>
                         </connections>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="NSToolbarPrintItem" explicitItemIdentifier="Print" id="mtd-zS-DXa"/>
+                    <toolbarItem implicitItemIdentifier="0496ED81-2A03-445D-9818-97386BC78CBC" label="Print" paletteLabel="Print" tag="-1" image="printer" catalog="system" bordered="YES" id="L6N-6G-UWl">
+                        <size key="minSize" width="30" height="25"/>
+                        <size key="maxSize" width="30" height="25"/>
+                        <connections>
+                            <action selector="printDocument:" target="-1" id="RLy-7k-iIR"/>
+                        </connections>
+                    </toolbarItem>
                     <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="AoG-LH-J4b"/>
                     <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="Q0x-n5-Q2Y"/>
-                    <toolbarItem implicitItemIdentifier="E8F74F8F-6DE2-4774-A690-F71D92CD932E" label="" paletteLabel="" tag="-1" sizingBehavior="auto" id="CJX-Ff-7iQ">
+                    <toolbarItem implicitItemIdentifier="E8F74F8F-6DE2-4774-A690-F71D92CD932E" label="" paletteLabel="" tag="-1" title="wtf" sizingBehavior="auto" id="CJX-Ff-7iQ">
                         <nil key="toolTip"/>
-                        <progressIndicator key="view" wantsLayer="YES" maxValue="100" displayedWhenStopped="NO" indeterminate="YES" style="spinning" id="rrz-Uh-Nae">
-                            <rect key="frame" x="0.0" y="14" width="32" height="32"/>
+                        <progressIndicator key="view" wantsLayer="YES" maxValue="100" displayedWhenStopped="NO" indeterminate="YES" controlSize="small" style="spinning" id="rrz-Uh-Nae">
+                            <rect key="frame" x="0.0" y="14" width="16" height="16"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </progressIndicator>
                     </toolbarItem>
                 </allowedToolbarItems>
                 <defaultToolbarItems>
-                    <toolbarItem reference="CBz-1N-o0Q"/>
-                    <toolbarItem reference="mtd-zS-DXa"/>
                     <toolbarItem reference="CJX-Ff-7iQ"/>
+                    <toolbarItem reference="CBz-1N-o0Q"/>
+                    <toolbarItem reference="L6N-6G-UWl"/>
                 </defaultToolbarItems>
             </toolbar>
             <point key="canvasLocation" x="-159" y="356"/>
@@ -972,5 +978,6 @@
         <image name="NSStopProgressFreestandingTemplate" width="15" height="15"/>
         <image name="NextTemplate" width="14" height="14"/>
         <image name="StepTemplate" width="14" height="14"/>
+        <image name="printer" catalog="system" width="18" height="16"/>
     </resources>
 </document>

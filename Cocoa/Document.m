@@ -783,16 +783,22 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     if (@available(macOS 11.0, *)) {
         self.memoryWindow.toolbarStyle = NSWindowToolbarStyleExpanded;
         self.printerFeedWindow.toolbarStyle = NSWindowToolbarStyleUnifiedCompact;
-        self.printerFeedWindow.toolbar.items[0].image =
+        self.printerFeedWindow.toolbar.items[1].image =
             [NSImage imageWithSystemSymbolName:@"square.and.arrow.down"
                       accessibilityDescription:@"Save"];
-        self.printerFeedWindow.toolbar.items[1].image =
+        self.printerFeedWindow.toolbar.items[2].image =
             [NSImage imageWithSystemSymbolName:@"printer"
                       accessibilityDescription:@"Print"];
-        self.printerFeedWindow.toolbar.items[0].bordered = false;
         self.printerFeedWindow.toolbar.items[1].bordered = false;
+        self.printerFeedWindow.toolbar.items[2].bordered = false;
     }
     else {
+        NSToolbarItem *spinner = self.printerFeedWindow.toolbar.items[0];
+        [self.printerFeedWindow.toolbar removeItemAtIndex:0];
+        [self.printerFeedWindow.toolbar insertItemWithItemIdentifier:spinner.itemIdentifier atIndex:2];
+        [self.printerFeedWindow.toolbar removeItemAtIndex:1];
+        [self.printerFeedWindow.toolbar insertItemWithItemIdentifier:NSToolbarPrintItemIdentifier
+                                                             atIndex:1];
         [self.printerFeedWindow.toolbar insertItemWithItemIdentifier:NSToolbarFlexibleSpaceItemIdentifier
                                                              atIndex:2];
     }
@@ -2239,9 +2245,11 @@ enum GBWindowResizeAction
                                                     height:_currentPrinterImageData.length / 160 / sizeof(imageBytes[0])
                                                      scale:2.0];
         NSRect frame = self.printerFeedWindow.frame;
+        double oldHeight = frame.size.height;
         frame.size = self.feedImageView.image.size;
         [self.printerFeedWindow setContentMaxSize:frame.size];
         frame.size.height += self.printerFeedWindow.frame.size.height - self.printerFeedWindow.contentView.frame.size.height;
+        frame.origin.y -= frame.size.height - oldHeight;
         [self.printerFeedWindow setFrame:frame display:false animate: self.printerFeedWindow.isVisible];
         [self.printerFeedWindow orderFront:NULL];
     });
