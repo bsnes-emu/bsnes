@@ -22,6 +22,7 @@
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>com.github.liji32.sameboy.gb</string>
+                <string>public.gbrom</string>
 			</array>
 			<key>LSTypeIsPackage</key>
 			<integer>0</integer>
