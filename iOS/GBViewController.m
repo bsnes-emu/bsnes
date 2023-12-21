@@ -13,7 +13,7 @@
 #import "GBSettingsViewController.h"
 #import "GBStatesViewController.h"
 #import <CoreMotion/CoreMotion.h>
-#import <Core/gb.h>
+#import <dlfcn.h>
 
 @implementation GBViewController
 {
@@ -246,8 +246,60 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [_backgroundView addSubview:_cameraPositionButton];
     
     [UNUserNotificationCenter currentNotificationCenter].delegate = self;
+    [self verifyEntitlements];
 
     return true;
+}
+
+- (void)verifyEntitlements
+{
+    /*
+        Make sure SameBoy is properly signed. If the bundle identifier the Info.plist file does not match the bundle
+        identifier in the application-identifier entitlement, iOS will not allow SameBoy to open files.
+    */
+    typedef void *xpc_object_t;
+    void *libxpc = dlopen("/usr/lib/system/libxpc.dylib", RTLD_NOW);
+    
+    extern xpc_object_t xpc_copy_entitlements_for_self$(void);
+    extern void xpc_release$ (xpc_object_t *object);
+    extern const char *xpc_dictionary_get_string$ (xpc_object_t *object, const char *key);
+    
+    typeof(xpc_copy_entitlements_for_self$) *xpc_copy_entitlements_for_self = dlsym(libxpc, "xpc_copy_entitlements_for_self");
+    typeof(xpc_release$) *xpc_release = dlsym(libxpc, "xpc_release");
+    typeof(xpc_dictionary_get_string$) *xpc_dictionary_get_string = dlsym(libxpc, "xpc_dictionary_get_string");
+    
+    if (!xpc_copy_entitlements_for_self || !xpc_release || !xpc_dictionary_get_string) return;
+    
+    xpc_object_t entitlements = xpc_copy_entitlements_for_self();
+    if (!entitlements) return;
+    const char *_entIdentifier = xpc_dictionary_get_string(entitlements, "application-identifier");
+    NSString *entIdentifier = _entIdentifier? @(_entIdentifier) : nil;
+    
+    const char *_teamIdentifier = xpc_dictionary_get_string(entitlements, "com.apple.developer.team-identifier");
+    NSString *teamIdentifier = _teamIdentifier? @(_teamIdentifier) : nil;
+    
+    xpc_release(entitlements);
+    
+    if (!entIdentifier) { // No identifier. Installed using a jailbreak, we're fine.
+        return;
+    }
+    
+    
+    if (teamIdentifier && [entIdentifier hasPrefix:[teamIdentifier stringByAppendingString:@"."]]) {
+        entIdentifier = [entIdentifier substringFromIndex:teamIdentifier.length + 1];
+    }
+    
+    NSString *plistIdentifier = [NSBundle mainBundle].bundleIdentifier;
+    
+    if (![entIdentifier isEqual:plistIdentifier]) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"SameBoy is not properly signed and might not be able to open ROMs"
+                                                                       message:[NSString stringWithFormat:@"The bundle identifier in the Info.plist file (“%@”) does not match the one in the entitlements (“%@”)", plistIdentifier, entIdentifier]
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        [alert  addAction:[UIAlertAction actionWithTitle:@"Close"
+                                                   style:UIAlertActionStyleCancel
+                                                 handler:nil]];
+        [self presentViewController:alert animated:true completion:nil];
+    }
 }
 
 - (void)saveStateToFile:(NSString *)file
