@@ -207,6 +207,9 @@ static void handle_events(GB_gameboy_t *gb)
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
+            case SDL_DISPLAYEVENT:
+                update_swap_interval();
+                break;
             case SDL_QUIT:
                 pending_command = GB_SDL_QUIT_COMMAND;
                 break;
@@ -226,6 +229,13 @@ static void handle_events(GB_gameboy_t *gb)
             case SDL_WINDOWEVENT: {
                 if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED) {
                     update_viewport();
+                }
+                if (event.window.type == SDL_WINDOWEVENT_MOVED
+#if SDL_COMPILEDVERSION > 2018
+                    || event.window.type == SDL_WINDOWEVENT_DISPLAY_CHANGED
+#endif
+                    ) {
+                    update_swap_interval();
                 }
                 break;
             }
@@ -428,12 +438,13 @@ static void handle_events(GB_gameboy_t *gb)
                         
                     case SDL_SCANCODE_F:
                         if (event.key.keysym.mod & MODIFIER) {
-                            if ((SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP) == false) {
+                            if (!(SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP)) {
                                 SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
                             }
                             else {
                                 SDL_SetWindowFullscreen(window, 0);
                             }
+                            update_swap_interval();
                             update_viewport();
                         }
                         break;
@@ -1128,6 +1139,7 @@ int main(int argc, char **argv)
     if (gl_context) {
         glGetIntegerv(GL_MAJOR_VERSION, &major);
         glGetIntegerv(GL_MINOR_VERSION, &minor);
+        update_swap_interval();
     }
     
     if (gl_context && major * 0x100 + minor < 0x302) {
