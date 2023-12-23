@@ -50,6 +50,21 @@ typedef struct IXAudio2Vtbl IXAudio2Vtbl;
 typedef void *IXAudio2MasteringVoice;
 
 #undef INTERFACE
+#define INTERFACE IXAudio2EngineCallback
+DECLARE_INTERFACE(IXAudio2EngineCallback)
+{
+    // Called by XAudio2 just before an audio processing pass begins.
+    STDMETHOD_(void, OnProcessingPassStart) (THIS) PURE;
+    
+    // Called just after an audio processing pass ends.
+    STDMETHOD_(void, OnProcessingPassEnd) (THIS) PURE;
+    
+    // Called in the event of a critical system error which requires XAudio2
+    // to be closed down and restarted.  The error code is given in Error.
+    STDMETHOD_(void, OnCriticalError) (THIS_ HRESULT Error) PURE;
+};
+
+#undef INTERFACE
 #define INTERFACE IXAudio2
 
 struct IXAudio2Vtbl {
@@ -61,8 +76,8 @@ struct IXAudio2Vtbl {
     STDMETHOD(Initialize) (THIS_ UINT32 Flags,
                            XAUDIO2_PROCESSOR XAudio2Processor) PURE;
 
-     void *RegisterForCallbacks;
-     void *UnregisterForCallbacks;
+    STDMETHOD(RegisterForCallbacks) (THIS_ __in IXAudio2EngineCallback *pCallback) PURE;
+    void *UnregisterForCallbacks;
     
     STDMETHOD(CreateSourceVoice) (THIS_ __deref_out IXAudio2SourceVoice **ppSourceVoice,
                                   __in const WAVEFORMATEX *pSourceFormat,
@@ -91,6 +106,7 @@ DEFINE_CLSID(XAudio2, 5a508685, a254, 4fba, 9b, 82, 9a, 24, b0, 03, 06, af);
 DEFINE_IID(IXAudio2, 8bcf1f58, 9fe7, 4583, 8a, c6, e2, ad, c4, 65, c8, bb);
 
 
+#define IXAudio2SourceVoice_RegisterForCallbacks(This, pCallback) ((This)->lpVtbl->RegisterForCallbacks(This,pCallback))
 #define IXAudio2SourceVoice_Start(This,Flags,OperationSet) ((This)->lpVtbl->Start(This,Flags,OperationSet))
 #define IXAudio2SourceVoice_Stop(This,Flags,OperationSet) ((This)->lpVtbl->Stop(This,Flags,OperationSet))
 #define IXAudio2SourceVoice_SubmitSourceBuffer(This,pBuffer,pBufferWMA) ((This)->lpVtbl->SubmitSourceBuffer(This,pBuffer,pBufferWMA))

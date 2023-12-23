@@ -109,8 +109,27 @@ static unsigned _audio_get_frequency(void)
     return audio_frequency;
 }
 
+static void nop(IXAudio2EngineCallback *this)
+{
+}
+
+static bool _audio_init(void);
+
+static _Atomic bool needs_restart = false;
+
+static void critical_error(IXAudio2EngineCallback *this, HRESULT error)
+{
+    needs_restart = true;
+}
+
+
 static size_t _audio_get_queue_length(void)
 {
+    if (needs_restart) {
+        _audio_init();
+        if (!xaudio2) return 0;
+        _audio_set_paused(!playing);
+    }
     static XAUDIO2_VOICE_STATE state;
     IXAudio2SourceVoice_GetState(source_voice, &state);
     
@@ -120,6 +139,12 @@ static size_t _audio_get_queue_length(void)
 static void _audio_queue_sample(GB_sample_t *sample)
 {
     if (!playing) return;
+    
+    if (needs_restart) {
+        _audio_init();
+        if (!xaudio2) return;
+        _audio_set_paused(!playing);
+    }
         
     static XAUDIO2_BUFFER buffer = {.AudioBytes = sizeof(*sample) * BATCH_SIZE, };
     sample_pool[pos] = *sample;
@@ -133,6 +158,14 @@ static void _audio_queue_sample(GB_sample_t *sample)
 
 static bool _audio_init(void)
 {
+    if (needs_restart) {
+        needs_restart = false;
+        if (xaudio2) {
+            xaudio2->lpVtbl->Release(xaudio2);
+            xaudio2 = NULL;
+        }
+    }
+    
     HRESULT hr = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
     if (FAILED(hr)) {
         fprintf(stderr, "CoInitializeEx failed: %lx\n", hr);
@@ -167,6 +200,19 @@ static bool _audio_init(void)
         fprintf(stderr, "CreateSourceVoice failed: %lx\n", hr);
         return false;
     }
+    
+    
+    static IXAudio2EngineCallbackVtbl callbacks = {
+        nop,
+        nop,
+        .OnCriticalError = critical_error
+    };
+    
+    static IXAudio2EngineCallback callbackObject = {
+        .lpVtbl = &callbacks
+    };
+    
+    IXAudio2SourceVoice_RegisterForCallbacks(xaudio2, &callbackObject);
     
     return true;
 }
