@@ -1,4 +1,9 @@
 #pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdalign.h>
@@ -1027,4 +1032,8 @@ internal void GB_clear_running_thread(GB_gameboy_t *gb);
 #define GB_clear_running_thread(gb)
 #endif
     
+#endif
+
+#ifdef __cplusplus
+}
 #endif
