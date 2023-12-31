@@ -245,8 +245,10 @@ CODESIGN := codesign -fs -
 else
 ifeq ($(PLATFORM),Darwin)
 SYSROOT := $(shell xcodebuild -sdk macosx -version Path 2> $(NULL))
+$(info "Password prompt to fix xcode-select bug.")
+$(shell sudo xcode-select -s /Applications/Xcode.app/Contents/Developer)
 ifeq ($(SYSROOT),)
-SYSROOT := /Library/Developer/CommandLineTools/SDKs/$(shell ls /Library/Developer/CommandLineTools/SDKs/ | grep 10 | tail -n 1)
+SYSROOT := /Library/Developer/CommandLineTools/SDKs/$(shell ls /Library/Developer/CommandLineTools/SDKs/ | grep 13 | tail -n 1)
 endif
 ifeq ($(SYSROOT),/Library/Developer/CommandLineTools/SDKs/)
 $(error Could not find a macOS SDK)
