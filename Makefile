@@ -245,8 +245,6 @@ CODESIGN := codesign -fs -
 else
 ifeq ($(PLATFORM),Darwin)
 SYSROOT := $(shell xcodebuild -sdk macosx -version Path 2> $(NULL))
-$(info Password prompt to fix xcode-select bug.)
-$(shell sudo xcode-select -s /Applications/Xcode.app/Contents/Developer)
 ifeq ($(SYSROOT),)
 SYSROOT := /Library/Developer/CommandLineTools/SDKs/$(shell ls /Library/Developer/CommandLineTools/SDKs/ | grep "[0-9]\." | tail -n 1)
 endif
