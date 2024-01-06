@@ -285,7 +285,15 @@ static uint32_t color_to_int(NSColor *color)
             dispatch_async(dispatch_get_main_queue(), ^{
                 NSArray *objects;
                 [[NSBundle mainBundle] loadNibNamed:@"UpdateWindow" owner:self topLevelObjects:&objects];
-                self.updateChanges.preferences.standardFontFamily = [NSFont systemFontOfSize:0].familyName;
+                if (@available(macOS 10.11, *)) {
+                    self.updateChanges.preferences.standardFontFamily = @"-apple-system";
+                }
+                else if (@available(macOS 10.10, *)) {
+                    self.updateChanges.preferences.standardFontFamily = @"Helvetica Neue";
+                }
+                else {
+                    self.updateChanges.preferences.standardFontFamily = @"Lucida Grande";
+                }
                 self.updateChanges.preferences.fixedFontFamily = @"Menlo";
                 self.updateChanges.drawsBackground = false;
                 [self.updateChanges.mainFrame loadHTMLString:html baseURL:nil];
