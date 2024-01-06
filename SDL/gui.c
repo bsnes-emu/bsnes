@@ -2648,6 +2648,9 @@ void run_gui(bool is_running)
                 memcpy(pixels, converted_background->pixels, sizeof(pixels));
             }
             else {
+                for (unsigned i = 0; i < width * height; i++) {
+                    pixels[i] = gui_palette_native[0];
+                }
                 for (unsigned y = 0; y < 144; y++) {
                     memcpy(pixels + x_offset + width * (y + y_offset), ((uint32_t *)converted_background->pixels) + 160 * y, 160 * 4);
                 }
