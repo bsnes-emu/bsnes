@@ -15,7 +15,6 @@ bool GB_audio_init(void)
     const GB_audio_driver_t *drivers[] = {
 #ifdef _WIN32
         GB_AUDIO_DRIVER_REF(XAudio2),
-        GB_AUDIO_DRIVER_REF(XAudio2_7),
 #endif
         GB_AUDIO_DRIVER_REF(SDL),
 #ifdef ENABLE_OPENAL
@@ -97,7 +96,6 @@ const char *GB_audio_driver_name_at_index(unsigned index)
     const GB_audio_driver_t *drivers[] = {
 #ifdef _WIN32
         GB_AUDIO_DRIVER_REF(XAudio2),
-        GB_AUDIO_DRIVER_REF(XAudio2_7),
 #endif
         GB_AUDIO_DRIVER_REF(SDL),
 #ifdef ENABLE_OPENAL
