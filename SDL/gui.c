@@ -238,12 +238,12 @@ enum style {
 
 static void draw_styled_text(uint32_t *buffer, unsigned width, unsigned height, unsigned y, const char *string, uint32_t color, uint32_t border, enum style style)
 {
-    unsigned x = GLYPH_WIDTH * 2;
+    unsigned x = GLYPH_WIDTH * 2 + (width - 160) / 2;
     if (style == STYLE_CENTER || style == STYLE_ARROWS) {
         x = width / 2 - (unsigned) strlen(string) * GLYPH_WIDTH / 2;
     }
     else if (style == STYLE_LEFT) {
-        x = 6;
+        x = 6 + (width - 160) / 2;
     }
     
     draw_text(buffer, width, height, x, y, string, color, border, false);
