@@ -195,6 +195,14 @@ void GB_configure_cart(GB_gameboy_t *gb)
             GB_log(gb, "Cartridge type %02x is not yet supported.\n", gb->rom[0x147]);
         }
     }
+    
+    if (!gb->cartridge_type->has_ram &&
+        gb->cartridge_type->mbc_type != GB_NO_MBC &&
+        gb->cartridge_type->mbc_type != GB_TPP1 &&
+        gb->rom[0x149]) {
+        GB_log(gb, "ROM header reports no RAM, but also reports a non-zero RAM size. Assuming cartridge has RAM.\n");
+        gb->cartridge_type++;
+    }
         
     size_t old_mbc_ram_size = gb->mbc_ram_size;
     gb->mbc_ram_size = 0;
