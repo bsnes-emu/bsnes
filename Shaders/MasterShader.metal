@@ -50,7 +50,7 @@ __attribute__((unused)) static inline float4 texture_relative(texture2d<half> t,
 #line 1
 {filter}
 
-#define BLEND_BIAS (2.0/5.0)
+#define BLEND_BIAS (1.0/3.0)
 
 enum frame_blending_mode {
     DISABLED,

@@ -1504,6 +1504,10 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                         gb->lcd_status_callback(gb, false);
                     }
                     gb->double_speed_alignment = 0;
+                    if (gb->model <= GB_MODEL_CGB_E) {
+                        /* TODO: Verify this, it's a bit... odd */
+                        gb->is_odd_frame ^= true;
+                    }
                     GB_timing_sync(gb);
                     GB_lcd_off(gb);
                 }

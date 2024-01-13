@@ -97,8 +97,7 @@ static void fifo_overlay_object_row(GB_fifo_t *fifo, uint8_t lower, uint8_t uppe
 #define WIDTH (160)
 #define BORDERED_WIDTH 256
 #define BORDERED_HEIGHT 224
-#define FRAME_LENGTH (LCDC_PERIOD)
-#define VIRTUAL_LINES (FRAME_LENGTH / LINE_LENGTH) // = 154
+#define VIRTUAL_LINES (LCDC_PERIOD / LINE_LENGTH) // = 154
 
 typedef struct __attribute__((packed)) {
     uint8_t y;
@@ -1380,12 +1379,28 @@ static inline uint8_t x_for_object_match(GB_gameboy_t *gb)
     return ret;
 }
 
+static void update_frame_parity(GB_gameboy_t *gb)
+{
+    if (gb->model <= GB_MODEL_CGB_E) {
+        gb->is_odd_frame ^= true;
+    }
+    else {
+        // Faster than division, it's normally only once
+        while (gb->frame_parity_ticks > LCDC_PERIOD * 2) {
+            gb->frame_parity_ticks -= LCDC_PERIOD * 2;
+            gb->is_odd_frame ^= true;
+        }
+    }
+}
+
 /*
  TODO: It seems that the STAT register's mode bits are always "late" by 4 T-cycles.
        The PPU logic can be greatly simplified if that delay is simply emulated.
  */
 void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
 {
+    gb->frame_parity_ticks += cycles;
+
     if (unlikely((gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE) && (signed)(gb->cycles_for_line * 2 + cycles + gb->display_cycles) > LINE_LENGTH * 2)) {
         unsigned first_batch = (LINE_LENGTH * 2 - gb->cycles_for_line * 2 + gb->display_cycles);
         GB_display_run(gb, first_batch, force);
@@ -1470,13 +1485,12 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
             if (gb->cycles_since_vblank_callback < LCDC_PERIOD) {
                 GB_SLEEP(gb, display, 1, LCDC_PERIOD - gb->cycles_since_vblank_callback);
             }
+            update_frame_parity(gb); // TODO: test actual timing
             GB_display_vblank(gb, GB_VBLANK_TYPE_LCD_OFF);
         }
         return;
     }
-    
-    gb->is_odd_frame = false;
-    
+        
     if (!GB_is_cgb(gb)) {
         GB_SLEEP(gb, display, 23, 1);
     }
@@ -2001,7 +2015,7 @@ skip_slow_mode_3:
                     }
                     else {
                         if (!GB_is_sgb(gb) || gb->current_lcd_line < LINES) {
-                            gb->is_odd_frame ^= true;
+                            update_frame_parity(gb); // TODO: test actual timing
                             GB_display_vblank(gb, GB_VBLANK_TYPE_NORMAL_FRAME);
                         }
                         gb->frame_skip_state = GB_FRAMESKIP_FIRST_FRAME_RENDERED;
@@ -2009,7 +2023,7 @@ skip_slow_mode_3:
                 }
                 else {
                     if (!GB_is_sgb(gb) || gb->current_lcd_line < LINES) {
-                        gb->is_odd_frame ^= true;
+                        update_frame_parity(gb); // TODO: test actual timing
                         GB_display_vblank(gb, GB_VBLANK_TYPE_NORMAL_FRAME);
                     }
                 }

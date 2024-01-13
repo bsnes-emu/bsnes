@@ -1762,6 +1762,8 @@ static void GB_reset_internal(GB_gameboy_t *gb, bool quick)
     }
     
     GB_set_internal_div_counter(gb, 8);
+    /* TODO: AGS-101 is inverted in comparison to AGS-001 and AGB */
+    gb->is_odd_frame = gb->model > GB_MODEL_CGB_E;
 
 #ifndef GB_DISABLE_DEBUGGER
     if (gb->nontrivial_jump_state) {
