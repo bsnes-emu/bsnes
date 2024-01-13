@@ -703,7 +703,7 @@
                     </toolbarItem>
                     <toolbarItem implicitItemIdentifier="NSToolbarSpaceItem" id="AoG-LH-J4b"/>
                     <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="Q0x-n5-Q2Y"/>
-                    <toolbarItem implicitItemIdentifier="E8F74F8F-6DE2-4774-A690-F71D92CD932E" label="" paletteLabel="" tag="-1" title="wtf" sizingBehavior="auto" id="CJX-Ff-7iQ">
+                    <toolbarItem implicitItemIdentifier="E8F74F8F-6DE2-4774-A690-F71D92CD932E" label="" paletteLabel="" tag="-1" sizingBehavior="auto" id="CJX-Ff-7iQ">
                         <nil key="toolTip"/>
                         <progressIndicator key="view" wantsLayer="YES" maxValue="100" displayedWhenStopped="NO" indeterminate="YES" controlSize="small" style="spinning" id="rrz-Uh-Nae">
                             <rect key="frame" x="0.0" y="14" width="16" height="16"/>

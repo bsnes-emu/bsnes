@@ -5,6 +5,7 @@
     uint32_t *_imageBuffers[3];
     unsigned _currentBuffer;
     GB_frame_blending_mode_t _frameBlendingMode;
+    bool _oddFrame;
 }
 
 - (void)screenSizeChanged
@@ -23,6 +24,7 @@
 - (void)flip
 {
     _currentBuffer = (_currentBuffer + 1) % self.numberOfBuffers;
+    _oddFrame = GB_is_odd_frame(_gb);
 }
 
 - (unsigned) numberOfBuffers
@@ -62,7 +64,7 @@
         if (!_gb || GB_is_sgb(_gb)) {
             return GB_FRAME_BLENDING_MODE_SIMPLE;
         }
-        return GB_is_odd_frame(_gb)? GB_FRAME_BLENDING_MODE_ACCURATE_ODD : GB_FRAME_BLENDING_MODE_ACCURATE_EVEN;
+        return _oddFrame ? GB_FRAME_BLENDING_MODE_ACCURATE_ODD : GB_FRAME_BLENDING_MODE_ACCURATE_EVEN;
     }
     return _frameBlendingMode;
 }

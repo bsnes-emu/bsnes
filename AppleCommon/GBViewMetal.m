@@ -85,7 +85,7 @@ static const vector_float2 rect[] =
 #endif
 }
 
-- (void) loadShader
+- (void)loadShader
 {
     NSError *error = nil;
     NSString *shader_source = [NSString stringWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"MasterShader"
@@ -160,22 +160,44 @@ static const vector_float2 rect[] =
         {texture.width, texture.height, 1} // MTLSize
     };
 
-    [texture replaceRegion:region
-               mipmapLevel:0
-                 withBytes:[self currentBuffer]
-               bytesPerRow:texture.width * 4];
-    if ([self frameBlendingMode]) {
-        [previous_texture replaceRegion:region
-                            mipmapLevel:0
-                              withBytes:[self previousBuffer]
-                            bytesPerRow:texture.width * 4];
+    GB_frame_blending_mode_t mode = [self frameBlendingMode];
+    
+    switch (mode) {
+        case GB_FRAME_BLENDING_MODE_SIMPLE:
+        case GB_FRAME_BLENDING_MODE_ACCURATE_EVEN:
+            [previous_texture replaceRegion:region
+                                mipmapLevel:0
+                                  withBytes:[self previousBuffer]
+                                bytesPerRow:texture.width * 4];
+        case GB_FRAME_BLENDING_MODE_DISABLED:
+            [texture replaceRegion:region
+                       mipmapLevel:0
+                         withBytes:[self currentBuffer]
+                       bytesPerRow:texture.width * 4];
+            break;
+        case GB_FRAME_BLENDING_MODE_ACCURATE_ODD:
+            /*
+             I don't understand GPUs. When rapidly changing `mode`, the shader might sometimes incorrectly
+             use the old value. I couldn't figure out how to fix it, so I just work around the issue by
+             avoiding rapid changes in `mode`.
+             */
+            mode = GB_FRAME_BLENDING_MODE_ACCURATE_EVEN;
+            [previous_texture replaceRegion:region
+                                mipmapLevel:0
+                                  withBytes:[self currentBuffer]
+                                bytesPerRow:texture.width * 4];
+            [texture replaceRegion:region
+                       mipmapLevel:0
+                         withBytes:[self previousBuffer]
+                       bytesPerRow:texture.width * 4];
+            break;
     }
     
     MTLRenderPassDescriptor *render_pass_descriptor = view.currentRenderPassDescriptor;
     id<MTLCommandBuffer> command_buffer = [command_queue commandBuffer];
 
     if (render_pass_descriptor) {
-        *(GB_frame_blending_mode_t *)[frame_blending_mode_buffer contents] = [self frameBlendingMode];
+        *(GB_frame_blending_mode_t *)[frame_blending_mode_buffer contents] = mode;
         *(vector_float2 *)[output_resolution_buffer contents] = output_resolution;
 
         id<MTLRenderCommandEncoder> render_encoder =
