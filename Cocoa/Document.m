@@ -2697,6 +2697,20 @@ enum GBWindowResizeAction
     }];
 }
 
+- (IBAction)reloadROM:(id)sender
+{
+    bool wasRunning = _running;
+    if (wasRunning) {
+        [self stop];
+    }
+    
+    [self loadROM];
+
+    if (wasRunning) {
+        [self start];
+    }
+}
+
 - (void)updateDebuggerButtons
 {
     bool updateContinue = false;

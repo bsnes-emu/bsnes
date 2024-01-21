@@ -208,6 +208,11 @@
                                     <action selector="reset:" target="-1" id="VV1-VP-L7g"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Reload ROM" alternate="YES" keyEquivalent="R" id="eQP-Fb-nkz">
+                                <connections>
+                                    <action selector="reloadROM:" target="-1" id="BpN-8V-Csg"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Pause" keyEquivalent="p" id="4K4-hw-R7Q">
                                 <connections>
                                     <action selector="togglePause:" target="-1" id="osW-wt-QAa"/>
