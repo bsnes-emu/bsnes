@@ -2674,6 +2674,7 @@ enum GBWindowResizeAction
         if (urls.count == 1) {
             bool ok = true;
             for (Document *document in [NSDocumentController sharedDocumentController].documents) {
+                if (document == self) continue;
                 if ([document.fileURL isEqual:urls.firstObject]) {
                     NSAlert *alert = [[NSAlert alloc] init];
                     [alert setMessageText:[NSString stringWithFormat:@"‘%@’ is already open in another window. Close ‘%@’ before hot swapping it into this instance.",
