@@ -1,10 +1,6 @@
 #import "GBLoadROMTableViewController.h"
 #import "GBROMManager.h"
 
-@interface GBLoadROMTableViewController ()
-
-@end
-
 @implementation GBLoadROMTableViewController
 {
     NSIndexPath *_renamingPath;

@@ -1,9 +1,5 @@
 #import "GBAboutController.h"
 
-@interface GBAboutController ()
-
-@end
-
 @implementation GBAboutController
 {
     UILabel *_titleLabel;

@@ -3,10 +3,6 @@
 #import "GBROMManager.h"
 #import "GBViewController.h"
 
-@interface GBStatesViewController ()
-
-@end
-
 @implementation GBStatesViewController
 
 - (void)updateSlotView:(GBSlotButton *)view

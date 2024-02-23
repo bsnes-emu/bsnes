@@ -1,9 +1,5 @@
 #import "GBOptionViewController.h"
 
-@interface GBOptionViewController ()
-
-@end
-
 @implementation GBOptionViewController
 {
     NSMutableArray<NSString *> *_options;

@@ -4,10 +4,6 @@
 #import "GBViewController.h"
 #import "GBROMManager.h"
 
-@interface GBMenuViewController ()
-
-@end
-
 @implementation GBMenuViewController
 
 + (instancetype)menu
