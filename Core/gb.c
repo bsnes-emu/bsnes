@@ -612,12 +612,7 @@ int GB_load_isx(GB_gameboy_t *gb, const char *path)
                     name[length] = 0;
                     READ(flag); // unused
                     
-                    READ(byte);
-                    bank = byte;
-                    if (byte >= 0x80) {
-                        READ(byte);
-                        bank |= byte << 8;
-                    }
+                    READ(bank);
                     
                     READ(address);
                     address = LE16(address);
