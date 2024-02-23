@@ -426,6 +426,11 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 - (void)openStates
 {
     UINavigationController *controller = [[UINavigationController alloc] initWithRootViewController:[[GBStatesViewController alloc] init]];
+    UIVisualEffect *effect = [UIBlurEffect effectWithStyle:(UIBlurEffectStyle)UIBlurEffectStyleProminent];
+    UIVisualEffectView *effectView = [[UIVisualEffectView alloc] initWithEffect:effect];
+    effectView.frame = controller.view.bounds;
+    effectView.autoresizingMask = UIViewAutoresizingFlexibleWidth |  UIViewAutoresizingFlexibleHeight;
+    [controller.view insertSubview:effectView atIndex:0];
     UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:@"Close"
                                                               style:UIBarButtonItemStylePlain
                                                              target:self

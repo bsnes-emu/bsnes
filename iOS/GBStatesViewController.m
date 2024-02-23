@@ -38,10 +38,8 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    UIVisualEffect *effect = [UIBlurEffect effectWithStyle:(UIBlurEffectStyle)UIBlurEffectStyleProminent];
-    self.view = [[UIVisualEffectView alloc] initWithEffect:effect];
     self.view.bounds = CGRectMake(0, 0, 0x300, 0x300);
-    UIView *root = ((UIVisualEffectView *)self.view).contentView;
+    UIView *root = self.view;
     for (unsigned i = 0; i < 9; i++) {
         unsigned x = i % 3;
         unsigned y = i / 3;
@@ -113,20 +111,6 @@
     slot.showingMenu = true;
     controller.popoverPresentationController.sourceView = slot;
     [self presentViewController:controller animated:true completion:nil];
-}
-
-- (void)viewWillLayoutSubviews
-{
-    [super viewWillLayoutSubviews];
-    if ([UIDevice currentDevice].userInterfaceIdiom != UIUserInterfaceIdiomPad) {
-        UIView *root = ((UIVisualEffectView *)self.view).contentView;
-        CGRect frame = root.frame;
-        UIEdgeInsets insets = [UIApplication sharedApplication].keyWindow.safeAreaInsets;
-        frame.size.height = self.view.frame.size.height - insets.bottom;
-        frame.size.width = self.view.frame.size.width -  insets.left - insets.right;
-        frame.origin.x = insets.left;
-        root.frame = frame;
-    }
 }
 
 - (NSString *)title
