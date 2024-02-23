@@ -2149,14 +2149,14 @@ static const debugger_command_t commands[] = {
     {"x", 1, }, /* Alias */
     {"disassemble", 1, disassemble, "Disassemble instructions at address", "<expression>", "count", .argument_completer = symbol_completer},
     {"breakpoint", 1, breakpoint, "Add a new breakpoint at the specified address/expression or range. "
-                                  "Ranges are exlusive by default, unless \"inclusive\" is used. "
+                                  "Ranges are exclusive by default, unless \"inclusive\" is used. "
                                   "If the j modifier is used, the breakpoint will occur just before "
                                   "jumping to the target.",
                                   "<expression> [to <end expression> [inclusive]] [if <condition expression>]", "j",
                                   .argument_completer = symbol_completer, .modifiers_completer = j_completer},
     {"delete", 2, delete, "Delete a breakpoint by its identifier, or all breakpoints", "[<breakpoint id>]"},
     {"watch", 1, watch, "Add a new watchpoint at the specified address/expression or range. "
-                        "Ranges are exlusive by default, unless \"inclusive\" is used. "
+                        "Ranges are exclusive by default, unless \"inclusive\" is used. "
                         "The default watchpoint type is write-only.",
                         "<expression> [to <end expression> [inclusive]] [if <condition expression>]", "(r|w|rw)",
                         .argument_completer = symbol_completer, .modifiers_completer = rw_completer
