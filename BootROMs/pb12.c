@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <assert.h>
 
-void opts(uint8_t byte, uint8_t *options)
+static void opts(uint8_t byte, uint8_t *options)
 {
     *(options++) = byte | ((byte << 1) & 0xff);
     *(options++) = byte & (byte << 1);
@@ -13,7 +13,7 @@ void opts(uint8_t byte, uint8_t *options)
     *(options++) = byte & (byte >> 1);
 }
 
-void write_all(int fd, const void *buf, size_t count) {
+static void write_all(int fd, const void *buf, size_t count) {
     while (count) {
         ssize_t written = write(fd, buf, count);
         if (written < 0) {
