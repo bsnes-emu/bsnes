@@ -1,4 +1,4 @@
-set -e
+set -exo pipefail
 
 LATEST=$(git tag --sort=-creatordate | grep "^v" | grep -v libretro | head -n 1)
 
