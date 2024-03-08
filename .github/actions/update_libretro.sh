@@ -1,5 +1,6 @@
-set -exo pipefail
+set -ex
 
+git fetch --tags
 LATEST=$(git tag --sort=-creatordate | grep "^v" | grep -v libretro | head -n 1)
 
 if [ $(git tag -l "$LATEST"-libretro) ]; then
