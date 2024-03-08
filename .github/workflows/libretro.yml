@@ -23,9 +23,6 @@ jobs:
         shell: bash
         run: |
           ./.github/actions/install_deps.sh ${{ matrix.os }}
-      - name: Build Boot ROMs
+      - name: Build Boot ROMs and Push
         run: |
-          make -j bootroms && mv build/bin/BootROMs BootROMs/prebuilt
-      - name: Push changes
-        run: |
-           git config --global --add --bool push.autoSetupRemote true && git config --global user.name 'Libretro Updater' &&  (git branch --delete libretro || true) && git checkout -b libretro && git config --global user.email '<>' && git add BootROMs/prebuilt/* && git commit -m 'Update prebuilt boot ROMs' && git push --force
+          ./.github/actions/update_libretro.sh
