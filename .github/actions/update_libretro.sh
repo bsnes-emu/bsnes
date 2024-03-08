@@ -23,4 +23,4 @@ git checkout tags/$LATEST -b libretro
 git add BootROMs/prebuilt/*
 git commit -m "Update libretro branch to $LATEST"
 git tag "$LATEST"-libretro
-git push --force --tags
+git push --force --tags --all
