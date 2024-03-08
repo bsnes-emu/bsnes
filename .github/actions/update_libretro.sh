@@ -18,9 +18,9 @@ git config --global user.name 'Libretro Updater'
 git config --global user.email '<>'
 
 git branch --delete libretro || true
-git checkout tags/$LATEST -b libretro
+git checkout tags/$LATEST
+git checkout -b libretro
 
 git add BootROMs/prebuilt/*
 git commit -m "Update libretro branch to $LATEST"
-git tag "$LATEST"-libretro
 git push --force --tags --all
