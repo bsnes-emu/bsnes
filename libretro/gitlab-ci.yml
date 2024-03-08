@@ -10,7 +10,7 @@
     JNI_PATH: libretro
     MAKEFILE_PATH: libretro
     CORENAME: sameboy
-    BOOTROMS_DIR: BootROMs/prebuilt
+    BOOTROMS_DIR: ../BootROMs/prebuilt
 
 # Inclusion templates, required for the build to work
 include:
