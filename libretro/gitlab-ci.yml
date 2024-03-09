@@ -7,15 +7,10 @@
 # Core definitions
 .core-defs:
   variables:
+    JNI_PATH: libretro
     MAKEFILE_PATH: libretro
     CORENAME: sameboy
-    BOOTROMS_DIR: ../BootROMs/prebuilt
-    
-.core-defs-android:
-  extends: .core-defs
-  variables:
-    JNI_PATH: libretro
-    BOOTROMS_DIR: ../../BootROMs/prebuilt
+    BOOTROMS_DIR: BootROMs/prebuilt
 
 # Inclusion templates, required for the build to work
 include:
@@ -128,25 +123,25 @@ libretro-build-osx-arm64:
 android-armeabi-v7a:
   extends:
     - .libretro-android-jni-armeabi-v7a
-    - .core-defs-android
+    - .core-defs
 
 # Android ARMv8a
 android-arm64-v8a:
   extends:
     - .libretro-android-jni-arm64-v8a
-    - .core-defs-android
+    - .core-defs
 
 # Android 64-bit x86
 android-x86_64:
   extends:
     - .libretro-android-jni-x86_64
-    - .core-defs-android
+    - .core-defs
 
 # Android 32-bit x86
 android-x86:
   extends:
     - .libretro-android-jni-x86
-    - .core-defs-android
+    - .core-defs
 
 # iOS
 libretro-build-ios-arm64:

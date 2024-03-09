@@ -188,7 +188,7 @@ endif
 
 	DEFINES := -DIOS
 ifeq ($(platform),ios-arm64)
-    CC = cc -arch armv64 -isysroot $(IOSSDK)
+    CC = cc -arch arm64 -isysroot $(IOSSDK)
 else
     CC = cc -arch armv7 -isysroot $(IOSSDK)
 endif
@@ -211,7 +211,7 @@ endif
    CC = cc -arch arm64 -isysroot $(IOSSDK)
 
 else ifneq (,$(findstring qnx,$(platform)))
-	TARGET := $(TARGET_NAME)_libretro_qnx.so
+   TARGET := $(TARGET_NAME)_libretro_qnx.so
    fpic := -fPIC
    SHARED := -shared -Wl,--version-script=$(CORE_DIR)/libretro/link.T -Wl,--no-undefined
 else ifeq ($(platform), emscripten)
@@ -326,7 +326,15 @@ else
    SHARED := -shared -static-libgcc -static-libstdc++ -s -Wl,--version-script=$(CORE_DIR)/libretro/link.T -Wl,--no-undefined
 endif
 
-TARGET := $(CORE_DIR)/build/bin/$(TARGET)
+ifeq ($(STATIC_LINKING), 1)
+# For some reason libretro's buildbot expects the output to be at ./libretro/ for static targets
+BIN ?= $(realpath -m $(CORE_DIR)/libretro)
+else
+BIN ?= $(realpath -m $(CORE_DIR))
+endif
+override BIN := $(shell cd .. && realpath -m $(BIN))
+TARGET := $(BIN)/$(TARGET)
+
 
 # To force use of the Unix version instead of the Windows version
 MKDIR := $(shell which mkdir)
@@ -364,6 +372,8 @@ endif
 CFLAGS   += -D__LIBRETRO__ $(fpic) $(INCFLAGS) -std=gnu11 -D_GNU_SOURCE -D_USE_MATH_DEFINES
 
 all: $(TARGET)
+
+override BOOTROMS_DIR := $(shell cd .. && realpath -m $(BOOTROMS_DIR))
 
 $(CORE_DIR)/libretro/%_boot.c: $(BOOTROMS_DIR)/%_boot.bin
 	echo "/* AUTO-GENERATED */" > $@
