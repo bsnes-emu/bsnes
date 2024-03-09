@@ -188,7 +188,7 @@ endif
 
 	DEFINES := -DIOS
 ifeq ($(platform),ios-arm64)
-    CC = cc -arch armv64 -isysroot $(IOSSDK)
+    CC = cc -arch arm64 -isysroot $(IOSSDK)
 else
     CC = cc -arch armv7 -isysroot $(IOSSDK)
 endif
@@ -326,7 +326,12 @@ else
    SHARED := -shared -static-libgcc -static-libstdc++ -s -Wl,--version-script=$(CORE_DIR)/libretro/link.T -Wl,--no-undefined
 endif
 
+ifeq ($(STATIC_LINKING), 1)
+# For some reason libretro's buildbot expects the output to be at ./libretro/ for static targets
+BIN ?= $(realpath -m $(CORE_DIR)/libretro)
+else
 BIN ?= $(realpath -m $(CORE_DIR))
+endif
 override BIN := $(shell cd .. && realpath -m $(BIN))
 TARGET := $(BIN)/$(TARGET)
 
