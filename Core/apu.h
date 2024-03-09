@@ -25,11 +25,22 @@
 
 /* APU ticks are 2MHz, triggered by an internal APU clock. */
 
+#ifdef GB_INTERNAL
+typedef union
+{
+    struct {
+        int16_t left;
+        int16_t right;
+    };
+    uint32_t packed;
+} GB_sample_t;
+#else
 typedef struct
 {
     int16_t left;
     int16_t right;
 } GB_sample_t;
+#endif
 
 typedef struct
 {
