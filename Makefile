@@ -631,7 +631,7 @@ $(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameBoyLogo.pb12
 
 # Libretro Core (uses its own build system)
 libretro:
-	CFLAGS="$(WARNINGS)" $(MAKE) -C libretro BOOTROMS_DIR=$(abspath $(BOOTROMS_DIR))
+	CFLAGS="$(WARNINGS)" $(MAKE) -C libretro BOOTROMS_DIR=$(BOOTROMS_DIR) BIN=$(BIN)
 
 # install for Linux/FreeDesktop/etc.
 # Does not install mimetype icons because FreeDesktop is cursed abomination with no right to exist.
