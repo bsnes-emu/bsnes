@@ -328,11 +328,10 @@ endif
 
 ifeq ($(STATIC_LINKING), 1)
 # For some reason libretro's buildbot expects the output to be at ./libretro/ for static targets
-BIN ?= $(realpath -m $(CORE_DIR)/libretro)
+BIN ?= $(abspath $(CORE_DIR)/libretro)
 else
-BIN ?= $(realpath -m $(CORE_DIR))
+BIN ?= $(abspath $(CORE_DIR))
 endif
-override BIN := $(shell cd .. && realpath -m $(BIN))
 TARGET := $(BIN)/$(TARGET)
 
 
@@ -372,8 +371,6 @@ endif
 CFLAGS   += -D__LIBRETRO__ $(fpic) $(INCFLAGS) -std=gnu11 -D_GNU_SOURCE -D_USE_MATH_DEFINES
 
 all: $(TARGET)
-
-override BOOTROMS_DIR := $(shell cd .. && realpath -m $(BOOTROMS_DIR))
 
 $(CORE_DIR)/libretro/%_boot.c: $(BOOTROMS_DIR)/%_boot.bin
 	echo "/* AUTO-GENERATED */" > $@
