@@ -604,7 +604,7 @@ int GB_load_isx(GB_gameboy_t *gb, const char *path)
                 uint8_t length;
                 char name[257];
                 uint8_t flag;
-                uint16_t bank;
+                uint8_t bank;
                 uint16_t address;
                 READ(count);
                 count = LE16(count);
