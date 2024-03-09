@@ -246,7 +246,8 @@ static const vector_float2 rect[] =
 {
     CIImage *ciImage = [CIImage imageWithMTLTexture:[[(MTKView *)self.internalView currentDrawable] texture]
                                             options:@{
-                                                kCIImageColorSpace: (__bridge_transfer id)CGColorSpaceCreateDeviceRGB()
+                                                kCIImageColorSpace: (__bridge_transfer id)CGColorSpaceCreateDeviceRGB(),
+                                                kCIImageProperties: [NSNull null]
                                             }];
     ciImage = [ciImage imageByApplyingTransform:CGAffineTransformTranslate(CGAffineTransformMakeScale(1, -1),
                                                                            0, ciImage.extent.size.height)];
