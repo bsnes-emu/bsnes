@@ -23,22 +23,22 @@ STATIC vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 ou
   
     /* Setting up common vars */
     vec2 pos = fract(position * input_resolution);
-    vec2 sub_pos = fract(position * input_resolution * 6);
-    
+    vec2 sub_pos = pos * 6;
+
     vec4 center = texture_relative(image, position, vec2(0, 0));
     vec4 left = texture_relative(image, position, vec2(-1, 0));
     vec4 right = texture_relative(image, position, vec2(1, 0));
     
     /* Vertical blurring */
-    if (pos.y < 1.0 / 6.0) {
+    if (sub_pos.y < 1.0) {
         center = mix(center, texture_relative(image, position, vec2( 0, -1)), 0.5 - sub_pos.y / 2.0);
         left =   mix(left,   texture_relative(image, position, vec2(-1, -1)), 0.5 - sub_pos.y / 2.0);
         right =  mix(right,  texture_relative(image, position, vec2( 1, -1)), 0.5 - sub_pos.y / 2.0);
     }
-    else if (pos.y > 5.0 / 6.0) {
-        center = mix(center, texture_relative(image, position, vec2( 0, 1)), sub_pos.y / 2.0);
-        left =   mix(left,   texture_relative(image, position, vec2(-1, 1)), sub_pos.y / 2.0);
-        right =  mix(right,  texture_relative(image, position, vec2( 1, 1)), sub_pos.y / 2.0);
+    else if (sub_pos.y > 5.0) {
+        center = mix(center, texture_relative(image, position, vec2( 0, 1)), (sub_pos.y - 5) / 2.0);
+        left =   mix(left,   texture_relative(image, position, vec2(-1, 1)), (sub_pos.y - 5) / 2.0);
+        right =  mix(right,  texture_relative(image, position, vec2( 1, 1)), (sub_pos.y - 5) / 2.0);
     }
     
     /* Scanlines */
@@ -75,7 +75,7 @@ STATIC vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 ou
     }
 
     /* Blur the edges of the separators of adjacent columns */
-    if (pos.x < 1.0 / 6.0 || pos.x > 5.0 / 6.0) {
+    if (sub_pos.x < 1.0 || sub_pos.x > 5.0) {
         pos.y += 0.5;
         pos.y = fract(pos.y);
         
@@ -112,35 +112,35 @@ STATIC vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 ou
     vec4 midright = mix(right, center, 0.5);
     
     vec4 ret;
-    if (pos.x < 1.0 / 6.0) {
+    if (sub_pos.x < 1.0) {
         ret = mix(vec4(COLOR_HIGH * center.r, COLOR_LOW * center.g, COLOR_HIGH * left.b, 1),
                   vec4(COLOR_HIGH * center.r, COLOR_LOW * center.g, COLOR_LOW  * left.b, 1),
                   sub_pos.x);
     }
-    else if (pos.x < 2.0 / 6.0) {
+    else if (sub_pos.x < 2.0) {
         ret = mix(vec4(COLOR_HIGH * center.r, COLOR_LOW  * center.g, COLOR_LOW * left.b, 1),
                   vec4(COLOR_HIGH * center.r, COLOR_HIGH * center.g, COLOR_LOW * midleft.b, 1),
-                  sub_pos.x);
+                  sub_pos.x - 1);
     }
-    else if (pos.x < 3.0 / 6.0) {
+    else if (sub_pos.x < 3.0) {
         ret = mix(vec4(COLOR_HIGH * center.r  , COLOR_HIGH * center.g, COLOR_LOW * midleft.b, 1),
                   vec4(COLOR_LOW  * midright.r, COLOR_HIGH * center.g, COLOR_LOW * center.b, 1),
-                  sub_pos.x);
+                  sub_pos.x - 2);
     }
-    else if (pos.x < 4.0 / 6.0) {
+    else if (sub_pos.x < 4.0) {
         ret = mix(vec4(COLOR_LOW * midright.r, COLOR_HIGH * center.g , COLOR_LOW  * center.b, 1),
                   vec4(COLOR_LOW * right.r   , COLOR_HIGH  * center.g, COLOR_HIGH * center.b, 1),
-                  sub_pos.x);
+                  sub_pos.x - 3);
     }
-    else if (pos.x < 5.0 / 6.0) {
+    else if (sub_pos.x < 5.0) {
         ret = mix(vec4(COLOR_LOW * right.r, COLOR_HIGH * center.g  , COLOR_HIGH * center.b, 1),
                   vec4(COLOR_LOW * right.r, COLOR_LOW  * midright.g, COLOR_HIGH * center.b, 1),
-                  sub_pos.x);
+                  sub_pos.x - 4);
     }
     else {
         ret = mix(vec4(COLOR_LOW  * right.r, COLOR_LOW * midright.g, COLOR_HIGH * center.b, 1),
                   vec4(COLOR_HIGH * right.r, COLOR_LOW * right.g  ,  COLOR_HIGH * center.b, 1),
-                  sub_pos.x);
+                  sub_pos.x - 5);
     }
     
     /* Anti alias the curve */
