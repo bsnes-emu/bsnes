@@ -1,3 +1,4 @@
+#define COBJMACROS
 #include <windows.h>
 #include <shlobj.h>
 #include <stdio.h>
@@ -42,24 +43,39 @@ char *do_open_rom_dialog(void)
 
 char *do_open_folder_dialog(void)
 {
+    HRESULT hr, hrCoInit;
     char *ret = NULL;
-    BROWSEINFOW dialog;
+    IFileOpenDialog *dialog = NULL;
+    IShellItem *result = NULL;
+    wchar_t *path = NULL;
 
-    memset(&dialog, 0, sizeof(dialog));
-    dialog.ulFlags = BIF_USENEWUI | BIF_RETURNONLYFSDIRS;
-    dialog.lpszTitle = L"Select Boot ROMs Folder";
+    hrCoInit = CoInitializeEx(NULL, COINIT_APARTMENTTHREADED);
 
-    HRESULT hrOleInit = OleInitialize(NULL);
-    LPITEMIDLIST list = SHBrowseForFolderW(&dialog);
-    if (list) {
-        wchar_t filename[MAX_PATH];
-        if (SHGetPathFromIDListW(list, filename)) {
-            ret = wc_to_utf8_alloc(filename);
-        }
-        CoTaskMemFree((void *)list);
-    }
+    hr = CoCreateInstance(&CLSID_FileOpenDialog, NULL, CLSCTX_ALL, &IID_IFileOpenDialog, (LPVOID *)&dialog);
+    if (FAILED(hr)) goto end;
 
-    if (SUCCEEDED(hrOleInit)) OleUninitialize();
+    hr = IFileOpenDialog_SetOptions(dialog, FOS_NOCHANGEDIR | FOS_PICKFOLDERS | FOS_FORCEFILESYSTEM | FOS_PATHMUSTEXIST | FOS_NOREADONLYRETURN);
+    if (FAILED(hr)) goto end;
+
+    hr = IFileOpenDialog_SetTitle(dialog, L"Select Boot ROMs Folder");
+    if (FAILED(hr)) goto end;
+
+    hr = IFileOpenDialog_Show(dialog, NULL);
+    if (FAILED(hr)) goto end;
+
+    hr = IFileOpenDialog_GetResult(dialog, &result);
+    if (FAILED(hr)) goto end;
+
+    hr = IShellItem_GetDisplayName(result, SIGDN_FILESYSPATH, &path);
+    if (FAILED(hr)) goto end;
+
+    ret = wc_to_utf8_alloc(path);
+
+end:
+    if (path) CoTaskMemFree((void *)path);
+    if (result) IShellItem_Release(result);
+    if (dialog) IFileOpenDialog_Release(dialog);
+    if (SUCCEEDED(hrCoInit)) CoUninitialize();
     return ret;
 }
 
