@@ -119,6 +119,19 @@ Start:
     ld a, $30
     ld [c], a
     
+    ; Wait 4 frames
+    ld e, 4
+    ld a, 1
+    ldh [rIE], a
+    xor a
+.waitLoop
+    ldh [rIF], a
+    halt
+    nop
+    dec e
+    jr nz, .waitLoop
+    ldh [rIE], a
+    
     ; Update command
     ldh a, [_HRAM]
     add 2
@@ -196,16 +209,6 @@ DoubleBitsAndWriteRow:
     inc hl
     ldi [hl], a
     inc hl
-    ret
-
-WaitFrame:
-    push hl
-    ld hl, $FF0F
-    res 0, [hl]
-.wait
-    bit 0, [hl]
-    jr z, .wait
-    pop hl
     ret
 
 TrademarkSymbol:
