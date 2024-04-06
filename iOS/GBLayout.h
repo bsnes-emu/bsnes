@@ -6,6 +6,7 @@
 @property (readonly) CGPoint dpadLocation;
 @property (readonly) CGPoint aLocation;
 @property (readonly) CGPoint bLocation;
+@property (readonly) CGPoint abComboLocation;
 @property (readonly) CGPoint startLocation;
 @property (readonly) CGPoint selectLocation;
 - (CGRect)viewRectForOrientation:(UIInterfaceOrientation)orientation;
@@ -19,6 +20,7 @@
 @property CGPoint dpadLocation;
 @property CGPoint aLocation;
 @property CGPoint bLocation;
+@property CGPoint abComboLocation;
 @property CGPoint startLocation;
 @property CGPoint selectLocation;
 @property (readonly) CGSize resolution;

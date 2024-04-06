@@ -322,6 +322,12 @@ static NSString const *typeLightTemp = @"typeLightTemp";
             },
         },
         @{
+            @"items": @[
+                @{@"type": typeCheck, @"pref": @"GBEnableABCombo", @"title": @"Single-Touch A+B"},
+            ],
+            @"footer": @"Enable this option to allow pressing A+B by touching the space between the two buttons",
+        },
+        @{
             @"header": @"Horizontal Swipe Behavior",
             @"items": @[
                 @{@"type": typeCheck, @"pref": @"GBDynamicSpeed", @"title": @"Dynamically Control Speed"},

@@ -332,6 +332,10 @@ static GB_key_mask_t angleToKeyMask(double angle)
         else if (CGPointSquaredDistance(point, _layout.selectLocation) <= buttonRadiusSquared) {
             mask |= GB_KEY_SELECT_MASK;
         }
+        else if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBEnableABCombo"] &&
+                 CGPointSquaredDistance(point, _layout.abComboLocation) <= buttonRadiusSquared) {
+            mask |= GB_KEY_A_MASK | GB_KEY_B_MASK;
+        }
         else if (!dpadHandled &&
                  fabs(point.x - _layout.dpadLocation.x) <= dpadRadius &&
                  fabs(point.y - _layout.dpadLocation.y) <= dpadRadius) {

@@ -85,6 +85,9 @@
     self.bLocation = (CGPoint){self.bLocation.x + self.cutout, self.bLocation.y};
     self.startLocation = (CGPoint){self.startLocation.x + self.cutout, self.startLocation.y};
     self.selectLocation = (CGPoint){self.selectLocation.x + self.cutout, self.selectLocation.y};
+    self.abComboLocation = (CGPoint){(self.aLocation.x + self.bLocation.x) / 2,
+                                     (self.aLocation.y + self.bLocation.y) / 2};
+
     
     UIGraphicsBeginImageContextWithOptions(resolution, true, 1);
     [self drawBackground];

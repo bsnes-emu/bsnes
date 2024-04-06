@@ -54,6 +54,8 @@
         round(buttonsCenter.y + buttonsDelta.height / 2)
     };
     
+    self.abComboLocation = buttonsCenter;
+    
     double controlsTop = self.dpadLocation.y - 80 * self.factor;
     double middleSpace = self.bLocation.x - buttonRadius - (self.dpadLocation.x + 80 * self.factor);
     
