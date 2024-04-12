@@ -126,7 +126,7 @@ Start:
     xor a
 .waitLoop
     ldh [rIF], a
-    halt
+    db $76 ; halt, compatible with rgbds 0.5-0.8
     nop
     dec e
     jr nz, .waitLoop
