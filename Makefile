@@ -449,8 +449,9 @@ ifeq ($(CONF), release)
 	$(STRIP) $@
 endif
 
-$(OBJ)/reregister: iOS/reregister.m
+$(OBJ)/reregister: iOS/reregister.m iOS/reregister.entitlements
 	$(CC) $< -o $@ $(REREGISTER_LDFLAGS) $(CFLAGS)
+	codesign -fs - --entitlements iOS/reregister.entitlements $@
 
 # Cocoa Port
 
@@ -699,7 +700,7 @@ $(BIN)/SameBoy-iOS.deb: $(OBJ)/debian-binary $(OBJ)/control.tar.gz $(OBJ)/data.t
 $(OBJ)/data.tar.gz: ios iOS/jailbreak.entitlements
 	$(MKDIR) -p $(OBJ)/Applications
 	cp -rf $(BIN)/SameBoy-iOS.app $(OBJ)/Applications/SameBoy-iOS.app
-	cp build/obj-ios/reregister iOS/reregister.entitlements $(OBJ)/Applications/SameBoy-iOS.app
+	cp build/obj-ios/reregister $(OBJ)/Applications/SameBoy-iOS.app
 	codesign -fs - --entitlements iOS/jailbreak.entitlements $(OBJ)/Applications/SameBoy-iOS.app
 	(cd $(OBJ) && tar -czf $(abspath $@) --format ustar --uid 501 --gid 501 --numeric-owner ./Applications)
 	rm -rf $(OBJ)/Applications
