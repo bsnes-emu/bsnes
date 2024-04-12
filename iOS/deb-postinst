@@ -1,2 +1,2 @@
 #!/bin/bash
-/Applications/SameBoy-iOS.app/reregister
+/private/var/containers/SameBoy-iOS.app/installer install

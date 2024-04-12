@@ -244,7 +244,7 @@ CORE_FILTER += Core/debugger.c Core/sm83_disassembler.c Core/symbol_hash.c
 LDFLAGS += -arch arm64
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT)
 LDFLAGS += -miphoneos-version-min=11.0  -isysroot $(SYSROOT)
-REREGISTER_LDFLAGS := $(LDFLAGS) -lobjc -framework CoreServices -framework Foundation
+IOS_INSTALLER_LDFLAGS := $(LDFLAGS) -lobjc -framework CoreServices -framework Foundation
 LDFLAGS += -lobjc -framework UIKit -framework Foundation -framework CoreGraphics -framework Metal -framework MetalKit -framework AudioToolbox -framework AVFoundation -framework QuartzCore -framework CoreMotion -framework CoreVideo -framework CoreMedia -framework CoreImage -framework UserNotifications -weak_framework CoreHaptics 
 CODESIGN := codesign -fs -
 else
@@ -325,7 +325,7 @@ quicklook: $(BIN)/SameBoy.qlgenerator
 sdl: $(SDL_TARGET) $(BIN)/SDL/dmg_boot.bin $(BIN)/SDL/mgb_boot.bin $(BIN)/SDL/cgb0_boot.bin $(BIN)/SDL/cgb_boot.bin $(BIN)/SDL/agb_boot.bin $(BIN)/SDL/sgb_boot.bin $(BIN)/SDL/sgb2_boot.bin $(BIN)/SDL/LICENSE $(BIN)/SDL/registers.sym $(BIN)/SDL/background.bmp $(BIN)/SDL/Shaders $(BIN)/SDL/Palettes
 bootroms: $(BIN)/BootROMs/agb_boot.bin $(BIN)/BootROMs/cgb_boot.bin $(BIN)/BootROMs/cgb0_boot.bin $(BIN)/BootROMs/dmg_boot.bin $(BIN)/BootROMs/mgb_boot.bin $(BIN)/BootROMs/sgb_boot.bin $(BIN)/BootROMs/sgb2_boot.bin
 tester: $(TESTER_TARGET) $(BIN)/tester/dmg_boot.bin $(BIN)/tester/cgb_boot.bin $(BIN)/tester/agb_boot.bin $(BIN)/tester/sgb_boot.bin $(BIN)/tester/sgb2_boot.bin
-_ios: $(BIN)/SameBoy-iOS.app $(OBJ)/reregister
+_ios: $(BIN)/SameBoy-iOS.app $(OBJ)/installer
 ios-ipa: $(BIN)/SameBoy-iOS.ipa
 ios-deb: $(BIN)/SameBoy-iOS.deb
 ifeq ($(PLATFORM),windows32)
@@ -344,7 +344,7 @@ CORE_SOURCES := $(filter-out $(CORE_FILTER),$(shell ls Core/*.c))
 CORE_HEADERS := $(shell ls Core/*.h)
 SDL_SOURCES := $(shell ls SDL/*.c) $(OPEN_DIALOG) $(patsubst %,SDL/audio/%.c,$(SDL_AUDIO_DRIVERS))
 TESTER_SOURCES := $(shell ls Tester/*.c)
-IOS_SOURCES := $(filter-out iOS/reregister.m, $(shell ls iOS/*.m)) $(shell ls AppleCommon/*.m)
+IOS_SOURCES := $(filter-out iOS/installer.m, $(shell ls iOS/*.m)) $(shell ls AppleCommon/*.m)
 COCOA_SOURCES := $(shell ls Cocoa/*.m) $(shell ls HexFiend/*.m) $(shell ls JoyKit/*.m) $(shell ls AppleCommon/*.m)
 QUICKLOOK_SOURCES := $(shell ls QuickLook/*.m) $(shell ls QuickLook/*.c)
 
@@ -449,9 +449,8 @@ ifeq ($(CONF), release)
 	$(STRIP) $@
 endif
 
-$(OBJ)/reregister: iOS/reregister.m iOS/reregister.entitlements
-	$(CC) $< -o $@ $(REREGISTER_LDFLAGS) $(CFLAGS)
-	codesign -fs - --entitlements iOS/reregister.entitlements $@
+$(OBJ)/installer: iOS/installer.m
+	$(CC) $< -o $@ $(IOS_INSTALLER_LDFLAGS) $(CFLAGS)
 
 # Cocoa Port
 
@@ -697,20 +696,22 @@ $(BIN)/SameBoy-iOS.deb: $(OBJ)/debian-binary $(OBJ)/control.tar.gz $(OBJ)/data.t
 	-@$(MKDIR) -p $(dir $@)
 	(cd $(OBJ) && ar cr $(abspath $@) $(notdir $^))
 	
-$(OBJ)/data.tar.gz: ios iOS/jailbreak.entitlements
-	$(MKDIR) -p $(OBJ)/Applications
-	cp -rf $(BIN)/SameBoy-iOS.app $(OBJ)/Applications/SameBoy-iOS.app
-	cp build/obj-ios/reregister $(OBJ)/Applications/SameBoy-iOS.app
-	codesign -fs - --entitlements iOS/jailbreak.entitlements $(OBJ)/Applications/SameBoy-iOS.app
-	(cd $(OBJ) && tar -czf $(abspath $@) --format ustar --uid 501 --gid 501 --numeric-owner ./Applications)
-	rm -rf $(OBJ)/Applications
+$(OBJ)/data.tar.gz: ios iOS/jailbreak.entitlements iOS/installer.entitlements
+	$(MKDIR) -p $(OBJ)/private/var/containers/
+	cp -rf $(BIN)/SameBoy-iOS.app $(OBJ)/private/var/containers/SameBoy-iOS.app
+	cp build/obj-ios/installer $(OBJ)/private/var/containers/SameBoy-iOS.app
+	codesign -fs - --entitlements iOS/installer.entitlements $(OBJ)/private/var/containers/SameBoy-iOS.app/installer
+	codesign -fs - --entitlements iOS/jailbreak.entitlements $(OBJ)/private/var/containers/SameBoy-iOS.app
+	(cd $(OBJ) && tar -czf $(abspath $@) --format ustar --uid 501 --gid 501 --numeric-owner ./private)
+	rm -rf $(OBJ)/private/
 	
-$(OBJ)/control.tar.gz: iOS/deb-postinst iOS/deb-control
+$(OBJ)/control.tar.gz: iOS/deb-postinst iOS/deb-prerm iOS/deb-control
 	-@$(MKDIR) -p $(dir $@)
 	sed "s/@VERSION/$(VERSION)/" < iOS/deb-control > $(OBJ)/control
 	ln iOS/deb-postinst $(OBJ)/postinst
-	(cd $(OBJ) && tar -czf $(abspath $@) --format ustar --uid 501 --gid 501 --numeric-owner ./control ./postinst)
-	rm $(OBJ)/control $(OBJ)/postinst
+	ln iOS/deb-prerm $(OBJ)/prerm
+	(cd $(OBJ) && tar -czf $(abspath $@) --format ustar --uid 501 --gid 501 --numeric-owner ./control ./postinst ./prerm)
+	rm $(OBJ)/control $(OBJ)/postinst $(OBJ)/prerm
 	
 $(OBJ)/debian-binary:
 	-@$(MKDIR) -p $(dir $@)
