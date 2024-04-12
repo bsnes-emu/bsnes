@@ -835,7 +835,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
         _rewindOver = false;
     }
     
-    if (_runMode == GBRunModeNormal || [[NSUserDefaults standardUserDefaults] boolForKey:@"GBDynamicSpeed"]) {
+    if (_runMode == GBRunModeNormal || ![[NSUserDefaults standardUserDefaults] boolForKey:@"GBDynamicSpeed"]) {
         if (_runMode == GBRunModeTurbo) {
             double multiplier = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBTurboSpeed"];
             GB_set_turbo_mode(&_gb, multiplier == 1, false);
