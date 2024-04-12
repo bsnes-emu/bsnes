@@ -9,6 +9,7 @@ int main(int argc, char * argv[])
         [[NSUserDefaults standardUserDefaults] registerDefaults:@{
             @"GBFilter": @"NearestNeighbor",
             @"GBColorCorrection": @(GB_COLOR_CORRECTION_MODERN_BALANCED),
+            @"GBAudioMode": @"switch",
             @"GBHighpassFilter": @(GB_HIGHPASS_ACCURATE),
             @"GBRewindLength": @(10),
             @"GBFrameBlendingMode": @(GB_FRAME_BLENDING_MODE_ACCURATE),

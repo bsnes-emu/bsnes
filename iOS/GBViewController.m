@@ -143,6 +143,13 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     [self addDefaultObserver:^(id newValue) {
         GB_set_rewind_length(gb, [newValue unsignedIntValue]);
     } forKey:@"GBRewindLength"];
+    [self addDefaultObserver:^(id newValue) {
+        [[AVAudioSession sharedInstance] setCategory:[newValue isEqual:@"on"]? AVAudioSessionCategoryPlayback :  AVAudioSessionCategorySoloAmbient
+                                                mode:AVAudioSessionModeMeasurement // Reduces latency on BT
+                                  routeSharingPolicy:AVAudioSessionRouteSharingPolicyDefault
+                                             options:AVAudioSessionCategoryOptionAllowBluetoothA2DP | AVAudioSessionCategoryOptionAllowAirPlay
+                                               error:nil];
+    } forKey:@"GBAudioMode"];
 }
 
 - (void)addDefaultObserver:(void(^)(id newValue))block forKey:(NSString *)key
@@ -526,37 +533,39 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 {
     GB_set_pixels_output(&_gb, _gbView.pixels);
     GB_set_sample_rate(&_gb, 96000);
-    _audioClient = [[GBAudioClient alloc] initWithRendererBlock:^(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer) {
-        [_audioLock lock];
-        
-        if (_audioBufferPosition < nFrames) {
-            _audioBufferNeeded = nFrames;
-            [_audioLock waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.125]];
-        }
-        
-        if (_stopping) {
-            memset(buffer, 0, nFrames * sizeof(*buffer));
+    if (![[[NSUserDefaults standardUserDefaults] stringForKey:@"GBAudioMode"] isEqual:@"off"]) {
+        _audioClient = [[GBAudioClient alloc] initWithRendererBlock:^(UInt32 sampleRate, UInt32 nFrames, GB_sample_t *buffer) {
+            [_audioLock lock];
+            
+            if (_audioBufferPosition < nFrames) {
+                _audioBufferNeeded = nFrames;
+                [_audioLock waitUntilDate:[NSDate dateWithTimeIntervalSinceNow:0.125]];
+            }
+            
+            if (_stopping) {
+                memset(buffer, 0, nFrames * sizeof(*buffer));
+                [_audioLock unlock];
+                return;
+            }
+            
+            if (_audioBufferPosition < nFrames) {
+                // Not enough audio
+                memset(buffer, 0, (nFrames - _audioBufferPosition) * sizeof(*buffer));
+                memcpy(buffer, _audioBuffer, _audioBufferPosition * sizeof(*buffer));
+                _audioBufferPosition = 0;
+            }
+            else if (_audioBufferPosition < nFrames + 4800) {
+                memcpy(buffer, _audioBuffer, nFrames * sizeof(*buffer));
+                memmove(_audioBuffer, _audioBuffer + nFrames, (_audioBufferPosition - nFrames) * sizeof(*buffer));
+                _audioBufferPosition = _audioBufferPosition - nFrames;
+            }
+            else {
+                memcpy(buffer, _audioBuffer + (_audioBufferPosition - nFrames), nFrames * sizeof(*buffer));
+                _audioBufferPosition = 0;
+            }
             [_audioLock unlock];
-            return;
-        }
-        
-        if (_audioBufferPosition < nFrames) {
-            // Not enough audio
-            memset(buffer, 0, (nFrames - _audioBufferPosition) * sizeof(*buffer));
-            memcpy(buffer, _audioBuffer, _audioBufferPosition * sizeof(*buffer));
-            _audioBufferPosition = 0;
-        }
-        else if (_audioBufferPosition < nFrames + 4800) {
-            memcpy(buffer, _audioBuffer, nFrames * sizeof(*buffer));
-            memmove(_audioBuffer, _audioBuffer + nFrames, (_audioBufferPosition - nFrames) * sizeof(*buffer));
-            _audioBufferPosition = _audioBufferPosition - nFrames;
-        }
-        else {
-            memcpy(buffer, _audioBuffer + (_audioBufferPosition - nFrames), nFrames * sizeof(*buffer));
-            _audioBufferPosition = 0;
-        }
-        [_audioLock unlock];
-    } andSampleRate:96000];
+        } andSampleRate:96000];
+    }
     
     [_audioClient start];
     if (GB_has_accelerometer(&_gb)) {
