@@ -100,7 +100,7 @@ CONF ?= debug
 BIN := build/bin
 OBJ := build/obj
 INC := build/include/sameboy
-LIB := build/lib
+LIBDIR := build/lib
 
 BOOTROMS_DIR ?= $(BIN)/BootROMs
 
@@ -331,7 +331,7 @@ ios-deb: $(BIN)/SameBoy-iOS.deb
 ifeq ($(PLATFORM),windows32)
 lib: lib-unsupported
 else
-lib: $(LIB)/libsameboy.o $(LIB)/libsameboy.a
+lib: $(LIBDIR)/libsameboy.o $(LIBDIR)/libsameboy.a
 endif
 all: sdl tester libretro lib
 ifeq ($(PLATFORM),Darwin)
@@ -717,7 +717,7 @@ $(OBJ)/debian-binary:
 	-@$(MKDIR) -p $(dir $@)
 	echo 2.0 > $@
     
-$(LIB)/libsameboy.o: $(CORE_OBJECTS)
+$(LIBDIR)/libsameboy.o: $(CORE_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
 	@# This is a somewhat simple hack to force Clang and GCC to build a native object file out of one or many LTO objects
 	echo "static const char __attribute__((used)) x=0;"| $(CC) $(filter-out -flto,$(CFLAGS)) -c -x c - -o $(OBJ)/lto_hack.o
@@ -725,7 +725,7 @@ $(LIB)/libsameboy.o: $(CORE_OBJECTS)
 	$(CC) $(FAT_FLAGS) $(CFLAGS) $(LIBFLAGS) $^ $(OBJ)/lto_hack.o -o $@
 	-@rm $(OBJ)/lto_hack.o
     
-$(LIB)/libsameboy.a: $(LIB)/libsameboy.o
+$(LIBDIR)/libsameboy.a: $(LIBDIR)/libsameboy.o
 	-@$(MKDIR) -p $(dir $@)
 	-@rm -f $@
 	ar -crs $@ $^
