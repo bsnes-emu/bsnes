@@ -590,7 +590,7 @@ $(BIN)/SameBoy-iOS.app/%.bin: $(BOOTROMS_DIR)/%.bin
 
 $(BIN)/SDL/LICENSE: LICENSE
 	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
+	grep -v "^  " $^ > $@
 
 $(BIN)/SDL/registers.sym: Misc/registers.sym
 	-@$(MKDIR) -p $(dir $@)
