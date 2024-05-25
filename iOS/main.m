@@ -11,7 +11,7 @@ int main(int argc, char * argv[])
             @"GBColorCorrection": @(GB_COLOR_CORRECTION_MODERN_BALANCED),
             @"GBAudioMode": @"switch",
             @"GBHighpassFilter": @(GB_HIGHPASS_ACCURATE),
-            @"GBRewindLength": @(10),
+            @"GBRewindLength": @(120),
             @"GBFrameBlendingMode": @(GB_FRAME_BLENDING_MODE_ACCURATE),
             
             @"GBDMGModel": @(GB_MODEL_DMG_B),
@@ -20,9 +20,12 @@ int main(int argc, char * argv[])
             @"GBSGBModel": @(GB_MODEL_SGB2),
             @"GBRumbleMode": @(GB_RUMBLE_CARTRIDGE_ONLY),
             @"GBButtonHaptics": @YES,
+            @"GBHapticsStrength": @0.75,
             @"GBTurboSpeed": @1,
             @"GBRewindSpeed": @1,
             @"GBDynamicSpeed": @NO,
+            
+            @"GBInterfaceTheme": @"SameBoy",
                         
             @"GBCurrentTheme": @"Lime (Game Boy)",
             // Default themes

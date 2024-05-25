@@ -1,10 +1,14 @@
 #import "GBSettingsViewController.h"
 #import "GBTemperatureSlider.h"
 #import "GBViewBase.h"
+#import "GBThemesViewController.h"
+#import "GBHapticManager.h"
+#import "GCExtendedGamepad+AllElements.h"
 #import <objc/runtime.h>
 
 static NSString const *typeSubmenu = @"submenu";
 static NSString const *typeOptionSubmenu = @"optionSubmenu";
+static NSString const *typeBlock = @"block";
 static NSString const *typeRadio = @"radio";
 static NSString const *typeCheck = @"check";
 static NSString const *typeDisabled = @"disabled";
@@ -16,6 +20,7 @@ static NSString const *typeLightTemp = @"typeLightTemp";
 {
     NSArray<NSDictionary *> *_structure;
     UINavigationController *_detailsNavigation;
+    NSArray<NSArray<GBTheme *> *> *_themes; // For prewarming
 }
 
 + (const GB_palette_t *)paletteForTheme:(NSString *)theme
@@ -317,9 +322,15 @@ static NSString const *typeLightTemp = @"typeLightTemp";
     
     NSArray<NSDictionary *> *controlsMenu = @[
         @{
+            @"items": @[
+                @{@"type": typeBlock, @"title": @"Configure Game Controllers", @"block": ^bool(GBSettingsViewController *controller){
+                    return [controller configureGameControllers];
+                }},
+            ],
+        },
+        @{
             @"header": @"D-pad Style",
             @"items": @[
-                // TODO: Convert to enum when implemented
                 @{@"type": typeRadio, @"pref": @"GBSwipeDpad", @"title": @"Standard", @"value": @NO,},
                 @{@"type": typeRadio, @"pref": @"GBSwipeDpad", @"title": @"Swipe",    @"value": @YES,},
             ],
@@ -379,6 +390,11 @@ static NSString const *typeLightTemp = @"typeLightTemp";
         @{
             @"items": @[
                 @{@"type": typeCheck, @"pref": @"GBButtonHaptics", @"title": @"Enable Button Haptics"},
+                @{@"type": typeSlider, @"pref": @"GBHapticsStrength", @"min": @0.25, @"max": @1, @"minImage": @"waveform.weak", @"maxImage": @"waveform",
+                  @"previewBlock": ^void(void){
+                      [[GBHapticManager sharedManager] doTapHaptic];
+                  }
+                }
             ],
         },
     ];
@@ -410,6 +426,12 @@ static NSString const *typeLightTemp = @"typeLightTemp";
                         @"submenu": controlsMenu,
                         @"image": [UIImage imageNamed:@"controlsSettings"],
                     },
+                    @{
+                        @"title": @"Themes",
+                        @"type": typeSubmenu,
+                        @"class": [GBThemesViewController class],
+                        @"image": [UIImage imageNamed:@"themeSettings"],
+                    },
             ]
         }
     ];
@@ -418,7 +440,12 @@ static NSString const *typeLightTemp = @"typeLightTemp";
 
 + (UIViewController *)settingsViewControllerWithLeftButton:(UIBarButtonItem *)button
 {
-    GBSettingsViewController *root = [[self alloc] initWithStructure:[self rootStructure] title:@"Settings" style:UITableViewStyleGrouped];
+    UITableViewStyle style = UITableViewStyleGrouped;
+    if (@available(iOS 13.0, *)) {
+        style = UITableViewStyleInsetGrouped;
+    }
+    GBSettingsViewController *root = [[self alloc] initWithStructure:[self rootStructure] title:@"Settings" style:style];
+    [root preloadThemePreviews];
     UINavigationController *controller = [[UINavigationController alloc] initWithRootViewController:root];
     [controller.visibleViewController.navigationItem setLeftBarButtonItem:button];
     if ([UIDevice currentDevice].userInterfaceIdiom != UIUserInterfaceIdiomPad) {
@@ -432,6 +459,220 @@ static NSString const *typeLightTemp = @"typeLightTemp";
     split.viewControllers = @[controller, root->_detailsNavigation];
     split.preferredDisplayMode = UISplitViewControllerDisplayModeAllVisible;
     return split;
+}
+
+static UIImage *ImageForController(GCController *controller)
+{
+    if (@available(iOS 13.0, *)) {
+        
+        NSString *symbolName = @"gamecontroller.fill";
+        UIColor *color = [UIColor grayColor];
+        
+        if (@available(iOS 14.5, *)) {
+            if ([controller.extendedGamepad isKindOfClass:[GCDualSenseGamepad class]]) {
+                symbolName = @"logo.playstation";
+                color = [UIColor colorWithRed:0 green:0x30 / 255.0 blue:0x87 / 255.0 alpha:1.0];
+            }
+        }
+        if (@available(iOS 14.0, *)) {
+            if ([controller.extendedGamepad isKindOfClass:[GCDualShockGamepad class]]) {
+                symbolName = @"logo.playstation";
+                color = [UIColor colorWithRed:0 green:0x30 / 255.0 blue:0x87 / 255.0 alpha:1.0];
+            }
+            if ([controller.extendedGamepad isKindOfClass:[GCXboxGamepad class]]) {
+                symbolName = @"logo.xbox";
+                color = [UIColor colorWithRed:0xe / 255.0 green:0x7a / 255.0 blue:0xd / 255.0 alpha:1.0];
+            }
+        }
+        
+        UIImage *glyph = [[UIImage systemImageNamed:symbolName] imageWithTintColor:[UIColor whiteColor]];
+        if (!glyph) {
+            glyph = [[UIImage systemImageNamed:@"gamecontroller.fill"] imageWithTintColor:[UIColor whiteColor]];
+        }
+        
+        UIGraphicsBeginImageContextWithOptions((CGSize){29, 29}, false, [UIScreen mainScreen].scale);
+        [color setFill];
+        [[UIBezierPath bezierPathWithRoundedRect:CGRectMake(0, 0, 29, 29) cornerRadius:7] fill];
+        double height = 25 / glyph.size.width * glyph.size.height;
+        [glyph drawInRect:CGRectMake(2, (29 - height) / 2, 25, height)];
+        
+        UIImage *ret = UIGraphicsGetImageFromCurrentImageContext();
+        UIGraphicsEndImageContext();
+        return ret;
+    }
+    return nil;
+    
+}
+
++ (GBButton)controller:(GCController *)controller convertUsageToButton:(GBControllerUsage)usage
+{
+    bool isSony = false;
+    if (@available(iOS 14.5, *)) {
+        if ([controller.extendedGamepad isKindOfClass:[GCDualSenseGamepad class]]) {
+            isSony = true;
+        }
+    }
+    if (@available(iOS 14.0, *)) {
+        if ([controller.extendedGamepad isKindOfClass:[GCDualShockGamepad class]]) {
+            isSony = true;
+        }
+    }
+    
+    NSNumber *mapping = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBControllerMappings"][controller.vendorName][[NSString stringWithFormat:@"%u", usage]];
+    if (mapping) {
+        return mapping.intValue;
+    }
+    
+    switch (usage) {
+        case GBUsageButtonA: return isSony? GBB : GBA;
+        case GBUsageButtonB: return isSony? GBA : GBB;
+        case GBUsageButtonX: return isSony? GBSelect : GBStart;
+        case GBUsageButtonY: return isSony? GBStart : GBSelect;
+        case GBUsageButtonMenu: return GBStart;
+        case GBUsageButtonOptions: return GBSelect;
+        case GBUsageButtonHome: return GBStart;
+        case GBUsageLeftShoulder: return GBRewind;
+        case GBUsageRightShoulder: return GBTurbo;
+        case GBUsageLeftTrigger: return GBUnderclock;
+        case GBUsageRightTrigger: return GBTurbo;
+        default: return GBUnusedButton;
+    }
+}
+
+static NSString *LocalizedNameForElement(GCControllerElement *element, GBControllerUsage usage)
+{
+    if (@available(iOS 14.0, *)) {
+        return element.localizedName;
+    }
+    switch (usage) {
+        case GBUsageDpad: return @"D-Pad";
+        case GBUsageButtonA: return @"A";
+        case GBUsageButtonB: return @"B";
+        case GBUsageButtonX: return @"X";
+        case GBUsageButtonY: return @"Y";
+        case GBUsageButtonMenu: return @"Menu";
+        case GBUsageButtonOptions: return @"Options";
+        case GBUsageButtonHome: return @"Home";
+        case GBUsageLeftThumbstick: return @"Left Thumbstick";
+        case GBUsageRightThumbstick: return @"Right Thumbstick";
+        case GBUsageLeftShoulder: return @"Left Shoulder";
+        case GBUsageRightShoulder: return @"Right Shoulder";
+        case GBUsageLeftTrigger: return @"Left Trigger";
+        case GBUsageRightTrigger: return @"Right Trigger";
+        case GBUsageLeftThumbstickButton: return @"Left Thumbstick Button";
+        case GBUsageRightThumbstickButton: return @"Right Thumbstick Button";
+        case GBUsageTouchpadButton: return @"Touchpad Button";
+    }
+    
+    return @"Button";
+}
+
+- (void)configureGameController:(GCController *)controller
+{
+    NSMutableArray *items = [NSMutableArray array];
+    NSDictionary <NSNumber *, GCControllerElement *> *elementsDict = controller.extendedGamepad.elementsDictionary;
+    for (NSNumber *usage in [[elementsDict allKeys] sortedArrayUsingSelector:@selector(compare:)]) {
+        GCControllerElement *element = elementsDict[usage];
+        if (![element isKindOfClass:[GCControllerButtonInput class]]) continue;
+ 
+        id (^getter)(void) = ^id(void) {
+            return @([GBSettingsViewController controller:controller convertUsageToButton:usage.intValue]);
+        };
+        
+        void (^setter)(id) = ^void(id value) {
+            NSMutableDictionary *mapping = ([[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBControllerMappings"] ?: @{}).mutableCopy;
+            
+            NSMutableDictionary *vendorMapping = ((NSDictionary *)mapping[controller.vendorName] ?: @{}).mutableCopy;
+            vendorMapping[usage.stringValue] = value;
+            mapping[controller.vendorName] = vendorMapping;
+            [[NSUserDefaults standardUserDefaults] setObject:mapping forKey:@"GBControllerMappings"];
+        };
+
+        
+        NSDictionary *item = @{
+            @"title": LocalizedNameForElement(element, usage.unsignedIntValue),
+            @"type": typeOptionSubmenu,
+            @"submenu": @[@{@"items": @[
+                @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"None",        @"value": @(GBUnusedButton)},
+                @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"Right",       @"value": @(GBRight)},
+                @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"Left",        @"value": @(GBLeft)},
+                @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"Up",          @"value": @(GBUp)},
+                @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"Down",        @"value": @(GBDown)},
+                @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"A",           @"value": @(GBA)},
+                @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"B",           @"value": @(GBB)},
+                @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"Select",      @"value": @(GBSelect)},
+                @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"Start",       @"value": @(GBStart)},
+                @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"Turbo",       @"value": @(GBTurbo)},
+                @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"Rewind",      @"value": @(GBRewind)},
+                @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"Slow-motion", @"value": @(GBUnderclock)},
+            ]}],
+        };
+        if (@available(iOS 14.0, *)) {
+            UIImage *image = [[UIImage systemImageNamed:element.sfSymbolsName] imageWithTintColor:UIColor.labelColor renderingMode:UIImageRenderingModeAlwaysOriginal];
+            if (image) {
+                item = [item mutableCopy];
+                ((NSMutableDictionary *)item)[@"image"] = image;
+            }
+        }
+        [items addObject:item];
+    }
+    
+    UITableViewStyle style = UITableViewStyleGrouped;
+    if (@available(iOS 13.0, *)) {
+        style = UITableViewStyleInsetGrouped;
+    }
+    
+    GBSettingsViewController *submenu = [[GBSettingsViewController alloc] initWithStructure:@[@{@"items": items}]
+                                                                                      title:controller.vendorName
+                                                                                      style:style];
+    [self.navigationController pushViewController:submenu animated:true];
+}
+
+- (bool)configureGameControllers
+{
+    
+    NSMutableArray *items = [NSMutableArray array];
+    for (GCController *controller in [GCController controllers]) {
+        if (!controller.extendedGamepad) continue;
+        NSDictionary *item = @{
+            @"title": controller.vendorName,
+            @"type": typeBlock,
+            @"block": ^bool(void) {
+                [self configureGameController:controller];
+                return true;
+            }
+        };
+        UIImage *image = ImageForController(controller);
+        if (image) {
+            item = [item mutableCopy];
+            ((NSMutableDictionary *)item)[@"image"] = image;
+        }
+            
+        [items addObject:item];
+    }
+    if (items.count) {
+        UITableViewStyle style = UITableViewStyleGrouped;
+        if (@available(iOS 13.0, *)) {
+            style = UITableViewStyleInsetGrouped;
+        }
+        
+        GBSettingsViewController *submenu = [[GBSettingsViewController alloc] initWithStructure:@[@{@"items": items}]
+                                                                                           title:@"Configure Game Controllers"
+                                                                                           style:style];
+        [self.navigationController pushViewController:submenu animated:true];
+    }
+    else {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"No Controllers Connected"
+                                                                       message:@"There are no connected game controllers to configure"
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        [alert  addAction:[UIAlertAction actionWithTitle:@"Close"
+                                                   style:UIAlertActionStyleCancel
+                                                 handler:nil]];
+        [self presentViewController:alert animated:true completion:nil];
+        return false;
+        
+    }
+    return true;
 }
 
 - (instancetype)initWithStructure:(NSArray *)structure title:(NSString *)title style:(UITableViewStyle)style
@@ -490,6 +731,14 @@ static NSString const *typeLightTemp = @"typeLightTemp";
     }
 }
 
+static id ValueForItem(NSDictionary *item)
+{
+    if (item[@"getter"]) {
+        return ((id(^)(void))item[@"getter"])();
+    }
+    return [[NSUserDefaults standardUserDefaults] objectForKey:item[@"pref"]] ?: @0;
+}
+
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSDictionary *item = [self itemForIndexPath:indexPath];
@@ -497,13 +746,13 @@ static NSString const *typeLightTemp = @"typeLightTemp";
     
     UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:nil];
     cell.textLabel.text = item[@"title"];
-    if (item[@"type"] == typeSubmenu || item[@"type"] == typeOptionSubmenu) {
+    if (item[@"type"] == typeSubmenu || item[@"type"] == typeOptionSubmenu || item[@"type"] == typeBlock) {
         cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
         cell.selectionStyle = UITableViewCellSelectionStyleBlue;
         if (item[@"type"] == typeOptionSubmenu) {
             for (NSDictionary *section in item[@"submenu"]) {
                 for (NSDictionary *item in section[@"items"]) {
-                    if (item[@"value"] && [([[NSUserDefaults standardUserDefaults] objectForKey:item[@"pref"]] ?: @0) isEqual:item[@"value"]]) {
+                    if (item[@"value"] && [ValueForItem(item) isEqual:item[@"value"]]) {
                         cell.detailTextLabel.text = item[@"title"];
                         break;
                     }
@@ -512,7 +761,7 @@ static NSString const *typeLightTemp = @"typeLightTemp";
         }
     }
     else if (item[@"type"] == typeRadio) {
-        if ([([[NSUserDefaults standardUserDefaults] objectForKey:item[@"pref"]] ?: @0) isEqual:item[@"value"]]) {
+        if ([ValueForItem(item) isEqual:item[@"value"]]) {
             cell.accessoryType = UITableViewCellAccessoryCheckmark;
         }
     }
@@ -569,21 +818,12 @@ static NSString const *typeLightTemp = @"typeLightTemp";
         slider.value = [[NSUserDefaults standardUserDefaults] floatForKey:item[@"pref"]];
         cell.selectionStyle = UITableViewCellSelectionStyleNone;
         
-        if (item[@"minImage"] && item[@"maxImage"]) {
-            if ([item[@"minImage"] isKindOfClass:[UIImage class]]) {
-                slider.minimumValueImage = item[@"minImage"];
+        if (@available(iOS 13.0, *)) {
+            if (item[@"minImage"] && item[@"maxImage"]) {
+                slider.minimumValueImage = [UIImage systemImageNamed:item[@"minImage"]] ?: [[UIImage imageNamed:item[@"minImage"]] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+                slider.maximumValueImage = [UIImage systemImageNamed:item[@"maxImage"]] ?: [[UIImage imageNamed:item[@"maxImage"]] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+                [GBSettingsViewController fixSliderTint:slider];
             }
-            else if (@available(iOS 13.0, *)) {
-                slider.minimumValueImage = [UIImage systemImageNamed:item[@"minImage"]];
-            }
-            
-            if ([item[@"maxImage"] isKindOfClass:[UIImage class]]) {
-                slider.maximumValueImage = item[@"maxImage"];
-            }
-            else if (@available(iOS 13.0, *)) {
-                slider.maximumValueImage = [UIImage systemImageNamed:item[@"maxImage"]];
-            }
-            [GBSettingsViewController fixSliderTint:slider];
         }
         
         id block = ^(){
@@ -592,6 +832,9 @@ static NSString const *typeLightTemp = @"typeLightTemp";
         objc_setAssociatedObject(cell, "RetainedBlock", block, OBJC_ASSOCIATION_RETAIN);
 
         [slider addTarget:block action:@selector(invoke) forControlEvents:UIControlEventValueChanged];
+        if (item[@"previewBlock"]) {
+            [slider addTarget:item[@"previewBlock"] action:@selector(invoke) forControlEvents:UIControlEventTouchUpInside | UIControlEventTouchUpOutside | UIControlEventTouchDown];
+        }
     }
     
     if ([self followingItemForIndexPath:indexPath][@"type"] == typeSeparator) {
@@ -606,14 +849,20 @@ static NSString const *typeLightTemp = @"typeLightTemp";
     NSDictionary *item = [self itemForIndexPath:indexPath];
     if (item[@"type"] == typeSubmenu || item[@"type"] == typeOptionSubmenu) {
         UITableViewStyle style = UITableViewStyleGrouped;
-        if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
-            if (@available(iOS 13.0, *)) {
-                style = UITableViewStyleInsetGrouped;
-            }
+        if (@available(iOS 13.0, *)) {
+            style = UITableViewStyleInsetGrouped;
         }
-        GBSettingsViewController *submenu = [[GBSettingsViewController alloc] initWithStructure:item[@"submenu"]
-                                                                                          title:item[@"title"]
-                                                                                          style:style];
+        UITableViewController *submenu = nil;
+        
+        if (item[@"class"]) {
+            submenu = [(UITableViewController *)[item[@"class"] alloc] initWithStyle:style];
+            submenu.title = item[@"title"];
+        }
+        else {
+            submenu = [[GBSettingsViewController alloc] initWithStructure:item[@"submenu"]
+                                                                    title:item[@"title"]
+                                                                    style:style];
+        }
         if (_detailsNavigation) {
             [_detailsNavigation setViewControllers:@[submenu] animated:false];
         }
@@ -623,8 +872,18 @@ static NSString const *typeLightTemp = @"typeLightTemp";
         return indexPath;
     }
     else if (item[@"type"] == typeRadio) {
-        [[NSUserDefaults standardUserDefaults] setObject:item[@"value"] forKey:item[@"pref"]];
+        if (item[@"setter"]) {
+            ((void(^)(id))item[@"setter"])(item[@"value"]);
+        }
+        else {
+            [[NSUserDefaults standardUserDefaults] setObject:item[@"value"] forKey:item[@"pref"]];
+        }
         [self.tableView reloadData];
+    }
+    else if (item[@"type"] == typeBlock) {
+        if (((bool(^)(GBSettingsViewController *))item[@"block"])(self)) {
+            return indexPath;
+        }
     }
     return nil;
 }
@@ -647,6 +906,38 @@ static NSString const *typeLightTemp = @"typeLightTemp";
 {
     [super viewWillAppear:animated];
     [self.tableView reloadData];
+}
+
+- (void)preloadThemePreviews
+{
+    /* These take some time to render, preload them when loading the root controller */
+    _themes = [GBThemesViewController themes];
+    double time = 0;
+    for (NSArray *section in _themes) {
+        for (GBTheme *theme in section) {
+            /* Sadly they can't be safely rendered outside the main thread, but we can
+               queue each of them individually to not block the main quote for too long. */
+            time += 0.1;
+            dispatch_after(dispatch_time(DISPATCH_TIME_NOW, time * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                [theme verticalPreview];
+                [theme horizontalPreview];
+            });
+        }
+    }
+}
+
++ (GBTheme *)themeNamed:(NSString *)name
+{
+    NSArray *themes = [GBThemesViewController themes];
+    for (NSArray *section in themes) {
+        for (GBTheme *theme in section) {
+            if ([theme.name isEqualToString:name]) {
+                return theme;
+            }
+        }
+    }
+    
+    return [themes.firstObject firstObject];
 }
 
 @end

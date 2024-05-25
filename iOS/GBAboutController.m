@@ -237,4 +237,9 @@
 {
     return UIModalPresentationFormSheet;
 }
+
+- (void)dismissViewController
+{
+    [self dismissViewControllerAnimated:true completion:nil];
+}
 @end
