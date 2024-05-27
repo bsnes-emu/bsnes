@@ -491,9 +491,11 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
                 // Newly played ROM, pick the best model
                 uint8_t *rom = GB_get_direct_access(&_gb, GB_DIRECT_ACCESS_ROM, NULL, NULL);
 
-                if ((rom[0x143] & 0x80) && !GB_is_cgb(&_gb)) {
+                if ((rom[0x143] & 0x80)) {
+                    if (!GB_is_cgb(&_gb)) {
                         GB_switch_model_and_reset(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBCGBModel"]);
                     }
+                }
                 else if ((rom[0x146]  == 3) && !GB_is_sgb(&_gb)) {
                     GB_switch_model_and_reset(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBSGBModel"]);
                 }
