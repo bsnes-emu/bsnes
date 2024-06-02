@@ -1215,8 +1215,12 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR13:
         case GB_IO_NR23: {
             GB_channel_t index = reg == GB_IO_NR23? GB_SQUARE_2: GB_SQUARE_1;
+            bool just_reloaded = gb->apu.square_channels[index].sample_countdown == (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 1;
             gb->apu.square_channels[index].sample_length &= ~0xFF;
             gb->apu.square_channels[index].sample_length |= value & 0xFF;
+            if (just_reloaded) {
+                gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + 1;
+            }
             break;
         }
 
@@ -1264,7 +1268,8 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 else {
                     unsigned extra_delay = 0;
                     if (gb->model == GB_MODEL_CGB_E || gb->model == GB_MODEL_CGB_D) {
-                        if (!(value & 4) && !(((gb->apu.square_channels[index].sample_countdown - 1 - gb->apu.square_channels[index].delay) / 2) & 0x400)) {
+                        bool just_reloaded = gb->apu.square_channels[index].sample_countdown == (old_sample_length ^ 0x7FF) * 2 + 1;
+                        if (!just_reloaded && !(value & 4) && !(((gb->apu.square_channels[index].sample_countdown - 1 - gb->apu.square_channels[index].delay) / 2) & 0x400)) {
                             gb->apu.square_channels[index].current_sample_index++;
                             gb->apu.square_channels[index].current_sample_index &= 0x7;
                             gb->apu.square_channels[index].sample_surpressed = false;
