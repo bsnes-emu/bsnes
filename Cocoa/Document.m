@@ -781,6 +781,8 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     self.memoryWindow.title = [NSString stringWithFormat:@"Memory – %@", [self.fileURL.path lastPathComponent]];
     self.vramWindow.title = [NSString stringWithFormat:@"VRAM Viewer – %@", [self.fileURL.path lastPathComponent]];
     
+    self.consoleWindow.level = NSNormalWindowLevel;
+    
     self.debuggerSplitView.dividerColor = self.debuggerVerticalLine.borderColor;
     [self.debuggerVerticalLine removeFromSuperview]; // No longer used, just there for the color
     if (@available(macOS 11.0, *)) {
