@@ -730,6 +730,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)preRun
 {
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIApplication.sharedApplication.idleTimerDisabled = true;
+    });
     GB_set_pixels_output(&_gb, _gbView.pixels);
     GB_set_sample_rate(&_gb, 96000);
     if (![[[NSUserDefaults standardUserDefaults] stringForKey:@"GBAudioMode"] isEqual:@"off"]) {
@@ -934,6 +937,10 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
         [center addNotificationRequest:request withCompletionHandler:nil];
         [[NSUserDefaults standardUserDefaults] setBool:true forKey:@"GBNotificationsUsed"];
     }
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        UIApplication.sharedApplication.idleTimerDisabled = false;
+    });
 }
 
 - (void)start
