@@ -1054,7 +1054,7 @@ int main(int argc, char **argv)
     SDL_Init(SDL_INIT_EVERYTHING & ~SDL_INIT_AUDIO);
     // This is, essentially, best-effort.
     // This function will not be called if the process is terminated in any way, anyhow.
-    (void)atexit(SDL_Quit);
+    atexit(SDL_Quit);
 
     if ((console_supported = CON_start(completer))) {
         CON_set_repeat_empty(true);
