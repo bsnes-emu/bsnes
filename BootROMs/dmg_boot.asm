@@ -120,9 +120,9 @@ Start:
 
 ; Set registers to match the original DMG boot
 IF DEF(MGB)
-    ld hl, (BOOTUP_A_MGB << 8) | $B0
+    lb hl, BOOTUP_A_MGB, %10110000
 ELSE
-    ld hl, (BOOTUP_A_DMG << 8) | $B0
+    lb hl, BOOTUP_A_DMG, %10110000
 ENDC
     push hl
     pop af

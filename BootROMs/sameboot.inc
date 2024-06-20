@@ -25,12 +25,12 @@ ENDM
     header_section NintendoLogoEnd,  $0134
     header_section Title,            $0134
     header_section ManufacturerCode, $013F
-    header_section CgbFlag,          $0143
+    header_section CGBFlag,          $0143
     header_section NewLicenseeCode,  $0144
-    header_section SgbFlag,          $0146
+    header_section SGBFlag,          $0146
     header_section CartridgeType,    $0147
-    header_section RomSize,          $0148
-    header_section RamSize,          $0149
+    header_section ROMSize,          $0148
+    header_section RAMSize,          $0149
     header_section DestinationCode,  $014A
     header_section OldLicenseeCode,  $014B
     header_section MaskRomVersion,   $014C

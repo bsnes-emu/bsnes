@@ -896,7 +896,7 @@ ENDC
     ld e, c
     ld l, $0D
 
-    ld a, [CgbFlag]
+    ld a, [CGBFlag]
     bit 7, a
     call z, EmulateDMG
     bit 7, a
