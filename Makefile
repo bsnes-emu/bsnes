@@ -387,7 +387,7 @@ endif
 $(OBJ)/SDL/%.dep: SDL/%
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) $(GL_CFLAGS) -MT $(OBJ)/$^.o -M $^ -c -o $@
-	
+
 $(OBJ)/OpenDialog/%.dep: OpenDialog/%
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) $(SDL_CFLAGS) $(GL_CFLAGS) -MT $(OBJ)/$^.o -M $^ -c -o $@
@@ -414,16 +414,16 @@ $(OBJ)/OpenDialog/%.c.o: OpenDialog/%.c
 $(OBJ)/%.c.o: %.c
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) $(FRONTEND_CFLAGS) $(FAT_FLAGS) -c $< -o $@
-	
+
 # HexFiend requires more flags
 $(OBJ)/HexFiend/%.m.o: HexFiend/%.m
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) $(FRONTEND_CFLAGS) $(FAT_FLAGS) $(OCFLAGS) -c $< -o $@ -fno-objc-arc -include HexFiend/HexFiend_2_Framework_Prefix.pch
-	
+
 $(OBJ)/%.m.o: %.m
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) $(FRONTEND_CFLAGS) $(FAT_FLAGS) $(OCFLAGS) -c $< -o $@
-    
+
 # iOS Port
 
 $(BIN)/SameBoy-iOS.app: $(BIN)/SameBoy-iOS.app/SameBoy \
@@ -495,7 +495,7 @@ endif
 
 $(BIN)/SameBoy.app/Contents/Resources/%.nib: Cocoa/%.xib
 	ibtool --target-device mac --minimum-deployment-target 10.9 --compile $@ $^ 2>&1 | cat -
-	
+
 $(BIN)/SameBoy-iOS.app/%.storyboardc: iOS/%.storyboard
 	ibtool --target-device iphone --target-device ipad --minimum-deployment-target $(IOS_MIN) --compile $@ $^ 2>&1 | cat -
 
@@ -526,7 +526,7 @@ endif
 $(BIN)/SameBoy.qlgenerator/Contents/Resources/cgb_boot_fast.bin: $(BIN)/BootROMs/cgb_boot_fast.bin
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
-	
+
 # SDL Port
 
 # Unix versions build only one binary
@@ -611,7 +611,7 @@ $(BIN)/SDL/background.bmp: SDL/background.bmp
 $(BIN)/SDL/Shaders: Shaders
 	-@$(MKDIR) -p $@
 	cp -rf Shaders/*.fsh $@
-    
+
 $(BIN)/SDL/Palettes: Misc/Palettes
 	-@$(MKDIR) -p $@
 	cp -rf Misc/Palettes/*.sbp $@
@@ -620,12 +620,12 @@ $(BIN)/SDL/Palettes: Misc/Palettes
 
 $(OBJ)/%.2bpp: %.png
 	-@$(MKDIR) -p $(dir $@)
-	$(RGBGFX) $(if $(filter $(shell echo 'print __RGBDS_MAJOR__ || (!__RGBDS_MAJOR__ && __RGBDS_MINOR__ > 5)' | $(RGBASM) -), $$0), -h -u, -Z -u -c embedded) -o $@ $<
+	$(RGBGFX) $(if $(filter $(shell echo 'println __RGBDS_MAJOR__ || (!__RGBDS_MAJOR__ && __RGBDS_MINOR__ > 5)' | $(RGBASM) -), $$0), -h -u, -Z -u -c embedded) -o $@ $<
 
 $(OBJ)/BootROMs/SameBoyLogo.pb12: $(OBJ)/BootROMs/SameBoyLogo.2bpp $(PB12_COMPRESS)
 	-@$(MKDIR) -p $(dir $@)
 	"$(realpath $(PB12_COMPRESS))" < $< > $@
-	
+
 $(PB12_COMPRESS): BootROMs/pb12.c
 	-@$(MKDIR) -p $(dir $@)
 	$(NATIVE_CC) -std=c99 -Wall -Werror $< -o $@
@@ -633,11 +633,11 @@ $(PB12_COMPRESS): BootROMs/pb12.c
 $(BIN)/BootROMs/cgb0_boot.bin: BootROMs/cgb_boot.asm
 $(BIN)/BootROMs/agb_boot.bin: BootROMs/cgb_boot.asm
 $(BIN)/BootROMs/cgb_boot_fast.bin: BootROMs/cgb_boot.asm
-$(BIN)/BootROMs/sgb2_boot: BootROMs/sgb_boot.asm
+$(BIN)/BootROMs/sgb2_boot.bin: BootROMs/sgb_boot.asm
 
 $(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameBoyLogo.pb12
 	-@$(MKDIR) -p $(dir $@)
-	$(RGBASM) -i $(OBJ)/BootROMs/ -i BootROMs/ -o $@.tmp $<
+	$(RGBASM) $(if $(filter $(shell echo 'println __RGBDS_MAJOR__ || (!__RGBDS_MAJOR__ && __RGBDS_MINOR__ > 6)' | $(RGBASM) -), $$0), -h,) --include $(OBJ)/BootROMs/ --include BootROMs/ -o $@.tmp $<
 	$(RGBLINK) -x -o $@ $@.tmp
 	@rm $@.tmp
 
@@ -690,7 +690,7 @@ endif
 
 ios:
 	@$(MAKE) _ios
-    
+
 $(BIN)/SameBoy-iOS.ipa: ios iOS/sideload.entitlements
 	$(MKDIR) -p $(OBJ)/Payload
 	cp -rf $(BIN)/SameBoy-iOS.app $(OBJ)/Payload/SameBoy-iOS.app
@@ -698,11 +698,11 @@ $(BIN)/SameBoy-iOS.ipa: ios iOS/sideload.entitlements
 	(cd $(OBJ) && zip -q $(abspath $@) -r Payload)
 	rm -rf $(OBJ)/Payload
 
-    
+
 $(BIN)/SameBoy-iOS.deb: $(OBJ)/debian-binary $(OBJ)/control.tar.gz $(OBJ)/data.tar.gz
 	-@$(MKDIR) -p $(dir $@)
 	(cd $(OBJ) && ar cr $(abspath $@) $(notdir $^))
-	
+
 $(OBJ)/data.tar.gz: ios iOS/jailbreak.entitlements iOS/installer.entitlements
 	$(MKDIR) -p $(OBJ)/private/var/containers/
 	cp -rf $(BIN)/SameBoy-iOS.app $(OBJ)/private/var/containers/SameBoy-iOS.app
@@ -711,7 +711,7 @@ $(OBJ)/data.tar.gz: ios iOS/jailbreak.entitlements iOS/installer.entitlements
 	codesign -fs - --entitlements iOS/jailbreak.entitlements $(OBJ)/private/var/containers/SameBoy-iOS.app
 	(cd $(OBJ) && tar -czf $(abspath $@) --format ustar --uid 501 --gid 501 --numeric-owner ./private)
 	rm -rf $(OBJ)/private/
-	
+
 $(OBJ)/control.tar.gz: iOS/deb-postinst iOS/deb-prerm iOS/deb-control
 	-@$(MKDIR) -p $(dir $@)
 	sed "s/@VERSION/$(VERSION)/" < iOS/deb-control > $(OBJ)/control
@@ -719,11 +719,11 @@ $(OBJ)/control.tar.gz: iOS/deb-postinst iOS/deb-prerm iOS/deb-control
 	ln iOS/deb-prerm $(OBJ)/prerm
 	(cd $(OBJ) && tar -czf $(abspath $@) --format ustar --uid 501 --gid 501 --numeric-owner ./control ./postinst ./prerm)
 	rm $(OBJ)/control $(OBJ)/postinst $(OBJ)/prerm
-	
+
 $(OBJ)/debian-binary:
 	-@$(MKDIR) -p $(dir $@)
 	echo 2.0 > $@
-    
+
 $(LIBDIR)/libsameboy.o: $(CORE_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
 	@# This is a somewhat simple hack to force Clang and GCC to build a native object file out of one or many LTO objects
@@ -731,12 +731,12 @@ $(LIBDIR)/libsameboy.o: $(CORE_OBJECTS)
 	@# And this is a somewhat complicated hack to invoke the correct LTO-enabled LD command in a mostly cross-platform nature
 	$(CC) $(FAT_FLAGS) $(CFLAGS) $(LIBFLAGS) $^ $(OBJ)/lto_hack.o -o $@
 	-@rm $(OBJ)/lto_hack.o
-    
+
 $(LIBDIR)/libsameboy.a: $(LIBDIR)/libsameboy.o
 	-@$(MKDIR) -p $(dir $@)
 	-@rm -f $@
 	ar -crs $@ $^
-	
+
 $(INC)/%.h: Core/%.h
 	-@$(MKDIR) -p $(dir $@)
 	-@# CPPP doesn't like multibyte characters, so we replace the single quote character before processing so it doesn't complain
@@ -745,7 +745,7 @@ $(INC)/%.h: Core/%.h
 lib-unsupported:
 	@echo Due to limitations of lld-link, compiling SameBoy as a library on Windows is not supported.
 	@false
-	
+
 # Clean
 clean:
 	rm -rf build
