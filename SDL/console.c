@@ -85,30 +85,31 @@ static bool is_term(void)
 {
     if (!isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO)) return false;
 #ifdef _WIN32
-    unsigned long input_mode, output_mode, has_con_input, has_con_output;
+    unsigned long input_mode, output_mode;
+    bool has_con_output;
     
-    HANDLE hSI = GetStdHandle(STD_INPUT_HANDLE);
-    HANDLE hSO = GetStdHandle(STD_OUTPUT_HANDLE);
+    HANDLE stdin_handle = GetStdHandle(STD_INPUT_HANDLE);
+    HANDLE stdout_handle = GetStdHandle(STD_OUTPUT_HANDLE);
     
-    has_con_input = GetConsoleMode(hSI, &input_mode);
-    has_con_output = GetConsoleMode(hSO, &output_mode);
+    GetConsoleMode(stdin_handle, &input_mode);
+    has_con_output = GetConsoleMode(stdout_handle, &output_mode);
     if (!has_con_output) {
         return false; // stdout has been redirected to a file or pipe
     }
     
-    SetConsoleMode(hSI, ENABLE_VIRTUAL_TERMINAL_INPUT);
-    SetConsoleMode(hSO, ENABLE_WRAP_AT_EOL_OUTPUT | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
+    SetConsoleMode(stdin_handle, ENABLE_VIRTUAL_TERMINAL_INPUT);
+    SetConsoleMode(stdout_handle, ENABLE_WRAP_AT_EOL_OUTPUT | ENABLE_PROCESSED_OUTPUT | ENABLE_VIRTUAL_TERMINAL_PROCESSING);
     
     CONSOLE_SCREEN_BUFFER_INFO before = {0,};
-    GetConsoleScreenBufferInfo(hSO, &before);
+    GetConsoleScreenBufferInfo(stdout_handle, &before);
     
     printf(SGR("0"));
     
     CONSOLE_SCREEN_BUFFER_INFO after = {0,};
-    GetConsoleScreenBufferInfo(hSO, &after);
+    GetConsoleScreenBufferInfo(stdout_handle, &after);
     
-    SetConsoleMode(hSI, input_mode);
-    SetConsoleMode(hSO, output_mode);
+    SetConsoleMode(stdin_handle, input_mode);
+    SetConsoleMode(stdout_handle, output_mode);
 
 
     if (before.dwCursorPosition.X != after.dwCursorPosition.X ||
