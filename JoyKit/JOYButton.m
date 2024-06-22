@@ -2,6 +2,10 @@
 #import "JOYElement.h"
 #import <AppKit/AppKit.h>
 
+@interface JOYButton ()
+@property JOYButtonUsage originalUsage;
+@end
+
 @implementation JOYButton
 {
     JOYElement *_element;
@@ -11,7 +15,7 @@
 + (NSString *)usageToString: (JOYButtonUsage) usage
 {
     if (usage < JOYButtonUsageNonGenericMax) {
-        return (NSString *[]) {
+        return inline_const(NSString *[], {
             @"None",
             @"A",
             @"B",
@@ -35,7 +39,7 @@
             @"D-Pad Right",
             @"D-Pad Up",
             @"D-Pad Down",
-        }[usage];
+        })[usage];
     }
     if (usage >= JOYButtonUsageGeneric0) {
         return [NSString stringWithFormat:@"Generic Button %d", usage - JOYButtonUsageGeneric0];
@@ -51,12 +55,12 @@
 
 - (uint64_t)uniqueID
 {
-    return _element.uniqueID;
+    return _element.uniqueID | (uint64_t)self.combinedIndex << 32;
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p, %@ (%llu); State: %s>", self.className, self, self.usageString, self.uniqueID, _state? "Presssed" : "Released"];
+    return [NSString stringWithFormat:@"<%@: %p, %@ (%llx); State: %s>", self.className, self, self.usageString, self.uniqueID, _state? "Presssed" : "Released"];
 }
 
 - (instancetype)initWithElement:(JOYElement *)element
@@ -87,6 +91,8 @@
             case kHIDUsage_Csmr_ACBack: _usage = JOYButtonUsageSelect; break;
         }
     }
+    
+    _originalUsage = _usage;
     
     return self;
 }

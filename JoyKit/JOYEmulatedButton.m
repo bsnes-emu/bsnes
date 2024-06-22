@@ -25,7 +25,7 @@
 
 - (uint64_t)uniqueID
 {
-    return _uniqueID;
+    return _uniqueID | (uint64_t)self.combinedIndex << 32;
 }
 
 - (bool)updateStateFromAxis:(JOYAxis *)axis

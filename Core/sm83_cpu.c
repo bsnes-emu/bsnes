@@ -21,23 +21,31 @@ typedef enum {
     GB_CONFLICT_DMG_LCDC,
     GB_CONFLICT_SGB_LCDC,
     GB_CONFLICT_WX,
-    GB_CONFLICT_CGB_LCDC,
-    GB_CONFLICT_NR10,
+    GB_CONFLICT_LCDC_CGB,
+    GB_CONFLICT_SCX_CGB,
+    GB_CONFLICT_LCDC_CGB_DOUBLE,
+    GB_CONFLICT_STAT_CGB_DOUBLE,
+    GB_CONFLICT_NR10_CGB_DOUBLE,
 } conflict_t;
 
-/* Todo: How does double speed mode affect these? */
 static const conflict_t cgb_conflict_map[0x80] = {
-    [GB_IO_LCDC] = GB_CONFLICT_CGB_LCDC,
+    [GB_IO_LCDC] = GB_CONFLICT_LCDC_CGB,
     [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_LYC] = GB_CONFLICT_WRITE_CPU,
     [GB_IO_STAT] = GB_CONFLICT_STAT_CGB,
     [GB_IO_BGP] = GB_CONFLICT_PALETTE_CGB,
     [GB_IO_OBP0] = GB_CONFLICT_PALETTE_CGB,
     [GB_IO_OBP1] = GB_CONFLICT_PALETTE_CGB,
-    [GB_IO_NR10] = GB_CONFLICT_NR10,
-    [GB_IO_SCX] = GB_CONFLICT_WRITE_CPU, // TODO: Similar to BGP, there's some time travelling involved
+    [GB_IO_SCX] = GB_CONFLICT_SCX_CGB,
+};
 
-    /* Todo: most values not verified, and probably differ between revisions */
+static const conflict_t cgb_double_conflict_map[0x80] = {
+    [GB_IO_LCDC] = GB_CONFLICT_LCDC_CGB_DOUBLE,
+    [GB_IO_IF] = GB_CONFLICT_WRITE_CPU,
+    [GB_IO_LYC] = GB_CONFLICT_READ_OLD,
+    [GB_IO_STAT] = GB_CONFLICT_STAT_CGB_DOUBLE,
+    [GB_IO_NR10] = GB_CONFLICT_NR10_CGB_DOUBLE,
+    [GB_IO_SCX] = GB_CONFLICT_SCX_CGB,
 };
 
 /* Todo: verify on an MGB */
@@ -53,7 +61,6 @@ static const conflict_t dmg_conflict_map[0x80] = {
     [GB_IO_OBP1] = GB_CONFLICT_PALETTE_DMG,
     [GB_IO_WY] = GB_CONFLICT_READ_OLD,
     [GB_IO_WX] = GB_CONFLICT_WX,
-    [GB_IO_NR10] = GB_CONFLICT_NR10,
     
     /* Todo: these were not verified at all */
     [GB_IO_SCX] = GB_CONFLICT_READ_NEW,
@@ -72,7 +79,6 @@ static const conflict_t sgb_conflict_map[0x80] = {
     [GB_IO_OBP1] = GB_CONFLICT_READ_NEW,
     [GB_IO_WY] = GB_CONFLICT_READ_OLD,
     [GB_IO_WX] = GB_CONFLICT_WX,
-    [GB_IO_NR10] = GB_CONFLICT_NR10,
     
     /* Todo: these were not verified at all */
     [GB_IO_SCX] = GB_CONFLICT_READ_NEW,
@@ -113,7 +119,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
     if ((addr & 0xFF80) == 0xFF00) {
         const conflict_t *map = NULL;
         if (GB_is_cgb(gb)) {
-            map = cgb_conflict_map;
+            map = gb->cgb_double_speed? cgb_double_conflict_map : cgb_conflict_map;
         }
         else if (GB_is_sgb(gb)) {
             map = sgb_conflict_map;
@@ -145,6 +151,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         /* The DMG STAT-write bug is basically the STAT register being read as FF for a single T-cycle */
         case GB_CONFLICT_STAT_DMG:
             GB_advance_cycles(gb, gb->pending_cycles);
+            GB_display_sync(gb);
             /* State 7 is the edge between HBlank and OAM mode, and it behaves a bit weird.
              The OAM interrupt seems to be blocked by HBlank interrupts in that case, despite
              the timing not making much sense for that.
@@ -163,9 +170,19 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         case GB_CONFLICT_STAT_CGB: {
             /* Todo: Verify this with SCX adjustments */
             /* The LYC bit behaves differently */
-            uint8_t old_value = GB_read_memory(gb, addr);
+            uint8_t old_value = gb->io_registers[GB_IO_STAT];
             GB_advance_cycles(gb, gb->pending_cycles);
             GB_write_memory(gb, addr, (old_value & 0x40) | (value & ~0x40));
+            GB_advance_cycles(gb, 1);
+            GB_write_memory(gb, addr, value);
+            gb->pending_cycles = 3;
+            break;
+        }
+            
+        case GB_CONFLICT_STAT_CGB_DOUBLE: {
+            uint8_t old_value = gb->io_registers[GB_IO_STAT];
+            GB_advance_cycles(gb, gb->pending_cycles);
+            GB_write_memory(gb, addr, (value & ~8) | (old_value & 8));
             GB_advance_cycles(gb, 1);
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 3;
@@ -195,25 +212,27 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         }
             
         case GB_CONFLICT_DMG_LCDC: {
-            /* Similar to the palette registers, these interact directly with the LCD, so they appear to be affected by it. Both my DMG (B, blob) and Game Boy Light behave this way though.
+            /* Similar to the palette registers, these interact directly with the LCD, so they appear to be affected by
+               it. Both my DMG (B, blob) and Game Boy Light behave this way though.
              
-               Additionally, LCDC.1 is very nasty because on the it is read both by the FIFO when popping pixels,
-               and the object-fetching state machine, and both behave differently when it comes to access conflicts.
-               Hacks ahead.
+               Additionally, LCDC.1 is very nasty because it is read both by the FIFO when popping pixels, and the
+               object-fetching state machine, and both behave differently when it comes to access conflicts. Hacks ahead.
              */
-            
-            
             
             uint8_t old_value = GB_read_memory(gb, addr);
             GB_advance_cycles(gb, gb->pending_cycles - 2);
-            
-            if (gb->model != GB_MODEL_MGB && gb->position_in_line == 0 && (old_value & 2) && !(value & 2)) {
-                old_value &= ~2;
+            GB_display_sync(gb);
+            if (gb->model != GB_MODEL_MGB && gb->position_in_line == 0 && (old_value & GB_LCDC_OBJ_EN) && !(value & GB_LCDC_OBJ_EN)) {
+                old_value &= ~GB_LCDC_OBJ_EN;
             }
             
-            GB_write_memory(gb, addr, old_value | (value & 1));
+            GB_write_memory(gb, addr, old_value | (value & GB_LCDC_BG_EN));
             GB_advance_cycles(gb, 1);
             GB_write_memory(gb, addr, value);
+            
+            if ((old_value & GB_LCDC_WIN_ENABLE) && !(value & GB_LCDC_WIN_ENABLE) && gb->window_is_being_fetched) {
+                gb->disable_window_pixel_insertion_glitch = true;
+            }
             gb->pending_cycles = 5;
             break;
         }
@@ -241,12 +260,13 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             gb->pending_cycles = 3;
             break;
             
-        case GB_CONFLICT_CGB_LCDC:
-            if ((value ^ gb->io_registers[GB_IO_LCDC]) & 0x10) {
-                // Todo: This is difference is because my timing is off in one of the models
+        case GB_CONFLICT_LCDC_CGB: {
+            uint8_t old = gb->io_registers[GB_IO_LCDC];
+            if ((~value & old) & GB_LCDC_TILE_SEL) {
+                // TODO: This is different is because my timing is off in CGB ≤ C
                 if (gb->model > GB_MODEL_CGB_C) {
                     GB_advance_cycles(gb, gb->pending_cycles);
-                    GB_write_memory(gb, addr, value ^ 0x10); // Write with the old TILE_SET first
+                    GB_write_memory(gb, addr, value ^ GB_LCDC_TILE_SEL); // Write with the old TILE_SET first
                     gb->tile_sel_glitch = true;
                     GB_advance_cycles(gb, 1);
                     gb->tile_sel_glitch = false;
@@ -255,7 +275,7 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 }
                 else {
                     GB_advance_cycles(gb, gb->pending_cycles - 1);
-                    GB_write_memory(gb, addr, value ^ 0x10); // Write with the old TILE_SET first
+                    GB_write_memory(gb, addr, value ^ GB_LCDC_TILE_SEL); // Write with the old TILE_SET first
                     gb->tile_sel_glitch = true;
                     GB_advance_cycles(gb, 1);
                     gb->tile_sel_glitch = false;
@@ -269,26 +289,55 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                 gb->pending_cycles = 4;
             }
             break;
-        
-        case GB_CONFLICT_NR10:
-            /* Hack: Due to the coupling between DIV and the APU, GB_apu_run only runs at M-cycle
-                     resolutions, but this quirk requires 2MHz even in single speed mode. To work
-                     around this, we specifically just step the calculate countdown if needed. */
-            GB_advance_cycles(gb, gb->pending_cycles);
-            if (gb->model <= GB_MODEL_CGB_C) {
-                // TODO: Double speed mode? This logic is also a bit weird, it needs more tests
-                if (gb->apu.square_sweep_calculate_countdown > 3 && gb->apu.enable_zombie_calculate_stepping) {
-                    gb->apu.square_sweep_calculate_countdown -= 2;
-                }
-                gb->apu.enable_zombie_calculate_stepping = true;
-                /* TODO: this causes audio regressions in the Donkey Kong Land series.
-                   The exact behavior of this quirk should be further investigated, as it seems
-                   more complicated than a single FF pseudo-write. */
-                // GB_write_memory(gb, addr, 0xFF);
+        }
+        case GB_CONFLICT_LCDC_CGB_DOUBLE: {
+            uint8_t old = gb->io_registers[GB_IO_LCDC];
+            // TODO: This is wrong for CGB ≤ C for TILE_SEL, BG_EN and BG_MAP.
+            // PPU timings for these models appear to be wrong and it'd make more sense to fix those first than hacking
+            // around them.
+            
+            // TODO: This condition is different from single speed mode. Why? What about odd modes?
+            if ((value ^ old) & GB_LCDC_TILE_SEL) {
+                GB_advance_cycles(gb, gb->pending_cycles - 2);
+                GB_write_memory(gb, addr, (value & (GB_LCDC_OBJ_EN | GB_LCDC_BG_EN)) | (old & ~(GB_LCDC_OBJ_EN | GB_LCDC_BG_EN)));
+                gb->tile_sel_glitch = true;
+                GB_advance_cycles(gb, 2);
+                gb->tile_sel_glitch = false;
+                GB_write_memory(gb, addr, value);
+                gb->pending_cycles = 4;
             }
+            else {
+                GB_advance_cycles(gb, gb->pending_cycles - 2);
+                GB_write_memory(gb, addr, (value & (GB_LCDC_OBJ_EN | GB_LCDC_BG_EN)) | (old & ~(GB_LCDC_OBJ_EN | GB_LCDC_BG_EN)));
+                GB_advance_cycles(gb, 2);
+                GB_write_memory(gb, addr, value);
+                gb->pending_cycles = 4;
+            }
+            break;
+        }
+            
+        case GB_CONFLICT_SCX_CGB:
+            if (gb->cgb_double_speed) {
+                GB_advance_cycles(gb, gb->pending_cycles - 2);
+                GB_write_memory(gb, addr, value);
+                gb->pending_cycles = 6;
+            }
+            else {
+                GB_advance_cycles(gb, gb->pending_cycles);
+                GB_write_memory(gb, addr, value);
+                gb->pending_cycles = 4;
+            }
+            break;
+        
+        case GB_CONFLICT_NR10_CGB_DOUBLE: {
+            GB_advance_cycles(gb, gb->pending_cycles - 1);
+            gb->apu_output.square_sweep_disable_stepping = gb->model <= GB_MODEL_CGB_C && (value & 7) == 0;
+            GB_advance_cycles(gb, 1);
+            gb->apu_output.square_sweep_disable_stepping = false;
             GB_write_memory(gb, addr, value);
             gb->pending_cycles = 4;
             break;
+        }
     }
     gb->address_bus = addr;
 }
@@ -305,16 +354,6 @@ static void cycle_oam_bug(GB_gameboy_t *gb, uint8_t register_id)
     }
     gb->address_bus = gb->registers[register_id];
     GB_trigger_oam_bug(gb, gb->registers[register_id]); /* Todo: test T-cycle timing */
-    gb->pending_cycles = 4;
-}
-
-static void cycle_oam_bug_pc(GB_gameboy_t *gb)
-{
-    if (gb->pending_cycles) {
-        GB_advance_cycles(gb, gb->pending_cycles);
-    }
-    gb->address_bus = gb->pc;
-    GB_trigger_oam_bug(gb, gb->pc); /* Todo: test T-cycle timing */
     gb->pending_cycles = 4;
 }
 
@@ -346,6 +385,7 @@ static void enter_stop_mode(GB_gameboy_t *gb)
         gb->div_cycles = -4; // Emulate the CPU-side DIV-reset signal being held
     }
     gb->stopped = true;
+    gb->allow_hdma_on_wake = (gb->io_registers[GB_IO_STAT] & 3);
     gb->oam_ppu_blocked = !gb->oam_read_blocked;
     gb->vram_ppu_blocked = !gb->vram_read_blocked;
     gb->cgb_palettes_ppu_blocked = !gb->cgb_palettes_blocked;
@@ -354,6 +394,9 @@ static void enter_stop_mode(GB_gameboy_t *gb)
 static void leave_stop_mode(GB_gameboy_t *gb)
 {
     gb->stopped = false;
+    if (gb->hdma_on_hblank && (gb->io_registers[GB_IO_STAT] & 3) == 0 && gb->allow_hdma_on_wake) {
+        gb->hdma_on = true;
+    }
     // TODO: verify this
     gb->dma_cycles = 4;
     GB_dma_run(gb);
@@ -366,6 +409,7 @@ static void leave_stop_mode(GB_gameboy_t *gb)
 static void stop(GB_gameboy_t *gb, uint8_t opcode)
 {
     flush_pending_cycles(gb);
+    GB_read_memory(gb, gb->pc); // Timing is completely unverified, and only affects STOP triggering the OAM bug
     if ((gb->io_registers[GB_IO_JOYP] & 0x30) != 0x30) {
         gb->joyp_accessed = true;
     }
@@ -389,7 +433,7 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
     if (speed_switch) {
         flush_pending_cycles(gb);
         
-        if (gb->io_registers[GB_IO_LCDC] & 0x80 && gb->cgb_double_speed) {
+        if (gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE && gb->cgb_double_speed) {
             GB_log(gb, "ROM triggered a PPU odd mode, which is currently not supported. Reverting to even-mode.\n");
             if (gb->double_speed_alignment & 7) {
                 gb->speed_switch_freeze = 2;
@@ -397,6 +441,9 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
         }
         if (gb->apu.global_enable && gb->cgb_double_speed) {
             GB_log(gb, "ROM triggered an APU odd mode, which is currently not tested.\n");
+        }
+        if (gb->cartridge_type->mbc_type == GB_CAMERA && (gb->camera_registers[GB_CAMERA_SHOOT_AND_1D_FLAGS] & 1) && !gb->cgb_double_speed) {
+            GB_log(gb, "ROM entered double speed mode with a camera cartridge, this could damage a real cartridge's camera.\n");
         }
         
         if (gb->cgb_double_speed) {
@@ -423,6 +470,7 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
             GB_dma_run(gb);
             gb->halted = true;
             gb->just_halted = true;
+            gb->allow_hdma_on_wake = (gb->io_registers[GB_IO_STAT] & 3);
         }
         else {
             gb->speed_switch_halt_countdown = 0;
@@ -649,9 +697,9 @@ static void rra(GB_gameboy_t *gb, uint8_t opcode)
 
 static void jr_r8(GB_gameboy_t *gb, uint8_t opcode)
 {
-    /* Todo: Verify timing */
-    gb->pc += (int8_t)cycle_read(gb, gb->pc) + 1;
-    cycle_no_access(gb);
+    int8_t offset = (int8_t)cycle_read(gb, gb->pc++);
+    cycle_oam_bug(gb, GB_REGISTER_PC);
+    gb->pc += offset;
 }
 
 static bool condition_code(GB_gameboy_t *gb, uint8_t opcode)
@@ -676,7 +724,7 @@ static void jr_cc_r8(GB_gameboy_t *gb, uint8_t opcode)
     int8_t offset = cycle_read(gb, gb->pc++);
     if (condition_code(gb, opcode)) {
         gb->pc += offset;
-        cycle_no_access(gb);
+        cycle_oam_bug(gb, GB_REGISTER_PC);
     }
 }
 
@@ -865,7 +913,7 @@ static void ld_##dhl##_##y(GB_gameboy_t *gb, uint8_t opcode) \
 cycle_write(gb, gb->hl, gb->y); \
 }
 
-LD_X_Y(b,c) LD_X_Y(b,d) LD_X_Y(b,e) LD_X_Y(b,h) LD_X_Y(b,l)             LD_X_DHL(b) LD_X_Y(b,a)
+            LD_X_Y(b,c) LD_X_Y(b,d) LD_X_Y(b,e) LD_X_Y(b,h) LD_X_Y(b,l) LD_X_DHL(b) LD_X_Y(b,a)
 LD_X_Y(c,b)             LD_X_Y(c,d) LD_X_Y(c,e) LD_X_Y(c,h) LD_X_Y(c,l) LD_X_DHL(c) LD_X_Y(c,a)
 LD_X_Y(d,b) LD_X_Y(d,c)             LD_X_Y(d,e) LD_X_Y(d,h) LD_X_Y(d,l) LD_X_DHL(d) LD_X_Y(d,a)
 LD_X_Y(e,b) LD_X_Y(e,c) LD_X_Y(e,d)             LD_X_Y(e,h) LD_X_Y(e,l) LD_X_DHL(e) LD_X_Y(e,a)
@@ -877,9 +925,11 @@ LD_X_Y(a,b) LD_X_Y(a,c) LD_X_Y(a,d) LD_X_Y(a,e) LD_X_Y(a,h) LD_X_Y(a,l) LD_X_DHL
 // fire the debugger if software breakpoints are enabled
 static void ld_b_b(GB_gameboy_t *gb, uint8_t opcode)
 {
+#ifndef GB_DISABLE_DEBUGGER
     if (gb->has_software_breakpoints) {
-        gb->debug_stopped = true;
+        GB_debugger_break(gb);
     }
+#endif
 }
 
 static void add_a_r(GB_gameboy_t *gb, uint8_t opcode)
@@ -941,7 +991,7 @@ static void sbc_a_r(GB_gameboy_t *gb, uint8_t opcode)
     value = get_src_value(gb, opcode);
     a = gb->af >> 8;
     carry = (gb->af & GB_CARRY_FLAG) != 0;
-    gb->af = ((a - value - carry) << 8) | GB_SUBTRACT_FLAG;
+    gb->af = (((uint8_t)(a - value - carry)) << 8) | GB_SUBTRACT_FLAG;
 
     if ((uint8_t) (a - value - carry) == 0) {
         gb->af |= GB_ZERO_FLAG;
@@ -1007,9 +1057,9 @@ static void cp_a_r(GB_gameboy_t *gb, uint8_t opcode)
 
 static void halt(GB_gameboy_t *gb, uint8_t opcode)
 {
+    cycle_read(gb, gb->pc);
     assert(gb->pending_cycles == 4);
     gb->pending_cycles = 0;
-    GB_advance_cycles(gb, 4);
     
     /* Despite what some online documentations say, the HALT bug also happens on a CGB, in both CGB and DMG modes. */
     if (((gb->interrupt_enable & gb->io_registers[GB_IO_IF] & 0x1F) != 0)) {
@@ -1024,6 +1074,7 @@ static void halt(GB_gameboy_t *gb, uint8_t opcode)
     }
     else {
         gb->halted = true;
+        gb->allow_hdma_on_wake = (gb->io_registers[GB_IO_STAT] & 3);
     }
     gb->just_halted = true;
 }
@@ -1366,7 +1417,7 @@ static void rlc_r(GB_gameboy_t *gb, uint8_t opcode)
     if (carry) {
         gb->af |= GB_CARRY_FLAG;
     }
-    if (!(value << 1)) {
+    if (value == 0) {
         gb->af |= GB_ZERO_FLAG;
     }
 }
@@ -1580,7 +1631,7 @@ static opcode_t *opcodes[256] = {
 };
 void GB_cpu_run(GB_gameboy_t *gb)
 {
-    if (gb->stopped) {
+    if (unlikely(gb->stopped)) {
         GB_timing_sync(gb);
         GB_advance_cycles(gb, 4);
         if ((gb->io_registers[GB_IO_JOYP] & 0x30) != 0x30) {
@@ -1617,7 +1668,7 @@ void GB_cpu_run(GB_gameboy_t *gb)
     /* Wake up from HALT mode without calling interrupt code. */
     if (gb->halted && !effective_ime && interrupt_queue) {
         gb->halted = false;
-        if (gb->hdma_on_hblank && (gb->io_registers[GB_IO_STAT] & 3) == 0) {
+        if (gb->hdma_on_hblank && (gb->io_registers[GB_IO_STAT] & 3) == 0 && gb->allow_hdma_on_wake) {
             gb->hdma_on = true;
         }
         gb->dma_cycles = 4;
@@ -1626,9 +1677,9 @@ void GB_cpu_run(GB_gameboy_t *gb)
     }
     
     /* Call interrupt */
-    else if (effective_ime && interrupt_queue) {
+    else if (unlikely(effective_ime && interrupt_queue)) {
         gb->halted = false;
-        if (gb->hdma_on_hblank && (gb->io_registers[GB_IO_STAT] & 3) == 0) {
+        if (gb->hdma_on_hblank && (gb->io_registers[GB_IO_STAT] & 3) == 0 && gb->allow_hdma_on_wake) {
             gb->hdma_on = true;
         }
         // TODO: verify the timing!
@@ -1638,7 +1689,7 @@ void GB_cpu_run(GB_gameboy_t *gb)
         uint16_t call_addr = gb->pc;
         
         cycle_read(gb, gb->pc++);
-        cycle_oam_bug_pc(gb);
+        cycle_oam_bug(gb, GB_REGISTER_PC);
         gb->pc--;
         GB_trigger_oam_bug(gb, gb->sp); /* Todo: test T-cycle timing */
         cycle_no_access(gb);
@@ -1676,7 +1727,7 @@ void GB_cpu_run(GB_gameboy_t *gb)
     }
     /* Run mode */
     else if (!gb->halted) {
-        uint8_t opcode = gb->hdma_open_bus = cycle_read(gb, gb->pc++);
+        uint8_t opcode = cycle_read(gb, gb->pc++);
         if (unlikely(gb->hdma_on)) {
             GB_hdma_run(gb);
         }

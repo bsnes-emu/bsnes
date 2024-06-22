@@ -1,5 +1,5 @@
 #import "JOYFullReportElement.h"
-#include <IOKit/hid/IOHIDLib.h>
+#import <IOKit/hid/IOHIDLib.h>
 
 @implementation JOYFullReportElement
 {
@@ -67,7 +67,7 @@
     return self.uniqueID == object.uniqueID;
 }
 
-- (id)copyWithZone:(nullable NSZone *)zone;
+- (id)copyWithZone:(NSZone *)zone;
 {
     return self;
 }

@@ -1,5 +1,7 @@
 #import <Foundation/Foundation.h>
-#include <IOKit/hid/IOHIDLib.h>
+#import <IOKit/hid/IOHIDLib.h>
+
+#define inline_const(type, ...) (*({static const typeof(type) _= __VA_ARGS__; &_;}))
 
 @interface JOYElement : NSObject<NSCopying>
 - (instancetype)initWithElement:(IOHIDElementRef)element;

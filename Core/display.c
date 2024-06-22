@@ -9,27 +9,32 @@
 
 static inline unsigned fifo_size(GB_fifo_t *fifo)
 {
-    return (fifo->write_end - fifo->read_end) & (GB_FIFO_LENGTH - 1);
+    return fifo->size;
 }
 
 static void fifo_clear(GB_fifo_t *fifo)
 {
-    fifo->read_end = fifo->write_end = 0;
+    fifo->read_end = fifo->size = 0;
 }
 
-static GB_fifo_item_t *fifo_pop(GB_fifo_t *fifo)
+static const GB_fifo_item_t *fifo_pop(GB_fifo_t *fifo)
 {
+    assert(fifo->size);
+    assert(fifo->size <= 8);
     GB_fifo_item_t *ret = &fifo->fifo[fifo->read_end];
     fifo->read_end++;
     fifo->read_end &= (GB_FIFO_LENGTH - 1);
+    fifo->size--;
     return ret;
 }
 
 static void fifo_push_bg_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint8_t palette, bool bg_priority, bool flip_x)
 {
+    assert(fifo->size == 0);
+    fifo->size = 8;
     if (!flip_x) {
-        unrolled for (unsigned i = 8; i--;) {
-            fifo->fifo[fifo->write_end] = (GB_fifo_item_t) {
+        unrolled for (unsigned i = 0; i < 8; i++) {
+            fifo->fifo[i] = (GB_fifo_item_t) {
                 (lower >> 7) | ((upper >> 7) << 1),
                 palette,
                 0,
@@ -37,14 +42,11 @@ static void fifo_push_bg_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint
             };
             lower <<= 1;
             upper <<= 1;
-            
-            fifo->write_end++;
-            fifo->write_end &= (GB_FIFO_LENGTH - 1);
         }
     }
     else {
-        unrolled for (unsigned i = 8; i--;) {
-            fifo->fifo[fifo->write_end] = (GB_fifo_item_t) {
+        unrolled for (unsigned i = 0; i < 8; i++) {
+            fifo->fifo[i] = (GB_fifo_item_t) {
                 (lower & 1) | ((upper & 1) << 1),
                 palette,
                 0,
@@ -52,19 +54,15 @@ static void fifo_push_bg_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint
             };
             lower >>= 1;
             upper >>= 1;
-            
-            fifo->write_end++;
-            fifo->write_end &= (GB_FIFO_LENGTH - 1);
         }
     }
 }
 
 static void fifo_overlay_object_row(GB_fifo_t *fifo, uint8_t lower, uint8_t upper, uint8_t palette, bool bg_priority, uint8_t priority, bool flip_x)
 {
-    while (fifo_size(fifo) < 8) {
-        fifo->fifo[fifo->write_end] = (GB_fifo_item_t) {0,};
-        fifo->write_end++;
-        fifo->write_end &= (GB_FIFO_LENGTH - 1);
+    while (fifo->size < GB_FIFO_LENGTH) {
+        fifo->fifo[(fifo->read_end + fifo->size) & (GB_FIFO_LENGTH - 1)] = (GB_fifo_item_t) {0,};
+        fifo->size++;
     }
     
     uint8_t flip_xor = flip_x? 0: 0x7;
@@ -99,8 +97,7 @@ static void fifo_overlay_object_row(GB_fifo_t *fifo, uint8_t lower, uint8_t uppe
 #define WIDTH (160)
 #define BORDERED_WIDTH 256
 #define BORDERED_HEIGHT 224
-#define FRAME_LENGTH (LCDC_PERIOD)
-#define VIRTUAL_LINES (FRAME_LENGTH / LINE_LENGTH) // = 154
+#define VIRTUAL_LINES (LCDC_PERIOD / LINE_LENGTH) // = 154
 
 typedef struct __attribute__((packed)) {
     uint8_t y;
@@ -109,8 +106,8 @@ typedef struct __attribute__((packed)) {
     uint8_t flags;
 } object_t;
 
-void GB_display_vblank(GB_gameboy_t *gb)
-{  
+void GB_display_vblank(GB_gameboy_t *gb, GB_vblank_type_t type)
+{
     gb->vblank_just_occured = true;
     gb->cycles_since_vblank_callback = 0;
     gb->lcd_disabled_outside_of_vblank = false;
@@ -126,9 +123,19 @@ void GB_display_vblank(GB_gameboy_t *gb)
         }
     }
     
-    bool is_ppu_stopped = !GB_is_cgb(gb) && gb->stopped && gb->io_registers[GB_IO_LCDC] & 0x80;
+    if (GB_is_cgb(gb) && type == GB_VBLANK_TYPE_NORMAL_FRAME && gb->frame_repeat_countdown > 0 && gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON) {
+        GB_handle_rumble(gb);
+        
+        if (gb->vblank_callback) {
+            gb->vblank_callback(gb, GB_VBLANK_TYPE_REPEAT);
+        }
+        GB_timing_sync(gb);
+        return;
+    }
     
-    if (!gb->disable_rendering && ((!(gb->io_registers[GB_IO_LCDC] & 0x80) || is_ppu_stopped) || gb->cgb_repeated_a_frame || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
+    bool is_ppu_stopped = !GB_is_cgb(gb) && gb->stopped && gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE;
+    
+    if (!gb->disable_rendering && ((!(gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE) || is_ppu_stopped) || gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON)) {
         /* LCD is off, set screen to white or black (if LCD is on in stop mode) */
         if (!GB_is_sgb(gb)) {
             uint32_t color = 0;
@@ -165,7 +172,7 @@ void GB_display_vblank(GB_gameboy_t *gb)
                 0x30DA, 0x69AD, 0x2B57, 0x2B5D, 0x632C,
                 0x1050, 0x3C84, 0x0E07, 0x0E18, 0x2964,
             };
-            unsigned index = gb->rom? gb->rom[0x14e] % 5 : 0;
+            unsigned index = gb->rom? gb->rom[0x14E] % 5 : 0;
             if (gb->model == GB_MODEL_CGB_0) {
                 index = 1; // CGB 0 was only available in indigo!
             }
@@ -214,7 +221,7 @@ void GB_display_vblank(GB_gameboy_t *gb)
     GB_handle_rumble(gb);
 
     if (gb->vblank_callback) {
-        gb->vblank_callback(gb);
+        gb->vblank_callback(gb, type);
     }
     GB_timing_sync(gb);
 }
@@ -228,7 +235,7 @@ static inline void temperature_tint(double temperature, double *r, double *g, do
             *b = 0;
         }
         else {
-            *b = sqrt(0.75 - temperature);
+            *b = sqrt(0.75 - temperature) / sqrt(0.75);
         }
     }
     else {
@@ -246,17 +253,17 @@ static inline uint8_t scale_channel(uint8_t x)
 
 static inline uint8_t scale_channel_with_curve(uint8_t x)
 {
-    return (uint8_t[]){0,6,12,20,28,36,45,56,66,76,88,100,113,125,137,149,161,172,182,192,202,210,218,225,232,238,243,247,250,252,254,255}[x];
+    return inline_const(uint8_t[], {0,6,12,20,28,36,45,56,66,76,88,100,113,125,137,149,161,172,182,192,202,210,218,225,232,238,243,247,250,252,254,255})[x];
 }
 
 static inline uint8_t scale_channel_with_curve_agb(uint8_t x)
 {
-    return (uint8_t[]){0,3,8,14,20,26,33,40,47,54,62,70,78,86,94,103,112,120,129,138,147,157,166,176,185,195,205,215,225,235,245,255}[x];
+    return inline_const(uint8_t[], {0,3,8,14,20,26,33,40,47,54,62,70,78,86,94,103,112,120,129,138,147,157,166,176,185,195,205,215,225,235,245,255})[x];
 }
 
 static inline uint8_t scale_channel_with_curve_sgb(uint8_t x)
 {
-    return (uint8_t[]){0,2,5,9,15,20,27,34,42,50,58,67,76,85,94,104,114,123,133,143,153,163,173,182,192,202,211,220,229,238,247,255}[x];
+    return inline_const(uint8_t[], {0,2,5,9,15,20,27,34,42,50,58,67,76,85,94,104,114,123,133,143,153,163,173,182,192,202,211,220,229,238,247,255})[x];
 }
 
 
@@ -284,41 +291,69 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border)
         
         if (gb->color_correction_mode != GB_COLOR_CORRECTION_CORRECT_CURVES) {
             uint8_t new_r, new_g, new_b;
-            if (agb) {
-                new_g = (g * 6 + b * 1) / 7;
+            if (g != b) { // Minor optimization
+                double gamma = 2.2;
+                if (gb->color_correction_mode < GB_COLOR_CORRECTION_REDUCE_CONTRAST) {
+                    /* Don't use absolutely gamma-correct mixing for the high-contrast
+                       modes, to prevent the blue hues from being too washed out */
+                    gamma = 1.6;
+                }
+                
+                // TODO: Optimze pow out using a LUT
+                if (agb) {
+                    new_g = round(pow((pow(g / 255.0, gamma) * 5 + pow(b / 255.0, gamma)) / 6, 1 / gamma) * 255);
+                }
+                else {
+                    new_g = round(pow((pow(g / 255.0, gamma) * 3 + pow(b / 255.0, gamma)) / 4, 1 / gamma) * 255);
+                }
             }
             else {
-                new_g = (g * 3 + b) / 4;
+                new_g = g;
             }
+   
             new_r = r;
             new_b = b;
             if (gb->color_correction_mode == GB_COLOR_CORRECTION_REDUCE_CONTRAST) {
                 r = new_r;
-                g = new_r;
-                b = new_r;
+                g = new_g;
+                b = new_b;
                 
-                new_r = new_r * 7 / 8 + (    g + b) / 16;
-                new_g = new_g * 7 / 8 + (r   +   b) / 16;
-                new_b = new_b * 7 / 8 + (r + g    ) / 16;
+                new_r = new_r * 15 / 16 + (    g + b) / 32;
+                new_g = new_g * 15 / 16 + (r   +   b) / 32;
+                new_b = new_b * 15 / 16 + (r + g    ) / 32;
                 
-                new_r = new_r * (224 - 32) / 255 + 32;
-                new_g = new_g * (220 - 36) / 255 + 36;
-                new_b = new_b * (216 - 40) / 255 + 40;
+                if (agb) {
+                    new_r = new_r * (224 - 20) / 255 + 20;
+                    new_g = new_g * (220 - 18) / 255 + 18;
+                    new_b = new_b * (216 - 16) / 255 + 16;
+                }
+                else {
+                    new_r = new_r * (220 - 40) / 255 + 40;
+                    new_g = new_g * (224 - 36) / 255 + 36;
+                    new_b = new_b * (216 - 32) / 255 + 32;
+                }
             }
             else if (gb->color_correction_mode == GB_COLOR_CORRECTION_LOW_CONTRAST) {
                 r = new_r;
-                g = new_r;
-                b = new_r;
+                g = new_g;
+                b = new_b;
+
+                new_r = new_r * 15 / 16 + (    g + b) / 32;
+                new_g = new_g * 15 / 16 + (r   +   b) / 32;
+                new_b = new_b * 15 / 16 + (r + g    ) / 32;
                 
-                new_r = new_r * 7 / 8 + (    g + b) / 16;
-                new_g = new_g * 7 / 8 + (r   +   b) / 16;
-                new_b = new_b * 7 / 8 + (r + g    ) / 16;
-                
-                new_r = new_r * (162 - 67) / 255 + 67;
-                new_g = new_g * (167 - 62) / 255 + 62;
-                new_b = new_b * (157 - 58) / 255 + 58;
+                if (agb) {
+                    new_r = new_r * (167 - 27) / 255 + 27;
+                    new_g = new_g * (165 - 24) / 255 + 24;
+                    new_b = new_b * (157 - 22) / 255 + 22;
+                }
+                else {
+                    new_r = new_r * (162 - 45) / 255 + 45;
+                    new_g = new_g * (167 - 41) / 255 + 41;
+                    new_b = new_b * (157 - 38) / 255 + 38;
+                }
             }
-            else if (gb->color_correction_mode == GB_COLOR_CORRECTION_PRESERVE_BRIGHTNESS) {
+            else if (gb->color_correction_mode == GB_COLOR_CORRECTION_MODERN_BOOST_CONTRAST) {
                 uint8_t old_max = MAX(r, MAX(g, b));
                 uint8_t new_max = MAX(new_r, MAX(new_g, new_b));
                 
@@ -331,10 +366,10 @@ uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border)
                 uint8_t old_min = MIN(r, MIN(g, b));
                 uint8_t new_min = MIN(new_r, MIN(new_g, new_b));
                 
-                if (new_min != 0xff) {
-                    new_r = 0xff - (0xff - new_r) * (0xff - old_min) / (0xff - new_min);
-                    new_g = 0xff - (0xff - new_g) * (0xff - old_min) / (0xff - new_min);
-                    new_b = 0xff - (0xff - new_b) * (0xff - old_min) / (0xff - new_min);
+                if (new_min != 0xFF) {
+                    new_r = 0xFF - (0xFF - new_r) * (0xFF - old_min) / (0xFF - new_min);
+                    new_g = 0xFF - (0xFF - new_g) * (0xFF - old_min) / (0xFF - new_min);
+                    new_b = 0xFF - (0xFF - new_b) * (0xFF - old_min) / (0xFF - new_min);
                 }
             }
             r = new_r;
@@ -367,7 +402,7 @@ void GB_set_color_correction_mode(GB_gameboy_t *gb, GB_color_correction_mode_t m
 {
     gb->color_correction_mode = mode;
     if (GB_is_cgb(gb)) {
-        for (unsigned i = 0; i < 32; i++) {
+        nounroll for (unsigned i = 0; i < 32; i++) {
             GB_palette_changed(gb, false, i * 2);
             GB_palette_changed(gb, true, i * 2);
         }
@@ -378,25 +413,19 @@ void GB_set_light_temperature(GB_gameboy_t *gb, double temperature)
 {
     gb->light_temperature = temperature;
     if (GB_is_cgb(gb)) {
-        for (unsigned i = 0; i < 32; i++) {
+        nounroll for (unsigned i = 0; i < 32; i++) {
             GB_palette_changed(gb, false, i * 2);
             GB_palette_changed(gb, true, i * 2);
         }
     }
 }
 
-/*
- STAT interrupt is implemented based on this finding:
- http://board.byuu.org/phpbb3/viewtopic.php?p=25527#p25531
- 
- General timing is based on GiiBiiAdvance's documents:
- https://github.com/AntonioND/giibiiadvance
- 
- */
-
 void GB_STAT_update(GB_gameboy_t *gb)
 {
-    if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) return;
+    if (!(gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE)) return;
+    if (GB_is_dma_active(gb) && (gb->io_registers[GB_IO_STAT] & 3) == 2) {
+        gb->io_registers[GB_IO_STAT] &= ~3;
+    }
     
     bool previous_interrupt_line = gb->stat_interrupt_line;
     /* Set LY=LYC bit */
@@ -433,6 +462,7 @@ void GB_STAT_update(GB_gameboy_t *gb)
 
 void GB_lcd_off(GB_gameboy_t *gb)
 {
+    gb->cycles_for_line = 0;
     gb->display_state = 0;
     gb->display_cycles = 0;
     /* When the LCD is disabled, state is constant */
@@ -468,25 +498,32 @@ static inline uint8_t oam_read(GB_gameboy_t *gb, uint8_t addr)
     if (unlikely(gb->oam_ppu_blocked)) {
         return 0xFF;
     }
-    if (unlikely(gb->dma_current_dest <= 0xa0 && gb->dma_current_dest > 0)) { // TODO: what happens in the last and first M cycles?
-        return gb->oam[((gb->dma_current_dest - 1 + (gb->halted || gb->stopped)) & ~1) | (addr & 1)];
+    if (unlikely(gb->dma_current_dest <= 0xA0 && gb->dma_current_dest > 0)) { // TODO: what happens in the last and first M cycles?
+        if (gb->hdma_in_progress) {
+            return GB_read_oam(gb, (gb->hdma_current_src & ~1) | (addr & 1));
+        }
+        if (gb->dma_current_dest != 0xA0) {
+            return gb->oam[(gb->dma_current_dest & ~1) | (addr & 1)];
+        }
     }
     return gb->oam[addr];
 }
 
 static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
 {
+    if (likely(!GB_is_dma_active(gb) || gb->halted || gb->stopped)) {
+        gb->mode2_y_bus = oam_read(gb, index * 4);
+        gb->mode2_x_bus = oam_read(gb, index * 4 + 1);
+    }
+
     if (gb->n_visible_objs == 10) return;
     
     /* TODO: It appears that DMA blocks PPU access to OAM, but it needs verification. */
-    if (unlikely(GB_is_dma_active(gb))) {
-        if (!gb->halted && !gb->stopped) {
-            return;
-        }
+    if (unlikely(GB_is_dma_active(gb) && (gb->halted || gb->stopped))) {
         if (gb->model < GB_MODEL_CGB_E) {
             return;
         }
-        /* CGB-0 to CGB-D: Halted DMA still blocks Mode 2;
+        /* CGB-0 to CGB-D: Halted DMA blocks Mode 2;
            Pre-CGB: Unit specific behavior, some units read FFs, some units read using
                     several different corruption pattterns. For simplicity, we emulate
                     FFs. */
@@ -495,23 +532,21 @@ static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
     if (unlikely(gb->oam_ppu_blocked)) {
         return;
     }
-
+    
+    bool height_16 = (gb->io_registers[GB_IO_LCDC] & GB_LCDC_OBJ_SIZE) != 0;
+    signed y = gb->mode2_y_bus - 16;
     /* This reverse sorts the visible objects by location and priority */
-    uint8_t oam_y = oam_read(gb, index * 4);
-    uint8_t oam_x = oam_read(gb, index * 4 + 1);
-    bool height_16 = (gb->io_registers[GB_IO_LCDC] & 4) != 0;
-    signed y = oam_y - 16;
     if (y <= gb->current_line && y + (height_16? 16 : 8) > gb->current_line) {
         unsigned j = 0;
         for (; j < gb->n_visible_objs; j++) {
-            if (gb->objects_x[j] <= oam_x) break;
+            if (gb->objects_x[j] <= gb->mode2_x_bus) break;
         }
         memmove(gb->visible_objs + j + 1, gb->visible_objs + j, gb->n_visible_objs - j);
         memmove(gb->objects_x + j + 1, gb->objects_x + j, gb->n_visible_objs - j);
         memmove(gb->objects_y + j + 1, gb->objects_y + j, gb->n_visible_objs - j);
         gb->visible_objs[j] = index;
-        gb->objects_x[j] = oam_x;
-        gb->objects_y[j] = oam_y;
+        gb->objects_x[j] = gb->mode2_x_bus;
+        gb->objects_y[j] = gb->mode2_y_bus;
         gb->n_visible_objs++;
     }
 }
@@ -525,16 +560,15 @@ static uint8_t data_for_tile_sel_glitch(GB_gameboy_t *gb, bool *should_use, bool
     *should_use = true;
     *cgb_d_glitch = false;
     
-    if (gb->io_registers[GB_IO_LCDC] & 0x10) {
+    if (gb->io_registers[GB_IO_LCDC] & GB_LCDC_TILE_SEL) {
         if (gb->model != GB_MODEL_CGB_D) {
             *should_use = !(gb->current_tile & 0x80);
             return gb->current_tile;
         }
         *cgb_d_glitch = true;
         *should_use = false;
-        gb->io_registers[GB_IO_LCDC] &= ~0x10;
+        gb->io_registers[GB_IO_LCDC] &= ~GB_LCDC_TILE_SEL;
         if (gb->fetcher_state == 3) {
-            *should_use = false;
             *cgb_d_glitch = true;
             return 0;
         }
@@ -550,22 +584,43 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     const GB_fifo_item_t *oam_fifo_item = NULL;
     bool draw_oam = false;
     bool bg_enabled = true, bg_priority = false;
+ 
+    // Rendering (including scrolling adjustment) does not occur as long as an object at x=0 is pending
+    if (gb->n_visible_objs != 0 &&
+        (gb->io_registers[GB_IO_LCDC] & GB_LCDC_OBJ_EN || GB_is_cgb(gb)) &&
+        gb->objects_x[gb->n_visible_objs - 1] == 0) {
+        return;
+    }
     
-    if (fifo_size(&gb->bg_fifo)) {
+    if (unlikely(!fifo_size(&gb->bg_fifo))) return;
+    
+    if (unlikely(gb->insert_bg_pixel)) {
+        gb->insert_bg_pixel = false;
+        fifo_item = ({static const GB_fifo_item_t empty_item = {0,}; &empty_item;});
+    }
+    else {
         fifo_item = fifo_pop(&gb->bg_fifo);
-        bg_priority = fifo_item->bg_priority;
-        
-        if (fifo_size(&gb->oam_fifo)) {
-            oam_fifo_item = fifo_pop(&gb->oam_fifo);
-            if (oam_fifo_item->pixel && (gb->io_registers[GB_IO_LCDC] & 2) && unlikely(!gb->objects_disabled)) {
-                draw_oam = true;
-                bg_priority |= oam_fifo_item->bg_priority;
-            }
+    }
+    bg_priority = fifo_item->bg_priority;
+    
+    if (fifo_size(&gb->oam_fifo)) {
+        oam_fifo_item = fifo_pop(&gb->oam_fifo);
+        if (oam_fifo_item->pixel && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_OBJ_EN) && unlikely(!gb->objects_disabled)) {
+            draw_oam = true;
+            bg_priority |= oam_fifo_item->bg_priority;
         }
     }
     
-
-    if (!fifo_item) return;
+    // (gb->position_in_line + 16 < 8) is (gb->position_in_line < -8) in unsigned logic
+    if (((uint8_t)(gb->position_in_line + 16) < 8)) {
+        if ((gb->position_in_line & 7) == (gb->io_registers[GB_IO_SCX] & 7)) {
+            gb->position_in_line = -8;
+        }
+        else if (gb->position_in_line == (uint8_t) -9) {
+            gb->position_in_line = -16;
+            return;
+        }
+    }
 
     /* Drop pixels for scrollings */
     if (gb->position_in_line >= 160 || (gb->disable_rendering && !gb->sgb)) {
@@ -575,7 +630,7 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     
     /* Mixing */
     
-    if ((gb->io_registers[GB_IO_LCDC] & 0x1) == 0) {
+    if ((gb->io_registers[GB_IO_LCDC] & GB_LCDC_BG_EN) == 0) {
         if (gb->cgb_mode) {
             bg_priority = false;
         }
@@ -699,7 +754,7 @@ static inline uint8_t vram_read(GB_gameboy_t *gb, uint16_t addr)
         return 0;
     }
     // TODO: what if both?
-    else if (unlikely(gb->dma_current_dest <= 0xa0 && gb->dma_current_dest > 0 && (gb->dma_current_src & 0xE000) == 0x8000)) { // TODO: what happens in the last and first M cycles?
+    else if (unlikely(gb->dma_current_dest <= 0xA0 && gb->dma_current_dest > 0 && (gb->dma_current_src & 0xE000) == 0x8000)) { // TODO: what happens in the last and first M cycles?
         // DMAing from VRAM!
         /* TODO: AGS has its own, very different pattern, but AGS is not currently a supported model */
         /* TODO: Research this when researching odd modes */
@@ -752,16 +807,16 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
             dma_sync(gb, cycles);
             uint16_t map = 0x1800;
             
-            if (!(gb->io_registers[GB_IO_LCDC] & 0x20)) {
+            if (!(gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE)) {
                 gb->wx_triggered = false;
                 gb->wx166_glitch = false;
             }
             
             /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
-            if (gb->io_registers[GB_IO_LCDC] & 0x08  && !gb->wx_triggered) {
+            if (gb->io_registers[GB_IO_LCDC] & GB_LCDC_BG_MAP  && !gb->wx_triggered) {
                 map = 0x1C00;
             }
-            else if (gb->io_registers[GB_IO_LCDC] & 0x40 && gb->wx_triggered) {
+            else if (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_MAP && gb->wx_triggered) {
                 map = 0x1C00;
             }
             
@@ -770,6 +825,9 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
             uint8_t x = 0;
             if (gb->wx_triggered) {
                 x = gb->window_tile_x;
+            }
+            else if ((uint8_t)(gb->position_in_line + 16) < 8) {
+                x = gb->io_registers[GB_IO_SCX] >> 3;
             }
             else {
                 /* TODO: There is some CGB timing error around here.
@@ -804,7 +862,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
             uint8_t y = gb->model > GB_MODEL_CGB_C ? gb->fetcher_y : fetcher_y(gb);
             
             /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
-            if (gb->io_registers[GB_IO_LCDC] & 0x10) {
+            if (gb->io_registers[GB_IO_LCDC] & GB_LCDC_TILE_SEL) {
                 tile_address = gb->current_tile * 0x10;
             }
             else {
@@ -821,7 +879,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
                     vram_read(gb, tile_address + ((y & 7) ^ y_flip) * 2);
 
             }
-            if ((gb->io_registers[GB_IO_LCDC] & 0x10) && gb->tile_sel_glitch) {
+            if ((gb->io_registers[GB_IO_LCDC] & GB_LCDC_TILE_SEL) && gb->tile_sel_glitch) {
                 gb->data_for_sel_glitch =
                     vram_read(gb, tile_address + ((y & 7) ^ y_flip) * 2);
             }
@@ -845,7 +903,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
             uint16_t tile_address = 0;
             uint8_t y = gb->model > GB_MODEL_CGB_C ? gb->fetcher_y : fetcher_y(gb);
             
-            if (gb->io_registers[GB_IO_LCDC] & 0x10) {
+            if (gb->io_registers[GB_IO_LCDC] & GB_LCDC_TILE_SEL) {
                 tile_address = gb->current_tile * 0x10;
             }
             else {
@@ -860,10 +918,10 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
             }
             gb->last_tile_data_address = tile_address +  ((y & 7) ^ y_flip) * 2 + 1 - cgb_d_glitch;
             if (!use_glitched) {
-                gb->current_tile_data[1] =
+                gb->data_for_sel_glitch = gb->current_tile_data[1] =
                     vram_read(gb, gb->last_tile_data_address);
             }
-            if ((gb->io_registers[GB_IO_LCDC] & 0x10) && gb->tile_sel_glitch) {
+            if ((gb->io_registers[GB_IO_LCDC] & GB_LCDC_TILE_SEL) && gb->tile_sel_glitch) {
                 gb->data_for_sel_glitch = vram_read(gb, gb->last_tile_data_address);
 
             }
@@ -874,7 +932,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
         }
         if (gb->wx_triggered) {
             gb->window_tile_x++;
-            gb->window_tile_x &= 0x1f;
+            gb->window_tile_x &= 0x1F;
         }
             
         // fallthrough
@@ -883,6 +941,21 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
                 gb->fetcher_state++;
             }
             if (fifo_size(&gb->bg_fifo) > 0) break;
+            
+            if (unlikely(gb->wy_triggered && !(gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE) && !GB_is_cgb(gb) && !gb->disable_window_pixel_insertion_glitch)) {
+                /* See https://github.com/LIJI32/SameBoy/issues/278 for documentation */
+                uint8_t logical_position = gb->position_in_line + 7;
+                if (logical_position > 167) {
+                    logical_position = 0;
+                }
+                if (gb->io_registers[GB_IO_WX] == logical_position) {
+                    gb->bg_fifo.read_end--;
+                    gb->bg_fifo.read_end &= GB_FIFO_LENGTH - 1;
+                    gb->bg_fifo.fifo[gb->bg_fifo.read_end] = (GB_fifo_item_t){0,};
+                    gb->bg_fifo.size = 1;
+                    break;
+                }
+            }
             
             fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1],
                              gb->current_tile_attributes & 7, gb->current_tile_attributes & 0x80, gb->current_tile_attributes & 0x20);
@@ -902,7 +975,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
 
 static uint16_t get_object_line_address(GB_gameboy_t *gb, uint8_t y, uint8_t tile, uint8_t flags)
 {
-    bool height_16 = (gb->io_registers[GB_IO_LCDC] & 4) != 0; /* Todo: Which T-cycle actually reads this? */
+    bool height_16 = (gb->io_registers[GB_IO_LCDC] & GB_LCDC_OBJ_SIZE) != 0; /* Todo: Which T-cycle actually reads this? */
     uint8_t tile_y = (gb->current_line - y) & (height_16? 0xF : 7);
     
     if (flags & 0x40) { /* Flip Y */
@@ -934,7 +1007,7 @@ static inline void get_tile_data(const GB_gameboy_t *gb, uint8_t tile_x, uint8_t
     uint16_t tile_address = 0;
     
     /* Todo: Verified for DMG (Tested: SGB2), CGB timing is wrong. */
-    if (gb->io_registers[GB_IO_LCDC] & 0x10) {
+    if (gb->io_registers[GB_IO_LCDC] & GB_LCDC_TILE_SEL) {
         tile_address = current_tile * 0x10;
     }
     else {
@@ -973,14 +1046,14 @@ static void render_line(GB_gameboy_t *gb)
     static const uint8_t empty_object_buffer[sizeof(_object_buffer)];
     const typeof(_object_buffer[0]) *object_buffer;
     
-    if (gb->n_visible_objs && !gb->objects_disabled && (gb->io_registers[GB_IO_LCDC] & 2)) {
+    if (gb->n_visible_objs && !gb->objects_disabled && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_OBJ_EN)) {
         object_buffer = &_object_buffer[0];
         object_t *objects = (object_t *) &gb->oam;
         memset(_object_buffer, 0, sizeof(_object_buffer));
 
         while (gb->n_visible_objs) {
             unsigned object_index = gb->visible_objs[gb->n_visible_objs - 1];
-            unsigned priority = gb->object_priority == GB_OBJECT_PRIORITY_X? 0 : object_index;
+            unsigned priority = (gb->object_priority == GB_OBJECT_PRIORITY_X)? 0 : object_index;
             const object_t *object = &objects[object_index];
             gb->n_visible_objs--;
             
@@ -1034,7 +1107,7 @@ static void render_line(GB_gameboy_t *gb)
         p += WIDTH * gb->current_line;
     }
     
-    if (unlikely(gb->background_disabled) || (!gb->cgb_mode && !(gb->io_registers[GB_IO_LCDC] & 1))) {
+    if (unlikely(gb->background_disabled) || (!gb->cgb_mode && !(gb->io_registers[GB_IO_LCDC] & GB_LCDC_BG_EN))) {
         uint32_t bg = gb->background_palettes_rgb[gb->cgb_mode? 0 : (gb->io_registers[GB_IO_BGP] & 3)];
         for (unsigned i = 160; i--;) {
             if (unlikely(object_buffer_pointer->pixel)) {
@@ -1056,7 +1129,7 @@ static void render_line(GB_gameboy_t *gb)
     uint8_t tile_x = gb->io_registers[GB_IO_SCX] / 8;
     unsigned fractional_scroll = gb->io_registers[GB_IO_SCX] & 7;
     uint16_t map = 0x1800;
-    if (gb->io_registers[GB_IO_LCDC] & 0x08) {
+    if (gb->io_registers[GB_IO_LCDC] & GB_LCDC_BG_MAP) {
         map = 0x1C00;
     }
     uint8_t y = gb->current_line + gb->io_registers[GB_IO_SCY];
@@ -1069,7 +1142,7 @@ uint8_t pixel = (data0 >> 7) | ((data1 >> 7) << 1);\
 data0 <<= 1;\
 data1 <<= 1;\
 \
-if (unlikely(object_buffer_pointer->pixel) && (pixel == 0 || !(object_buffer_pointer->bg_priority || (attributes & 0x80)) || !(gb->io_registers[GB_IO_LCDC] & 1))) {\
+if (unlikely(object_buffer_pointer->pixel) && (pixel == 0 || !(object_buffer_pointer->bg_priority || (attributes & 0x80)) || !(gb->io_registers[GB_IO_LCDC] & GB_LCDC_BG_EN))) {\
     pixel = object_buffer_pointer->pixel;\
     if (!gb->cgb_mode) {\
         pixel = ((gb->io_registers[GB_IO_OBP0 + object_buffer_pointer->palette] >> (pixel << 1)) & 3);\
@@ -1088,12 +1161,12 @@ object_buffer_pointer++\
     // First 1-8 pixels
     data0 <<= fractional_scroll;
     data1 <<= fractional_scroll;
-    bool check_window = gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20);
-    for (unsigned i = fractional_scroll; i < 8; i++) {
+    bool check_window = gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE);
+    nounroll for (unsigned i = fractional_scroll; i < 8; i++) {
         if (check_window && gb->io_registers[GB_IO_WX] == pixels + 7) {
 activate_window:
             check_window = false;
-            map = gb->io_registers[GB_IO_LCDC] & 0x40? 0x1C00 : 0x1800;
+            map = gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_MAP? 0x1C00 : 0x1800;
             tile_x = -1;
             y = ++gb->window_y;
             break;
@@ -1104,7 +1177,7 @@ activate_window:
     
     while (pixels < 160 - 8) {
         get_tile_data(gb, tile_x, y, map, &attributes, &data0, &data1);
-        for (unsigned i = 0; i < 8; i++) {
+        nounroll for (unsigned i = 0; i < 8; i++) {
             if (check_window && gb->io_registers[GB_IO_WX] == pixels + 7) {
                 goto activate_window;
             }
@@ -1139,7 +1212,7 @@ static void render_line_sgb(GB_gameboy_t *gb)
     static const uint8_t empty_object_buffer[sizeof(_object_buffer)];
     const typeof(_object_buffer[0]) *object_buffer;
     
-    if (gb->n_visible_objs && !gb->objects_disabled && (gb->io_registers[GB_IO_LCDC] & 2)) {
+    if (gb->n_visible_objs && !gb->objects_disabled && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_OBJ_EN)) {
         object_buffer = &_object_buffer[0];
         object_t *objects = (object_t *) &gb->oam;
         memset(_object_buffer, 0, sizeof(_object_buffer));
@@ -1182,7 +1255,7 @@ static void render_line_sgb(GB_gameboy_t *gb)
     typeof(object_buffer[0]) *object_buffer_pointer = object_buffer + 8;
     p += WIDTH * gb->current_line;
     
-    if (unlikely(gb->background_disabled) || (!gb->cgb_mode && !(gb->io_registers[GB_IO_LCDC] & 1))) {
+    if (unlikely(gb->background_disabled) || (!gb->cgb_mode && !(gb->io_registers[GB_IO_LCDC] & GB_LCDC_BG_EN))) {
         for (unsigned i = 160; i--;) {
             if (unlikely(object_buffer_pointer->pixel)) {
                 uint8_t pixel = object_buffer_pointer->pixel;
@@ -1201,7 +1274,7 @@ static void render_line_sgb(GB_gameboy_t *gb)
     uint8_t tile_x = gb->io_registers[GB_IO_SCX] / 8;
     unsigned fractional_scroll = gb->io_registers[GB_IO_SCX] & 7;
     uint16_t map = 0x1800;
-    if (gb->io_registers[GB_IO_LCDC] & 0x08) {
+    if (gb->io_registers[GB_IO_LCDC] & GB_LCDC_BG_MAP) {
         map = 0x1C00;
     }
     uint8_t y = gb->current_line + gb->io_registers[GB_IO_SCY];
@@ -1214,7 +1287,7 @@ uint8_t pixel = (data0 >> 7) | ((data1 >> 7) << 1);\
 data0 <<= 1;\
 data1 <<= 1;\
 \
-if (unlikely(object_buffer_pointer->pixel) && (pixel == 0 || !object_buffer_pointer->bg_priority || !(gb->io_registers[GB_IO_LCDC] & 1))) {\
+if (unlikely(object_buffer_pointer->pixel) && (pixel == 0 || !object_buffer_pointer->bg_priority || !(gb->io_registers[GB_IO_LCDC] & GB_LCDC_BG_EN))) {\
     pixel = object_buffer_pointer->pixel;\
     pixel = ((gb->io_registers[GB_IO_OBP0 + object_buffer_pointer->palette] >> (pixel << 1)) & 3);\
     *(p++) = pixel;\
@@ -1229,12 +1302,12 @@ object_buffer_pointer++\
     // First 1-8 pixels
     data0 <<= fractional_scroll;
     data1 <<= fractional_scroll;
-    bool check_window = gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20);
-    for (unsigned i = fractional_scroll; i < 8; i++) {
+    bool check_window = gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE);
+    nounroll for (unsigned i = fractional_scroll; i < 8; i++) {
         if (check_window && gb->io_registers[GB_IO_WX] == pixels + 7) {
         activate_window:
             check_window = false;
-            map = gb->io_registers[GB_IO_LCDC] & 0x40? 0x1C00 : 0x1800;
+            map = gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_MAP? 0x1C00 : 0x1800;
             tile_x = -1;
             y = ++gb->window_y;
             break;
@@ -1245,7 +1318,7 @@ object_buffer_pointer++\
     
     while (pixels < 160 - 8) {
         get_tile_data(gb, tile_x, y, map, &attributes, &data0, &data1);
-        for (unsigned i = 0; i < 8; i++) {
+        nounroll for (unsigned i = 0; i < 8; i++) {
             if (check_window && gb->io_registers[GB_IO_WX] == pixels + 7) {
                 goto activate_window;
             }
@@ -1265,15 +1338,26 @@ object_buffer_pointer++\
 
 static inline uint16_t mode3_batching_length(GB_gameboy_t *gb)
 {
+    if (gb->position_in_line != (uint8_t)-16) return 0;
     if (gb->model & GB_MODEL_NO_SFC_BIT) return 0;
     if (gb->hdma_on) return 0;
+    if (gb->stopped) return 0;
     if (GB_is_dma_active(gb)) return 0;
-    if (gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20) && (gb->io_registers[GB_IO_WX] < 8 || gb->io_registers[GB_IO_WX] == 166)) {
-        return 0;
+    if (gb->wy_triggered) {
+        if (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE) {
+            if ((gb->io_registers[GB_IO_WX] < 8 || gb->io_registers[GB_IO_WX] == 166)) {
+                return 0;
+            }
+        }
+        else {
+            if (gb->io_registers[GB_IO_WX] < 167 && !GB_is_cgb(gb)) {
+                return 0;
+            }
+        }
     }
 
     // No objects or window, timing is trivial
-    if (gb->n_visible_objs == 0 && !(gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20))) return 167 + (gb->io_registers[GB_IO_SCX] & 7);
+    if (gb->n_visible_objs == 0 && !(gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE))) return 167 + (gb->io_registers[GB_IO_SCX] & 7);
 
     if (gb->hdma_on_hblank) return 0;
     
@@ -1288,22 +1372,70 @@ static inline uint16_t mode3_batching_length(GB_gameboy_t *gb)
     return 0;
 }
 
+static inline uint8_t x_for_object_match(GB_gameboy_t *gb)
+{
+    uint8_t ret = gb->position_in_line + 8;
+    if (ret > (uint8_t)-16) return 0;
+    return ret;
+}
+
+static void update_frame_parity(GB_gameboy_t *gb)
+{
+    if (gb->model <= GB_MODEL_CGB_E) {
+        gb->is_odd_frame ^= true;
+    }
+    else {
+        // Faster than division, it's normally only once
+        while (gb->frame_parity_ticks > LCDC_PERIOD * 2) {
+            gb->frame_parity_ticks -= LCDC_PERIOD * 2;
+            gb->is_odd_frame ^= true;
+        }
+    }
+}
+
 /*
  TODO: It seems that the STAT register's mode bits are always "late" by 4 T-cycles.
        The PPU logic can be greatly simplified if that delay is simply emulated.
  */
 void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
 {
+    gb->frame_parity_ticks += cycles;
+
+    if (unlikely((gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE) && (signed)(gb->cycles_for_line * 2 + cycles + gb->display_cycles) > LINE_LENGTH * 2)) {
+        unsigned first_batch = (LINE_LENGTH * 2 - gb->cycles_for_line * 2 + gb->display_cycles);
+        GB_display_run(gb, first_batch, force);
+        cycles -= first_batch;
+        if (gb->display_state == 22) {
+            gb->io_registers[GB_IO_STAT] &= ~3;
+            gb->mode_for_interrupt = 0;
+            GB_STAT_update(gb);
+        }
+        gb->display_state = 9;
+        gb->display_cycles = 0;
+    }
+    if (unlikely(gb->delayed_glitch_hblank_interrupt && cycles && gb->current_line < LINES)) {
+        gb->delayed_glitch_hblank_interrupt = false;
+        gb->mode_for_interrupt = 0;
+        GB_STAT_update(gb);
+        gb->mode_for_interrupt = 3;
+    }
     gb->cycles_since_vblank_callback += cycles / 2;
+    
+    if (cycles < gb->frame_repeat_countdown) {
+        gb->frame_repeat_countdown -= cycles;
+    }
+    else {
+        gb->frame_repeat_countdown = 0;
+    }
 
     /* The PPU does not advance while in STOP mode on the DMG */
     if (gb->stopped && !GB_is_cgb(gb)) {
         if (gb->cycles_since_vblank_callback >= LCDC_PERIOD) {
-            GB_display_vblank(gb);
+            GB_display_vblank(gb, GB_VBLANK_TYPE_ARTIFICIAL);
         }
         return;
     }
-    
+        
     GB_BATCHABLE_STATE_MACHINE(gb, display, cycles, 2, !force) {
         GB_STATE(gb, display, 1);
         GB_STATE(gb, display, 2);
@@ -1313,7 +1445,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
         GB_STATE(gb, display, 6);
         GB_STATE(gb, display, 7);
         GB_STATE(gb, display, 8);
-        // GB_STATE(gb, display, 9);
+        GB_STATE(gb, display, 9);
         GB_STATE(gb, display, 10);
         GB_STATE(gb, display, 11);
         GB_STATE(gb, display, 12);
@@ -1345,21 +1477,20 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
         GB_STATE(gb, display, 40);
         GB_STATE(gb, display, 41);
         GB_STATE(gb, display, 42);
+        GB_STATE(gb, display, 43);
     }
     
-    if (!(gb->io_registers[GB_IO_LCDC] & 0x80)) {
+    if (!(gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE)) {
         while (true) {
             if (gb->cycles_since_vblank_callback < LCDC_PERIOD) {
                 GB_SLEEP(gb, display, 1, LCDC_PERIOD - gb->cycles_since_vblank_callback);
             }
-            GB_display_vblank(gb);
-            gb->cgb_repeated_a_frame = true;
+            update_frame_parity(gb); // TODO: test actual timing
+            GB_display_vblank(gb, GB_VBLANK_TYPE_LCD_OFF);
         }
         return;
     }
-    
-    gb->is_odd_frame = false;
-    
+        
     if (!GB_is_cgb(gb)) {
         GB_SLEEP(gb, display, 23, 1);
     }
@@ -1368,6 +1499,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
     gb->current_line = 0;
     gb->window_y = -1;
     gb->wy_triggered = false;
+    gb->position_in_line = -16;
     
     gb->ly_for_comparison = 0;
     gb->io_registers[GB_IO_STAT] &= ~3;
@@ -1387,6 +1519,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
     GB_SLEEP(gb, display, 34, 2);
     
     gb->n_visible_objs = 0;
+    gb->orig_n_visible_objs = 0;
     gb->cycles_for_line += 8; // Mode 0 is shorter on the first line 0, so we augment cycles_for_line by 8 extra cycles.
 
     gb->io_registers[GB_IO_STAT] &= ~3;
@@ -1413,7 +1546,47 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
     gb->wx_triggered = false;
     gb->wx166_glitch = false;
     goto mode_3_start;
-    
+
+    // Mode 3 abort, state 9
+    display9: {
+        // TODO: Timing of things in this scenario is almost completely untested
+        if (gb->current_line < LINES && !GB_is_sgb(gb) && !gb->disable_rendering) {
+            GB_log(gb, "The ROM is preventing line %d from fully rendering, this could damage a real device's LCD display.\n", gb->current_line);
+            uint32_t *dest = NULL;
+            if (gb->border_mode != GB_BORDER_ALWAYS) {
+                dest = gb->screen + gb->lcd_x + gb->current_line * WIDTH;
+            }
+            else {
+                dest = gb->screen + gb->lcd_x + gb->current_line * BORDERED_WIDTH + (BORDERED_WIDTH - WIDTH) / 2 + (BORDERED_HEIGHT - LINES) / 2 * BORDERED_WIDTH;
+            }
+            uint32_t color = GB_is_cgb(gb)? GB_convert_rgb15(gb, 0x7FFF, false) : gb->background_palettes_rgb[4];
+            while (gb->lcd_x < 160) {
+                *(dest++) = color;
+                gb->lcd_x++;
+            }
+        }
+        gb->n_visible_objs = gb->orig_n_visible_objs;
+        gb->current_line++;
+        gb->cycles_for_line = 0;
+        if (gb->current_line != LINES) {
+            gb->cycles_for_line = 2;
+            GB_SLEEP(gb, display, 28, 2);
+            gb->io_registers[GB_IO_LY] = gb->current_line;
+            if (gb->position_in_line >= 156 && gb->position_in_line < (uint8_t)-16) {
+                gb->delayed_glitch_hblank_interrupt = true;
+            }
+            GB_STAT_update(gb);
+            gb->position_in_line = -15;
+            goto mode_3_start;
+        }
+        else {
+            if (gb->position_in_line >= 156 && gb->position_in_line < (uint8_t)-16) {
+                gb->delayed_glitch_hblank_interrupt = true;
+            }
+            gb->position_in_line = -16;
+        }
+    }
+        
     while (true) {
         /* Lines 0 - 143 */
         gb->window_y = -1;
@@ -1455,6 +1628,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
             gb->mode_for_interrupt = -1;
             GB_STAT_update(gb);
             gb->n_visible_objs = 0;
+            gb->orig_n_visible_objs = 0;
             
             if (!GB_is_dma_active(gb) && !gb->oam_ppu_blocked) {
                 GB_BATCHPOINT(gb, display, 5, 80);
@@ -1477,7 +1651,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                 }
             }
             gb->cycles_for_line = MODE2_LENGTH + 4;
-
+            gb->orig_n_visible_objs = gb->n_visible_objs;
             gb->accessed_oam_row = -1;
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->io_registers[GB_IO_STAT] |= 3;
@@ -1502,8 +1676,9 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
             gb->cycles_for_line += 2;
             GB_SLEEP(gb, display, 32, 2);
         mode_3_start:
+            gb->disable_window_pixel_insertion_glitch = false;
             /* TODO: Timing seems incorrect, might need an access conflict handling. */
-            if ((gb->io_registers[GB_IO_LCDC] & 0x20) &&
+            if ((gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE) &&
                 gb->io_registers[GB_IO_WY] == gb->current_line) {
                 gb->wy_triggered = true;
             }
@@ -1512,11 +1687,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
             fifo_clear(&gb->oam_fifo);
             /* Fill the FIFO with 8 pixels of "junk", it's going to be dropped anyway. */
             fifo_push_bg_row(&gb->bg_fifo, 0, 0, 0, false, false);
-            /* Todo: find out actual access time of SCX */
-            gb->position_in_line = - (gb->io_registers[GB_IO_SCX] & 7) - 8;
             gb->lcd_x = 0;
-          
-            gb->extra_penalty_for_object_at_0 = MIN((gb->io_registers[GB_IO_SCX] & 7), 5);
             
             /* The actual rendering cycle */
             gb->fetcher_state = 0;
@@ -1544,16 +1715,16 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                    that point. The code should be updated to represent this, and this will fix the time travel hack in
                    WX's access conflict code. */
                 
-                if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20)) {
+                if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE)) {
                     bool should_activate_window = false;
                     if (gb->io_registers[GB_IO_WX] == 0) {
-                        static const uint8_t scx_to_wx0_comparisons[] = {-7, -9, -10, -11, -12, -13, -14, -14};
+                        static const uint8_t scx_to_wx0_comparisons[] = {-7, -1, -2, -3, -4, -5, -6, -6};
                         if (gb->position_in_line == scx_to_wx0_comparisons[gb->io_registers[GB_IO_SCX] & 7]) {
                             should_activate_window = true;
                         }
                     }
                     else if (gb->wx166_glitch) {
-                        static const uint8_t scx_to_wx166_comparisons[] = {-8, -9, -10, -11, -12, -13, -14, -15};
+                        static const uint8_t scx_to_wx166_comparisons[] = {-16, -1, -2, -3, -4, -5, -6, -7};
                         if (gb->position_in_line == scx_to_wx166_comparisons[gb->io_registers[GB_IO_SCX] & 7]) {
                             should_activate_window = true;
                         }
@@ -1591,31 +1762,27 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                         gb->window_y++;
                     }
                 }
-                
-                /* TODO: What happens when WX=0? */
-                if (!GB_is_cgb(gb) && gb->wx_triggered && !gb->window_is_being_fetched &&
-                    gb->fetcher_state == 0 && gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) ) {
-                    // Insert a pixel right at the FIFO's end
-                    gb->bg_fifo.read_end--;
-                    gb->bg_fifo.read_end &= GB_FIFO_LENGTH - 1;
-                    gb->bg_fifo.fifo[gb->bg_fifo.read_end] = (GB_fifo_item_t){0,};
-                    gb->window_is_being_fetched = false;
-                }
 
+                /* TODO: What happens when WX=0?*/
+                if (!GB_is_cgb(gb) && gb->wx_triggered && !gb->window_is_being_fetched &&
+                    gb->fetcher_state == 0 && gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) && gb->bg_fifo.size == 8) {
+                    // Insert a pixel right at the FIFO's end
+                    gb->insert_bg_pixel = true;
+                }
+                
                 /* Handle objects */
                 /* When the object enabled bit is off, this proccess is skipped entirely on the DMG, but not on the CGB.
                    On the CGB, this bit is checked only when the pixel is actually popped from the FIFO. */
-                
+                                
                 while (gb->n_visible_objs != 0 &&
-                       (gb->position_in_line < 160 || gb->position_in_line >= (uint8_t)(-8)) &&
-                       gb->objects_x[gb->n_visible_objs - 1] < (uint8_t)(gb->position_in_line + 8)) {
+                       gb->objects_x[gb->n_visible_objs - 1] < x_for_object_match(gb)) {
                     gb->n_visible_objs--;
                 }
                 
                 gb->during_object_fetch = true;
                 while (gb->n_visible_objs != 0 &&
-                       (gb->io_registers[GB_IO_LCDC] & 2 || GB_is_cgb(gb)) &&
-                       gb->objects_x[gb->n_visible_objs - 1] == (uint8_t)(gb->position_in_line + 8)) {
+                       (gb->io_registers[GB_IO_LCDC] & GB_LCDC_OBJ_EN || GB_is_cgb(gb)) &&
+                       gb->objects_x[gb->n_visible_objs - 1] == x_for_object_match(gb)) {
                     
                     while (gb->fetcher_state < 5 || fifo_size(&gb->bg_fifo) == 0) {
                         advance_fetcher_state_machine(gb, &cycles);
@@ -1623,18 +1790,6 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                         GB_SLEEP(gb, display, 27, 1);
                         if (gb->object_fetch_aborted) {
                             goto abort_fetching_object;
-                        }
-                    }
-                    
-                    /* Todo: Measure if penalty occurs before or after waiting for the fetcher. */
-                    if (gb->extra_penalty_for_object_at_0 != 0) {
-                        if (gb->objects_x[gb->n_visible_objs - 1] == 0) {
-                            gb->cycles_for_line += gb->extra_penalty_for_object_at_0;
-                            GB_SLEEP(gb, display, 28, gb->extra_penalty_for_object_at_0);
-                            gb->extra_penalty_for_object_at_0 = 0;
-                            if (gb->object_fetch_aborted) {
-                                goto abort_fetching_object;
-                            }
                         }
                     }
                     
@@ -1649,12 +1804,9 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     
                     advance_fetcher_state_machine(gb, &cycles);
                     dma_sync(gb, &cycles);
-                    gb->object_low_line_address = get_object_line_address(gb,
-                                                                          gb->objects_y[gb->n_visible_objs - 1],
-                                                                          oam_read(gb, gb->visible_objs[gb->n_visible_objs - 1] * 4 + 2),
-                                                                          gb->object_flags = oam_read(gb, gb->visible_objs[gb->n_visible_objs - 1] * 4 + 3)
-                                                                          );
-                    
+                    gb->mode2_y_bus = oam_read(gb, gb->visible_objs[gb->n_visible_objs - 1] * 4 + 2);
+                    gb->object_flags = oam_read(gb, gb->visible_objs[gb->n_visible_objs - 1] * 4 + 3);
+                                        
                     gb->cycles_for_line += 2;
                     GB_SLEEP(gb, display, 20, 2);
                     if (gb->object_fetch_aborted) {
@@ -1663,6 +1815,10 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     
                     /* TODO: timing not verified */
                     dma_sync(gb, &cycles);
+                    gb->object_low_line_address = get_object_line_address(gb,
+                                                                          gb->objects_y[gb->n_visible_objs - 1],
+                                                                          gb->mode2_y_bus,
+                                                                          gb->object_flags);
                     gb->object_tile_data[0] = vram_read(gb, gb->object_low_line_address);
 
                     
@@ -1672,13 +1828,15 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                         goto abort_fetching_object;
                     }
                     
-                    /* TODO: timing not verified */
-                    dma_sync(gb, &cycles);
-                    gb->object_tile_data[1] = vram_read(gb, gb->object_low_line_address + 1);
-
-                    
                     gb->during_object_fetch = false;
                     gb->cycles_for_line++;
+                    gb->object_low_line_address = get_object_line_address(gb,
+                                                                          gb->objects_y[gb->n_visible_objs - 1],
+                                                                          gb->mode2_y_bus,
+                                                                          gb->object_flags);
+
+                    dma_sync(gb, &cycles);
+                    gb->object_tile_data[1] = vram_read(gb, gb->object_low_line_address + 1);
                     GB_SLEEP(gb, display, 40, 1);
 
                     
@@ -1710,7 +1868,8 @@ abort_fetching_object:
                 GB_SLEEP(gb, display, 21, 1);
             }
 skip_slow_mode_3:
-            
+            gb->position_in_line = -16;
+
             /* TODO: This seems incorrect (glitches Tesserae), verify further */
             /*
             if (gb->fetcher_state == 4 || gb->fetcher_state == 5) {
@@ -1721,7 +1880,7 @@ skip_slow_mode_3:
             }
             */
             while (gb->lcd_x != 160 && !gb->disable_rendering && gb->screen && !gb->sgb) {
-                /* Oh no! The PPU and LCD desynced! Fill the rest of the line whith white. */
+                /* Oh no! The PPU and LCD desynced! Fill the rest of the line with the last color. */
                 uint32_t *dest = NULL;
                 if (gb->border_mode != GB_BORDER_ALWAYS) {
                     dest = gb->screen + gb->lcd_x + gb->current_line * WIDTH;
@@ -1729,13 +1888,13 @@ skip_slow_mode_3:
                 else {
                     dest = gb->screen + gb->lcd_x + gb->current_line * BORDERED_WIDTH + (BORDERED_WIDTH - WIDTH) / 2 + (BORDERED_HEIGHT - LINES) / 2 * BORDERED_WIDTH;
                 }
-                *dest = gb->background_palettes_rgb[0];
+                *dest = (gb->lcd_x == 0)? gb->background_palettes_rgb[0] : dest[-1];
                 gb->lcd_x++;
 
             }
             
             /* TODO: Verify timing */
-            if (!GB_is_cgb(gb) && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & 0x20) && gb->io_registers[GB_IO_WX] == 166) {
+            if (!GB_is_cgb(gb) && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE) && gb->io_registers[GB_IO_WX] == 166) {
                 gb->wx166_glitch = true;
             }
             else {
@@ -1781,15 +1940,26 @@ skip_slow_mode_3:
             GB_SLEEP(gb, display, 36, 2);
             gb->cgb_palettes_blocked = false;
             
-            GB_SLEEP(gb, display, 11, LINE_LENGTH - gb->cycles_for_line - 2);
+            if (gb->cycles_for_line > LINE_LENGTH - 2) {
+                gb->cycles_for_line = 0;
+                GB_SLEEP(gb, display, 43, LINE_LENGTH - gb->cycles_for_line);
+                goto display9;
+            }
+            
+            {
+                uint16_t cycles_for_line =  gb->cycles_for_line;
+                gb->cycles_for_line = 0;
+                GB_SLEEP(gb, display, 11, LINE_LENGTH - cycles_for_line - 2);
+            }
             /*
              TODO: Verify double speed timing
              TODO: Timing differs on a DMG
             */
-            if ((gb->io_registers[GB_IO_LCDC] & 0x20) &&
+            if ((gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE) &&
                 (gb->io_registers[GB_IO_WY] == gb->current_line)) {
                 gb->wy_triggered = true;
             }
+            gb->cycles_for_line = 0;
             GB_SLEEP(gb, display, 31, 2);
             if (gb->current_line != LINES - 1) {
                 gb->mode_for_interrupt = 2;
@@ -1798,7 +1968,7 @@ skip_slow_mode_3:
             // Todo: unverified timing
             gb->current_lcd_line++;
             if (gb->current_lcd_line == LINES && GB_is_sgb(gb)) {
-                GB_display_vblank(gb);
+                GB_display_vblank(gb, GB_VBLANK_TYPE_NORMAL_FRAME);
             }
             
             if (gb->icd_hreset_callback) {
@@ -1819,6 +1989,10 @@ skip_slow_mode_3:
                 gb->io_registers[GB_IO_IF] |= 2;
             }
             GB_SLEEP(gb, display, 12, 2);
+            if (gb->delayed_glitch_hblank_interrupt) {
+                gb->delayed_glitch_hblank_interrupt = false;
+                gb->mode_for_interrupt = 0;
+            }
             gb->ly_for_comparison = gb->current_line;
             GB_STAT_update(gb);
             GB_SLEEP(gb, display, 24, 1);
@@ -1836,36 +2010,38 @@ skip_slow_mode_3:
                 
                 if (gb->frame_skip_state == GB_FRAMESKIP_LCD_TURNED_ON) {
                     if (GB_is_cgb(gb)) {
-                        GB_display_vblank(gb);
-                        gb->frame_skip_state = GB_FRAMESKIP_FIRST_FRAME_SKIPPED;
+                        GB_display_vblank(gb, GB_VBLANK_TYPE_NORMAL_FRAME);
+                        gb->frame_skip_state = GB_FRAMESKIP_FIRST_FRAME_RENDERED;
                     }
                     else {
                         if (!GB_is_sgb(gb) || gb->current_lcd_line < LINES) {
-                            gb->is_odd_frame ^= true;
-                            GB_display_vblank(gb);
+                            update_frame_parity(gb); // TODO: test actual timing
+                            GB_display_vblank(gb, GB_VBLANK_TYPE_NORMAL_FRAME);
                         }
-                        gb->frame_skip_state = GB_FRAMESKIP_SECOND_FRAME_RENDERED;
+                        gb->frame_skip_state = GB_FRAMESKIP_FIRST_FRAME_RENDERED;
                     }
                 }
                 else {
                     if (!GB_is_sgb(gb) || gb->current_lcd_line < LINES) {
-                        gb->is_odd_frame ^= true;
-                        GB_display_vblank(gb);
-                    }
-                    if (gb->frame_skip_state == GB_FRAMESKIP_FIRST_FRAME_SKIPPED) {
-                        gb->cgb_repeated_a_frame = true;
-                        gb->frame_skip_state = GB_FRAMESKIP_SECOND_FRAME_RENDERED;
-                    }
-                    else {
-                        gb->cgb_repeated_a_frame = false;
+                        update_frame_parity(gb); // TODO: test actual timing
+                        GB_display_vblank(gb, GB_VBLANK_TYPE_NORMAL_FRAME);
                     }
                 }
+            }
+            
+            /* 3640 is just a few cycles less than 4 lines, no clue where the
+               AGB constant comes from (These are measured and confirmed)  */
+            gb->frame_repeat_countdown = LINES * LINE_LENGTH * 2 + (gb->model > GB_MODEL_CGB_E? 5982 : 3640); // 8MHz units
+            if (gb->display_cycles < gb->frame_repeat_countdown) {
+                gb->frame_repeat_countdown -= gb->display_cycles;
+            }
+            else {
+                gb->frame_repeat_countdown = 0;
             }
             
             GB_SLEEP(gb, display, 13, LINE_LENGTH - 5);
         }
         
-        /* TODO: Verified on SGB2 and CGB-E. Actual interrupt timings not tested. */
         /* Lines 153 */
         gb->ly_for_comparison = -1;
         GB_STAT_update(gb);
@@ -1976,12 +2152,12 @@ void GB_draw_tilemap(GB_gameboy_t *gb, uint32_t *dest, GB_palette_type_t palette
             break;
     }
     
-    if (map_type == GB_MAP_9C00 || (map_type == GB_MAP_AUTO && gb->io_registers[GB_IO_LCDC] & 0x08)) {
-        map = 0x1c00;
+    if (map_type == GB_MAP_9C00 || (map_type == GB_MAP_AUTO && gb->io_registers[GB_IO_LCDC] & GB_LCDC_BG_MAP)) {
+        map = 0x1C00;
     }
     
     if (tileset_type == GB_TILESET_AUTO) {
-        tileset_type = (gb->io_registers[GB_IO_LCDC] & 0x10)? GB_TILESET_8800 : GB_TILESET_8000;
+        tileset_type = (gb->io_registers[GB_IO_LCDC] & GB_LCDC_TILE_SEL)? GB_TILESET_8800 : GB_TILESET_8000;
     }
     
     for (unsigned y = 0; y < 256; y++) {
@@ -2025,14 +2201,14 @@ void GB_draw_tilemap(GB_gameboy_t *gb, uint32_t *dest, GB_palette_type_t palette
 uint8_t GB_get_oam_info(GB_gameboy_t *gb, GB_oam_info_t *dest, uint8_t *object_height)
 {
     uint8_t count = 0;
-    *object_height = (gb->io_registers[GB_IO_LCDC] & 4) ? 16:8;
+    *object_height = (gb->io_registers[GB_IO_LCDC] & GB_LCDC_OBJ_SIZE) ? 16:8;
     uint8_t oam_to_dest_index[40] = {0,};
     for (signed y = 0; y < LINES; y++) {
         object_t *object = (object_t *) &gb->oam;
         uint8_t objects_in_line = 0;
+        bool obscured = false;
         for (uint8_t i = 0; i < 40; i++, object++) {
             signed object_y = object->y - 16;
-            bool obscured = false;
             // Is object not in this line?
             if (object_y > y || object_y + *object_height <= y) continue;
             if (++objects_in_line == 11) obscured = true;

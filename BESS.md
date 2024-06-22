@@ -176,6 +176,48 @@ The length of this block is 0x11 bytes long and it follows the following structu
 | 0x0E   | Scheduled alarm time days (16-bit)                    |
 | 0x10   | Alarm enabled flag (8-bits, either 0 or 1)            |
 
+#### TPP1 block
+The TPP1 block uses the `'TPP1'` identifier, and is an optional block that is used while emulating a TPP1 cartridge to store RTC information. This block can be omitted if the ROM header does not specify the inclusion of a RTC.
+
+The length of this block is 0x11 bytes long and it follows the following structure:
+
+| Offset | Content                                               |
+|--------|-------------------------------------------------------|
+| 0x00   | UNIX timestamp at the time of the save state (64-bit) |
+| 0x08   | The current RTC data (4 bytes)                        |
+| 0x0C   | The latched RTC data (4 bytes)                        |
+| 0x10   | The value of the MR4 register (8-bits)                |
+
+
+#### MBC7 block
+The MBC7 block uses the `'MBC7'` identifier, and is an optional block that is used while emulating an MBC7 cartridge to store the EEPROM communication state and motion control state.
+
+The length of this block is 0xA bytes long and it follows the following structure:
+
+| Offset | Content                                               |
+|--------|-------------------------------------------------------|
+| 0x00   | Flags (8-bits)                                        |
+| 0x01   | Argument bits left (8-bits)                           |
+| 0x02   | Current EEPROM command (16-bits)                      |
+| 0x04   | Pending bits to read (16-bits)                        |
+| 0x06   | Latched gyro X value (16-bits)                        |
+| 0x08   | Latched gyro Y value (16-bits)                        |
+
+The meaning of the individual bits in flags are:
+ * Bit 0: Latch ready; set after writing `0x55` to `0xAX0X` and reset after writing `0xAA` to `0xAX1X`
+ * Bit 1: EEPROM DO line
+ * Bit 2: EEPROM DI line
+ * Bit 3: EEPROM CLK line
+ * Bit 4: EEPROM CS line
+ * Bit 5: EEPROM write enable; set after an `EWEN` command, reset after an `EWDS` command
+ * Bits 6-7: Unused.
+
+The current EEPROM command field has bits pushed to its LSB first, padded with zeros. For example, if the ROM clocked a single `1` bit, this field should contain `0b1`; if the ROM later clocks a `0` bit, this field should contain `0b10`.
+
+If the currently transmitted command has an argument, the "Argument bits left" field should contain the number argument bits remaining. Otherwise, it should contain 0.
+
+The "Pending bits to read" field contains the pending bits waiting to be shifted into the DO signal, MSB first, padded with ones.
+
 #### SGB block
 
 The SGB block uses the `'SGB '` identifier, and is an optional block that is only used while emulating an SGB or SGB2 *and* SGB commands enabled. Implementations must not save this block on other models or when SGB commands are disabled, and should assume SGB commands are disabled if this block is missing.

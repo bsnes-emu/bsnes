@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <assert.h>
 #include <errno.h>
+#include <string.h>
+#include <stdlib.h>
 
 static inline uint8_t hash_addr(uint16_t addr)
 {
@@ -30,23 +32,28 @@ static uint16_t bank_for_addr(GB_gameboy_t *gb, uint16_t addr)
     return 0;
 }
 
+static noinline void apply_cheat(GB_gameboy_t *gb, uint16_t address, uint8_t *value)
+{
+    if (unlikely(!gb->boot_rom_finished)) return;
+    const GB_cheat_hash_t *hash = gb->cheat_hash[hash_addr(address)];
+    if (likely(!hash)) return;
+    
+    for (unsigned i = 0; i < hash->size; i++) {
+        GB_cheat_t *cheat = hash->cheats[i];
+        if (cheat->address == address && cheat->enabled && (!cheat->use_old_value || cheat->old_value == *value)) {
+            if (cheat->bank == GB_CHEAT_ANY_BANK || cheat->bank == bank_for_addr(gb, address)) {
+                *value = cheat->value;
+                break;
+            }
+        }
+    }
+}
+
 void GB_apply_cheat(GB_gameboy_t *gb, uint16_t address, uint8_t *value)
 {
     if (likely(!gb->cheat_enabled)) return;
     if (likely(gb->cheat_count == 0)) return; // Optimization
-    if (unlikely(!gb->boot_rom_finished)) return;
-    const GB_cheat_hash_t *hash = gb->cheat_hash[hash_addr(address)];
-    if (unlikely(hash)) {
-        for (unsigned i = 0; i < hash->size; i++) {
-            GB_cheat_t *cheat = hash->cheats[i];
-            if (cheat->address == address && cheat->enabled && (!cheat->use_old_value || cheat->old_value == *value)) {
-                if (cheat->bank == GB_CHEAT_ANY_BANK || cheat->bank == bank_for_addr(gb, address)) {
-                    *value = cheat->value;
-                    break;
-                }
-            }
-        }
-    }
+    apply_cheat(gb, address, value);
 }
 
 bool GB_cheats_enabled(GB_gameboy_t *gb)
@@ -59,8 +66,10 @@ void GB_set_cheats_enabled(GB_gameboy_t *gb, bool enabled)
     gb->cheat_enabled = enabled;
 }
 
-void GB_add_cheat(GB_gameboy_t *gb, const char *description, uint16_t address, uint16_t bank, uint8_t value, uint8_t old_value, bool use_old_value, bool enabled)
+const GB_cheat_t *GB_add_cheat(GB_gameboy_t *gb, const char *description, uint16_t address, uint16_t bank, uint8_t value, uint8_t old_value, bool use_old_value, bool enabled)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    
     GB_cheat_t *cheat = malloc(sizeof(*cheat));
     cheat->address = address;
     cheat->bank = bank;
@@ -84,15 +93,22 @@ void GB_add_cheat(GB_gameboy_t *gb, const char *description, uint16_t address, u
         *hash = realloc(*hash, sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
         (*hash)->cheats[(*hash)->size - 1] = cheat;
     }
+    
+    return cheat;
 }
 
 const GB_cheat_t *const *GB_get_cheats(GB_gameboy_t *gb, size_t *size)
 {
-    *size = gb->cheat_count;
+    if (size) {
+        *size = gb->cheat_count;
+    }
     return (void *)gb->cheats;
 }
+
 void GB_remove_cheat(GB_gameboy_t *gb, const GB_cheat_t *cheat)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    
     for (unsigned i = 0; i < gb->cheat_count; i++) {
         if (gb->cheats[i] == cheat) {
             gb->cheats[i] = gb->cheats[--gb->cheat_count];
@@ -116,7 +132,7 @@ void GB_remove_cheat(GB_gameboy_t *gb, const GB_cheat_t *cheat)
                 *hash = NULL;
             }
             else {
-                *hash = malloc(sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
+                *hash = realloc(*hash, sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
             }
             break;
         }
@@ -125,11 +141,13 @@ void GB_remove_cheat(GB_gameboy_t *gb, const GB_cheat_t *cheat)
     free((void *)cheat);
 }
 
-bool GB_import_cheat(GB_gameboy_t *gb, const char *cheat, const char *description, bool enabled)
+const GB_cheat_t *GB_import_cheat(GB_gameboy_t *gb, const char *cheat, const char *description, bool enabled)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    
     uint8_t dummy;
     /* GameShark */
-    {
+    if (strlen(cheat) == 8) {
         uint8_t bank;
         uint8_t value;
         uint16_t address;
@@ -137,8 +155,8 @@ bool GB_import_cheat(GB_gameboy_t *gb, const char *cheat, const char *descriptio
             if (bank >= 0x80) {
                 bank &= 0xF;
             }
-            GB_add_cheat(gb, description, address, bank, value, 0, false, enabled);
-            return true;
+            address = __builtin_bswap16(address);
+            return GB_add_cheat(gb, description, address, bank, value, 0, false, enabled);
         }
     }
     
@@ -159,6 +177,9 @@ bool GB_import_cheat(GB_gameboy_t *gb, const char *cheat, const char *descriptio
         uint8_t old_value;
         uint8_t value;
         uint16_t address;
+        if (strlen(stripped_cheat) != 8 && strlen(stripped_cheat) != 6) {
+            return NULL;
+        }
         if (sscanf(stripped_cheat, "%02hhx%04hx%02hhx%c", &value, &address, &old_value, &dummy) == 3) {
             address = (uint16_t)(address >> 4) | (uint16_t)(address << 12);
             address ^= 0xF000;
@@ -167,8 +188,7 @@ bool GB_import_cheat(GB_gameboy_t *gb, const char *cheat, const char *descriptio
             }
             old_value = (uint8_t)(old_value >> 2) | (uint8_t)(old_value << 6);
             old_value ^= 0xBA;
-            GB_add_cheat(gb, description, address, GB_CHEAT_ANY_BANK, value, old_value, true, enabled);
-            return true;
+            return GB_add_cheat(gb, description, address, GB_CHEAT_ANY_BANK, value, old_value, true, enabled);
         }
         
         if (sscanf(stripped_cheat, "%02hhx%04hx%c", &value, &address, &dummy) == 2) {
@@ -177,15 +197,16 @@ bool GB_import_cheat(GB_gameboy_t *gb, const char *cheat, const char *descriptio
             if (address > 0x7FFF) {
                 return false;
             }
-            GB_add_cheat(gb, description, address, GB_CHEAT_ANY_BANK, value, false, true, enabled);
-            return true;
+            return GB_add_cheat(gb, description, address, GB_CHEAT_ANY_BANK, value, false, true, enabled);
         }
     }
-    return false;
+    return NULL;
 }
 
 void GB_update_cheat(GB_gameboy_t *gb, const GB_cheat_t *_cheat, const char *description, uint16_t address, uint16_t bank, uint8_t value, uint8_t old_value, bool use_old_value, bool enabled)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    
     GB_cheat_t *cheat = NULL;
     for (unsigned i = 0; i < gb->cheat_count; i++) {
         if (gb->cheats[i] == _cheat) {
@@ -207,7 +228,7 @@ void GB_update_cheat(GB_gameboy_t *gb, const GB_cheat_t *_cheat, const char *des
                     *hash = NULL;
                 }
                 else {
-                    *hash = malloc(sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
+                    *hash = realloc(*hash, sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
                 }
                 break;
             }
@@ -242,6 +263,8 @@ void GB_update_cheat(GB_gameboy_t *gb, const GB_cheat_t *_cheat, const char *des
 
 void GB_load_cheats(GB_gameboy_t *gb, const char *path)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    
     FILE *f = fopen(path, "rb");
     if (!f) {
         return;

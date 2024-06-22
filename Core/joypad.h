@@ -1,5 +1,4 @@
-#ifndef joypad_h
-#define joypad_h
+#pragma once
 #include "defs.h"
 #include <stdbool.h>
 
@@ -37,9 +36,9 @@ void GB_icd_set_joyp(GB_gameboy_t *gb, uint8_t value);
 bool GB_get_joyp_accessed(GB_gameboy_t *gb);
 void GB_clear_joyp_accessed(GB_gameboy_t *gb);
 void GB_set_allow_illegal_inputs(GB_gameboy_t *gb, bool allow);
-
+void GB_set_emulate_joypad_bouncing(GB_gameboy_t *gb, bool emulate);
 
 #ifdef GB_INTERNAL
 internal void GB_update_joyp(GB_gameboy_t *gb);
+internal void GB_joypad_run(GB_gameboy_t *gb, unsigned cycles);
 #endif
-#endif /* joypad_h */

@@ -1,6 +1,4 @@
 #import <Cocoa/Cocoa.h>
-#ifndef BigSurToolbar_h
-#define BigSurToolbar_h
 
 /* Backport the toolbarStyle property to allow compilation with older SDKs*/
 #ifndef __MAC_10_16
@@ -24,7 +22,5 @@ typedef NS_ENUM(NSInteger, NSWindowToolbarStyle) {
 @interface NSImage (SFSymbols)
 + (instancetype)imageWithSystemSymbolName:(NSString *)symbolName accessibilityDescription:(NSString *)description API_AVAILABLE(macos(11.0));
 @end
-
-#endif
 
 #endif

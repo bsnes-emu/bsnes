@@ -25,7 +25,7 @@ static void log_callback(GB_gameboy_t *gb, const char *string, GB_log_attributes
 }
 
 
-static void vblank(GB_gameboy_t *gb)
+static void vblank(GB_gameboy_t *gb, GB_vblank_type_t type)
 {
 
     struct local_data *local_data = (struct local_data *)GB_get_user_data(gb);
@@ -59,7 +59,7 @@ int get_image_for_rom(const char *filename, const char *boot_path, uint32_t *out
     GB_set_rgb_encode_callback(&gb, rgb_encode);
     GB_set_async_input_callback(&gb, async_input_callback);
     GB_set_log_callback(&gb, log_callback);
-    GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_EMULATE_HARDWARE);
+    GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_MODERN_BALANCED);
     
     size_t length = strlen(filename);
     char extension[4] = {0,};

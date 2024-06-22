@@ -1,12 +1,15 @@
 ; SameBoy DMG bootstrap ROM
-; Todo: use friendly names for HW registers instead of magic numbers
-SECTION "BootCode", ROM0[$0]
+
+include "sameboot.inc"
+
+SECTION "BootCode", ROM0[$0000]
 Start:
 ; Init stack pointer
-    ld sp, $fffe
+    ld sp, $FFFE
 
 ; Clear memory VRAM
-    ld hl, $8000
+    ld hl, _VRAM
+    xor a
 
 .clearVRAMLoop
     ldi [hl], a
@@ -14,24 +17,25 @@ Start:
     jr z, .clearVRAMLoop
 
 ; Init Audio
-    ld a, $80
-    ldh [$26], a
-    ldh [$11], a
-    ld a, $f3
-    ldh [$12], a
-    ldh [$25], a
+    ld a, AUDENA_ON
+    ldh [rNR52], a
+    assert AUDENA_ON == AUDLEN_DUTY_50
+    ldh [rNR11], a
+    ld a, $F3
+    ldh [rNR12], a ; Envelope $F, decreasing, sweep $3
+    ldh [rNR51], a ; Channels 1+2+3+4 left, channels 1+2 right
     ld a, $77
-    ldh [$24], a
+    ldh [rNR50], a ; Volume $7, left and right
 
 ; Init BG palette
-    ld a, $54
-    ldh [$47], a
+    ld a, %01_01_01_00
+    ldh [rBGP], a
 
 ; Load logo from ROM.
 ; A nibble represents a 4-pixels line, 2 bytes represent a 4x4 tile, scaled to 8x8.
 ; Tiles are ordered left to right, top to bottom.
-    ld de, $104 ; Logo start
-    ld hl, $8010 ; This is where we load the tiles in VRAM
+    ld de, NintendoLogo
+    ld hl, _VRAM + $10 ; This is where we load the tiles in VRAM
 
 .loadLogoLoop
     ld a, [de] ; Read 2 rows
@@ -40,92 +44,92 @@ Start:
     call DoubleBitsAndWriteRow
     inc de
     ld a, e
-    xor $34 ; End of logo
+    xor LOW(NintendoLogoEnd)
     jr nz, .loadLogoLoop
 
 ; Load trademark symbol
     ld de, TrademarkSymbol
-    ld c,$08
+    ld c, TrademarkSymbolEnd - TrademarkSymbol
 .loadTrademarkSymbolLoop:
-    ld a,[de]
+    ld a, [de]
     inc de
-    ldi [hl],a
+    ldi [hl], a
     inc hl
     dec c
     jr nz, .loadTrademarkSymbolLoop
 
 ; Set up tilemap
-    ld a,$19      ; Trademark symbol
-    ld [$9910], a ; ... put in the superscript position
-    ld hl,$992f   ; Bottom right corner of the logo
-    ld c,$c       ; Tiles in a logo row
+    ld a, $19                           ; Trademark symbol tile ID
+    ld [_SCRN0 + 8 * SCRN_VX_B + 16], a ; ... put in the superscript position
+    ld hl, _SCRN0 + 9 * SCRN_VX_B + 15  ; Bottom right corner of the logo
+    ld c, 12                            ; Tiles in a logo row
 .tilemapLoop
     dec a
     jr z, .tilemapDone
     ldd [hl], a
     dec c
     jr nz, .tilemapLoop
-    ld l,$0f ; Jump to top row
+    ld l, $0F ; Jump to top row
     jr .tilemapLoop
 .tilemapDone
 
     ld a, 30
-    ldh [$ff42], a
-    
-    ; Turn on LCD
-    ld a, $91
-    ldh [$40], a
+    ldh [rSCY], a
 
-    ld d, (-119) & $FF
+    ; Turn on LCD
+    ld a, LCDCF_ON | LCDCF_BLK01 | LCDCF_BGON
+    ldh [rLCDC], a
+
+    ld d, LOW(-119)
     ld c, 15
-    
+
 .animate
     call WaitFrame
     ld a, d
     sra a
     sra a
-    ldh [$ff42], a
+    ldh [rSCY], a
     ld a, d
     add c
     ld d, a
     ld a, c
     cp 8
     jr nz, .noPaletteChange
-    ld a, $A8
-    ldh [$47], a
+    ld a, %10_10_10_00
+    ldh [rBGP], a
 .noPaletteChange
     dec c
     jr nz, .animate
-    ld a, $fc
-    ldh [$47], a
-    
+    ld a, %11_11_11_00
+    ldh [rBGP], a
+
     ; Play first sound
     ld a, $83
     call PlaySound
     ld b, 5
     call WaitBFrames
     ; Play second sound
-    ld a, $c1
+    ld a, $C1
     call PlaySound
-    
+
 
 
 ; Wait ~1 second
     ld b, 60
     call WaitBFrames
-    
+
 ; Set registers to match the original DMG boot
 IF DEF(MGB)
-    ld hl, $FFB0
+    lb hl, BOOTUP_A_MGB, %10110000
 ELSE
-    ld hl, $01B0
+    lb hl, BOOTUP_A_DMG, %10110000
 ENDC
     push hl
     pop af
-    ld hl, $014D
-    ld bc, $0013
-    ld de, $00D8
-    
+    ld hl, HeaderChecksum
+    lb bc, 0, LOW(rNR13) ; $0013
+    lb de, 0, $D8        ; $00D8
+
 ; Boot the game
     jp BootGame
 
@@ -152,7 +156,7 @@ DoubleBitsAndWriteRow:
 
 WaitFrame:
     push hl
-    ld hl, $FF0F
+    ld hl, rIF
     res 0, [hl]
 .wait
     bit 0, [hl]
@@ -167,15 +171,26 @@ WaitBFrames:
     ret
 
 PlaySound:
-    ldh [$13], a
-    ld a, $87
-    ldh [$14], a
+    ldh [rNR13], a
+    ld a, AUDHIGH_RESTART | $7
+    ldh [rNR14], a
     ret
 
 
 TrademarkSymbol:
-db $3c,$42,$b9,$a5,$b9,$a5,$42,$3c
+    pusho
+    opt b.X
+    db %..XXXX..
+    db %.X....X.
+    db %X.XXX..X
+    db %X.X..X.X
+    db %X.XXX..X
+    db %X.X..X.X
+    db %.X....X.
+    db %..XXXX..
+    popo
+TrademarkSymbolEnd:
 
-SECTION "BootGame", ROM0[$fe]
+SECTION "BootGame", ROM0[$00FE]
 BootGame:
-    ldh [$50], a
+    ldh [rBANK], a ; unmap boot ROM

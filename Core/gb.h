@@ -1,11 +1,15 @@
-#ifndef GB_h
-#define GB_h
-#define typeof __typeof__
+#pragma once
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdalign.h>
 #include <time.h>
 
+#include "model.h"
 #include "defs.h"
 #include "save_state.h"
 
@@ -27,14 +31,7 @@
 #include "workboy.h"
 #include "random.h"
 
-#define GB_STRUCT_VERSION 14
-
-#define GB_MODEL_FAMILY_MASK 0xF00
-#define GB_MODEL_DMG_FAMILY 0x000
-#define GB_MODEL_MGB_FAMILY 0x100
-#define GB_MODEL_CGB_FAMILY 0x200
-#define GB_MODEL_PAL_BIT 0x40
-#define GB_MODEL_NO_SFC_BIT 0x80
+#define GB_STRUCT_VERSION 15
 
 #define GB_REWIND_FRAMES_PER_KEY 255
 
@@ -95,32 +92,6 @@ typedef struct __attribute__((packed)) {
     uint8_t alarm_enabled;
 } GB_huc3_rtc_time_t;
 
-typedef enum {
-    // GB_MODEL_DMG_0 = 0x000,
-    // GB_MODEL_DMG_A = 0x001,
-    GB_MODEL_DMG_B = 0x002,
-    // GB_MODEL_DMG_C = 0x003,
-    GB_MODEL_SGB = 0x004,
-    GB_MODEL_SGB_NTSC = GB_MODEL_SGB,
-    GB_MODEL_SGB_PAL = GB_MODEL_SGB | GB_MODEL_PAL_BIT,
-    GB_MODEL_SGB_NTSC_NO_SFC = GB_MODEL_SGB | GB_MODEL_NO_SFC_BIT,
-    GB_MODEL_SGB_NO_SFC = GB_MODEL_SGB_NTSC_NO_SFC,
-    GB_MODEL_SGB_PAL_NO_SFC = GB_MODEL_SGB | GB_MODEL_NO_SFC_BIT | GB_MODEL_PAL_BIT,
-    GB_MODEL_MGB = 0x100,
-    GB_MODEL_SGB2 = 0x101,
-    GB_MODEL_SGB2_NO_SFC = GB_MODEL_SGB2 | GB_MODEL_NO_SFC_BIT,
-    GB_MODEL_CGB_0 = 0x200,
-    GB_MODEL_CGB_A = 0x201,
-    GB_MODEL_CGB_B = 0x202,
-    GB_MODEL_CGB_C = 0x203,
-    GB_MODEL_CGB_D = 0x204,
-    GB_MODEL_CGB_E = 0x205,
-    // GB_MODEL_AGB_0 = 0x206,
-    GB_MODEL_AGB_A = 0x207,
-    GB_MODEL_AGB = GB_MODEL_AGB_A,
-    //GB_MODEL_AGB_B = 0x208
-} GB_model_t;
-
 enum {
     GB_REGISTER_AF,
     GB_REGISTER_BC,
@@ -133,10 +104,21 @@ enum {
 
 /* Todo: Actually use these! */
 enum {
-    GB_CARRY_FLAG = 16,
-    GB_HALF_CARRY_FLAG = 32,
-    GB_SUBTRACT_FLAG = 64,
-    GB_ZERO_FLAG = 128,
+    GB_CARRY_FLAG = 0x10,
+    GB_HALF_CARRY_FLAG = 0x20,
+    GB_SUBTRACT_FLAG = 0x40,
+    GB_ZERO_FLAG = 0x80,
+};
+
+enum {
+    GB_LCDC_BG_EN = 1,
+    GB_LCDC_OBJ_EN = 2,
+    GB_LCDC_OBJ_SIZE = 4,
+    GB_LCDC_BG_MAP = 8,
+    GB_LCDC_TILE_SEL = 0x10,
+    GB_LCDC_WIN_ENABLE = 0x20,
+    GB_LCDC_WIN_MAP = 0x40,
+    GB_LCDC_ENABLE = 0x80,
 };
 
 typedef enum {
@@ -161,7 +143,7 @@ enum {
 
     /* Missing */
 
-    GB_IO_IF         = 0x0f, // Interrupt Flag (R/W)
+    GB_IO_IF         = 0x0F, // Interrupt Flag (R/W)
 
     /* Sound */
     GB_IO_NR10       = 0x10, // Channel 1 Sweep register (R/W)
@@ -174,11 +156,11 @@ enum {
     GB_IO_NR22       = 0x17, // Channel 2 Volume Envelope (R/W)
     GB_IO_NR23       = 0x18, // Channel 2 Frequency lo data (W)
     GB_IO_NR24       = 0x19, // Channel 2 Frequency hi data (R/W)
-    GB_IO_NR30       = 0x1a, // Channel 3 Sound on/off (R/W)
-    GB_IO_NR31       = 0x1b, // Channel 3 Sound Length
-    GB_IO_NR32       = 0x1c, // Channel 3 Select output level (R/W)
-    GB_IO_NR33       = 0x1d, // Channel 3 Frequency's lower data (W)
-    GB_IO_NR34       = 0x1e, // Channel 3 Frequency's higher data (R/W)
+    GB_IO_NR30       = 0x1A, // Channel 3 Sound on/off (R/W)
+    GB_IO_NR31       = 0x1B, // Channel 3 Sound Length
+    GB_IO_NR32       = 0x1C, // Channel 3 Select output level (R/W)
+    GB_IO_NR33       = 0x1D, // Channel 3 Frequency's lower data (W)
+    GB_IO_NR34       = 0x1E, // Channel 3 Frequency's higher data (R/W)
     /* NR40 does not exist */
     GB_IO_NR41       = 0x20, // Channel 4 Sound Length (R/W)
     GB_IO_NR42       = 0x21, // Channel 4 Volume Envelope (R/W)
@@ -191,7 +173,7 @@ enum {
     /* Missing */
 
     GB_IO_WAV_START  = 0x30, // Wave pattern start
-    GB_IO_WAV_END    = 0x3f, // Wave pattern end
+    GB_IO_WAV_END    = 0x3F, // Wave pattern end
 
     /* Graphics */
     GB_IO_LCDC       = 0x40, // LCD Control (R/W)
@@ -204,18 +186,18 @@ enum {
     GB_IO_BGP        = 0x47, // BG Palette Data (R/W) - Non CGB Mode Only
     GB_IO_OBP0       = 0x48, // Object Palette 0 Data (R/W) - Non CGB Mode Only
     GB_IO_OBP1       = 0x49, // Object Palette 1 Data (R/W) - Non CGB Mode Only
-    GB_IO_WY         = 0x4a, // Window Y Position (R/W)
-    GB_IO_WX         = 0x4b, // Window X Position minus 7 (R/W)
+    GB_IO_WY         = 0x4A, // Window Y Position (R/W)
+    GB_IO_WX         = 0x4B, // Window X Position minus 7 (R/W)
     // Controls DMG mode and PGB mode
-    GB_IO_KEY0 = 0x4c,
+    GB_IO_KEY0 = 0x4C,
 
     /* General CGB features */
-    GB_IO_KEY1       = 0x4d, // CGB Mode Only - Prepare Speed Switch
+    GB_IO_KEY1       = 0x4D, // CGB Mode Only - Prepare Speed Switch
 
     /* Missing */
 
-    GB_IO_VBK        = 0x4f, // CGB Mode Only - VRAM Bank
-    GB_IO_BANK       = 0x50, // Write to disable the BIOS mapping
+    GB_IO_VBK        = 0x4F, // CGB Mode Only - VRAM Bank
+    GB_IO_BANK       = 0x50, // Write to disable the boot ROM mapping
 
     /* CGB DMA */
     GB_IO_HDMA1      = 0x51, // CGB Mode Only - New DMA Source, High
@@ -229,16 +211,17 @@ enum {
 
     /* Missing */
 
-    /* CGB Paletts */
+    /* CGB Palettes */
     GB_IO_BGPI       = 0x68, // CGB Mode Only - Background Palette Index
     GB_IO_BGPD       = 0x69, // CGB Mode Only - Background Palette Data
-    GB_IO_OBPI       = 0x6a, // CGB Mode Only - Object Palette Index
-    GB_IO_OBPD       = 0x6b, // CGB Mode Only - Object Palette Data
-    GB_IO_OPRI       = 0x6c, // Affects object priority (X based or index based)
+    GB_IO_OBPI       = 0x6A, // CGB Mode Only - Object Palette Index
+    GB_IO_OBPD       = 0x6B, // CGB Mode Only - Object Palette Data
+    GB_IO_OPRI       = 0x6C, // Affects object priority (X based or index based)
 
     /* Missing */
 
     GB_IO_SVBK       = 0x70, // CGB Mode Only - WRAM Bank
+    GB_IO_PSM        = 0x71, // Palette Selection Mode, controls the PSW and key combo
     GB_IO_PSWX       = 0x72, // X position of the palette switching window
     GB_IO_PSWY       = 0x73, // Y position of the palette switching window
     GB_IO_PSW        = 0x74, // Key combo to trigger the palette switching window
@@ -262,6 +245,8 @@ typedef enum {
     GB_BOOT_ROM_SGB2,
     GB_BOOT_ROM_CGB_0,
     GB_BOOT_ROM_CGB,
+    GB_BOOT_ROM_CGB_E,
+    GB_BOOT_ROM_AGB_0,
     GB_BOOT_ROM_AGB,
 } GB_boot_rom_t;
 
@@ -272,18 +257,18 @@ typedef enum {
 #define SGB_PAL_FREQUENCY (21281370 / 5)
 #define DIV_CYCLES (0x100)
 
-#if !defined(MIN)
-#define MIN(A, B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __a : __b; })
+#ifdef GB_DISABLE_REWIND
+#define GB_rewind_reset(...)
+#define GB_rewind_push(...)
+#define GB_rewind_invalidate_for_backstepping(...)
 #endif
 
-#if !defined(MAX)
-#define MAX(A, B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __b : __a; })
-#endif
 #endif
 
-typedef void (*GB_vblank_callback_t)(GB_gameboy_t *gb);
+typedef void (*GB_vblank_callback_t)(GB_gameboy_t *gb, GB_vblank_type_t type);
 typedef void (*GB_log_callback_t)(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes);
 typedef char *(*GB_input_callback_t)(GB_gameboy_t *gb);
+typedef void (*GB_debugger_reload_callback_t)(GB_gameboy_t *gb);
 typedef uint32_t (*GB_rgb_encode_callback_t)(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b);
 typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on);
 typedef void (*GB_rumble_callback_t)(GB_gameboy_t *gb, double rumble_amplitude);
@@ -298,6 +283,7 @@ typedef void (*GB_boot_rom_load_callback_t)(GB_gameboy_t *gb, GB_boot_rom_t type
 
 typedef void (*GB_execution_callback_t)(GB_gameboy_t *gb, uint16_t address, uint8_t opcode);
 typedef void (*GB_lcd_line_callback_t)(GB_gameboy_t *gb, uint8_t line);
+typedef void (*GB_lcd_status_callback_t)(GB_gameboy_t *gb, bool on);
 
 struct GB_breakpoint_s;
 struct GB_watchpoint_s;
@@ -309,11 +295,11 @@ typedef struct {
     bool bg_priority; // For object FIFO – the BG priority bit. For the BG FIFO – the CGB attributes priority bit
 } GB_fifo_item_t;
 
-#define GB_FIFO_LENGTH 16
+#define GB_FIFO_LENGTH 8
 typedef struct {
     GB_fifo_item_t fifo[GB_FIFO_LENGTH];
     uint8_t read_end;
-    uint8_t write_end;
+    uint8_t size;
 } GB_fifo_t;
 
 typedef struct {
@@ -354,6 +340,12 @@ typedef union {
         uint8_t GB_REGISTER_ORDER;
     };
 } GB_registers_t;
+
+typedef GB_ENUM(uint8_t, {
+    GB_ACCESSORY_NONE,
+    GB_ACCESSORY_PRINTER,
+    GB_ACCESSORY_WORKBOY,
+}) GB_accessory_t;
 
 /* When state saving, each section is dumped independently of other sections.
    This allows adding data to the end of the section without worrying about future compatibility.
@@ -409,14 +401,14 @@ struct GB_gameboy_internal_s {
 
         /* Misc state */
         bool infrared_input;
-        GB_printer_t printer;
-        uint8_t extra_oam[0xff00 - 0xfea0];
+        uint8_t extra_oam[0xFF00 - 0xFEA0];
         uint32_t ram_size; // Different between CGB and DMG
-        GB_workboy_t workboy;
                
-       int32_t ir_sensor;
-       bool effective_ir_input;
-       uint16_t address_bus;
+        int32_t ir_sensor;
+        bool effective_ir_input;
+        uint16_t address_bus;
+        uint8_t data_bus; // cart data bus (MAIN)
+        uint32_t data_bus_decay_countdown;
     )
 
     /* DMA and HDMA */
@@ -433,12 +425,14 @@ struct GB_gameboy_internal_s {
         int8_t dma_cycles_modulo;
         bool dma_ppu_vram_conflict;
         uint16_t dma_ppu_vram_conflict_addr;
-        uint8_t hdma_open_bus; /* Required to emulate HDMA reads from Exxx */
+        bool allow_hdma_on_wake;
+        bool dma_restarting;
     )
     
     /* MBC */
     GB_SECTION(mbc,
         uint16_t mbc_rom_bank;
+        uint16_t mbc_rom0_bank; /* For multicart mappings . */
         uint8_t mbc_ram_bank;
         uint32_t mbc_ram_size;
         bool mbc_ram_enable;
@@ -463,28 +457,44 @@ struct GB_gameboy_internal_s {
                 uint8_t rom_bank_low;
                 uint8_t rom_bank_high:1;
                 uint8_t ram_bank:4;
-            } mbc5;
+            } mbc5; // Also used for GB_CAMERA
                
-           struct {
-               uint8_t rom_bank;
-               uint16_t x_latch;
-               uint16_t y_latch;
-               bool latch_ready:1;
-               bool eeprom_do:1;
-               bool eeprom_di:1;
-               bool eeprom_clk:1;
-               bool eeprom_cs:1;
-               uint16_t eeprom_command:11;
-               uint16_t read_bits;
-               uint8_t bits_countdown:5;
-               bool secondary_ram_enable:1;
-               bool eeprom_write_enabled:1;
-           } mbc7;
+            struct {
+                uint16_t x_latch;
+                uint16_t y_latch;
+                uint8_t rom_bank;
+                bool latch_ready:1;
+                bool eeprom_do:1;
+                bool eeprom_di:1;
+                bool eeprom_clk:1;
+                bool eeprom_cs:1;
+                uint16_t eeprom_command:11;
+                uint16_t read_bits;
+                uint8_t argument_bits_left:5;
+                bool secondary_ram_enable:1;
+                bool eeprom_write_enabled:1;
+            } mbc7;
+               
+            struct {
+                uint8_t rom_bank_low:5;
+                uint8_t rom_bank_mid:2;
+                bool mbc1_mode:1;
+               
+                uint8_t rom_bank_mask:4;
+                uint8_t rom_bank_high:2;
+                uint8_t ram_bank_low:2;
+               
+                uint8_t ram_bank_high:2;
+                uint8_t ram_bank_mask:2;
+
+                bool locked:1;
+                bool mbc1_mode_disable:1;
+                bool multiplex_mode:1;
+            } mmm01;
             
             struct {
                 uint8_t bank_low:6;
                 uint8_t bank_high:3;
-                bool mode:1;
                 bool ir_mode:1;
             } huc1;
 
@@ -492,10 +502,10 @@ struct GB_gameboy_internal_s {
                 uint8_t rom_bank:7;
                 uint8_t padding:1;
                 uint8_t ram_bank:4;
-                uint8_t mode;
-                uint8_t access_index;
+                uint8_t mode:4;
                 uint16_t minutes, days;
                 uint16_t alarm_minutes, alarm_days;
+                uint8_t access_index;
                 bool alarm_enabled;
                 uint8_t read;
                 uint8_t access_flags;
@@ -507,11 +517,13 @@ struct GB_gameboy_internal_s {
                uint8_t mode;
            } tpp1;
         };
-        uint16_t mbc_rom0_bank; /* For some MBC1 wirings. */
-        bool camera_registers_mapped;
-        uint8_t camera_registers[0x36];
         uint8_t rumble_strength;
         bool cart_ir;
+               
+        bool camera_registers_mapped;
+        uint8_t camera_registers[0x36];
+        uint8_t camera_alignment;
+        int32_t camera_countdown;
     )
 
     /* HRAM and HW Registers */
@@ -525,9 +537,13 @@ struct GB_gameboy_internal_s {
         GB_UNIT(display);
         GB_UNIT(div);
         uint16_t div_counter;
-        uint8_t tima_reload_state; /* After TIMA overflows, it becomes 0 for 4 cycles before actually reloading. */
-        uint16_t serial_cycles;
-        uint16_t serial_length;
+        GB_ENUM(uint8_t, {
+            GB_TIMA_RUNNING = 0,
+            GB_TIMA_RELOADING = 1,
+            GB_TIMA_RELOADED = 2
+        }) tima_reload_state; /* After TIMA overflows, it becomes 0 for 4 cycles before actually reloading. */
+        bool serial_master_clock;
+        uint8_t serial_mask;
         uint8_t double_speed_alignment;
         uint8_t serial_count;
         int32_t speed_switch_halt_countdown;
@@ -538,6 +554,9 @@ struct GB_gameboy_internal_s {
         bool lcd_disabled_outside_of_vblank;
         int32_t allowed_pending_cycles;
         uint16_t mode3_batching_length;
+        uint8_t joyp_switching_delay;
+        uint8_t joyp_switch_value;
+        uint16_t key_bounce_timing[GB_KEY_MAX];
     )
 
     /* APU */
@@ -562,25 +581,22 @@ struct GB_gameboy_internal_s {
         uint8_t object_palettes_data[0x40];
         uint8_t position_in_line;
         bool stat_interrupt_line;
-        uint8_t effective_scx;
         uint8_t window_y;
         /* The LCDC will skip the first frame it renders after turning it on.
            On the CGB, a frame is not skipped if the previous frame was skipped as well.
            See https://www.reddit.com/r/EmuDev/comments/6exyxu/ */
                
         /* TODO: Drop this and properly emulate the dropped vreset signal*/
-        enum {
+        GB_ENUM(uint8_t, {
             GB_FRAMESKIP_LCD_TURNED_ON, // On a DMG, the LCD renders a blank screen during this state,
                                         // on a CGB, the previous frame is repeated (which might be
                                         // blank if the LCD was off for more than a few cycles)
-            GB_FRAMESKIP_FIRST_FRAME_SKIPPED, // This state is 'skipped' when emulating a DMG
-            GB_FRAMESKIP_SECOND_FRAME_RENDERED,
-        } frame_skip_state;
+            GB_FRAMESKIP_FIRST_FRAME_RENDERED,
+        }) frame_skip_state;
         bool oam_read_blocked;
         bool vram_read_blocked;
         bool oam_write_blocked;
         bool vram_write_blocked;
-        bool fifo_insertion_glitch;
         uint8_t current_line;
         uint16_t ly_for_comparison;
         GB_fifo_t bg_fifo, oam_fifo;
@@ -597,11 +613,16 @@ struct GB_gameboy_internal_s {
         uint8_t objects_x[10];
         uint8_t objects_y[10];
         uint8_t object_tile_data[2];
-        uint8_t object_flags;
+        uint8_t mode2_y_bus;
+        // They're the same bus
+        union {
+            uint8_t mode2_x_bus;
+            uint8_t object_flags;
+        };
         uint8_t n_visible_objs;
+        uint8_t orig_n_visible_objs;
         uint8_t oam_search_index;
         uint8_t accessed_oam_row;
-        uint8_t extra_penalty_for_object_at_0;
         uint8_t mode_for_interrupt;
         bool lyc_interrupt_line;
         bool cgb_palettes_blocked;
@@ -619,8 +640,21 @@ struct GB_gameboy_internal_s {
         bool is_odd_frame;
         uint16_t last_tile_data_address;
         uint16_t last_tile_index_address;
-        bool cgb_repeated_a_frame;
         uint8_t data_for_sel_glitch;
+        bool delayed_glitch_hblank_interrupt;
+        uint32_t frame_repeat_countdown;
+        bool disable_window_pixel_insertion_glitch;
+        bool insert_bg_pixel;
+        uint8_t cpu_vram_bus;
+        uint32_t frame_parity_ticks;
+    )
+    
+    GB_SECTION(accessory,
+        GB_accessory_t accessory;
+        union {
+            GB_printer_t printer;
+            GB_workboy_t workboy;
+        };
     )
 
     /* Unsaved data. This includes all pointers, as well as everything that shouldn't be on a save state */
@@ -660,6 +694,8 @@ struct GB_gameboy_internal_s {
         bool background_disabled;
         bool joyp_accessed;
         bool illegal_inputs_allowed;
+        bool no_bouncing_emulation;
+        bool joypad_is_stable;
 
         /* Timing */
         uint64_t last_sync;
@@ -668,6 +704,7 @@ struct GB_gameboy_internal_s {
         uint32_t rtc_second_length;
         uint32_t clock_rate;
         uint32_t unmultiplied_clock_rate;
+        uint32_t data_bus_decay;
 
         /* Audio */
         GB_apu_output_t apu_output;
@@ -694,14 +731,21 @@ struct GB_gameboy_internal_s {
         GB_write_memory_callback_t write_memory_callback;
         GB_boot_rom_load_callback_t boot_rom_load_callback;
         GB_print_image_callback_t printer_callback;
+        GB_printer_done_callback_t printer_done_callback;
         GB_workboy_set_time_callback workboy_set_time_callback;
         GB_workboy_get_time_callback workboy_get_time_callback;
         GB_execution_callback_t execution_callback;
         GB_lcd_line_callback_t lcd_line_callback;
-
+        GB_lcd_status_callback_t lcd_status_callback;
+        GB_debugger_reload_callback_t debugger_reload_callback;
+               
+#ifndef GB_DISABLE_DEBUGGER
         /*** Debugger ***/
         volatile bool debug_stopped, debug_disable;
         bool debug_fin_command, debug_next_command;
+        bool debug_active; // Cached value determining if GB_debugger_run does anything
+        bool help_shown;
+        uint32_t backstep_instructions;
 
         /* Breakpoints */
         uint16_t n_breakpoints;
@@ -710,8 +754,6 @@ struct GB_gameboy_internal_s {
         void *nontrivial_jump_state;
         bool non_trivial_jump_breakpoint_occured;
 
-        /* SLD (Todo: merge with backtrace) */
-        bool stack_leak_detection;
         signed debug_call_depth;
         uint16_t sp_for_call_depth[0x200]; /* Should be much more than enough */
         uint16_t addr_for_call_depth[0x200];
@@ -729,7 +771,8 @@ struct GB_gameboy_internal_s {
         struct GB_watchpoint_s *watchpoints;
 
         /* Symbol tables */
-        GB_symbol_map_t *bank_symbols[0x200];
+        GB_symbol_map_t **bank_symbols;
+        size_t n_symbol_maps;
         GB_reversed_symbol_map_t reversed_symbol_map;
 
         /* Ticks command */
@@ -739,15 +782,21 @@ struct GB_gameboy_internal_s {
         /* Undo */
         uint8_t *undo_state;
         const char *undo_label;
+#endif
 
+#ifndef GB_DISABLE_REWIND
         /* Rewind */
         size_t rewind_buffer_length;
+        size_t rewind_state_size;
         struct {
             uint8_t *key_state;
             uint8_t *compressed_states[GB_REWIND_FRAMES_PER_KEY];
+            uint32_t instruction_count[GB_REWIND_FRAMES_PER_KEY + 1];
             unsigned pos;
         } *rewind_sequences; // lasts about 4 seconds
         size_t rewind_pos;
+        bool rewind_disable_invalidation;
+#endif
                
         /* SGB - saved and allocated optionally */
         GB_sgb_t *sgb;
@@ -756,11 +805,13 @@ struct GB_gameboy_internal_s {
         double sgb_intro_sweep_phase;
         double sgb_intro_sweep_previous_sample;
                
-        /* Cheats */
+#ifndef GB_DISABLE_CHEATS
+       /* Cheats */
         bool cheat_enabled;
         size_t cheat_count;
         GB_cheat_t **cheats;
         GB_cheat_hash_t *cheat_hash[256];
+#endif
 
         /* Misc */
         bool turbo;
@@ -780,7 +831,12 @@ struct GB_gameboy_internal_s {
         bool disable_oam_corruption; // For safe memory reads
         bool in_dma_read;
         bool hdma_in_progress;
+        bool returned_open_bus;
         uint16_t addr_for_hdma_conflict;
+        bool during_div_write;
+               
+        /* Thread safety (debug only) */
+        void *running_thread_id;
                
         GB_gbs_header_t gbs_header;
    )
@@ -799,15 +855,39 @@ struct GB_gameboy_s {
 __attribute__((__format__ (__printf__, fmtarg, firstvararg)))
 #endif
 
-void GB_init(GB_gameboy_t *gb, GB_model_t model);
+/*
+    There are two instance allocation styles – one where you manage your
+    own instance allocation, and one where you use provided allocators.
+ 
+    Managing allocations yourself:
+    GB_gameboy_t gb;
+    GB_init(&gb, model);
+    ...
+    GB_free(&gb);
+ 
+    Using the provided allocators:
+    GB_gameboy_t *gb = GB_init(GB_alloc(), model);
+    ...
+    GB_free(gb); // optional
+    GB_dealloc(gb);
+ 
+*/
+GB_gameboy_t *GB_init(GB_gameboy_t *gb, GB_model_t model);
+void GB_free(GB_gameboy_t *gb);
+GB_gameboy_t *GB_alloc(void);
+void GB_dealloc(GB_gameboy_t *gb);
+
+// For when you want to use your own malloc implementation without having to rely on the header struct
+size_t GB_allocation_size(void);
+    
 bool GB_is_inited(GB_gameboy_t *gb);
 bool GB_is_cgb(const GB_gameboy_t *gb);
 bool GB_is_cgb_in_cgb_mode(GB_gameboy_t *gb);
 bool GB_is_sgb(GB_gameboy_t *gb); // Returns true if the model is SGB or SGB2
 bool GB_is_hle_sgb(GB_gameboy_t *gb); // Returns true if the model is SGB or SGB2 and the SFC/SNES side is HLE'd
 GB_model_t GB_get_model(GB_gameboy_t *gb);
-void GB_free(GB_gameboy_t *gb);
 void GB_reset(GB_gameboy_t *gb);
+void GB_quick_reset(GB_gameboy_t *gb); // Similar to the cart reset line
 void GB_switch_model_and_reset(GB_gameboy_t *gb, GB_model_t model);
 
 /* Returns the time passed, in 8MHz ticks. */
@@ -827,6 +907,7 @@ typedef enum {
     GB_DIRECT_ACCESS_BGP,
     GB_DIRECT_ACCESS_OBP,
     GB_DIRECT_ACCESS_IE,
+    GB_DIRECT_ACCESS_ROM0, // Identical to ROM, but returns the correct rom0 bank in the bank output argument
 } GB_direct_access_t;
 
 /* Returns a mutable pointer to various hardware memories. If that memory is banked, the current bank
@@ -860,6 +941,7 @@ void GB_log(GB_gameboy_t *gb, const char *fmt, ...) __printflike(2, 3);
 void GB_attributed_log(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, ...) __printflike(3, 4);
 
 void GB_set_pixels_output(GB_gameboy_t *gb, uint32_t *output);
+uint32_t *GB_get_pixels_output(GB_gameboy_t *gb);
 void GB_set_border_mode(GB_gameboy_t *gb, GB_border_mode_t border_mode);
     
 void GB_set_infrared_input(GB_gameboy_t *gb, bool state);
@@ -868,6 +950,7 @@ void GB_set_vblank_callback(GB_gameboy_t *gb, GB_vblank_callback_t callback);
 void GB_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback);
 void GB_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
 void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
+void GB_set_debugger_reload_callback(GB_gameboy_t *gb, GB_debugger_reload_callback_t callback);
 void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback);
 void GB_set_infrared_callback(GB_gameboy_t *gb, GB_infrared_callback_t callback);
 void GB_set_rumble_callback(GB_gameboy_t *gb, GB_rumble_callback_t callback);
@@ -877,6 +960,7 @@ void GB_set_boot_rom_load_callback(GB_gameboy_t *gb, GB_boot_rom_load_callback_t
     
 void GB_set_execution_callback(GB_gameboy_t *gb, GB_execution_callback_t callback);
 void GB_set_lcd_line_callback(GB_gameboy_t *gb, GB_lcd_line_callback_t callback);
+void GB_set_lcd_status_callback(GB_gameboy_t *gb, GB_lcd_status_callback_t callback);
 
 void GB_set_palette(GB_gameboy_t *gb, const GB_palette_t *palette);
 const GB_palette_t *GB_get_palette(GB_gameboy_t *gb);
@@ -890,8 +974,10 @@ bool GB_serial_get_data_bit(GB_gameboy_t *gb);
 void GB_serial_set_data_bit(GB_gameboy_t *gb, bool data);
     
 void GB_disconnect_serial(GB_gameboy_t *gb);
+GB_accessory_t GB_get_built_in_accessory(GB_gameboy_t *gb);
     
 /* For cartridges with an alarm clock */
+bool GB_rom_supports_alarms(GB_gameboy_t *gb);
 unsigned GB_time_to_alarm(GB_gameboy_t *gb); // 0 if no alarm
 
 /* For cartridges motion controls */
@@ -899,6 +985,9 @@ bool GB_has_accelerometer(GB_gameboy_t *gb);
 // In units of g (gravity's acceleration).
 // Values within ±4 recommended
 void GB_set_accelerometer_values(GB_gameboy_t *gb, double x, double y);
+    
+// Time it takes for a value in the data bus to decay to FF, in 8MHz units. (0 to never decay, like e.g. an EverDrive)
+void GB_set_open_bus_decay_time(GB_gameboy_t *gb, uint32_t decay);
     
 /* For integration with SFC/SNES emulators */
 void GB_set_joyp_write_callback(GB_gameboy_t *gb, GB_joyp_write_callback_t callback);
@@ -925,4 +1014,29 @@ internal void GB_borrow_sgb_border(GB_gameboy_t *gb);
 internal void GB_update_clock_rate(GB_gameboy_t *gb);
 #endif
     
-#endif /* GB_h */
+#ifdef GB_INTERNAL
+
+#ifndef NDEBUG
+#define GB_CONTEXT_SAFETY
+#endif
+    
+#ifdef GB_CONTEXT_SAFETY
+#include <assert.h>
+internal void *GB_get_thread_id(void);
+internal void GB_set_running_thread(GB_gameboy_t *gb);
+internal void GB_clear_running_thread(GB_gameboy_t *gb);
+#define GB_ASSERT_NOT_RUNNING(gb) if (gb->running_thread_id) {GB_log(gb, "Function %s must not be called in a running context.\n", __FUNCTION__); assert(!gb->running_thread_id);}
+#define GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb) if (gb->running_thread_id && gb->running_thread_id != GB_get_thread_id()) {GB_log(gb, "Function %s must not be called while running in another thread.\n", __FUNCTION__); assert(!gb->running_thread_id || gb->running_thread_id == GB_get_thread_id());}
+
+#else
+#define GB_ASSERT_NOT_RUNNING(gb)
+#define GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+#define GB_set_running_thread(gb)
+#define GB_clear_running_thread(gb)
+#endif
+    
+#endif
+
+#ifdef __cplusplus
+}
+#endif

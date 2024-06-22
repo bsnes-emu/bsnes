@@ -4,7 +4,7 @@ case `echo $1 | cut -d '-' -f 1` in
                 sudo apt-get install -yq bison libpng-dev pkg-config libsdl2-dev
                 (
                 cd `mktemp -d`
-                curl -L https://github.com/rednex/rgbds/archive/v0.4.0.zip > rgbds.zip
+                curl -L https://github.com/rednex/rgbds/archive/v0.6.0.zip > rgbds.zip
                 unzip rgbds.zip
                 cd rgbds-*
                 make -sj
@@ -12,9 +12,22 @@ case `echo $1 | cut -d '-' -f 1` in
                 cd ..
                 rm -rf *
                 )
+                
+                (
+                cd `mktemp -d`
+                curl -L https://github.com/BR903/cppp/archive/refs/heads/master.zip > cppp.zip
+                unzip cppp.zip
+                cd cppp-*
+                make -sj
+                sudo make install
+                cd ..
+                rm -rf *
+                )
+                
+                
                 ;;
         macos)
-                brew install rgbds sdl2
+                brew install rgbds sdl2 cppp
                 ;;
         *)
                 echo "Unsupported OS"

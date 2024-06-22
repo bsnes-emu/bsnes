@@ -1,10 +1,23 @@
 #pragma once
+
+#ifdef noinline
+#undef noinline
 #include_next <stdio.h>
+#define noinline __attribute__((noinline))
+#else
+#include_next <stdio.h>
+#endif
+
 #include <stdlib.h>
+#include <stdarg.h>
+
+#if _WIN64
+#define fseek(...) _fseeki64(__VA_ARGS__)
+#endif
 
 int access(const char *filename, int mode);
-#define R_OK 2
-#define W_OK 4
+#define R_OK 4
+#define W_OK 2
 
 #ifndef __MINGW32__
 #ifndef __LIBRETRO__
@@ -20,6 +33,16 @@ static inline int vasprintf(char **str, const char *fmt, va_list args)
     }
     return ret;
 }
+
+static inline int asprintf(char **strp, const char *fmt, ...)
+{
+    va_list args;
+    va_start(args, fmt);
+    int r = vasprintf(strp, fmt, args);
+    va_end(args);
+    return r;
+}
+
 #endif
 #endif
 

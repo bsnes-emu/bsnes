@@ -1,6 +1,3 @@
-#ifndef KeyboardShortcutPrivateAPIs_h
-#define KeyboardShortcutPrivateAPIs_h
-
 /* These are private APIs, but they are a very simple and comprehensive way
    to convert a key equivalent to its display name. */
 
@@ -22,5 +19,3 @@
 @interface NSPrefPaneUtils : NSObject
 + (id)stringForVirtualKey:(unsigned int)key modifiers:(unsigned int)flags;
 @end
-
-#endif

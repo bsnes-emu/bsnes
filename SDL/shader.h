@@ -1,5 +1,5 @@
-#ifndef shader_h
-#define shader_h
+#pragma once
+
 #include "opengl_compat.h"
 #include <stdbool.h>
 
@@ -30,5 +30,3 @@ void render_bitmap_with_shader(shader_t *shader, void *bitmap, void *previous,
                                unsigned x, unsigned y, unsigned w, unsigned h,
                                GB_frame_blending_mode_t blending_mode);
 void free_shader(struct shader_s *shader);
-
-#endif /* shader_h */

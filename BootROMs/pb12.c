@@ -5,7 +5,7 @@
 #include <unistd.h>
 #include <assert.h>
 
-void opts(uint8_t byte, uint8_t *options)
+static void opts(uint8_t byte, uint8_t *options)
 {
     *(options++) = byte | ((byte << 1) & 0xff);
     *(options++) = byte & (byte << 1);
@@ -13,7 +13,7 @@ void opts(uint8_t byte, uint8_t *options)
     *(options++) = byte & (byte >> 1);
 }
 
-void write_all(int fd, const void *buf, size_t count) {
+static void write_all(int fd, const void *buf, size_t count) {
     while (count) {
         ssize_t written = write(fd, buf, count);
         if (written < 0) {
@@ -25,7 +25,7 @@ void write_all(int fd, const void *buf, size_t count) {
     }
 }
 
-int main()
+int main(void)
 {
     static uint8_t source[0x4000];
     size_t size = read(STDIN_FILENO, &source, sizeof(source));
@@ -87,7 +87,7 @@ int main()
         prev[1] = byte;
         if (bits >= 8) {
             uint8_t outctl = control >> (bits - 8);
-            assert(outctl != 1);
+            assert(outctl != 1); // 1 is reserved as the end byte
             write_all(STDOUT_FILENO, &outctl, 1);
             write_all(STDOUT_FILENO, literals, literals_size);
             bits -= 8;

@@ -1,6 +1,10 @@
 #import "JOYAxes3D.h"
 #import "JOYElement.h"
 
+@interface JOYAxes3D()
+@property unsigned rotation; // in 90 degrees units, clockwise
+@end
+
 @implementation JOYAxes3D
 {
     JOYElement *_element1, *_element2, *_element3;
@@ -13,12 +17,12 @@
 + (NSString *)usageToString: (JOYAxes3DUsage) usage
 {
     if (usage < JOYAxes3DUsageNonGenericMax) {
-        return (NSString *[]) {
+        return inline_const(NSString *[], {
             @"None",
             @"Acceleretion",
             @"Orientation",
             @"Gyroscope",
-        }[usage];
+        })[usage];
     }
     if (usage >= JOYAxes3DUsageGeneric0) {
         return [NSString stringWithFormat:@"Generic 3D Analog Control %d", usage - JOYAxes3DUsageGeneric0];
@@ -34,12 +38,12 @@
 
 - (uint64_t)uniqueID
 {
-    return _element1.uniqueID;
+    return _element1.uniqueID | (uint64_t)self.combinedIndex << 32;
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p, %@ (%llu); State: (%.2f, %.2f, %.2f)>", self.className, self, self.usageString, self.uniqueID, _state1, _state2, _state3];
+    return [NSString stringWithFormat:@"<%@: %p, %@ (%llx); State: (%.2f, %.2f, %.2f)>", self.className, self, self.usageString, self.uniqueID, _state1, _state2, _state3];
 }
 
 - (instancetype)initWithFirstElement:(JOYElement *)element1 secondElement:(JOYElement *)element2 thirdElement:(JOYElement *)element3
@@ -100,6 +104,23 @@
     }
     else {
         _gApproximation = _gApproximation * 0.9999 + distance * 0.0001;
+    }
+    
+    double temp = _state1;
+    switch (_rotation & 3) {
+        case 0: break;
+        case 1:
+            _state1 = -_state3;
+            _state3 = temp;
+            break;
+        case 2:
+            _state1 = -_state1;
+            _state3 = -_state3;
+            break;
+        case 3:
+            _state1 = _state3;
+            _state3 = -temp;
+            break;
     }
 
     return old1 != _state1 || old2 != _state2 || old3 != _state3;

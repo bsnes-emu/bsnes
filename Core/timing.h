@@ -1,5 +1,5 @@
-#ifndef timing_h
-#define timing_h
+#pragma once
+
 #include "defs.h"
 
 typedef enum {
@@ -19,12 +19,8 @@ internal void GB_emulate_timer_glitch(GB_gameboy_t *gb, uint8_t old_tac, uint8_t
 internal bool GB_timing_sync_turbo(GB_gameboy_t *gb); /* Returns true if should skip frame */
 internal void GB_timing_sync(GB_gameboy_t *gb);
 internal void GB_set_internal_div_counter(GB_gameboy_t *gb, uint16_t value);
-enum {
-    GB_TIMA_RUNNING = 0,
-    GB_TIMA_RELOADING = 1,
-    GB_TIMA_RELOADED = 2
-};
-
+internal void GB_serial_master_edge(GB_gameboy_t *gb);
+internal void GB_rtc_set_time(GB_gameboy_t *gb, uint64_t time);
 
 #define GB_SLEEP(gb, unit, state, cycles) do {\
     (gb)->unit##_cycles -= (cycles) * __state_machine_divisor; \
@@ -52,14 +48,12 @@ if ((gb)->unit##_cycles <= 0) {\
     return;\
 }\
 switch ((gb)->unit##_state)
-#endif
 
 #define GB_BATCHABLE_STATE_MACHINE(gb, unit, cycles, divisor, allow_batching) \
 const bool __state_machine_allow_batching = (allow_batching); \
 GB_STATE_MACHINE(gb, unit, cycles, divisor)
 
 #define GB_STATE(gb, unit, state) case state: goto unit##state
+#endif
 
 #define GB_UNIT(unit) int32_t unit##_cycles, unit##_state
-
-#endif /* timing_h */

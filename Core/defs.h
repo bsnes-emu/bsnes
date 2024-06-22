@@ -1,20 +1,41 @@
-#ifndef defs_h
-#define defs_h
+#pragma once
+
+#define GB_likely(x)   __builtin_expect((bool)(x), 1)
+#define GB_unlikely(x) __builtin_expect((bool)(x), 0)
+#define GB_inline_const(type, ...) (*({static const typeof(type) _= __VA_ARGS__; &_;}))
 
 #ifdef GB_INTERNAL
 
 // "Keyword" definitions
-#define likely(x)   __builtin_expect((bool)(x), 1)
-#define unlikely(x) __builtin_expect((bool)(x), 0)
+#define likely(x)   GB_likely(x)
+#define unlikely(x) GB_unlikely(x)
+#define inline_const GB_inline_const
+#define typeof __typeof__
 
-#define internal __attribute__((visibility("internal")))
+#if !defined(MIN)
+#define MIN(A, B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __a : __b; })
+#endif
+
+#if !defined(MAX)
+#define MAX(A, B)    ({ __typeof__(A) __a = (A); __typeof__(B) __b = (B); __a < __b ? __b : __a; })
+#endif
+
+#if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 8)
+#define __builtin_bswap16(x) ({ typeof(x) _x = (x); _x >> 8 | _x << 8; })
+#endif
+
+#define internal __attribute__((visibility("hidden")))
+#define noinline __attribute__((noinline))
 
 #if __clang__
 #define unrolled _Pragma("unroll")
+#define nounroll _Pragma("clang loop unroll(disable)")
 #elif __GNUC__ >= 8
 #define unrolled _Pragma("GCC unroll 8")
+#define nounroll _Pragma("GCC unroll 0")
 #else
 #define unrolled
+#define nounroll
 #endif
 
 #define unreachable() __builtin_unreachable();
@@ -37,10 +58,5 @@
 #endif
 #endif
 
-#if __GNUC__ < 4 || (__GNUC__ == 4 && __GNUC_MINOR__ < 8)
-#define __builtin_bswap16(x) ({ typeof(x) _x = (x); _x >> 8 | _x << 8; })
-#endif
-
 struct GB_gameboy_s;
 typedef struct GB_gameboy_s GB_gameboy_t;
-#endif 

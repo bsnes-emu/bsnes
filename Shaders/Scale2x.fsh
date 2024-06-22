@@ -2,22 +2,16 @@
 
 STATIC vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
-    // o = offset, the width of a pixel
-    vec2 o = 1.0 / input_resolution;
-    
     // texel arrangement
     // A B C
     // D E F
     // G H I
-    // vec4 A = texture(image, position + vec2( -o.x,  o.y));
-    vec4 B = texture(image, position + vec2(    0,  o.y));
-    // vec4 C = texture(image, position + vec2(  o.x,  o.y));
-    vec4 D = texture(image, position + vec2( -o.x,    0));
-    vec4 E = texture(image, position + vec2(    0,    0));
-    vec4 F = texture(image, position + vec2(  o.x,    0));
-    // vec4 G = texture(image, position + vec2( -o.x, -o.y));
-    vec4 H = texture(image, position + vec2(    0, -o.y));
-    // vec4 I = texture(image, position + vec2(  o.x, -o.y));
+    
+    vec4 B = texture_relative(image, position, vec2(  0,  1));
+    vec4 D = texture_relative(image, position, vec2( -1,  0));
+    vec4 E = texture_relative(image, position, vec2(  0,  0));
+    vec4 F = texture_relative(image, position, vec2(  1,  0));
+    vec4 H = texture_relative(image, position, vec2(  0, -1));
     vec2 p = position * input_resolution;
     // p = the position within a pixel [0...1]
     p = fract(p);

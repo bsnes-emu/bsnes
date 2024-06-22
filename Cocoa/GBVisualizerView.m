@@ -1,6 +1,6 @@
 #import "GBVisualizerView.h"
 #import "GBPaletteEditorController.h"
-#include <Core/gb.h>
+#import <Core/gb.h>
 
 #define SAMPLE_COUNT 1024
 

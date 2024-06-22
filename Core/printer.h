@@ -1,5 +1,5 @@
-#ifndef printer_h
-#define printer_h
+#pragma once
+
 #include <stdint.h>
 #include <stdbool.h>
 #include "defs.h"
@@ -13,12 +13,13 @@ typedef void (*GB_print_image_callback_t)(GB_gameboy_t *gb,
                                           uint8_t bottom_margin,
                                           uint8_t exposure);
 
+typedef void (*GB_printer_done_callback_t)(GB_gameboy_t *gb);
 
 typedef struct
 {
     /* Communication state machine */
 
-    enum {
+    GB_ENUM(uint8_t, {
         GB_PRINTER_COMMAND_MAGIC1,
         GB_PRINTER_COMMAND_MAGIC2,
         GB_PRINTER_COMMAND_ID,
@@ -30,13 +31,13 @@ typedef struct
         GB_PRINTER_COMMAND_CHECKSUM_HIGH,
         GB_PRINTER_COMMAND_ACTIVE,
         GB_PRINTER_COMMAND_STATUS,
-    } command_state : 8;
-    enum {
+    }) command_state;
+    GB_ENUM(uint8_t, {
         GB_PRINTER_INIT_COMMAND = 1,
         GB_PRINTER_START_COMMAND = 2,
         GB_PRINTER_DATA_COMMAND = 4,
         GB_PRINTER_NOP_COMMAND = 0xF,
-    } command_id : 8;
+    }) command_id;
     bool compression;
     uint16_t length_left;
     uint8_t command_data[GB_PRINTER_MAX_COMMAND_LENGTH];
@@ -47,8 +48,9 @@ typedef struct
     
     uint8_t image[160 * 200];
     uint16_t image_offset;
-    
-    uint64_t idle_time;
+
+    uint32_t idle_time;
+    uint32_t time_remaining;
     
     uint8_t compression_run_lenth;
     bool compression_run_is_compressed;
@@ -59,5 +61,4 @@ typedef struct
 } GB_printer_t;
 
 
-void GB_connect_printer(GB_gameboy_t *gb, GB_print_image_callback_t callback);
-#endif
+void GB_connect_printer(GB_gameboy_t *gb, GB_print_image_callback_t callback, GB_printer_done_callback_t done_callback);
