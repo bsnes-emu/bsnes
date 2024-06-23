@@ -171,6 +171,7 @@ GB_gameboy_t *GB_init(GB_gameboy_t *gb, GB_model_t model)
 #endif
     gb->cartridge_type = &GB_cart_defs[0]; // Default cartridge type
     gb->clock_multiplier = 1.0;
+    gb->apu_output.max_cycles_per_sample = 0x400;
     
     if (model & GB_MODEL_NO_SFC_BIT) {
         /* Disable time syncing. Timing should be done by the SFC emulator. */

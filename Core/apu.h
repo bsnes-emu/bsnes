@@ -169,6 +169,7 @@ typedef struct {
     unsigned sample_rate;
 
     unsigned sample_cycles; // Counts by sample_rate until it reaches the clock frequency
+    unsigned max_cycles_per_sample;
 
     // Samples are NOT normalized to MAX_CH_AMP * 4 at this stage!
     unsigned cycles_since_render;
