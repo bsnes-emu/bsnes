@@ -252,7 +252,7 @@ static void timers_run(GB_gameboy_t *gb, uint8_t cycles)
 {
     if (gb->stopped) {
         if (GB_is_cgb(gb)) {
-            gb->apu.apu_cycles += 4 << !gb->cgb_double_speed;
+            gb->apu.apu_cycles += 1 << !gb->cgb_double_speed;
         }
         return;
     }
@@ -266,7 +266,7 @@ static void timers_run(GB_gameboy_t *gb, uint8_t cycles)
     while (true) {
         advance_tima_state_machine(gb);
         GB_set_internal_div_counter(gb, gb->div_counter + 4);
-        gb->apu.apu_cycles += 4 << !gb->cgb_double_speed;
+        gb->apu.apu_cycles += 1 << !gb->cgb_double_speed;
         GB_SLEEP(gb, div, 2, 4);
     }
 }

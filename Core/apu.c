@@ -633,9 +633,11 @@ static void step_lfsr(GB_gameboy_t *gb, unsigned cycles_offset)
 
 void GB_apu_run(GB_gameboy_t *gb, bool force)
 {
-    uint32_t clock_rate = GB_get_clock_rate(gb) * 2;
+    uint32_t clock_rate = GB_get_clock_rate(gb) * 2;    
+    uint16_t cycles = gb->apu.apu_cycles;
+
     if (force ||
-        (gb->apu.apu_cycles > 0x1000) ||
+        (gb->apu.apu_cycles > 0x400) ||
         (gb->apu_output.sample_cycles >= clock_rate) ||
         (gb->apu.square_sweep_calculate_countdown || gb->apu.channel_1_restart_hold || gb->apu.square_sweep_calculate_countdown_reload_timer) ||
         (gb->model <= GB_MODEL_CGB_E && (gb->apu.wave_channel.bugged_read_countdown || (gb->apu.wave_channel.enable && gb->apu.wave_channel.pulsed)))) {
@@ -644,8 +646,7 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
     if (!force) {
         return;
     }
-    /* Convert 4MHZ to 2MHz. apu_cycles is always divisable by 4. */
-    uint16_t cycles = gb->apu.apu_cycles >> 2;
+
     gb->apu.apu_cycles = 0;
     if (!cycles) return;
     
@@ -677,7 +678,7 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
             else {
                 /* Split it into two */
                 cycles -= gb->apu.noise_channel.dmg_delayed_start;
-                gb->apu.apu_cycles = gb->apu.noise_channel.dmg_delayed_start * 4;
+                gb->apu.apu_cycles = gb->apu.noise_channel.dmg_delayed_start;
                 GB_apu_run(gb, true);
             }
         }
@@ -854,6 +855,7 @@ void GB_apu_run(GB_gameboy_t *gb, bool force)
 void GB_apu_init(GB_gameboy_t *gb)
 {
     memset(&gb->apu, 0, sizeof(gb->apu));
+    gb->apu.apu_cycles_in_2mhz = true;
     gb->apu.lf_div = 1;
     gb->apu.wave_channel.shift = 4;
     /* APU glitch: When turning the APU on while DIV's bit 4 (or 5 in double speed mode) is on,
@@ -1154,6 +1156,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                 memset(&gb->apu, 0, sizeof(gb->apu));
                 memset(gb->io_registers + GB_IO_NR10, 0, GB_IO_WAV_START - GB_IO_NR10);
                 gb->apu.global_enable = false;
+                gb->apu.apu_cycles_in_2mhz = true;
             }
 
             if (!GB_is_cgb(gb) && (value & 0x80)) {
@@ -1627,7 +1630,6 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
 
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned sample_rate)
 {
-
     gb->apu_output.sample_rate = sample_rate;
     if (sample_rate) {
         gb->apu_output.highpass_rate = pow(0.999958,  GB_get_clock_rate(gb) / (double)sample_rate);
