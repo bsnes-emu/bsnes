@@ -217,6 +217,14 @@ SDL_LDFLAGS += $(shell $(PKG_CONFIG) --libs openal)
 SDL_AUDIO_DRIVERS += openal
 endif
 endif
+
+GIO_CFLAGS := $(shell $(PKG_CONFIG) --cflags gio-2.0) -DG_LOG_USE_STRUCTURED
+GIO_LDFLAGS := $(shell $(PKG_CONFIG) --libs gio-2.0)
+ifeq ($(CONF),debug)
+GIO_CFLAGS += -DG_ENABLE_DEBUG
+else
+GIO_CFLAGS += -DG_DISABLE_ASSERT
+endif
 endif
 
 ifeq (,$(PKG_CONFIG))
@@ -330,6 +338,7 @@ endif
 
 cocoa: $(BIN)/SameBoy.app
 quicklook: $(BIN)/SameBoy.qlgenerator
+xdg-thumbnailer: $(BIN)/XdgThumbnailer/sameboy-thumbnailer
 sdl: $(SDL_TARGET) $(BIN)/SDL/dmg_boot.bin $(BIN)/SDL/mgb_boot.bin $(BIN)/SDL/cgb0_boot.bin $(BIN)/SDL/cgb_boot.bin $(BIN)/SDL/agb_boot.bin $(BIN)/SDL/sgb_boot.bin $(BIN)/SDL/sgb2_boot.bin $(BIN)/SDL/LICENSE $(BIN)/SDL/registers.sym $(BIN)/SDL/background.bmp $(BIN)/SDL/Shaders $(BIN)/SDL/Palettes
 bootroms: $(BIN)/BootROMs/agb_boot.bin $(BIN)/BootROMs/cgb_boot.bin $(BIN)/BootROMs/cgb0_boot.bin $(BIN)/BootROMs/dmg_boot.bin $(BIN)/BootROMs/mgb_boot.bin $(BIN)/BootROMs/sgb_boot.bin $(BIN)/BootROMs/sgb2_boot.bin
 tester: $(TESTER_TARGET) $(BIN)/tester/dmg_boot.bin $(BIN)/tester/cgb_boot.bin $(BIN)/tester/agb_boot.bin $(BIN)/tester/sgb_boot.bin $(BIN)/tester/sgb2_boot.bin
@@ -355,6 +364,7 @@ TESTER_SOURCES := $(shell ls Tester/*.c)
 IOS_SOURCES := $(filter-out iOS/installer.m, $(shell ls iOS/*.m)) $(shell ls AppleCommon/*.m)
 COCOA_SOURCES := $(shell ls Cocoa/*.m) $(shell ls HexFiend/*.m) $(shell ls JoyKit/*.m) $(shell ls AppleCommon/*.m)
 QUICKLOOK_SOURCES := $(shell ls QuickLook/*.m) $(shell ls QuickLook/*.c)
+XDG_THUMBNAILER_SOURCES := $(shell ls XdgThumbnailer/*.c)
 
 ifeq ($(PLATFORM),windows32)
 CORE_SOURCES += $(shell ls Windows/*.c)
@@ -367,6 +377,7 @@ IOS_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(IOS_SOURCES))
 QUICKLOOK_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(QUICKLOOK_SOURCES))
 SDL_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(SDL_SOURCES))
 TESTER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(TESTER_SOURCES))
+XDG_THUMBNAILER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(XDG_THUMBNAILER_SOURCES)) $(OBJ)/XdgThumbnailer/interface.c.o
 
 lib: $(PUBLIC_HEADERS)
 
@@ -410,6 +421,20 @@ $(OBJ)/SDL/%.c.o: SDL/%.c
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) $(FRONTEND_CFLAGS) $(FAT_FLAGS) $(SDL_CFLAGS) $(GL_CFLAGS) -c $< -o $@
 
+$(OBJ)/XdgThumbnailer/%.c.o: XdgThumbnailer/%.c
+	-@$(MKDIR) -p $(dir $@)
+	$(CC) $(CFLAGS) $(FRONTEND_CFLAGS) $(FAT_FLAGS) $(GIO_CFLAGS) -c $< -o $@
+# Make sure not to attempt compiling this before generating the interface code.
+$(OBJ)/XdgThumbnailer/main.c.o: $(OBJ)/XdgThumbnailer/interface.h
+# Silence warnings for this. It is code generated not by us, so we do not want `-Werror` to break
+# compilation with some version of the generator and/or compiler.
+$(OBJ)/XdgThumbnailer/interface.c.o: $(OBJ)/XdgThumbnailer/interface.c
+	-@$(MKDIR) -p $(dir $@)
+	$(CC) $(CFLAGS) $(FRONTEND_CFLAGS) $(FAT_FLAGS) $(GIO_CFLAGS) -w -c $< -o $@
+$(OBJ)/XdgThumbnailer/interface.c $(OBJ)/XdgThumbnailer/interface.h: XdgThumbnailer/interface.xml
+	-@$(MKDIR) -p $(dir $@)
+	gdbus-codegen --c-generate-autocleanup none --c-namespace Thumbnailer --interface-prefix org.freedesktop.thumbnails. --generate-c-code $(OBJ)/XdgThumbnailer/interface $<
+
 $(OBJ)/OpenDialog/%.c.o: OpenDialog/%.c
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) $(FRONTEND_CFLAGS) $(FAT_FLAGS) $(SDL_CFLAGS) $(GL_CFLAGS) -c $< -o $@
@@ -427,7 +452,7 @@ $(OBJ)/HexFiend/%.m.o: HexFiend/%.m
 $(OBJ)/%.m.o: %.m
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) $(FRONTEND_CFLAGS) $(FAT_FLAGS) $(OCFLAGS) -c $< -o $@
-    
+
 # iOS Port
 
 $(BIN)/SameBoy-iOS.app: $(BIN)/SameBoy-iOS.app/SameBoy \
@@ -530,7 +555,13 @@ endif
 $(BIN)/SameBoy.qlgenerator/Contents/Resources/cgb_boot_fast.bin: $(BIN)/BootROMs/cgb_boot_fast.bin
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
-	
+
+# XDG thumbnailer
+
+$(BIN)/XdgThumbnailer/sameboy-thumbnailer: $(CORE_OBJECTS) $(XDG_THUMBNAILER_OBJECTS)
+	-@$(MKDIR) -p $(dir $@)
+	$(CC) $^ -o $@ $(LDFLAGS) $(FAT_FLAGS) $(GIO_LDFLAGS)
+
 # SDL Port
 
 # Unix versions build only one binary
@@ -615,7 +646,7 @@ $(BIN)/SDL/background.bmp: SDL/background.bmp
 $(BIN)/SDL/Shaders: Shaders
 	-@$(MKDIR) -p $@
 	cp -rf Shaders/*.fsh $@
-    
+
 $(BIN)/SDL/Palettes: Misc/Palettes
 	-@$(MKDIR) -p $@
 	cp -rf Misc/Palettes/*.sbp $@
