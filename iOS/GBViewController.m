@@ -253,15 +253,15 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     if (@available(iOS 13.0, *)) {
         // AVCaptureDeviceTypeBuiltInUltraWideCamera is only available in iOS 13+
         deviceTypes = @[AVCaptureDeviceTypeBuiltInWideAngleCamera,
-                       AVCaptureDeviceTypeBuiltInUltraWideCamera,
-                       AVCaptureDeviceTypeBuiltInTelephotoCamera];
+                        AVCaptureDeviceTypeBuiltInUltraWideCamera,
+                        AVCaptureDeviceTypeBuiltInTelephotoCamera];
     }
 
     // Use a discovery session to gather the capture devices (all back cameras as well as the front camera)
     AVCaptureDeviceDiscoverySession *cameraDiscoverySession = [AVCaptureDeviceDiscoverySession
-                                                                    discoverySessionWithDeviceTypes:deviceTypes
-                                                                    mediaType:AVMediaTypeVideo
-                                                                    position:AVCaptureDevicePositionUnspecified];
+                                                               discoverySessionWithDeviceTypes:deviceTypes
+                                                               mediaType:AVMediaTypeVideo
+                                                               position:AVCaptureDevicePositionUnspecified];
     _allCaptureDevices = cameraDiscoverySession.devices;
 
     // Filter only the back cameras into a list used for switching between them
@@ -301,19 +301,19 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
         UIImage *selectCameraImage = [[UIImage imageNamed:@"CameraTemplate"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         [_changeCameraButton  setImage:selectCameraImage
-                                forState:UIControlStateNormal];
+                              forState:UIControlStateNormal];
         _changeCameraButton.backgroundColor = [UIColor whiteColor];
     }
     _cameraPositionButton.layer.cornerRadius = 6;
     _cameraPositionButton.alpha = 0;
     [_cameraPositionButton addTarget:self
-                              action:@selector(rotateCamera)
-                    forControlEvents:UIControlEventTouchUpInside];
+                           action:@selector(rotateCamera)
+                           forControlEvents:UIControlEventTouchUpInside];
     _changeCameraButton.layer.cornerRadius = 6;
     _changeCameraButton.alpha = 0;
     [_changeCameraButton addTarget:self
-                              action:@selector(changeCamera)
-                    forControlEvents:UIControlEventTouchUpInside];
+                         action:@selector(changeCamera)
+                         forControlEvents:UIControlEventTouchUpInside];
 
     [_backgroundView addSubview:_cameraPositionButton];
     // Only show the select camera button if we have more than one back camera to swap between.
