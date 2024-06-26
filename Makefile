@@ -338,7 +338,7 @@ endif
 
 cocoa: $(BIN)/SameBoy.app
 quicklook: $(BIN)/SameBoy.qlgenerator
-xdg-thumbnailer: $(BIN)/XdgThumbnailer/sameboy-thumbnailer $(BIN)/SDL/cgb_boot_fast.bin
+xdg-thumbnailer: $(BIN)/XdgThumbnailer/sameboy-thumbnailer $(BIN)/XdgThumbnailer/cgb_boot_fast.bin $(patsubst QuickLook/%.png,$(BIN)/XdgThumbnailer/%.png,$(wildcard QuickLook/*.png))
 sdl: $(SDL_TARGET) $(BIN)/SDL/dmg_boot.bin $(BIN)/SDL/mgb_boot.bin $(BIN)/SDL/cgb0_boot.bin $(BIN)/SDL/cgb_boot.bin $(BIN)/SDL/agb_boot.bin $(BIN)/SDL/sgb_boot.bin $(BIN)/SDL/sgb2_boot.bin $(BIN)/SDL/LICENSE $(BIN)/SDL/registers.sym $(BIN)/SDL/background.bmp $(BIN)/SDL/Shaders $(BIN)/SDL/Palettes
 bootroms: $(BIN)/BootROMs/agb_boot.bin $(BIN)/BootROMs/cgb_boot.bin $(BIN)/BootROMs/cgb0_boot.bin $(BIN)/BootROMs/dmg_boot.bin $(BIN)/BootROMs/mgb_boot.bin $(BIN)/BootROMs/sgb_boot.bin $(BIN)/BootROMs/sgb2_boot.bin
 tester: $(TESTER_TARGET) $(BIN)/tester/dmg_boot.bin $(BIN)/tester/cgb_boot.bin $(BIN)/tester/agb_boot.bin $(BIN)/tester/sgb_boot.bin $(BIN)/tester/sgb2_boot.bin
@@ -615,41 +615,51 @@ $(BIN)/tester/sameboy_tester.exe: $(CORE_OBJECTS) $(SDL_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) -Wl,/subsystem:console
 
-$(BIN)/SDL/%.bin: $(BOOTROMS_DIR)/%.bin
-	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
-
 $(BIN)/tester/%.bin: $(BOOTROMS_DIR)/%.bin
 	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
+	cp -f $< $@
 
 $(BIN)/SameBoy.app/Contents/Resources/%.bin: $(BOOTROMS_DIR)/%.bin
 	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
+	cp -f $< $@
 
 $(BIN)/SameBoy-iOS.app/%.bin: $(BOOTROMS_DIR)/%.bin
 	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
+	cp -f $< $@
+
+$(BIN)/XdgThumbnailer/%.png: QuickLook/%.png
+	-@$(MKDIR) -p $(dir $@)
+	cp -f $< $@
+
+$(BIN)/XdgThumbnailer/%.bin: $(BOOTROMS_DIR)/%.bin
+	-@$(MKDIR) -p $(dir $@)
+	cp -f $< $@
+
+$(BIN)/SDL/%.bin: $(BOOTROMS_DIR)/%.bin
+	-@$(MKDIR) -p $(dir $@)
+	cp -f $< $@
 
 $(BIN)/SDL/LICENSE: LICENSE
 	-@$(MKDIR) -p $(dir $@)
-	grep -v "^  " $^ > $@
+	grep -v "^  " $< > $@
 
 $(BIN)/SDL/registers.sym: Misc/registers.sym
 	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
+	cp -f $< $@
 
 $(BIN)/SDL/background.bmp: SDL/background.bmp
 	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
+	cp -f $< $@
 
-$(BIN)/SDL/Shaders: Shaders
+$(BIN)/SDL/Shaders: $(wildcard Shaders/*.fsh)
 	-@$(MKDIR) -p $@
-	cp -rf Shaders/*.fsh $@
+	cp -rf $^ $@
+	touch $@
 
-$(BIN)/SDL/Palettes: Misc/Palettes
+$(BIN)/SDL/Palettes: $(wildcard Misc/Palettes/*.sbp)
 	-@$(MKDIR) -p $@
-	cp -rf Misc/Palettes/*.sbp $@
+	cp -rf $^ $@
+	touch $@
 
 # Boot ROMs
 
@@ -693,6 +703,7 @@ install: sdl xdg-thumbnailer $(DESTDIR)$(PREFIX)/share/mime/packages/sameboy.xml
 	-@$(MKDIR) -p $(dir $(DESTDIR)$(PREFIX))
 	mkdir -p $(DESTDIR)$(DATA_DIR)/ $(DESTDIR)$(PREFIX)/bin/
 	cp -rf $(BIN)/SDL/* $(DESTDIR)$(DATA_DIR)/
+	cp -rf $(BIN)/XdgThumbnailer/* $(DESTDIR)$(DATA_DIR)/
 	mv $(DESTDIR)$(DATA_DIR)/sameboy $(DESTDIR)$(PREFIX)/bin/sameboy
 ifeq ($(DESTDIR),)
 	-update-mime-database -n $(PREFIX)/share/mime

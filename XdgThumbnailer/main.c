@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "emulate.h"
 #include "tasks.h"
 #include "thumbnail.h"
 
@@ -110,7 +111,7 @@ int main(int argc, char const *argv[])
     // unsigned active_worker_threads = 0;
     //  Create the task queue *before* starting to accept tasks from D-Bus.
     init_tasks();
-    load_boot_roms();
+    load_boot_rom();
     // Likewise, create the main loop before then, so it can be aborted even before entering it.
     main_loop = g_main_loop_new(NULL, FALSE);
 
@@ -129,12 +130,12 @@ int main(int argc, char const *argv[])
     g_info("Waiting for outstanding tasks...");
     cleanup_tasks(); // Also waits for any remaining tasks.
     // "Pedantic" cleanup for Valgrind et al.
-    unload_boot_roms();
+    unload_boot_rom();
     g_main_loop_unref(main_loop);
     g_bus_unown_name(owner_id);
     if (thumbnailer_interface) {
         g_dbus_interface_skeleton_unexport(G_DBUS_INTERFACE_SKELETON(thumbnailer_interface));
+        g_object_unref(thumbnailer_interface);
     }
-    g_object_unref(thumbnailer_interface);
     return 0;
 }

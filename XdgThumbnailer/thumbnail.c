@@ -2,43 +2,14 @@
 
 #include <gio/gio.h>
 #include <glib.h>
+#include <stdint.h>
 #include <stdlib.h>
 
-#include "Core/gb.h"
-#include "XdgThumbnailer/tasks.h"
+#include "emulate.h"
 #include "main.h"
+#include "tasks.h"
 
 #define THUMBNAILING_ERROR_DOMAIN (g_quark_from_static_string("thumbnailing"))
-
-enum FileKind {
-    KIND_GB,
-    KIND_GBC,
-    KIND_ISX,
-};
-
-#define BOOT_ROM_SIZE (0x100 + 0x800) // The two "parts" of it, which are stored contiguously.
-static char *boot_rom;
-
-void load_boot_roms(void)
-{
-    static char const *boot_rom_path = DATA_DIR "/cgb_boot_fast.bin";
-
-    size_t length;
-    GError *error = NULL;
-    g_file_get_contents(boot_rom_path, &boot_rom, &length, &error);
-
-    if (error) {
-        g_error("Error loading boot ROM from \"%s\": %s", boot_rom_path, error->message);
-        // NOTREACHED
-    }
-    else if (length != BOOT_ROM_SIZE) {
-        g_error("Error loading boot ROM from \"%s\": expected to read %d bytes, got %zu",
-                boot_rom_path, BOOT_ROM_SIZE, length);
-        // NOTREACHED
-    }
-}
-
-void unload_boot_roms(void) { g_free(boot_rom); }
 
 struct TaskData {
     char *contents;
@@ -59,19 +30,11 @@ static void generate_thumbnail(GTask *task, void *source_object, void *data,
 {
     struct TaskData *task_data = data;
 
-    GB_gameboy_t gb;
-    GB_init(&gb, GB_MODEL_CGB_E);
-    GB_load_boot_rom_from_buffer(&gb, (unsigned char const *)boot_rom, sizeof(boot_rom));
-
-    if (task_data->kind == KIND_ISX) {
-        g_assert_not_reached(); // TODO: implement GB_load_isx_from_buffer
-    }
-    else {
-        GB_load_rom_from_buffer(&gb, (unsigned char const *)task_data->contents, task_data->length);
-    }
-    // TODO
-
-    GB_free(&gb);
+    uint32_t screen[160 * 144];
+    unsigned cgb_flag = emulate(task_data->kind, (unsigned char const *)task_data->contents,
+                                task_data->length, screen);
+    // TODO: generate the thumbnail from `screen` and `cgb_flag`.
+    (void)cgb_flag;
 
     g_task_return_boolean(task, TRUE);
     g_object_unref(task);
@@ -112,7 +75,7 @@ static void on_thumbnailing_end(GObject *source_object, GAsyncResult *res, void 
 
     g_assert_null(source_object); // The object that was passed to `g_task_new`.
     GTask *task = G_TASK(res);
-    g_debug("Ending thumbnailing for \"%s\"", g_task_get_name(task));
+    g_info("Ending thumbnailing for \"%s\"", g_task_get_name(task));
     unsigned handle = GPOINTER_TO_UINT(user_data);
     char const *uri = g_task_get_name(task);
 
