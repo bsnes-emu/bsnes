@@ -277,10 +277,6 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
                                                                        0,
                                                                        32,
                                                                        32)];
-    _changeCameraButton = [[UIButton alloc] initWithFrame:CGRectMake(8,
-                                                                     0,
-                                                                     32,
-                                                                     32)];
     [self didRotateFromInterfaceOrientation:[UIApplication sharedApplication].statusBarOrientation];
     if (@available(iOS 13.0, *)) {
         [_cameraPositionButton  setImage:[UIImage systemImageNamed:@"camera.rotate"
@@ -288,38 +284,38 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
                                 forState:UIControlStateNormal];
         _cameraPositionButton.backgroundColor = [UIColor systemBackgroundColor];
 
+        // Configure the change camera button
+        _changeCameraButton = [[UIButton alloc] initWithFrame:CGRectMake(8,
+                                                                         0,
+                                                                         32,
+                                                                         32)];
         [_changeCameraButton  setImage:[UIImage systemImageNamed:@"camera"
                                                 withConfiguration:[UIImageSymbolConfiguration configurationWithScale:UIImageSymbolScaleLarge]]
                                 forState:UIControlStateNormal];
         _changeCameraButton.backgroundColor = [UIColor systemBackgroundColor];
+        _changeCameraButton.layer.cornerRadius = 6;
+        _changeCameraButton.alpha = 0;
+        [_changeCameraButton addTarget:self
+                             action:@selector(changeCamera)
+                             forControlEvents:UIControlEventTouchUpInside];
+        // Only show the change camera button if we have more than one back camera to swap between.
+        if ([_backCaptureDevices count] > 1) {
+            [_backgroundView addSubview:_changeCameraButton];
+        }
     }
     else {
         UIImage *rotateImage = [[UIImage imageNamed:@"CameraRotateTemplate"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
         [_cameraPositionButton  setImage:rotateImage
                                 forState:UIControlStateNormal];
         _cameraPositionButton.backgroundColor = [UIColor whiteColor];
-
-        UIImage *selectCameraImage = [[UIImage imageNamed:@"CameraTemplate"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-        [_changeCameraButton  setImage:selectCameraImage
-                              forState:UIControlStateNormal];
-        _changeCameraButton.backgroundColor = [UIColor whiteColor];
     }
     _cameraPositionButton.layer.cornerRadius = 6;
     _cameraPositionButton.alpha = 0;
     [_cameraPositionButton addTarget:self
                            action:@selector(rotateCamera)
                            forControlEvents:UIControlEventTouchUpInside];
-    _changeCameraButton.layer.cornerRadius = 6;
-    _changeCameraButton.alpha = 0;
-    [_changeCameraButton addTarget:self
-                         action:@selector(changeCamera)
-                         forControlEvents:UIControlEventTouchUpInside];
 
     [_backgroundView addSubview:_cameraPositionButton];
-    // Only show the select camera button if we have more than one back camera to swap between.
-    if ([_backCaptureDevices count] > 1) {
-        [_backgroundView addSubview:_changeCameraButton];
-    }
 
     _cameraQueue = dispatch_queue_create("SameBoy Camera Queue", NULL);
     
@@ -742,7 +738,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 {
     UIEdgeInsets insets = self.window.safeAreaInsets;
     _cameraPositionButton.frame = CGRectMake(insets.left + 8, _backgroundView.bounds.size.height - 8 - insets.bottom - 32, 32, 32);
-    _changeCameraButton.frame = CGRectMake(insets.right - 8, _backgroundView.bounds.size.height - 8 - insets.bottom - 32, 32, 32);
+    if (@available(iOS 13.0, *)) {
+        _changeCameraButton.frame = CGRectMake(_backgroundView.bounds.size.width - 8 - insets.right - 32, _backgroundView.bounds.size.height - 8 - insets.bottom - 32, 32, 32);
+    }
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations
