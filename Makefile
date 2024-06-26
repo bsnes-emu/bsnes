@@ -338,7 +338,7 @@ endif
 
 cocoa: $(BIN)/SameBoy.app
 quicklook: $(BIN)/SameBoy.qlgenerator
-xdg-thumbnailer: $(BIN)/XdgThumbnailer/sameboy-thumbnailer
+xdg-thumbnailer: $(BIN)/XdgThumbnailer/sameboy-thumbnailer $(BIN)/SDL/cgb_boot_fast.bin
 sdl: $(SDL_TARGET) $(BIN)/SDL/dmg_boot.bin $(BIN)/SDL/mgb_boot.bin $(BIN)/SDL/cgb0_boot.bin $(BIN)/SDL/cgb_boot.bin $(BIN)/SDL/agb_boot.bin $(BIN)/SDL/sgb_boot.bin $(BIN)/SDL/sgb2_boot.bin $(BIN)/SDL/LICENSE $(BIN)/SDL/registers.sym $(BIN)/SDL/background.bmp $(BIN)/SDL/Shaders $(BIN)/SDL/Palettes
 bootroms: $(BIN)/BootROMs/agb_boot.bin $(BIN)/BootROMs/cgb_boot.bin $(BIN)/BootROMs/cgb0_boot.bin $(BIN)/BootROMs/dmg_boot.bin $(BIN)/BootROMs/mgb_boot.bin $(BIN)/BootROMs/sgb_boot.bin $(BIN)/BootROMs/sgb2_boot.bin
 tester: $(TESTER_TARGET) $(BIN)/tester/dmg_boot.bin $(BIN)/tester/cgb_boot.bin $(BIN)/tester/agb_boot.bin $(BIN)/tester/sgb_boot.bin $(BIN)/tester/sgb2_boot.bin
@@ -423,21 +423,21 @@ $(OBJ)/SDL/%.c.o: SDL/%.c
 
 $(OBJ)/XdgThumbnailer/%.c.o: XdgThumbnailer/%.c
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $(CFLAGS) $(FRONTEND_CFLAGS) $(FAT_FLAGS) $(GIO_CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(GIO_CFLAGS) -DG_LOG_DOMAIN='"sameboy-thumbnailer"' -c $< -o $@
 # Make sure not to attempt compiling this before generating the interface code.
 $(OBJ)/XdgThumbnailer/main.c.o: $(OBJ)/XdgThumbnailer/interface.h
 # Silence warnings for this. It is code generated not by us, so we do not want `-Werror` to break
 # compilation with some version of the generator and/or compiler.
 $(OBJ)/XdgThumbnailer/interface.c.o: $(OBJ)/XdgThumbnailer/interface.c
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $(CFLAGS) $(FRONTEND_CFLAGS) $(FAT_FLAGS) $(GIO_CFLAGS) -w -c $< -o $@
+	$(CC) $(CFLAGS) $(GIO_CFLAGS) -DG_LOG_DOMAIN='"sameboy-thumbnailer"' -w -c $< -o $@
 $(OBJ)/XdgThumbnailer/interface.c $(OBJ)/XdgThumbnailer/interface.h: XdgThumbnailer/interface.xml
 	-@$(MKDIR) -p $(dir $@)
 	gdbus-codegen --c-generate-autocleanup none --c-namespace Thumbnailer --interface-prefix org.freedesktop.thumbnails. --generate-c-code $(OBJ)/XdgThumbnailer/interface $<
 
 $(OBJ)/OpenDialog/%.c.o: OpenDialog/%.c
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $(CFLAGS) $(FRONTEND_CFLAGS) $(FAT_FLAGS) $(SDL_CFLAGS) $(GL_CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(SDL_CFLAGS) $(GL_CFLAGS) -c $< -o $@
 
 
 $(OBJ)/%.c.o: %.c
@@ -688,7 +688,8 @@ ifneq ($(FREEDESKTOP),)
 ICON_NAMES := apps/sameboy mimetypes/x-gameboy-rom mimetypes/x-gameboy-color-rom
 ICON_SIZES := 16x16 32x32 64x64 128x128 256x256 512x512
 ICONS := $(foreach name,$(ICON_NAMES), $(foreach size,$(ICON_SIZES),$(DESTDIR)$(PREFIX)/share/icons/hicolor/$(size)/$(name).png))
-install: sdl $(DESTDIR)$(PREFIX)/share/mime/packages/sameboy.xml $(ICONS) FreeDesktop/sameboy.desktop
+# TODO: install the thumbnailer as well
+install: sdl xdg-thumbnailer $(DESTDIR)$(PREFIX)/share/mime/packages/sameboy.xml $(ICONS) FreeDesktop/sameboy.desktop
 	-@$(MKDIR) -p $(dir $(DESTDIR)$(PREFIX))
 	mkdir -p $(DESTDIR)$(DATA_DIR)/ $(DESTDIR)$(PREFIX)/bin/
 	cp -rf $(BIN)/SDL/* $(DESTDIR)$(DATA_DIR)/
@@ -725,7 +726,7 @@ endif
 
 ios:
 	@$(MAKE) _ios
-    
+
 $(BIN)/SameBoy-iOS.ipa: ios iOS/sideload.entitlements
 	$(MKDIR) -p $(OBJ)/Payload
 	cp -rf $(BIN)/SameBoy-iOS.app $(OBJ)/Payload/SameBoy-iOS.app
