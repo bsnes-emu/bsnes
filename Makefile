@@ -225,6 +225,12 @@ GIO_CFLAGS += -DG_ENABLE_DEBUG
 else
 GIO_CFLAGS += -DG_DISABLE_ASSERT
 endif
+
+GDK_PIXBUF_CFLAGS := $(shell $(PKG_CONFIG) --cflags gdk-pixbuf-2.0)
+GDK_PIXBUF_LDFLAGS := $(shell $(PKG_CONFIG) --libs gdk-pixbuf-2.0)
+
+LIBPNG_CFLAGS := $(shell $(PKG_CONFIG) --cflags libpng)
+LIBPNG_LDFLAGS := $(shell $(PKG_CONFIG) --libs libpng)
 endif
 
 ifeq (,$(PKG_CONFIG))
@@ -338,7 +344,7 @@ endif
 
 cocoa: $(BIN)/SameBoy.app
 quicklook: $(BIN)/SameBoy.qlgenerator
-xdg-thumbnailer: $(BIN)/XdgThumbnailer/sameboy-thumbnailer $(BIN)/XdgThumbnailer/cgb_boot_fast.bin $(patsubst QuickLook/%.png,$(BIN)/XdgThumbnailer/%.png,$(wildcard QuickLook/*.png))
+xdg-thumbnailer: $(BIN)/XdgThumbnailer/sameboy-thumbnailer
 sdl: $(SDL_TARGET) $(BIN)/SDL/dmg_boot.bin $(BIN)/SDL/mgb_boot.bin $(BIN)/SDL/cgb0_boot.bin $(BIN)/SDL/cgb_boot.bin $(BIN)/SDL/agb_boot.bin $(BIN)/SDL/sgb_boot.bin $(BIN)/SDL/sgb2_boot.bin $(BIN)/SDL/LICENSE $(BIN)/SDL/registers.sym $(BIN)/SDL/background.bmp $(BIN)/SDL/Shaders $(BIN)/SDL/Palettes
 bootroms: $(BIN)/BootROMs/agb_boot.bin $(BIN)/BootROMs/cgb_boot.bin $(BIN)/BootROMs/cgb0_boot.bin $(BIN)/BootROMs/dmg_boot.bin $(BIN)/BootROMs/mgb_boot.bin $(BIN)/BootROMs/sgb_boot.bin $(BIN)/BootROMs/sgb2_boot.bin
 tester: $(TESTER_TARGET) $(BIN)/tester/dmg_boot.bin $(BIN)/tester/cgb_boot.bin $(BIN)/tester/agb_boot.bin $(BIN)/tester/sgb_boot.bin $(BIN)/tester/sgb2_boot.bin
@@ -377,7 +383,7 @@ IOS_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(IOS_SOURCES))
 QUICKLOOK_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(QUICKLOOK_SOURCES))
 SDL_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(SDL_SOURCES))
 TESTER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(TESTER_SOURCES))
-XDG_THUMBNAILER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(XDG_THUMBNAILER_SOURCES)) $(OBJ)/XdgThumbnailer/interface.c.o
+XDG_THUMBNAILER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(XDG_THUMBNAILER_SOURCES)) $(OBJ)/XdgThumbnailer/interface.c.o $(OBJ)/XdgThumbnailer/resources.c.o
 
 lib: $(PUBLIC_HEADERS)
 
@@ -423,17 +429,25 @@ $(OBJ)/SDL/%.c.o: SDL/%.c
 
 $(OBJ)/XdgThumbnailer/%.c.o: XdgThumbnailer/%.c
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $(CFLAGS) $(GIO_CFLAGS) -DG_LOG_DOMAIN='"sameboy-thumbnailer"' -c $< -o $@
+	$(CC) $(CFLAGS) $(GIO_CFLAGS) $(GDK_PIXBUF_CFLAGS) $(LIBPNG_CFLAGS) -DG_LOG_DOMAIN='"sameboy-thumbnailer"' -c $< -o $@
 # Make sure not to attempt compiling this before generating the interface code.
 $(OBJ)/XdgThumbnailer/main.c.o: $(OBJ)/XdgThumbnailer/interface.h
+# Make sure not to attempt compiling this before generating the resource code.
+$(OBJ)/XdgThumbnailer/emulate.c.o: $(OBJ)/XdgThumbnailer/resources.h
 # Silence warnings for this. It is code generated not by us, so we do not want `-Werror` to break
 # compilation with some version of the generator and/or compiler.
-$(OBJ)/XdgThumbnailer/interface.c.o: $(OBJ)/XdgThumbnailer/interface.c
+$(OBJ)/XdgThumbnailer/%.c.o: $(OBJ)/XdgThumbnailer/%.c
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $(CFLAGS) $(GIO_CFLAGS) -DG_LOG_DOMAIN='"sameboy-thumbnailer"' -w -c $< -o $@
+	$(CC) $(CFLAGS) $(GIO_CFLAGS) $(GDK_PIXBUF_CFLAGS) $(LIBPNG_CFLAGS) -DG_LOG_DOMAIN='"sameboy-thumbnailer"' -w -c $< -o $@
+
 $(OBJ)/XdgThumbnailer/interface.c $(OBJ)/XdgThumbnailer/interface.h: XdgThumbnailer/interface.xml
 	-@$(MKDIR) -p $(dir $@)
 	gdbus-codegen --c-generate-autocleanup none --c-namespace Thumbnailer --interface-prefix org.freedesktop.thumbnails. --generate-c-code $(OBJ)/XdgThumbnailer/interface $<
+
+$(OBJ)/XdgThumbnailer/resources.c $(OBJ)/XdgThumbnailer/resources.h: %: XdgThumbnailer/resources.gresource.xml $(BIN)/BootROMs/cgb_boot_fast.bin
+	-@$(MKDIR) -p $(dir $@)
+	CC=$(CC) glib-compile-resources --dependency-file $@.mk --generate-phony-targets --generate --target $@ $<
+-include $(OBJ)/XdgThumbnailer/resources.c.mk $(OBJ)/XdgThumbnailer/resources.h.mk
 
 $(OBJ)/OpenDialog/%.c.o: OpenDialog/%.c
 	-@$(MKDIR) -p $(dir $@)
@@ -560,7 +574,7 @@ $(BIN)/SameBoy.qlgenerator/Contents/Resources/cgb_boot_fast.bin: $(BIN)/BootROMs
 
 $(BIN)/XdgThumbnailer/sameboy-thumbnailer: $(CORE_OBJECTS) $(XDG_THUMBNAILER_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $^ -o $@ $(LDFLAGS) $(FAT_FLAGS) $(GIO_LDFLAGS)
+	$(CC) $^ -o $@ $(LDFLAGS) $(GIO_LDFLAGS) $(GDK_PIXBUF_LDFLAGS) $(LIBPNG_LDFLAGS)
 
 # SDL Port
 
@@ -624,14 +638,6 @@ $(BIN)/SameBoy.app/Contents/Resources/%.bin: $(BOOTROMS_DIR)/%.bin
 	cp -f $< $@
 
 $(BIN)/SameBoy-iOS.app/%.bin: $(BOOTROMS_DIR)/%.bin
-	-@$(MKDIR) -p $(dir $@)
-	cp -f $< $@
-
-$(BIN)/XdgThumbnailer/%.png: QuickLook/%.png
-	-@$(MKDIR) -p $(dir $@)
-	cp -f $< $@
-
-$(BIN)/XdgThumbnailer/%.bin: $(BOOTROMS_DIR)/%.bin
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $< $@
 

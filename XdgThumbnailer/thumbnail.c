@@ -11,6 +11,20 @@
 
 #define THUMBNAILING_ERROR_DOMAIN (g_quark_from_static_string("thumbnailing"))
 
+/* --- */
+
+enum CartridgeType {
+    CART_DMG_ONLY,
+    CART_DUAL,
+    CART_CGB_ONLY,
+};
+
+void load_cartridge_images(void) {
+    // TODO
+}
+
+/* --- */
+
 struct TaskData {
     char *contents;
     size_t length;
@@ -25,6 +39,8 @@ static void destroy_task_data(void *data)
     g_slice_free(struct TaskData, task_data);
 }
 
+/* --- */
+
 static void generate_thumbnail(GTask *task, void *source_object, void *data,
                                GCancellable *cancellable)
 {
@@ -33,8 +49,21 @@ static void generate_thumbnail(GTask *task, void *source_object, void *data,
     uint32_t screen[160 * 144];
     unsigned cgb_flag = emulate(task_data->kind, (unsigned char const *)task_data->contents,
                                 task_data->length, screen);
-    // TODO: generate the thumbnail from `screen` and `cgb_flag`.
-    (void)cgb_flag;
+
+    // Generate the thumbnail from `screen` and `cgb_flag`.
+    enum CartridgeType type;
+    switch (cgb_flag) {
+    case 0xC0:
+        type = CART_CGB_ONLY;
+        break;
+    case 0x80:
+        type = CART_DUAL;
+        break;
+    default:
+        type = CART_DMG_ONLY;
+        break;
+    }
+    (void)type;
 
     g_task_return_boolean(task, TRUE);
     g_object_unref(task);
@@ -68,6 +97,8 @@ static void on_file_ready(GObject *source_object, GAsyncResult *res, void *user_
     // TODO: cap the max number of active threads.
     g_task_run_in_thread(task, generate_thumbnail);
 }
+
+/* --- */
 
 static void on_thumbnailing_end(GObject *source_object, GAsyncResult *res, void *user_data)
 {

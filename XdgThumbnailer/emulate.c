@@ -1,11 +1,13 @@
 #include "emulate.h"
 
 #include <glib.h>
+#include <gio/gio.h>
 #include <stdint.h>
 
 #include "Core/gb.h"
-#include "Core/memory.h"
-#include "glibconfig.h"
+
+// Auto-generated via `glib-compile-resources` from `resources.gresource.xml`.
+#include "build/obj/XdgThumbnailer/resources.h"
 
 #define NB_FRAMES_TO_EMULATE (60 * 10)
 
@@ -67,7 +69,15 @@ unsigned emulate(enum FileKind kind, unsigned char const *rom, size_t rom_size, 
     GB_gameboy_t gb;
     GB_init(&gb, GB_MODEL_CGB_E);
 
-    GB_load_boot_rom_from_buffer(&gb, (unsigned char const *)boot_rom, sizeof(boot_rom));
+    GError *error = NULL;
+    GBytes *boot_rom = g_resource_lookup_data(resources_get_resource(), "/thumbnailer/cgb_boot_fast.bin", G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
+    g_assert_no_error(error);
+    size_t boot_rom_size;
+    unsigned char const *boot_rom_data = g_bytes_get_data(boot_rom, &boot_rom_size);
+    g_assert_cmpuint(boot_rom_size, ==, BOOT_ROM_SIZE);
+    GB_load_boot_rom_from_buffer(&gb, boot_rom_data, boot_rom_size);
+    g_bytes_unref(boot_rom);
+
     if (kind == KIND_ISX) {
         g_assert_not_reached(); // TODO: implement GB_load_isx_from_buffer
     }

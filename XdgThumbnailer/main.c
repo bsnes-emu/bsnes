@@ -111,7 +111,6 @@ int main(int argc, char const *argv[])
     // unsigned active_worker_threads = 0;
     //  Create the task queue *before* starting to accept tasks from D-Bus.
     init_tasks();
-    load_boot_rom();
     // Likewise, create the main loop before then, so it can be aborted even before entering it.
     main_loop = g_main_loop_new(NULL, FALSE);
 
