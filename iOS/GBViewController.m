@@ -258,10 +258,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     }
 
     // Use a discovery session to gather the capture devices (all back cameras as well as the front camera)
-    AVCaptureDeviceDiscoverySession *cameraDiscoverySession = [AVCaptureDeviceDiscoverySession
-                                                               discoverySessionWithDeviceTypes:deviceTypes
-                                                               mediaType:AVMediaTypeVideo
-                                                               position:AVCaptureDevicePositionUnspecified];
+    AVCaptureDeviceDiscoverySession *cameraDiscoverySession = [AVCaptureDeviceDiscoverySession discoverySessionWithDeviceTypes:deviceTypes
+                                                                                                                     mediaType:AVMediaTypeVideo
+                                                                                                                      position:AVCaptureDevicePositionUnspecified];
     _allCaptureDevices = cameraDiscoverySession.devices;
 
     // Filter only the back cameras into a list used for switching between them
@@ -306,8 +305,8 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     }
     else {
         UIImage *rotateImage = [[UIImage imageNamed:@"CameraRotateTemplate"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-        [_cameraPositionButton  setImage:rotateImage
-                                forState:UIControlStateNormal];
+        [_cameraPositionButton setImage:rotateImage
+                               forState:UIControlStateNormal];
         _cameraPositionButton.backgroundColor = [UIColor whiteColor];
     }
 
@@ -743,7 +742,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
                                              _backgroundView.bounds.size.height - 8 - insets.bottom - 32,
                                              32,
                                              32);
-    if (_changeCameraButton != nil) {
+    if (_changeCameraButton) {
         _changeCameraButton.frame = CGRectMake(insets.left + 8,
                                                _backgroundView.bounds.size.height - 8 - insets.bottom - 32 - 32 - 8,
                                                32,
@@ -1250,12 +1249,14 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
                 _cameraPositionButton.alpha = 1;
             }];
         }
-        if (_changeCameraButton != nil) {
+        if (_changeCameraButton) {
             // The change camera button is only available when we are using a capture device on the back of the device
-            int changeCameraButtonAlpha = (_cameraPosition == AVCaptureDevicePositionFront) ? 0 : 1;
-            [UIView animateWithDuration:0.25 animations:^{
-                _changeCameraButton.alpha = changeCameraButtonAlpha;
-            }];
+            double changeCameraButtonAlpha = (_cameraPosition == AVCaptureDevicePositionFront) ? 0 : 1;
+            if (changeCameraButtonAlpha != _changeCameraButton.alpha) {
+                [UIView animateWithDuration:0.25 animations:^{
+                    _changeCameraButton.alpha = changeCameraButtonAlpha;
+                }];
+            }
         }
 
         _disableCameraTimer = [NSTimer scheduledTimerWithTimeInterval:1
@@ -1266,12 +1267,10 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
                     _cameraPositionButton.alpha = 0;
                 }];
             }
-            if (_changeCameraButton != nil) {
-                if (_changeCameraButton.alpha) {
-                    [UIView animateWithDuration:0.25 animations:^{
-                        _changeCameraButton.alpha = 0;
-                    }];
-                }
+            if (_changeCameraButton.alpha) {
+                [UIView animateWithDuration:0.25 animations:^{
+                    _changeCameraButton.alpha = 0;
+                }];
             }
             dispatch_async(_cameraQueue, ^{
                 [_cameraSession stopRunning];
