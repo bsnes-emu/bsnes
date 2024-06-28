@@ -228,9 +228,6 @@ endif
 
 GDK_PIXBUF_CFLAGS := $(shell $(PKG_CONFIG) --cflags gdk-pixbuf-2.0)
 GDK_PIXBUF_LDFLAGS := $(shell $(PKG_CONFIG) --libs gdk-pixbuf-2.0)
-
-LIBPNG_CFLAGS := $(shell $(PKG_CONFIG) --cflags libpng)
-LIBPNG_LDFLAGS := $(shell $(PKG_CONFIG) --libs libpng)
 endif
 
 ifeq (,$(PKG_CONFIG))
@@ -429,7 +426,7 @@ $(OBJ)/SDL/%.c.o: SDL/%.c
 
 $(OBJ)/XdgThumbnailer/%.c.o: XdgThumbnailer/%.c
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $(CFLAGS) $(GIO_CFLAGS) $(GDK_PIXBUF_CFLAGS) $(LIBPNG_CFLAGS) -DG_LOG_DOMAIN='"sameboy-thumbnailer"' -c $< -o $@
+	$(CC) $(CFLAGS) $(GIO_CFLAGS) $(GDK_PIXBUF_CFLAGS) -DG_LOG_DOMAIN='"sameboy-thumbnailer"' -c $< -o $@
 # Make sure not to attempt compiling this before generating the interface code.
 $(OBJ)/XdgThumbnailer/main.c.o: $(OBJ)/XdgThumbnailer/interface.h
 # Make sure not to attempt compiling this before generating the resource code.
@@ -438,7 +435,7 @@ $(OBJ)/XdgThumbnailer/emulate.c.o: $(OBJ)/XdgThumbnailer/resources.h
 # compilation with some version of the generator and/or compiler.
 $(OBJ)/XdgThumbnailer/%.c.o: $(OBJ)/XdgThumbnailer/%.c
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $(CFLAGS) $(GIO_CFLAGS) $(GDK_PIXBUF_CFLAGS) $(LIBPNG_CFLAGS) -DG_LOG_DOMAIN='"sameboy-thumbnailer"' -w -c $< -o $@
+	$(CC) $(CFLAGS) $(GIO_CFLAGS) $(GDK_PIXBUF_CFLAGS) -DG_LOG_DOMAIN='"sameboy-thumbnailer"' -w -c $< -o $@
 
 $(OBJ)/XdgThumbnailer/interface.c $(OBJ)/XdgThumbnailer/interface.h: XdgThumbnailer/interface.xml
 	-@$(MKDIR) -p $(dir $@)
@@ -574,7 +571,7 @@ $(BIN)/SameBoy.qlgenerator/Contents/Resources/cgb_boot_fast.bin: $(BIN)/BootROMs
 
 $(BIN)/XdgThumbnailer/sameboy-thumbnailer: $(CORE_OBJECTS) $(XDG_THUMBNAILER_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $^ -o $@ $(LDFLAGS) $(GIO_LDFLAGS) $(GDK_PIXBUF_LDFLAGS) $(LIBPNG_LDFLAGS)
+	$(CC) $^ -o $@ $(LDFLAGS) $(GIO_LDFLAGS) $(GDK_PIXBUF_LDFLAGS)
 
 # SDL Port
 
@@ -657,14 +654,14 @@ $(BIN)/SDL/background.bmp: SDL/background.bmp
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $< $@
 
-$(BIN)/SDL/Shaders: $(wildcard Shaders/*.fsh)
+$(BIN)/SDL/Shaders: Shaders
 	-@$(MKDIR) -p $@
-	cp -rf $^ $@
+	cp -rf $< $@
 	touch $@
 
-$(BIN)/SDL/Palettes: $(wildcard Misc/Palettes/*.sbp)
+$(BIN)/SDL/Palettes: Misc/Palettes
 	-@$(MKDIR) -p $@
-	cp -rf $^ $@
+	cp -rf $< $@
 	touch $@
 
 # Boot ROMs

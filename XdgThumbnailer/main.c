@@ -5,6 +5,7 @@
 #include <glib-unix.h>
 #include <glib.h>
 #include <signal.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -21,13 +22,12 @@ static char const *const object_path = "/com/github/liji32/sameboy/XdgThumbnaile
 ThumbnailerSpecializedThumbnailer1 *thumbnailer_interface = NULL;
 static unsigned max_nb_worker_threads;
 
-static gboolean handle_queue(void *instance, GDBusMethodInvocation *invocation, char const *uri,
-                             char const *mime_type, char const *flavor, gboolean urgent,
-                             void *user_data)
+static gboolean handle_queue(void *instance, GDBusMethodInvocation *invocation, char const *uri, char const *mime_type,
+                             char const *flavor, gboolean urgent, void *user_data)
 {
     ThumbnailerSpecializedThumbnailer1 *skeleton = instance;
-    g_info("Received Queue(uri=\"%s\", mime_type=\"%s\", flavor=\"%s\", urgent=%s) request", uri,
-           mime_type, flavor, urgent ? "true" : "false");
+    g_info("Received Queue(uri=\"%s\", mime_type=\"%s\", flavor=\"%s\", urgent=%s) request", uri, mime_type, flavor,
+           urgent ? "true" : "false");
     g_assert(skeleton == thumbnailer_interface);
 
     struct NewTaskInfo task_info = new_task(urgent);
@@ -37,8 +37,7 @@ static gboolean handle_queue(void *instance, GDBusMethodInvocation *invocation, 
     return G_DBUS_METHOD_INVOCATION_HANDLED;
 }
 
-static gboolean handle_dequeue(void *instance, GDBusMethodInvocation *invocation, unsigned handle,
-                               void *user_data)
+static gboolean handle_dequeue(void *instance, GDBusMethodInvocation *invocation, unsigned handle, void *user_data)
 {
     ThumbnailerSpecializedThumbnailer1 *skeleton = instance;
     g_info("Received Dequeue(handle=%u) request", handle);
@@ -69,8 +68,8 @@ static void on_bus_acquired(GDBusConnection *connection, const char *name, void 
     g_assert(res);
     g_assert_no_error(error);
     if (error) {
-        g_error("Error exporting interface \"%s\" at \"%s\": %s",
-                g_dbus_interface_skeleton_get_info(interface)->name, object_path, error->message);
+        g_error("Error exporting interface \"%s\" at \"%s\": %s", g_dbus_interface_skeleton_get_info(interface)->name,
+                object_path, error->message);
         // NOTREACHED
     }
 }
@@ -112,13 +111,12 @@ int main(int argc, char const *argv[])
     //  Create the task queue *before* starting to accept tasks from D-Bus.
     init_tasks();
     // Likewise, create the main loop before then, so it can be aborted even before entering it.
-    main_loop = g_main_loop_new(NULL, FALSE);
+    main_loop = g_main_loop_new(NULL, false);
 
     // Refuse to replace the name or be replaced; there should only be one instance of the
     // thumbnailer on the bus at all times. To replace this program, kill it.
-    unsigned owner_id =
-        g_bus_own_name(G_BUS_TYPE_SESSION, name_on_bus, G_BUS_NAME_OWNER_FLAGS_DO_NOT_QUEUE,
-                       on_bus_acquired, on_name_acquired, on_name_lost, NULL, NULL);
+    unsigned owner_id = g_bus_own_name(G_BUS_TYPE_SESSION, name_on_bus, G_BUS_NAME_OWNER_FLAGS_DO_NOT_QUEUE,
+                                       on_bus_acquired, on_name_acquired, on_name_lost, NULL, NULL);
 
     unsigned sigterm_source_id = g_unix_signal_add(SIGTERM, handle_sigterm, NULL);
     g_main_loop_run(main_loop);

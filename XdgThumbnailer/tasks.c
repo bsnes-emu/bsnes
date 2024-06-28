@@ -2,6 +2,7 @@
 
 #include <gio/gio.h>
 #include <glib.h>
+#include <stdbool.h>
 
 #define URGENT_FLAG (1u << (sizeof(unsigned) * CHAR_BIT - 1)) // The compiler should warn if this shift is out of range.
 
@@ -16,7 +17,7 @@ static struct Tasks urgent_tasks, tasks;
 static void init_task_list(struct Tasks *task_list)
 {
     g_rw_lock_init(&task_list->lock);
-    task_list->tasks = g_array_new(FALSE, FALSE, sizeof(GCancellable *));
+    task_list->tasks = g_array_new(false, false, sizeof(GCancellable *));
 }
 void init_tasks(void)
 {
@@ -24,7 +25,8 @@ void init_tasks(void)
     init_task_list(&tasks);
 }
 
-static void cleanup_task_list(struct Tasks *task_list) {
+static void cleanup_task_list(struct Tasks *task_list)
+{
     // TODO: wait for the remaining tasks to end?
     g_rw_lock_clear(&task_list->lock);
     g_array_unref(task_list->tasks);
@@ -70,8 +72,7 @@ got_slot:
     g_assert_cmpuint(index, !=, 0);
     g_assert_cmpuint(index, <, URGENT_FLAG);
 
-    return (struct NewTaskInfo){.handle = is_urgent ? (index | URGENT_FLAG) : index,
-                                .cancellable = cancellable};
+    return (struct NewTaskInfo){.handle = is_urgent ? (index | URGENT_FLAG) : index, .cancellable = cancellable};
 }
 
 void cancel_task(unsigned handle)

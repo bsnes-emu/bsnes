@@ -1,27 +1,22 @@
 #include "thumbnail.h"
 
+#include <gdk-pixbuf/gdk-pixbuf.h>
 #include <gio/gio.h>
 #include <glib.h>
+#include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 #include "emulate.h"
 #include "main.h"
 #include "tasks.h"
 
+#define DMG_ONLY_RESOURCE_PATH "/thumbnailer/CartridgeTemplate.png"
+#define DUAL_RESOURCE_PATH "/thumbnailer/UniversalCartridgeTemplate.png"
+#define CGB_ONLY_RESOURCE_PATH "/thumbnailer/ColorCartridgeTemplate.png"
+
 #define THUMBNAILING_ERROR_DOMAIN (g_quark_from_static_string("thumbnailing"))
-
-/* --- */
-
-enum CartridgeType {
-    CART_DMG_ONLY,
-    CART_DUAL,
-    CART_CGB_ONLY,
-};
-
-void load_cartridge_images(void) {
-    // TODO
-}
 
 /* --- */
 
@@ -39,33 +34,88 @@ static void destroy_task_data(void *data)
     g_slice_free(struct TaskData, task_data);
 }
 
+char const *mime_type(enum FileKind kind)
+{
+    switch (kind) {
+        case KIND_GB:
+            return "application/x-gameboy-rom";
+        case KIND_GBC:
+            return "application/x-gameboy-color-rom";
+        case KIND_ISX:
+            return "application/x-gameboy-isx";
+    }
+}
+
 /* --- */
 
-static void generate_thumbnail(GTask *task, void *source_object, void *data,
-                               GCancellable *cancellable)
+#define GB_SCREEN_WIDTH 160
+#define GB_SCREEN_HEIGHT 144
+
+static void generate_thumbnail(GTask *task, void *source_object, void *data, GCancellable *cancellable)
 {
     struct TaskData *task_data = data;
 
-    uint32_t screen[160 * 144];
-    unsigned cgb_flag = emulate(task_data->kind, (unsigned char const *)task_data->contents,
-                                task_data->length, screen);
+    uint32_t screen_raw[GB_SCREEN_WIDTH * GB_SCREEN_HEIGHT];
+    unsigned cgb_flag =
+        emulate(task_data->kind, (unsigned char const *)task_data->contents, task_data->length, screen_raw);
 
-    // Generate the thumbnail from `screen` and `cgb_flag`.
-    enum CartridgeType type;
+    // Generate the thumbnail from `screen_raw` and `cgb_flag`.
+
+    // `screen_raw` is properly formatted for this operation; see the comment in `rgb_encode` for a
+    // discussion of why and how.
+    GdkPixbuf *screen = gdk_pixbuf_new_from_data((uint8_t *)screen_raw, GDK_COLORSPACE_RGB,
+                                                 true,                                  // Yes, we have alpha!
+                                                 8,                                     // bpp
+                                                 GB_SCREEN_WIDTH, GB_SCREEN_HEIGHT,     // Size.
+                                                 GB_SCREEN_WIDTH * sizeof(*screen_raw), // Row stride.
+                                                 NULL, NULL);                           // Do not free the buffer.
+    // Scale the screen and position it in the appropriate place for compositing the cartridge templates.
+    GdkPixbuf *scaled_screen = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, 1024, 1024);
+    gdk_pixbuf_scale(screen, scaled_screen, 192, 298,           // Match the displacement below.
+                     GB_SCREEN_WIDTH * 4, GB_SCREEN_HEIGHT * 4, // Cropping the scaled rectangle...
+                     192, 298, // Displace the scaled screen so it lines up with the template.
+                     4, 4,     // Scaling factors.
+                     GDK_INTERP_NEAREST);
+    g_object_unref(screen);
+
+    GError *error = NULL;
+    GdkPixbuf *template;
     switch (cgb_flag) {
-    case 0xC0:
-        type = CART_CGB_ONLY;
-        break;
-    case 0x80:
-        type = CART_DUAL;
-        break;
-    default:
-        type = CART_DMG_ONLY;
-        break;
+        case 0xC0:
+            template = gdk_pixbuf_new_from_resource(CGB_ONLY_RESOURCE_PATH, &error);
+            break;
+        case 0x80:
+            template = gdk_pixbuf_new_from_resource(DUAL_RESOURCE_PATH, &error);
+            break;
+        default:
+            template = gdk_pixbuf_new_from_resource(DMG_ONLY_RESOURCE_PATH, &error);
+            break;
     }
-    (void)type;
+    g_assert_no_error(error);
+    g_assert_cmpint(gdk_pixbuf_get_width(template), ==, 1024);
+    g_assert_cmpint(gdk_pixbuf_get_height(template), ==, 1024);
+    gdk_pixbuf_composite(template,           // Source.
+                         scaled_screen,      // Destination.
+                         0, 0,               // Match the displacement below.
+                         1024, 1024,         // Crop of the scaled rectangle.
+                         0, 0,               // Displacement of the scaled rectangle.
+                         1, 1,               // Scaling factors.
+                         GDK_INTERP_NEAREST, // Doesn't really matter, but should be a little faster.
+                         255);               // Blending factor of the source.
+    g_object_unref(template);
 
-    g_task_return_boolean(task, TRUE);
+    char file_size[sizeof(G_STRINGIFY(SIZE_MAX))];
+    sprintf(file_size, "%zu", task_data->length);
+    // TODO: proper file name
+    gdk_pixbuf_save(scaled_screen, "/tmp/output.png", "png", &error, // "Base" parameters.
+                    "tEXt::Thumb::URI", g_task_get_name(task),       // URI of the file being thumbnailed.
+                    "tEXt::Thumb::MTime", "", // TODO
+                    "tEXt::Thumb::Size", file_size,                  // Size (in bytes) of the file being thumbnailed.
+                    "tEXt::Thumb::Mimetype", mime_type(task_data->kind), // MIME type of the file being thumbnailed.
+                    NULL);
+    g_object_unref(scaled_screen);
+
+    g_task_return_boolean(task, true);
     g_object_unref(task);
 }
 
@@ -116,16 +166,15 @@ static void on_thumbnailing_end(GObject *source_object, GAsyncResult *res, void 
     }
     else if (!g_cancellable_is_cancelled(g_task_get_cancellable(task))) {
         // If the task was cancelled, do not emit an error response.
-        g_signal_emit_by_name(thumbnailer_interface, "error", handle, uri, error->code,
-                              error->message);
+        g_signal_emit_by_name(thumbnailer_interface, "error", handle, uri, error->code, error->message);
     }
     g_signal_emit_by_name(thumbnailer_interface, "finished", handle);
 
     finished_task(handle);
 }
 
-void start_thumbnailing(unsigned handle, GCancellable *cancellable, gboolean is_urgent,
-                        char const *uri, char const *mime_type)
+void start_thumbnailing(unsigned handle, GCancellable *cancellable, gboolean is_urgent, char const *uri,
+                        char const *mime_type)
 {
     g_signal_emit_by_name(thumbnailer_interface, "started", handle);
 

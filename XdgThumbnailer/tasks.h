@@ -1,7 +1,7 @@
 #pragma once
 
-#include <glib.h>
 #include <gio/gio.h>
+#include <glib.h>
 
 void init_tasks(void);
 void cleanup_tasks(void);
