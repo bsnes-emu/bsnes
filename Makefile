@@ -205,19 +205,23 @@ SDL_LDFLAGS += -lopenal
 endif
 SDL_AUDIO_DRIVERS += openal
 endif
-else
+else # ifneq ($(PKG_CONFIG),)
 SDL_CFLAGS := $(shell $(PKG_CONFIG) --cflags sdl2)
 SDL_LDFLAGS := $(shell $(PKG_CONFIG) --libs sdl2) -lpthread
 
 # Allow OpenAL to be disabled even if the development libraries are available
 ifneq ($(ENABLE_OPENAL),0)
-ifeq ($(shell $(PKG_CONFIG) --exists openal && echo 0),0)
+ifneq ($(shell $(PKG_CONFIG) --exists openal && echo 0),)
 SDL_CFLAGS += $(shell $(PKG_CONFIG) --cflags openal) -DENABLE_OPENAL
 SDL_LDFLAGS += $(shell $(PKG_CONFIG) --libs openal)
 SDL_AUDIO_DRIVERS += openal
 endif
 endif
 
+ifneq ($(shell pkg-config --exists gio-2.0 || echo 0),)
+GIO_CFLAGS = $(error The Gio library could not be found)
+GIO_LDFLAGS = $(error The Gio library could not be found)
+else
 GIO_CFLAGS := $(shell $(PKG_CONFIG) --cflags gio-2.0) -DG_LOG_USE_STRUCTURED
 GIO_LDFLAGS := $(shell $(PKG_CONFIG) --libs gio-2.0)
 ifeq ($(CONF),debug)
@@ -225,9 +229,15 @@ GIO_CFLAGS += -DG_ENABLE_DEBUG
 else
 GIO_CFLAGS += -DG_DISABLE_ASSERT
 endif
+endif
 
+ifneq ($(shell pkg-config --exists gdk-pixbuf-2.0 || echo 0),)
+GDK_PIXBUF_CFLAGS = $(error The Gdk-Pixbuf library could not be found)
+GDK_PIXBUF_LDFLAGS = $(error The Gdk-Pixbuf library could not be found)
+else
 GDK_PIXBUF_CFLAGS := $(shell $(PKG_CONFIG) --cflags gdk-pixbuf-2.0)
 GDK_PIXBUF_LDFLAGS := $(shell $(PKG_CONFIG) --libs gdk-pixbuf-2.0)
+endif
 endif
 
 ifeq (,$(PKG_CONFIG))
@@ -656,12 +666,12 @@ $(BIN)/SDL/background.bmp: SDL/background.bmp
 
 $(BIN)/SDL/Shaders: Shaders
 	-@$(MKDIR) -p $@
-	cp -rf $< $@
+	cp -rfT $< $@
 	touch $@
 
 $(BIN)/SDL/Palettes: Misc/Palettes
 	-@$(MKDIR) -p $@
-	cp -rf $< $@
+	cp -rfT $< $@
 	touch $@
 
 # Boot ROMs
@@ -698,6 +708,8 @@ libretro:
 # If you somehow find a reasonable way to make associate an icon with an extension in this dumpster
 # fire of a desktop environment, open an issue or a pull request
 ifneq ($(FREEDESKTOP),)
+all: xdg-thumbnailer
+
 ICON_NAMES := apps/sameboy mimetypes/x-gameboy-rom mimetypes/x-gameboy-color-rom
 ICON_SIZES := 16x16 32x32 64x64 128x128 256x256 512x512
 ICONS := $(foreach name,$(ICON_NAMES), $(foreach size,$(ICON_SIZES),$(DESTDIR)$(PREFIX)/share/icons/hicolor/$(size)/$(name).png))

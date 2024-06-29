@@ -16,8 +16,8 @@
 // Auto-generated via `gdbus-codegen` from `interface.xml`.
 #include "build/obj/XdgThumbnailer/interface.h"
 
-static char const *const name_on_bus = "com.github.liji32.sameboy.XdgThumbnailer";
-static char const *const object_path = "/com/github/liji32/sameboy/XdgThumbnailer";
+static char const name_on_bus[] = "com.github.liji32.sameboy.XdgThumbnailer";
+static char const object_path[] = "/com/github/liji32/sameboy/XdgThumbnailer";
 
 ThumbnailerSpecializedThumbnailer1 *thumbnailer_interface = NULL;
 static unsigned max_nb_worker_threads;
@@ -127,7 +127,6 @@ int main(int argc, char const *argv[])
     g_info("Waiting for outstanding tasks...");
     cleanup_tasks(); // Also waits for any remaining tasks.
     // "Pedantic" cleanup for Valgrind et al.
-    unload_boot_rom();
     g_main_loop_unref(main_loop);
     g_bus_unown_name(owner_id);
     if (thumbnailer_interface) {

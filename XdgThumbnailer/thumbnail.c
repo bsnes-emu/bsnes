@@ -12,11 +12,15 @@
 #include "main.h"
 #include "tasks.h"
 
-#define DMG_ONLY_RESOURCE_PATH "/thumbnailer/CartridgeTemplate.png"
-#define DUAL_RESOURCE_PATH "/thumbnailer/UniversalCartridgeTemplate.png"
-#define CGB_ONLY_RESOURCE_PATH "/thumbnailer/ColorCartridgeTemplate.png"
-
 #define THUMBNAILING_ERROR_DOMAIN (g_quark_from_static_string("thumbnailing"))
+
+static char const dmg_only_resource_path[] = "/thumbnailer/CartridgeTemplate.png";
+static char const dual_resource_path[] = "/thumbnailer/UniversalCartridgeTemplate.png";
+static char const cgb_only_resource_path[] = "/thumbnailer/ColorCartridgeTemplate.png";
+
+static char const gb_mime_type[] = "application/x-gameboy-rom";
+static char const gbc_mime_type[] = "application/x-gameboy-color-rom";
+static char const isx_mime_type[] = "application/x-gameboy-isx";
 
 /* --- */
 
@@ -38,11 +42,11 @@ char const *mime_type(enum FileKind kind)
 {
     switch (kind) {
         case KIND_GB:
-            return "application/x-gameboy-rom";
+            return gb_mime_type;
         case KIND_GBC:
-            return "application/x-gameboy-color-rom";
+            return gbc_mime_type;
         case KIND_ISX:
-            return "application/x-gameboy-isx";
+            return isx_mime_type;
     }
 }
 
@@ -82,13 +86,13 @@ static void generate_thumbnail(GTask *task, void *source_object, void *data, GCa
     GdkPixbuf *template;
     switch (cgb_flag) {
         case 0xC0:
-            template = gdk_pixbuf_new_from_resource(CGB_ONLY_RESOURCE_PATH, &error);
+            template = gdk_pixbuf_new_from_resource(cgb_only_resource_path, &error);
             break;
         case 0x80:
-            template = gdk_pixbuf_new_from_resource(DUAL_RESOURCE_PATH, &error);
+            template = gdk_pixbuf_new_from_resource(dual_resource_path, &error);
             break;
         default:
-            template = gdk_pixbuf_new_from_resource(DMG_ONLY_RESOURCE_PATH, &error);
+            template = gdk_pixbuf_new_from_resource(dmg_only_resource_path, &error);
             break;
     }
     g_assert_no_error(error);
@@ -109,7 +113,7 @@ static void generate_thumbnail(GTask *task, void *source_object, void *data, GCa
     // TODO: proper file name
     gdk_pixbuf_save(scaled_screen, "/tmp/output.png", "png", &error, // "Base" parameters.
                     "tEXt::Thumb::URI", g_task_get_name(task),       // URI of the file being thumbnailed.
-                    "tEXt::Thumb::MTime", "", // TODO
+                    // "tEXt::Thumb::MTime", "", // TODO
                     "tEXt::Thumb::Size", file_size,                  // Size (in bytes) of the file being thumbnailed.
                     "tEXt::Thumb::Mimetype", mime_type(task_data->kind), // MIME type of the file being thumbnailed.
                     NULL);
@@ -183,13 +187,13 @@ void start_thumbnailing(unsigned handle, GCancellable *cancellable, gboolean is_
     g_task_set_name(task, uri);
 
     enum FileKind kind;
-    if (g_strcmp0(mime_type, "application/x-gameboy-color-rom") == 0) {
+    if (g_strcmp0(mime_type, gbc_mime_type) == 0) {
         kind = KIND_GBC;
     }
-    else if (g_strcmp0(mime_type, "application/x-gameboy-rom") == 0) {
+    else if (g_strcmp0(mime_type, gb_mime_type) == 0) {
         kind = KIND_GB;
     }
-    else if (g_strcmp0(mime_type, "application/x-gameboy-isx") == 0) {
+    else if (g_strcmp0(mime_type, isx_mime_type) == 0) {
         kind = KIND_ISX;
     }
     else {

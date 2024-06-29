@@ -12,28 +12,6 @@
 #define NB_FRAMES_TO_EMULATE (60 * 10)
 
 #define BOOT_ROM_SIZE (0x100 + 0x800) // The two "parts" of it, which are stored contiguously.
-static char *boot_rom;
-
-void load_boot_rom(void)
-{
-    static char const *boot_rom_path = DATA_DIR "/cgb_boot_fast.bin";
-
-    size_t length;
-    GError *error = NULL;
-    g_file_get_contents(boot_rom_path, &boot_rom, &length, &error);
-
-    if (error) {
-        g_error("Error loading boot ROM from \"%s\": %s", boot_rom_path, error->message);
-        // NOTREACHED
-    }
-    else if (length != BOOT_ROM_SIZE) {
-        g_error("Error loading boot ROM from \"%s\": expected to read %d bytes, got %zu", boot_rom_path, BOOT_ROM_SIZE,
-                length);
-        // NOTREACHED
-    }
-}
-
-void unload_boot_rom(void) { g_free(boot_rom); }
 
 /* --- */
 
