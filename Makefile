@@ -716,9 +716,9 @@ else
 	install -Dm 644 -t $(DESTDIR)$(PREFIX)/share/mime FreeDesktop/sameboy.xml
 	install -Dm 644 -t $(DESTDIR)$(PREFIX)/share/applications FreeDesktop/sameboy.desktop
 	for size in 16x16 32x32 64x64 128x128 256x256 512x512; do \
-		install -TDm 644 FreeDesktop/AppIcon/$$size.png $(DESTDIR)$(PREFIX)/share/icons/$$size/apps/sameboy.png; \
-		install -TDm 644 FreeDesktop/Cartridge/$$size.png $(DESTDIR)$(PREFIX)/share/icons/$$size/mimetypes/x-gameboy-rom.png; \
-		install -TDm 644 FreeDesktop/ColorCartridge/$$size.png $(DESTDIR)$(PREFIX)/share/icons/$$size/mimetypes/x-gameboy-color-rom.png; \
+		install -TDm 644 FreeDesktop/AppIcon/$$size.png $(DESTDIR)$(PREFIX)/share/icons/hicolor/$$size/apps/sameboy.png; \
+		install -TDm 644 FreeDesktop/Cartridge/$$size.png $(DESTDIR)$(PREFIX)/share/icons/hicolor/$$size/mimetypes/x-gameboy-rom.png; \
+		install -TDm 644 FreeDesktop/ColorCartridge/$$size.png $(DESTDIR)$(PREFIX)/share/icons/hicolor/$$size/mimetypes/x-gameboy-color-rom.png; \
 	done
 endif
 endif
@@ -733,7 +733,7 @@ $(BIN)/SameBoy-iOS.ipa: ios iOS/sideload.entitlements
 	(cd $(OBJ) && zip -q $(abspath $@) -r Payload)
 	rm -rf $(OBJ)/Payload
 
-    
+
 $(BIN)/SameBoy-iOS.deb: $(OBJ)/debian-binary $(OBJ)/control.tar.gz $(OBJ)/data.tar.gz
 	-@$(MKDIR) -p $(dir $@)
 	(cd $(OBJ) && ar cr $(abspath $@) $(notdir $^))
