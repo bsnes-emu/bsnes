@@ -701,9 +701,10 @@ libretro:
 ifneq ($(FREEDESKTOP),)
 install: $(BIN)/XdgThumbnailer/sameboy-thumbnailer sdl $(shell find FreeDesktop)
 	install -Dm 644 -st $(DESTDIR)$(PREFIX)/bin/ $<
-	install -Dm 644 -st $(DESTDIR)$(DATA_DIR)/ $(BIN)/SDL/*
+	install -Dm 644 -t $(DESTDIR)$(DATA_DIR)/ $(BIN)/SDL/*
 	mv $(DESTDIR)$(DATA_DIR)/sameboy $(DESTDIR)$(PREFIX)/bin/sameboy
 	chmod +x $(DESTDIR)$(PREFIX)/bin/sameboy
+	strip $(DESTDIR)$(PREFIX)/bin/sameboy
 ifeq ($(DESTDIR),)
 	xdg-mime install --novendor FreeDesktop/sameboy.xml
 	xdg-desktop-menu install --novendor FreeDesktop/sameboy.desktop
