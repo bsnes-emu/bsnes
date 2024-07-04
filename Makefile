@@ -700,15 +700,13 @@ libretro:
 # Install for Linux, and other FreeDesktop platforms.
 ifneq ($(FREEDESKTOP),)
 install: $(BIN)/XdgThumbnailer/sameboy-thumbnailer sdl $(shell find FreeDesktop)
-	install -Dm 644 -st $(DESTDIR)$(PREFIX)/bin/ $<
-	install -Dm 644 -t $(DESTDIR)$(DATA_DIR)/ $(BIN)/SDL/*
-	mv $(DESTDIR)$(DATA_DIR)/sameboy $(DESTDIR)$(PREFIX)/bin/sameboy
-	chmod +x $(DESTDIR)$(PREFIX)/bin/sameboy
-	strip $(DESTDIR)$(PREFIX)/bin/sameboy
+	(cd $(BIN)/SDL && find . \! -name sameboy -type f -exec install -Dm 644 -T {} "$(DESTDIR)$(DATA_DIR)/{}" \; )
+	install -Dm 755 -st $(DESTDIR)$(PREFIX)/bin/ $(BIN)/SDL/sameboy
+	install -Dm 755 -st $(DESTDIR)$(PREFIX)/bin/ $<
 ifeq ($(DESTDIR),)
 	xdg-mime install --novendor FreeDesktop/sameboy.xml
 	xdg-desktop-menu install --novendor FreeDesktop/sameboy.desktop
-	for size in 16 32 64 128 256 512; do \
+	for size in 16x16 32x32 64x64 128x128 256x256 512x512; do \
 		xdg-icon-resource install --novendor --theme hicolor --context apps FreeDesktop/AppIcon/$$size.png sameboy; \
 		xdg-icon-resource install --novendor --theme hicolor --context mimetypes FreeDesktop/Cartridge/$$size.png x-gameboy-rom; \
 		xdg-icon-resource install --novendor --theme hicolor --context mimetypes FreeDesktop/ColorCartridge/$$size.png x-gameboy-color-rom; \
@@ -716,7 +714,7 @@ ifeq ($(DESTDIR),)
 else
 	install -Dm 644 -t $(DESTDIR)$(PREFIX)/share/mime FreeDesktop/sameboy.xml
 	install -Dm 644 -t $(DESTDIR)$(PREFIX)/share/applications FreeDesktop/sameboy.desktop
-	for size in 16 32 64 128 256 512; do \
+	for size in 16x16 32x32 64x64 128x128 256x256 512x512; do \
 		install -TDm 644 FreeDesktop/AppIcon/$$size.png $(DESTDIR)$(PREFIX)/share/icons/$$size/apps/sameboy.png; \
 		install -TDm 644 FreeDesktop/Cartridge/$$size.png $(DESTDIR)$(PREFIX)/share/icons/$$size/mimetypes/x-gameboy-rom.png; \
 		install -TDm 644 FreeDesktop/ColorCartridge/$$size.png $(DESTDIR)$(PREFIX)/share/icons/$$size/mimetypes/x-gameboy-color-rom.png; \
