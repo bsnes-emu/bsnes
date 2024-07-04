@@ -1,5 +1,7 @@
 #pragma once
 
+#include <unistd.h>
+
 // As defined in the thumbnailer spec.
 enum ErrorCode {
     ERROR_UNKNOWN_SCHEME_OR_MIME,
@@ -12,3 +14,5 @@ enum ErrorCode {
 
 struct _ThumbnailerSpecializedThumbnailer1;
 extern struct _ThumbnailerSpecializedThumbnailer1 *thumbnailer_interface;
+
+extern pid_t pid;

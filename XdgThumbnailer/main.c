@@ -8,8 +8,8 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
-#include "emulate.h"
 #include "tasks.h"
 #include "thumbnail.h"
 
@@ -22,6 +22,8 @@ static char const object_path[] = "/com/github/liji32/sameboy/XdgThumbnailer";
 ThumbnailerSpecializedThumbnailer1 *thumbnailer_interface = NULL;
 static unsigned max_nb_worker_threads;
 
+pid_t pid;
+
 static gboolean handle_queue(void *instance, GDBusMethodInvocation *invocation, char const *uri, char const *mime_type,
                              char const *flavor, gboolean urgent, void *user_data)
 {
@@ -31,7 +33,7 @@ static gboolean handle_queue(void *instance, GDBusMethodInvocation *invocation, 
     g_assert(skeleton == thumbnailer_interface);
 
     struct NewTaskInfo task_info = new_task(urgent);
-    start_thumbnailing(task_info.handle, task_info.cancellable, urgent, uri, mime_type);
+    start_thumbnailing(task_info.handle, task_info.cancellable, urgent, uri, mime_type, flavor);
 
     thumbnailer_specialized_thumbnailer1_complete_queue(skeleton, invocation, task_info.handle);
     return G_DBUS_METHOD_INVOCATION_HANDLED;
@@ -104,11 +106,18 @@ static gboolean handle_sigterm(void *user_data)
     return G_SOURCE_CONTINUE; // Do not remove this source ourselves, let the post-main loop do so.
 }
 
+/* --- */
+
 int main(int argc, char const *argv[])
 {
+    pid = getpid();
+
+    locate_and_create_thumbnail_dir();
+
     max_nb_worker_threads = g_get_num_processors();
     // unsigned active_worker_threads = 0;
-    //  Create the task queue *before* starting to accept tasks from D-Bus.
+
+    // Create the task queue *before* starting to accept tasks from D-Bus.
     init_tasks();
     // Likewise, create the main loop before then, so it can be aborted even before entering it.
     main_loop = g_main_loop_new(NULL, false);
@@ -133,5 +142,6 @@ int main(int argc, char const *argv[])
         g_dbus_interface_skeleton_unexport(G_DBUS_INTERFACE_SKELETON(thumbnailer_interface));
         g_object_unref(thumbnailer_interface);
     }
+    free_thumbnail_dir_path();
     return 0;
 }

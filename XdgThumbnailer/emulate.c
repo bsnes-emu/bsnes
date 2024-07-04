@@ -85,6 +85,7 @@ unsigned emulate(enum FileKind kind, unsigned char const *rom, size_t rom_size, 
     GB_set_rendering_disabled(&gb, true);
     GB_set_turbo_mode(&gb, true, true);
     while (GPOINTER_TO_UINT(GB_get_user_data(&gb))) {
+        // TODO: handle cancellation
         GB_run(&gb);
     }
 
