@@ -1,147 +1,128 @@
-#include "main.h"
-
-#include <gio/gio.h>
-#include <glib-object.h>
-#include <glib-unix.h>
+#include <errno.h>
+#include <gdk-pixbuf/gdk-pixbuf.h>
 #include <glib.h>
-#include <signal.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 
-#include "tasks.h"
-#include "thumbnail.h"
+#include "emulate.h"
 
-// Auto-generated via `gdbus-codegen` from `interface.xml`.
-#include "build/obj/XdgThumbnailer/interface.h"
+static char const dmg_only_resource_path[] = "/thumbnailer/CartridgeTemplate.png";
+static char const dual_resource_path[] = "/thumbnailer/UniversalCartridgeTemplate.png";
+static char const cgb_only_resource_path[] = "/thumbnailer/ColorCartridgeTemplate.png";
 
-static char const name_on_bus[] = "com.github.liji32.sameboy.XdgThumbnailer";
-static char const object_path[] = "/com/github/liji32/sameboy/XdgThumbnailer";
-
-ThumbnailerSpecializedThumbnailer1 *thumbnailer_interface = NULL;
-static unsigned max_nb_worker_threads;
-
-pid_t pid;
-
-static gboolean handle_queue(void *instance, GDBusMethodInvocation *invocation, char const *uri, char const *mime_type,
-                             char const *flavor, gboolean urgent, void *user_data)
+static GdkPixbuf *generate_thumbnail(char const *input_path)
 {
-    ThumbnailerSpecializedThumbnailer1 *skeleton = instance;
-    g_info("Received Queue(uri=\"%s\", mime_type=\"%s\", flavor=\"%s\", urgent=%s) request", uri, mime_type, flavor,
-           urgent ? "true" : "false");
-    g_assert(skeleton == thumbnailer_interface);
+    uint32_t screen_raw[GB_SCREEN_WIDTH * GB_SCREEN_HEIGHT];
+    uint8_t cgb_flag = emulate(input_path, screen_raw);
 
-    struct NewTaskInfo task_info = new_task(urgent);
-    start_thumbnailing(task_info.handle, task_info.cancellable, urgent, uri, mime_type, flavor);
+    // Generate the thumbnail from `screen_raw` and `cgb_flag`.
 
-    thumbnailer_specialized_thumbnailer1_complete_queue(skeleton, invocation, task_info.handle);
-    return G_DBUS_METHOD_INVOCATION_HANDLED;
-}
+    // `screen_raw` is properly formatted for this operation; see the comment in `rgb_encode` for a
+    // discussion of why and how.
+    GdkPixbuf *screen = gdk_pixbuf_new_from_data((uint8_t *)screen_raw, GDK_COLORSPACE_RGB,
+                                                 true,                                    // Yes, we have alpha!
+                                                 8,                                       // bpp
+                                                 GB_SCREEN_WIDTH, GB_SCREEN_HEIGHT,       // Size.
+                                                 GB_SCREEN_WIDTH * sizeof(screen_raw[0]), // Row stride.
+                                                 NULL, NULL);                             // Do not free the buffer.
+    // Scale the screen and position it in the appropriate place for compositing the cartridge templates.
+    GdkPixbuf *scaled_screen = gdk_pixbuf_new(GDK_COLORSPACE_RGB, true, 8, 1024, 1024);
+    gdk_pixbuf_scale(screen,                                    // Source.
+                     scaled_screen,                             // Destination.
+                     192, 298,                                  // Match the displacement below.
+                     GB_SCREEN_WIDTH * 4, GB_SCREEN_HEIGHT * 4, // How the scaled rectangle should be cropped.
+                     192, 298, // Displace the scaled screen so it lines up with the template.
+                     4, 4,     // Scaling factors.
+                     GDK_INTERP_NEAREST);
+    g_object_unref(screen);
 
-static gboolean handle_dequeue(void *instance, GDBusMethodInvocation *invocation, unsigned handle, void *user_data)
-{
-    ThumbnailerSpecializedThumbnailer1 *skeleton = instance;
-    g_info("Received Dequeue(handle=%u) request", handle);
-    g_assert(skeleton == thumbnailer_interface);
-
-    cancel_task(handle);
-
-    return G_DBUS_METHOD_INVOCATION_HANDLED;
-}
-
-static GMainLoop *main_loop;
-
-static void on_bus_acquired(GDBusConnection *connection, const char *name, void *user_data)
-{
-    g_assert_cmpstr(name, ==, name_on_bus);
-    (void)user_data;
-    g_info("Acquired bus");
-
-    // Create the interface, and hook up callbacks for when its methods are called.
-    thumbnailer_interface = thumbnailer_specialized_thumbnailer1_skeleton_new();
-    g_signal_connect(thumbnailer_interface, "handle-queue", G_CALLBACK(handle_queue), NULL);
-    g_signal_connect(thumbnailer_interface, "handle-dequeue", G_CALLBACK(handle_dequeue), NULL);
-
-    // Export the interface on the bus.
     GError *error = NULL;
-    GDBusInterfaceSkeleton *interface = G_DBUS_INTERFACE_SKELETON(thumbnailer_interface);
-    gboolean res = g_dbus_interface_skeleton_export(interface, connection, object_path, &error);
-    g_assert(res);
+    GdkPixbuf *template;
+    switch (cgb_flag) {
+        case 0xC0:
+            template = gdk_pixbuf_new_from_resource(cgb_only_resource_path, &error);
+            break;
+        case 0x80:
+            template = gdk_pixbuf_new_from_resource(dual_resource_path, &error);
+            break;
+        default:
+            template = gdk_pixbuf_new_from_resource(dmg_only_resource_path, &error);
+            break;
+    }
     g_assert_no_error(error);
+    g_assert_cmpint(gdk_pixbuf_get_width(template), ==, 1024);
+    g_assert_cmpint(gdk_pixbuf_get_height(template), ==, 1024);
+    gdk_pixbuf_composite(template,           // Source.
+                         scaled_screen,      // Destination.
+                         0, 0,               // Match the displacement below.
+                         1024, 1024,         // Crop of the scaled rectangle.
+                         0, 0,               // Displacement of the scaled rectangle.
+                         1, 1,               // Scaling factors.
+                         GDK_INTERP_NEAREST, // Doesn't really matter, but should be a little faster.
+                         255);               // Blending factor of the source onto the destination.
+    g_object_unref(template);
+
+    return scaled_screen;
+}
+
+static GdkPixbuf *enforce_max_size(GdkPixbuf *thumbnail, unsigned long max_size)
+{
+    g_assert_cmpuint(gdk_pixbuf_get_width(thumbnail), ==, gdk_pixbuf_get_height(thumbnail));
+    g_assert_cmpuint(gdk_pixbuf_get_width(thumbnail), ==, 1024);
+    // This is only a *max* size; don't bother scaling up.
+    // (This also prevents any overflow errors—notice that the scale function takes `int` size parameters!)
+    if (max_size > 1024) return thumbnail;
+    GdkPixbuf *scaled = gdk_pixbuf_scale_simple(thumbnail, max_size, max_size, GDK_INTERP_BILINEAR);
+    g_object_unref(thumbnail);
+    return scaled;
+}
+
+static void write_thumbnail(GdkPixbuf *thumbnail, char const *output_path)
+{
+    GError *error = NULL;
+    // Intentionally be "not a good citizen":
+    // - Write directly to the provided path, instead of atomically replacing it with a fully-formed file;
+    //   this is necessary for at least Tumbler (XFCE's thumbnailer daemon), which creates the file **and** keeps the
+    //   returned FD—which keeps pointing to the deleted file... which is still empty!
+    // - Do not save any metadata to the PNG, since the thumbnailer daemon (again, at least XFCE's, the only one I have
+    //   tested with) appears to read the PNG's pixels, and write a new one with the appropriate metadata.
+    //   (Thank you! Saves me all that work.)
+    gdk_pixbuf_save(thumbnail, output_path, "png", &error, NULL);
     if (error) {
-        g_error("Error exporting interface \"%s\" at \"%s\": %s", g_dbus_interface_skeleton_get_info(interface)->name,
-                object_path, error->message);
+        g_error("Failed to save thumbnail: %s", error->message);
         // NOTREACHED
     }
 }
 
-static void on_name_acquired(GDBusConnection *connection, const char *name, void *user_data)
+int main(int argc, char *argv[])
 {
-    g_assert_cmpstr(name, ==, name_on_bus);
-    (void)user_data;
-
-    g_info("Acquired the name \"%s\" on the session bus", name);
-}
-
-static void on_name_lost(GDBusConnection *connection, const char *name, void *user_data)
-{
-    g_assert_cmpstr(name, ==, name_on_bus);
-    (void)user_data;
-
-    if (connection != NULL) {
-        g_info("Lost the name \"%s\" on the session bus", name);
+    if (argc != 3 && argc != 4) {
+        g_error("Usage: %s <input path> <output path> [<size>]", argv[0] ? argv[0] : "sameboy-thumbnailer");
+        // NOTREACHED
     }
-    else {
-        g_error("Failed to connect to session bus");
+    char const *input_path = argv[1];
+    char *output_path = argv[2];    // Gets mutated in-place.
+    char const *max_size = argv[3]; // May be NULL.
+
+    g_debug("%s -> %s [%s]", input_path, output_path, max_size ? max_size : "(none)");
+
+    GdkPixbuf *thumbnail = generate_thumbnail(input_path);
+    if (max_size) {
+        char *endptr;
+        errno = 0;
+        unsigned long size = strtoul(max_size, &endptr, 10);
+        if (errno != 0 || *max_size == '\0' || *endptr != '\0') {
+            g_error("Invalid size parameter \"%s\": %s", max_size, strerror(errno == 0 ? EINVAL : errno));
+            // NOTREACHED
+        }
+
+        thumbnail = enforce_max_size(thumbnail, size);
     }
-    g_main_loop_quit(main_loop);
-}
+    write_thumbnail(thumbnail, output_path);
+    g_object_unref(thumbnail);
 
-static gboolean handle_sigterm(void *user_data)
-{
-    g_info("SIGTERM received! Quitting...");
-
-    g_main_loop_quit(main_loop);
-    return G_SOURCE_CONTINUE; // Do not remove this source ourselves, let the post-main loop do so.
-}
-
-/* --- */
-
-int main(int argc, char const *argv[])
-{
-    pid = getpid();
-
-    locate_and_create_thumbnail_dir();
-
-    max_nb_worker_threads = g_get_num_processors();
-    // unsigned active_worker_threads = 0;
-
-    // Create the task queue *before* starting to accept tasks from D-Bus.
-    init_tasks();
-    // Likewise, create the main loop before then, so it can be aborted even before entering it.
-    main_loop = g_main_loop_new(NULL, false);
-
-    // Refuse to replace the name or be replaced; there should only be one instance of the
-    // thumbnailer on the bus at all times. To replace this program, kill it.
-    unsigned owner_id = g_bus_own_name(G_BUS_TYPE_SESSION, name_on_bus, G_BUS_NAME_OWNER_FLAGS_DO_NOT_QUEUE,
-                                       on_bus_acquired, on_name_acquired, on_name_lost, NULL, NULL);
-
-    unsigned sigterm_source_id = g_unix_signal_add(SIGTERM, handle_sigterm, NULL);
-    g_main_loop_run(main_loop);
-    // This must be done before destroying the main loop.
-    gboolean removed = g_source_remove(sigterm_source_id);
-    g_assert(removed);
-
-    g_info("Waiting for outstanding tasks...");
-    cleanup_tasks(); // Also waits for any remaining tasks.
-    // "Pedantic" cleanup for Valgrind et al.
-    g_main_loop_unref(main_loop);
-    g_bus_unown_name(owner_id);
-    if (thumbnailer_interface) {
-        g_dbus_interface_skeleton_unexport(G_DBUS_INTERFACE_SKELETON(thumbnailer_interface));
-        g_object_unref(thumbnailer_interface);
-    }
-    free_thumbnail_dir_path();
     return 0;
 }

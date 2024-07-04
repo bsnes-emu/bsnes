@@ -222,8 +222,8 @@ ifneq ($(shell pkg-config --exists gio-2.0 || echo 0),)
 GIO_CFLAGS = $(error The Gio library could not be found)
 GIO_LDFLAGS = $(error The Gio library could not be found)
 else
-GIO_CFLAGS := $(shell $(PKG_CONFIG) --cflags gio-2.0) -DG_LOG_USE_STRUCTURED
-GIO_LDFLAGS := $(shell $(PKG_CONFIG) --libs gio-2.0)
+GIO_CFLAGS := $(shell $(PKG_CONFIG) --cflags gio-unix-2.0) -DG_LOG_USE_STRUCTURED
+GIO_LDFLAGS := $(shell $(PKG_CONFIG) --libs gio-unix-2.0)
 ifeq ($(CONF),debug)
 GIO_CFLAGS += -DG_ENABLE_DEBUG
 else
@@ -437,8 +437,6 @@ $(OBJ)/SDL/%.c.o: SDL/%.c
 $(OBJ)/XdgThumbnailer/%.c.o: XdgThumbnailer/%.c
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) $(GIO_CFLAGS) $(GDK_PIXBUF_CFLAGS) -DG_LOG_DOMAIN='"sameboy-thumbnailer"' -c $< -o $@
-# Make sure not to attempt compiling this before generating the interface code.
-$(OBJ)/XdgThumbnailer/main.c.o: $(OBJ)/XdgThumbnailer/interface.h
 # Make sure not to attempt compiling this before generating the resource code.
 $(OBJ)/XdgThumbnailer/emulate.c.o: $(OBJ)/XdgThumbnailer/resources.h
 # Silence warnings for this. It is code generated not by us, so we do not want `-Werror` to break
@@ -446,10 +444,6 @@ $(OBJ)/XdgThumbnailer/emulate.c.o: $(OBJ)/XdgThumbnailer/resources.h
 $(OBJ)/XdgThumbnailer/%.c.o: $(OBJ)/XdgThumbnailer/%.c
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) $(GIO_CFLAGS) $(GDK_PIXBUF_CFLAGS) -DG_LOG_DOMAIN='"sameboy-thumbnailer"' -w -c $< -o $@
-
-$(OBJ)/XdgThumbnailer/interface.c $(OBJ)/XdgThumbnailer/interface.h: XdgThumbnailer/interface.xml
-	-@$(MKDIR) -p $(dir $@)
-	gdbus-codegen --c-generate-autocleanup none --c-namespace Thumbnailer --interface-prefix org.freedesktop.thumbnails. --generate-c-code $(OBJ)/XdgThumbnailer/interface $<
 
 $(OBJ)/XdgThumbnailer/resources.c $(OBJ)/XdgThumbnailer/resources.h: %: XdgThumbnailer/resources.gresource.xml $(BIN)/BootROMs/cgb_boot_fast.bin
 	-@$(MKDIR) -p $(dir $@)

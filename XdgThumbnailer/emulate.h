@@ -1,12 +1,8 @@
 #pragma once
 
-#include <stddef.h>
 #include <stdint.h>
 
-enum FileKind {
-    KIND_GB,
-    KIND_GBC,
-    KIND_ISX,
-};
+#define GB_SCREEN_WIDTH 160
+#define GB_SCREEN_HEIGHT 144
 
-unsigned emulate(enum FileKind kind, unsigned char const *rom, size_t rom_size, uint32_t screen[static 160 * 144]);
+uint8_t emulate(char const *path, uint32_t screen[static GB_SCREEN_WIDTH * GB_SCREEN_HEIGHT]);
