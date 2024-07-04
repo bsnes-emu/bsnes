@@ -699,10 +699,11 @@ libretro:
 
 # Install for Linux, and other FreeDesktop platforms.
 ifneq ($(FREEDESKTOP),)
-install: $(BIN)/XdgThumbnailer/sameboy-thumbnailer sdl $(shell find FreeDesktop)
+install: $(BIN)/XdgThumbnailer/sameboy-thumbnailer sdl $(shell find FreeDesktop) XdgThumbnailer/sameboy.thumbnailer
 	(cd $(BIN)/SDL && find . \! -name sameboy -type f -exec install -Dm 644 -T {} "$(DESTDIR)$(DATA_DIR)/{}" \; )
 	install -Dm 755 -st $(DESTDIR)$(PREFIX)/bin/ $(BIN)/SDL/sameboy
 	install -Dm 755 -st $(DESTDIR)$(PREFIX)/bin/ $<
+	install -Dm 644 -t $(DESTDIR)$(PREFIX)/share/thumbnailers/ XdgThumbnailer/sameboy.thumbnailer
 ifeq ($(DESTDIR),)
 	xdg-mime install --novendor FreeDesktop/sameboy.xml
 	xdg-desktop-menu install --novendor FreeDesktop/sameboy.desktop
