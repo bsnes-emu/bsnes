@@ -717,9 +717,9 @@ else
 	install -Dm 644 -t $(DESTDIR)$(PREFIX)/share/mime FreeDesktop/sameboy.xml
 	install -Dm 644 -t $(DESTDIR)$(PREFIX)/share/applications FreeDesktop/sameboy.desktop
 	for size in 16 32 64 128 256 512; do \
-		install -TDm 644 FreeDesktop/AppIcon/$$size.png $(DESTDIR)$(PREFIX)/share/pixmaps/$$size/apps/sameboy.png; \
-		install -TDm 644 FreeDesktop/Cartridge/$$size.png $(DESTDIR)$(PREFIX)/share/pixmaps/$$size/mimetypes/x-gameboy-rom.png; \
-		install -TDm 644 FreeDesktop/ColorCartridge/$$size.png $(DESTDIR)$(PREFIX)/share/pixmaps/$$size/mimetypes/x-gameboy-color-rom.png; \
+		install -TDm 644 FreeDesktop/AppIcon/$$size.png $(DESTDIR)$(PREFIX)/share/icons/$$size/apps/sameboy.png; \
+		install -TDm 644 FreeDesktop/Cartridge/$$size.png $(DESTDIR)$(PREFIX)/share/icons/$$size/mimetypes/x-gameboy-rom.png; \
+		install -TDm 644 FreeDesktop/ColorCartridge/$$size.png $(DESTDIR)$(PREFIX)/share/icons/$$size/mimetypes/x-gameboy-color-rom.png; \
 	done
 endif
 endif
