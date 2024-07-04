@@ -1,4 +1,4 @@
 [Thumbnailer Entry]
-TryExec=/home/issotm/SameBoy/build/bin/XdgThumbnailer/sameboy-thumbnailer
-Exec=/home/issotm/SameBoy/build/bin/XdgThumbnailer/sameboy-thumbnailer %i %o %s
+TryExec=sameboy-thumbnailer
+Exec=sameboy-thumbnailer %i %o %s
 MimeType=application/x-gameboy-rom;application/x-gameboy-color-rom;application/x-gameboy-isx

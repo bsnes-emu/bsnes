@@ -390,7 +390,7 @@ IOS_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(IOS_SOURCES))
 QUICKLOOK_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(QUICKLOOK_SOURCES))
 SDL_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(SDL_SOURCES))
 TESTER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(TESTER_SOURCES))
-XDG_THUMBNAILER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(XDG_THUMBNAILER_SOURCES)) $(OBJ)/XdgThumbnailer/interface.c.o $(OBJ)/XdgThumbnailer/resources.c.o
+XDG_THUMBNAILER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(XDG_THUMBNAILER_SOURCES)) $(OBJ)/XdgThumbnailer/resources.c.o
 
 lib: $(PUBLIC_HEADERS)
 
@@ -697,51 +697,30 @@ $(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameBoyLogo.pb12
 libretro:
 	CFLAGS="$(WARNINGS)" $(MAKE) -C libretro BOOTROMS_DIR=$(abspath $(BOOTROMS_DIR)) BIN=$(abspath $(BIN))
 
-# install for Linux/FreeDesktop/etc.
-# Does not install mimetype icons because FreeDesktop is cursed abomination with no right to exist.
-# If you somehow find a reasonable way to make associate an icon with an extension in this dumpster
-# fire of a desktop environment, open an issue or a pull request
+# Install for Linux, and other FreeDesktop platforms.
 ifneq ($(FREEDESKTOP),)
-all: xdg-thumbnailer
-
-ICON_NAMES := apps/sameboy mimetypes/x-gameboy-rom mimetypes/x-gameboy-color-rom
-ICON_SIZES := 16x16 32x32 64x64 128x128 256x256 512x512
-ICONS := $(foreach name,$(ICON_NAMES), $(foreach size,$(ICON_SIZES),$(DESTDIR)$(PREFIX)/share/icons/hicolor/$(size)/$(name).png))
-# TODO: install the thumbnailer as well
-install: sdl xdg-thumbnailer $(DESTDIR)$(PREFIX)/share/mime/packages/sameboy.xml $(ICONS) FreeDesktop/sameboy.desktop
-	-@$(MKDIR) -p $(dir $(DESTDIR)$(PREFIX))
-	mkdir -p $(DESTDIR)$(DATA_DIR)/ $(DESTDIR)$(PREFIX)/bin/
-	cp -rf $(BIN)/SDL/* $(DESTDIR)$(DATA_DIR)/
-	cp -rf $(BIN)/XdgThumbnailer/* $(DESTDIR)$(DATA_DIR)/
+install: $(BIN)/XdgThumbnailer/sameboy-thumbnailer sdl $(shell find FreeDesktop)
+	install -Dm 644 -st $(DESTDIR)$(PREFIX)/bin/ $<
+	install -Dm 644 -st $(DESTDIR)$(DATA_DIR)/ $(BIN)/SDL/*
 	mv $(DESTDIR)$(DATA_DIR)/sameboy $(DESTDIR)$(PREFIX)/bin/sameboy
+	chmod +x $(DESTDIR)$(PREFIX)/bin/sameboy
 ifeq ($(DESTDIR),)
-	-update-mime-database -n $(PREFIX)/share/mime
-	-xdg-desktop-menu install --novendor --mode system FreeDesktop/sameboy.desktop
-	-xdg-icon-resource forceupdate --mode system
-	-xdg-desktop-menu forceupdate --mode system
-ifneq ($(SUDO_USER),)
-	-su $(SUDO_USER) -c "xdg-desktop-menu forceupdate --mode system"
-endif
+	xdg-mime install --novendor FreeDesktop/sameboy.xml
+	xdg-desktop-menu install --novendor FreeDesktop/sameboy.desktop
+	for size in 16 32 64 128 256 512; do \
+		xdg-icon-resource install --novendor --theme hicolor --context apps FreeDesktop/AppIcon/$$size.png sameboy; \
+		xdg-icon-resource install --novendor --theme hicolor --context mimetypes FreeDesktop/Cartridge/$$size.png x-gameboy-rom; \
+		xdg-icon-resource install --novendor --theme hicolor --context mimetypes FreeDesktop/ColorCartridge/$$size.png x-gameboy-color-rom; \
+	done
 else
-	-@$(MKDIR) -p $(DESTDIR)$(PREFIX)/share/applications/
-	cp FreeDesktop/sameboy.desktop $(DESTDIR)$(PREFIX)/share/applications/sameboy.desktop
+	install -Dm 644 -t $(DESTDIR)$(PREFIX)/share/mime FreeDesktop/sameboy.xml
+	install -Dm 644 -t $(DESTDIR)$(PREFIX)/share/applications FreeDesktop/sameboy.desktop
+	for size in 16 32 64 128 256 512; do \
+		install -TDm 644 FreeDesktop/AppIcon/$$size.png $(DESTDIR)$(PREFIX)/share/pixmaps/$$size/apps/sameboy.png; \
+		install -TDm 644 FreeDesktop/Cartridge/$$size.png $(DESTDIR)$(PREFIX)/share/pixmaps/$$size/mimetypes/x-gameboy-rom.png; \
+		install -TDm 644 FreeDesktop/ColorCartridge/$$size.png $(DESTDIR)$(PREFIX)/share/pixmaps/$$size/mimetypes/x-gameboy-color-rom.png; \
+	done
 endif
-
-$(DESTDIR)$(PREFIX)/share/icons/hicolor/%/apps/sameboy.png: FreeDesktop/AppIcon/%.png
-	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
-
-$(DESTDIR)$(PREFIX)/share/icons/hicolor/%/mimetypes/x-gameboy-rom.png: FreeDesktop/Cartridge/%.png
-	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
-
-$(DESTDIR)$(PREFIX)/share/icons/hicolor/%/mimetypes/x-gameboy-color-rom.png: FreeDesktop/ColorCartridge/%.png
-	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
-
-$(DESTDIR)$(PREFIX)/share/mime/packages/sameboy.xml: FreeDesktop/sameboy.xml
-	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
 endif
 
 ios:
