@@ -32,12 +32,11 @@ static void vblank_callback(GB_gameboy_t *gb, GB_vblank_type_t type)
 {
     (void)type; // Ignore the type, we use VBlank counting as a kind of pacing (and to avoid tearing).
 
-    unsigned nb_frames_left = GPOINTER_TO_UINT(GB_get_user_data(gb));
-    nb_frames_left--;
-    GB_set_user_data(gb, GUINT_TO_POINTER(nb_frames_left));
+    unsigned *nb_frames_left = GB_get_user_data(gb);
+    (*nb_frames_left)--;
 
     // *Do* render the very last frame.
-    if (nb_frames_left == 1) {
+    if (*nb_frames_left == 1) {
         GB_set_rendering_disabled(gb, false);
     }
 }
@@ -51,7 +50,7 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     // So we treat each uint32_t as a 4-byte buffer, and write the bytes accordingly.
     // This is guaranteed to not be UB, because casting a `T*` to any flavour of `char*` accesses
     // and modifies the `T`'s "object representation".
-    unsigned char *bytes = (uint8_t *)&rgba;
+    uint8_t *bytes = (uint8_t *)&rgba;
     bytes[0] = r;
     bytes[1] = g;
     bytes[2] = b;
@@ -75,12 +74,10 @@ uint8_t emulate(char const *path, uint32_t screen[static GB_SCREEN_WIDTH * GB_SC
                                               G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
     g_assert_no_error(error); // This shouldn't be able to fail.
     size_t boot_rom_size;
-    unsigned char const *boot_rom_data = g_bytes_get_data(boot_rom, &boot_rom_size);
+    uint8_t const *boot_rom_data = g_bytes_get_data(boot_rom, &boot_rom_size);
     g_assert_cmpuint(boot_rom_size, ==, BOOT_ROM_SIZE);
     GB_load_boot_rom_from_buffer(&gb, boot_rom_data, boot_rom_size);
     g_bytes_unref(boot_rom);
-
-    GB_set_user_data(&gb, GUINT_TO_POINTER(NB_FRAMES_TO_EMULATE));
 
     GB_set_vblank_callback(&gb, vblank_callback);
     GB_set_pixels_output(&gb, screen);
@@ -89,9 +86,12 @@ uint8_t emulate(char const *path, uint32_t screen[static GB_SCREEN_WIDTH * GB_SC
     GB_set_log_callback(&gb, log_callback); // Anything bizarre the ROM does during emulation, we don't care about.
     GB_set_color_correction_mode(&gb, GB_COLOR_CORRECTION_MODERN_BALANCED);
 
+    unsigned nb_frames_left = NB_FRAMES_TO_EMULATE;
+    GB_set_user_data(&gb, &nb_frames_left);
+
     GB_set_rendering_disabled(&gb, true);
     GB_set_turbo_mode(&gb, true, true);
-    while (GPOINTER_TO_UINT(GB_get_user_data(&gb))) {
+    while (nb_frames_left) {
         GB_run(&gb);
     }
 

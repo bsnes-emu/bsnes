@@ -171,7 +171,7 @@ endif
 
 # These must come before the -Wno- flags
 WARNINGS += -Werror -Wall -Wno-unknown-warning -Wno-unknown-warning-option -Wno-missing-braces
-WARNINGS += -Wno-nonnull -Wno-unused-result -Wno-multichar -Wno-int-in-bool-context -Wno-format-truncation -Wformat-overflow=2
+WARNINGS += -Wno-nonnull -Wno-unused-result -Wno-multichar -Wno-int-in-bool-context -Wno-format-truncation
 
 # Only add this flag if the compiler supports it
 ifeq ($(shell $(CC) -x c -c $(NULL) -o $(NULL) -Werror -Wpartial-availability 2> $(NULL); echo $$?),0)
@@ -366,6 +366,9 @@ endif
 all: sdl tester libretro lib
 ifeq ($(PLATFORM),Darwin)
 all: cocoa ios-ipa ios-deb
+endif
+ifneq ($(FREEDESKTOP),)
+all: xdg-thumbnailer
 endif
 
 # Get a list of our source files and their respective object file targets
@@ -658,9 +661,8 @@ $(BIN)/SDL/background.bmp: SDL/background.bmp
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $< $@
 
-$(BIN)/SDL/Shaders: Shaders
-	-@$(MKDIR) -p $@
-	cp -rfT $< $@
+$(BIN)/SDL/Shaders: $(wildcard Shaders/*.fsh)
+	install -Dt $@ $^
 	touch $@
 
 $(BIN)/SDL/Palettes: Misc/Palettes

@@ -68,7 +68,7 @@ static GdkPixbuf *generate_thumbnail(char const *input_path)
     return scaled_screen;
 }
 
-static GdkPixbuf *enforce_max_size(GdkPixbuf *thumbnail, unsigned long max_size)
+static GdkPixbuf *enforce_max_size(GdkPixbuf *thumbnail, unsigned max_size)
 {
     g_assert_cmpuint(gdk_pixbuf_get_width(thumbnail), ==, gdk_pixbuf_get_height(thumbnail));
     g_assert_cmpuint(gdk_pixbuf_get_width(thumbnail), ==, 1024);
@@ -113,7 +113,8 @@ int main(int argc, char *argv[])
     if (max_size) {
         char *endptr;
         errno = 0;
-        unsigned long size = strtoul(max_size, &endptr, 10);
+        // This can implicitly truncate, but that's the behaviour Liji wants.
+        unsigned size = strtoul(max_size, &endptr, 10);
         if (errno != 0 || *max_size == '\0' || *endptr != '\0') {
             g_error("Invalid size parameter \"%s\": %s", max_size, strerror(errno == 0 ? EINVAL : errno));
             // NOTREACHED
