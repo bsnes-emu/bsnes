@@ -58,12 +58,12 @@ static uint32_t rgb_encode(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b)
     return rgba;
 }
 
-uint8_t emulate(char const *path, uint32_t screen[static GB_SCREEN_WIDTH * GB_SCREEN_HEIGHT])
+uint8_t emulate(const char *path, uint32_t screen[static GB_SCREEN_WIDTH * GB_SCREEN_HEIGHT])
 {
     GB_gameboy_t gb;
     GB_init(&gb, GB_MODEL_CGB_E);
 
-    char const *last_dot = strrchr(path, '.');
+    const char *last_dot = strrchr(path, '.');
     bool is_isx = last_dot && strcmp(last_dot + 1, "isx") == 0;
     if (is_isx ? GB_load_isx(&gb, path) : GB_load_rom(&gb, path)) {
         exit(EXIT_FAILURE);
@@ -74,7 +74,7 @@ uint8_t emulate(char const *path, uint32_t screen[static GB_SCREEN_WIDTH * GB_SC
                                               G_RESOURCE_LOOKUP_FLAGS_NONE, &error);
     g_assert_no_error(error); // This shouldn't be able to fail.
     size_t boot_rom_size;
-    uint8_t const *boot_rom_data = g_bytes_get_data(boot_rom, &boot_rom_size);
+    const uint8_t *boot_rom_data = g_bytes_get_data(boot_rom, &boot_rom_size);
     g_assert_cmpuint(boot_rom_size, ==, BOOT_ROM_SIZE);
     GB_load_boot_rom_from_buffer(&gb, boot_rom_data, boot_rom_size);
     g_bytes_unref(boot_rom);

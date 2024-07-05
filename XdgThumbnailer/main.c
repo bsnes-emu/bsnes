@@ -9,11 +9,11 @@
 
 #include "emulate.h"
 
-static char const dmg_only_resource_path[] = "/thumbnailer/CartridgeTemplate.png";
-static char const dual_resource_path[] = "/thumbnailer/UniversalCartridgeTemplate.png";
-static char const cgb_only_resource_path[] = "/thumbnailer/ColorCartridgeTemplate.png";
+static const char dmg_only_resource_path[] = "/thumbnailer/CartridgeTemplate.png";
+static const char dual_resource_path[] = "/thumbnailer/UniversalCartridgeTemplate.png";
+static const char cgb_only_resource_path[] = "/thumbnailer/ColorCartridgeTemplate.png";
 
-static GdkPixbuf *generate_thumbnail(char const *input_path)
+static GdkPixbuf *generate_thumbnail(const char *input_path)
 {
     uint32_t screen_raw[GB_SCREEN_WIDTH * GB_SCREEN_HEIGHT];
     uint8_t cgb_flag = emulate(input_path, screen_raw);
@@ -80,7 +80,7 @@ static GdkPixbuf *enforce_max_size(GdkPixbuf *thumbnail, unsigned max_size)
     return scaled;
 }
 
-static void write_thumbnail(GdkPixbuf *thumbnail, char const *output_path)
+static void write_thumbnail(GdkPixbuf *thumbnail, const char *output_path)
 {
     GError *error = NULL;
     // Intentionally be "not a good citizen":
@@ -103,9 +103,9 @@ int main(int argc, char *argv[])
         g_error("Usage: %s <input path> <output path> [<size>]", argv[0] ? argv[0] : "sameboy-thumbnailer");
         // NOTREACHED
     }
-    char const *input_path = argv[1];
+    const char *input_path = argv[1];
     char *output_path = argv[2];    // Gets mutated in-place.
-    char const *max_size = argv[3]; // May be NULL.
+    const char *max_size = argv[3]; // May be NULL.
 
     g_debug("%s -> %s [%s]", input_path, output_path, max_size ? max_size : "(none)");
 
