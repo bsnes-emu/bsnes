@@ -710,10 +710,10 @@ install: $(BIN)/XdgThumbnailer/sameboy-thumbnailer sdl $(shell find FreeDesktop)
 ifeq ($(DESTDIR),)
 	xdg-mime install --novendor FreeDesktop/sameboy.xml
 	xdg-desktop-menu install --novendor FreeDesktop/sameboy.desktop
-	for size in 16x16 32x32 64x64 128x128 256x256 512x512; do \
-		xdg-icon-resource install --novendor --theme hicolor --size $$size --context apps FreeDesktop/AppIcon/$$size.png sameboy; \
-		xdg-icon-resource install --novendor --theme hicolor --size $$size --context mimetypes FreeDesktop/Cartridge/$$size.png x-gameboy-rom; \
-		xdg-icon-resource install --novendor --theme hicolor --size $$size --context mimetypes FreeDesktop/ColorCartridge/$$size.png x-gameboy-color-rom; \
+	for size in 16 32 64 128 256 512; do \
+		xdg-icon-resource install --novendor --theme hicolor --size $$size --context apps FreeDesktop/AppIcon/$$size*$$size.png sameboy; \
+		xdg-icon-resource install --novendor --theme hicolor --size $$size --context mimetypes FreeDesktop/Cartridge/$$size*$$size.png x-gameboy-rom; \
+		xdg-icon-resource install --novendor --theme hicolor --size $$size --context mimetypes FreeDesktop/ColorCartridge/$$size*$$size.png x-gameboy-color-rom; \
 	done
 else
 	install -Dm 644 -t $(DESTDIR)$(PREFIX)/share/mime FreeDesktop/sameboy.xml
