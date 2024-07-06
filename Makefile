@@ -218,7 +218,7 @@ SDL_AUDIO_DRIVERS += openal
 endif
 endif
 
-ifneq ($(shell pkg-config --exists gio-2.0 || echo 0),)
+ifneq ($(shell $(PKG_CONFIG) --exists gio-unix-2.0 || echo 0),)
 GIO_CFLAGS = $(error The Gio library could not be found)
 GIO_LDFLAGS = $(error The Gio library could not be found)
 else
@@ -231,7 +231,7 @@ GIO_CFLAGS += -DG_DISABLE_ASSERT
 endif
 endif
 
-ifneq ($(shell pkg-config --exists gdk-pixbuf-2.0 || echo 0),)
+ifneq ($(shell $(PKG_CONFIG) --exists gdk-pixbuf-2.0 || echo 0),)
 GDK_PIXBUF_CFLAGS = $(error The Gdk-Pixbuf library could not be found)
 GDK_PIXBUF_LDFLAGS = $(error The Gdk-Pixbuf library could not be found)
 else
@@ -698,7 +698,7 @@ $(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameBoyLogo.pb12
 
 # Libretro Core (uses its own build system)
 libretro:
-	CFLAGS="$(WARNINGS)" $(MAKE) -C libretro BOOTROMS_DIR=$(abspath $(BOOTROMS_DIR)) BIN=$(abspath $(BIN))
+	CC=$(CC) CFLAGS="$(WARNINGS)" $(MAKE) -C libretro BOOTROMS_DIR=$(abspath $(BOOTROMS_DIR)) BIN=$(abspath $(BIN))
 
 # Install for Linux, and other FreeDesktop platforms.
 ifneq ($(FREEDESKTOP),)
@@ -711,9 +711,9 @@ ifeq ($(DESTDIR),)
 	xdg-mime install --novendor FreeDesktop/sameboy.xml
 	xdg-desktop-menu install --novendor FreeDesktop/sameboy.desktop
 	for size in 16x16 32x32 64x64 128x128 256x256 512x512; do \
-		xdg-icon-resource install --novendor --theme hicolor --context apps FreeDesktop/AppIcon/$$size.png sameboy; \
-		xdg-icon-resource install --novendor --theme hicolor --context mimetypes FreeDesktop/Cartridge/$$size.png x-gameboy-rom; \
-		xdg-icon-resource install --novendor --theme hicolor --context mimetypes FreeDesktop/ColorCartridge/$$size.png x-gameboy-color-rom; \
+		xdg-icon-resource install --novendor --theme hicolor --size $$size --context apps FreeDesktop/AppIcon/$$size.png sameboy; \
+		xdg-icon-resource install --novendor --theme hicolor --size $$size --context mimetypes FreeDesktop/Cartridge/$$size.png x-gameboy-rom; \
+		xdg-icon-resource install --novendor --theme hicolor --size $$size --context mimetypes FreeDesktop/ColorCartridge/$$size.png x-gameboy-color-rom; \
 	done
 else
 	install -Dm 644 -t $(DESTDIR)$(PREFIX)/share/mime FreeDesktop/sameboy.xml

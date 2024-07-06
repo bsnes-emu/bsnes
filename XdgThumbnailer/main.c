@@ -113,7 +113,8 @@ int main(int argc, char *argv[])
     if (max_size) {
         char *endptr;
         errno = 0;
-        // This can implicitly truncate, but that's the behaviour Liji wants.
+        /* This will implicitly truncate, but enforce_max_size will cap size to 1024 anyway.
+           (Not that 4 billion pixels wide icons make sense to begin with)*/
         unsigned size = strtoul(max_size, &endptr, 10);
         if (errno != 0 || *max_size == '\0' || *endptr != '\0') {
             g_error("Invalid size parameter \"%s\": %s", max_size, strerror(errno == 0 ? EINVAL : errno));
