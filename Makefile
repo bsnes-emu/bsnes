@@ -662,12 +662,13 @@ $(BIN)/SDL/background.bmp: SDL/background.bmp
 	cp -f $< $@
 
 $(BIN)/SDL/Shaders: $(wildcard Shaders/*.fsh)
-	install -Dt $@ $^
+	-@$(MKDIR) -p $@
+	cp -f $^ $@
 	touch $@
 
 $(BIN)/SDL/Palettes: Misc/Palettes
 	-@$(MKDIR) -p $@
-	cp -rfT $< $@
+	cp -f $</* $@
 	touch $@
 
 # Boot ROMs
