@@ -429,7 +429,6 @@ void GB_STAT_update(GB_gameboy_t *gb)
     
     bool previous_interrupt_line = gb->stat_interrupt_line;
     /* Set LY=LYC bit */
-    /* TODO: This behavior might not be correct for CGB revisions other than C and E */
     if (gb->ly_for_comparison != (uint16_t)-1 || gb->model <= GB_MODEL_CGB_C) {
         if (gb->ly_for_comparison == gb->io_registers[GB_IO_LYC]) {
             gb->lyc_interrupt_line = true;
@@ -733,11 +732,6 @@ static inline void dma_sync(GB_gameboy_t *gb, unsigned *cycles)
         }
     }
 }
-
-/* All verified CGB timings are based on CGB CPU E. CGB CPUs >= D are known to have
-   slightly different timings than CPUs <= C.
- 
-   Todo: Add support to CPU C and older */
 
 static inline uint8_t fetcher_y(GB_gameboy_t *gb)
 {
@@ -1464,7 +1458,6 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
         GB_STATE(gb, display, 27);
         GB_STATE(gb, display, 28);
         GB_STATE(gb, display, 29);
-        GB_STATE(gb, display, 30);
         GB_STATE(gb, display, 31);
         GB_STATE(gb, display, 32);
         GB_STATE(gb, display, 33);
@@ -1538,8 +1531,8 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
     GB_SLEEP(gb, display, 37, 2);
     
     gb->cgb_palettes_blocked = true;
-    gb->cycles_for_line += (GB_is_cgb(gb) && gb->model <= GB_MODEL_CGB_C)? 2 : 3;
-    GB_SLEEP(gb, display, 38, (GB_is_cgb(gb) && gb->model <= GB_MODEL_CGB_C)? 2 : 3);
+    gb->cycles_for_line += 3;
+    GB_SLEEP(gb, display, 38, 3);
     
     gb->vram_read_blocked = true;
     gb->vram_write_blocked = true;
@@ -1665,12 +1658,8 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
             GB_STAT_update(gb);
 
             
-            uint8_t idle_cycles = 3;
-            if (GB_is_cgb(gb) && gb->model <= GB_MODEL_CGB_C) {
-                idle_cycles = 2;
-            }
-            gb->cycles_for_line += idle_cycles;
-            GB_SLEEP(gb, display, 10, idle_cycles);
+            gb->cycles_for_line += 3;
+            GB_SLEEP(gb, display, 10, 3);
             
             gb->cgb_palettes_blocked = true;
             gb->cycles_for_line += 2;
@@ -1901,11 +1890,6 @@ skip_slow_mode_3:
                 gb->wx166_glitch = false;
             }
             gb->wx_triggered = false;
-            
-            if (GB_is_cgb(gb) && gb->model <= GB_MODEL_CGB_C) {
-                gb->cycles_for_line++;
-                GB_SLEEP(gb, display, 30, 1);
-            }
             
             if (!gb->cgb_double_speed) {
                 gb->io_registers[GB_IO_STAT] &= ~3;

@@ -982,10 +982,10 @@ static void cycle_cgb_revision_backwards(unsigned index)
 static const char *current_cgb_revision_string(unsigned index)
 {
     return GB_inline_const(const char *[], {
-        "CPU CGB 0 (Exp.)",
-        "CPU CGB A (Exp.)",
-        "CPU CGB B (Exp.)",
-        "CPU CGB C (Exp.)",
+        "CPU CGB 0",
+        "CPU CGB A",
+        "CPU CGB B",
+        "CPU CGB C",
         "CPU CGB D",
         "CPU CGB E",
     })

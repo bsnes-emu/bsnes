@@ -203,12 +203,12 @@ static NSString const *typeLightTemp = @"typeLightTemp";
                     @{@"type": typeRadio, @"pref": @"GBSGBModel", @"title": @"Super Game Boy 2",      @"value": @(GB_MODEL_SGB2),},
                 ]),
                 QUICK_SUBMENU(@"Game Boy Color", @[
-                    @{@"type": typeRadio, @"pref": @"GBCGBModel", @"title": @"CPU CGB 0 (Experimental)", @"value": @(GB_MODEL_CGB_0),},
-                    @{@"type": typeRadio, @"pref": @"GBCGBModel", @"title": @"CPU CGB A (Experimental)", @"value": @(GB_MODEL_CGB_A),},
-                    @{@"type": typeRadio, @"pref": @"GBCGBModel", @"title": @"CPU CGB B (Experimental)", @"value": @(GB_MODEL_CGB_B),},
-                    @{@"type": typeRadio, @"pref": @"GBCGBModel", @"title": @"CPU CGB C (Experimental)", @"value": @(GB_MODEL_CGB_C),},
-                    @{@"type": typeRadio, @"pref": @"GBCGBModel", @"title": @"CPU CGB D",                @"value": @(GB_MODEL_CGB_D),},
-                    @{@"type": typeRadio, @"pref": @"GBCGBModel", @"title": @"CPU CGB E",                @"value": @(GB_MODEL_CGB_E),},
+                    @{@"type": typeRadio, @"pref": @"GBCGBModel", @"title": @"CPU CGB 0", @"value": @(GB_MODEL_CGB_0),},
+                    @{@"type": typeRadio, @"pref": @"GBCGBModel", @"title": @"CPU CGB A", @"value": @(GB_MODEL_CGB_A),},
+                    @{@"type": typeRadio, @"pref": @"GBCGBModel", @"title": @"CPU CGB B", @"value": @(GB_MODEL_CGB_B),},
+                    @{@"type": typeRadio, @"pref": @"GBCGBModel", @"title": @"CPU CGB C", @"value": @(GB_MODEL_CGB_C),},
+                    @{@"type": typeRadio, @"pref": @"GBCGBModel", @"title": @"CPU CGB D", @"value": @(GB_MODEL_CGB_D),},
+                    @{@"type": typeRadio, @"pref": @"GBCGBModel", @"title": @"CPU CGB E", @"value": @(GB_MODEL_CGB_E),},
                 ]),
                 QUICK_SUBMENU(@"Game Boy Advance", @[
                     @{@"type": typeDisabled, @"title": @"CPU AGB 0 (Early GBA)",},
