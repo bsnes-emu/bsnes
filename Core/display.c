@@ -1603,7 +1603,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
             
             GB_SLEEP(gb, display, 6, 1);
             gb->io_registers[GB_IO_LY] = gb->current_line;
-            gb->oam_read_blocked = true;
+            gb->oam_read_blocked = !gb->cgb_double_speed || gb->model >= GB_MODEL_CGB_D;
             gb->ly_for_comparison = gb->current_line? -1 : 0;
             
             /* The OAM STAT interrupt occurs 1 T-cycle before STAT actually changes, except on line 0.
@@ -1618,7 +1618,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
             GB_STAT_update(gb);
 
             GB_SLEEP(gb, display, 7, 1);
-            
+            gb->oam_read_blocked = true;
             gb->io_registers[GB_IO_STAT] &= ~3;
             gb->io_registers[GB_IO_STAT] |= 2;
             gb->mode_for_interrupt = 2;
@@ -1910,7 +1910,7 @@ skip_slow_mode_3:
             if (!gb->cgb_double_speed) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
                 gb->mode_for_interrupt = 0;
-                gb->oam_read_blocked = false;
+                gb->oam_read_blocked = gb->model >= GB_MODEL_CGB_D;
                 gb->vram_read_blocked = false;
                 gb->oam_write_blocked = false;
                 gb->vram_write_blocked = false;
