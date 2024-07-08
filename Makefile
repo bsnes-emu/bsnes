@@ -205,17 +205,38 @@ SDL_LDFLAGS += -lopenal
 endif
 SDL_AUDIO_DRIVERS += openal
 endif
-else
+else # ifneq ($(PKG_CONFIG),)
 SDL_CFLAGS := $(shell $(PKG_CONFIG) --cflags sdl2)
 SDL_LDFLAGS := $(shell $(PKG_CONFIG) --libs sdl2) -lpthread
 
 # Allow OpenAL to be disabled even if the development libraries are available
 ifneq ($(ENABLE_OPENAL),0)
-ifeq ($(shell $(PKG_CONFIG) --exists openal && echo 0),0)
+ifneq ($(shell $(PKG_CONFIG) --exists openal && echo 0),)
 SDL_CFLAGS += $(shell $(PKG_CONFIG) --cflags openal) -DENABLE_OPENAL
 SDL_LDFLAGS += $(shell $(PKG_CONFIG) --libs openal)
 SDL_AUDIO_DRIVERS += openal
 endif
+endif
+
+ifneq ($(shell $(PKG_CONFIG) --exists gio-unix-2.0 || echo 0),)
+GIO_CFLAGS = $(error The Gio library could not be found)
+GIO_LDFLAGS = $(error The Gio library could not be found)
+else
+GIO_CFLAGS := $(shell $(PKG_CONFIG) --cflags gio-unix-2.0) -DG_LOG_USE_STRUCTURED
+GIO_LDFLAGS := $(shell $(PKG_CONFIG) --libs gio-unix-2.0)
+ifeq ($(CONF),debug)
+GIO_CFLAGS += -DG_ENABLE_DEBUG
+else
+GIO_CFLAGS += -DG_DISABLE_ASSERT
+endif
+endif
+
+ifneq ($(shell $(PKG_CONFIG) --exists gdk-pixbuf-2.0 || echo 0),)
+GDK_PIXBUF_CFLAGS = $(error The Gdk-Pixbuf library could not be found)
+GDK_PIXBUF_LDFLAGS = $(error The Gdk-Pixbuf library could not be found)
+else
+GDK_PIXBUF_CFLAGS := $(shell $(PKG_CONFIG) --cflags gdk-pixbuf-2.0)
+GDK_PIXBUF_LDFLAGS := $(shell $(PKG_CONFIG) --libs gdk-pixbuf-2.0)
 endif
 endif
 
@@ -330,6 +351,7 @@ endif
 
 cocoa: $(BIN)/SameBoy.app
 quicklook: $(BIN)/SameBoy.qlgenerator
+xdg-thumbnailer: $(BIN)/XdgThumbnailer/sameboy-thumbnailer
 sdl: $(SDL_TARGET) $(BIN)/SDL/dmg_boot.bin $(BIN)/SDL/mgb_boot.bin $(BIN)/SDL/cgb0_boot.bin $(BIN)/SDL/cgb_boot.bin $(BIN)/SDL/agb_boot.bin $(BIN)/SDL/sgb_boot.bin $(BIN)/SDL/sgb2_boot.bin $(BIN)/SDL/LICENSE $(BIN)/SDL/registers.sym $(BIN)/SDL/background.bmp $(BIN)/SDL/Shaders $(BIN)/SDL/Palettes
 bootroms: $(BIN)/BootROMs/agb_boot.bin $(BIN)/BootROMs/cgb_boot.bin $(BIN)/BootROMs/cgb0_boot.bin $(BIN)/BootROMs/dmg_boot.bin $(BIN)/BootROMs/mgb_boot.bin $(BIN)/BootROMs/sgb_boot.bin $(BIN)/BootROMs/sgb2_boot.bin
 tester: $(TESTER_TARGET) $(BIN)/tester/dmg_boot.bin $(BIN)/tester/cgb_boot.bin $(BIN)/tester/agb_boot.bin $(BIN)/tester/sgb_boot.bin $(BIN)/tester/sgb2_boot.bin
@@ -345,6 +367,9 @@ all: sdl tester libretro lib
 ifeq ($(PLATFORM),Darwin)
 all: cocoa ios-ipa ios-deb
 endif
+ifneq ($(FREEDESKTOP),)
+all: xdg-thumbnailer
+endif
 
 # Get a list of our source files and their respective object file targets
 
@@ -355,6 +380,7 @@ TESTER_SOURCES := $(shell ls Tester/*.c)
 IOS_SOURCES := $(filter-out iOS/installer.m, $(shell ls iOS/*.m)) $(shell ls AppleCommon/*.m)
 COCOA_SOURCES := $(shell ls Cocoa/*.m) $(shell ls HexFiend/*.m) $(shell ls JoyKit/*.m) $(shell ls AppleCommon/*.m)
 QUICKLOOK_SOURCES := $(shell ls QuickLook/*.m) $(shell ls QuickLook/*.c)
+XDG_THUMBNAILER_SOURCES := $(shell ls XdgThumbnailer/*.c)
 
 ifeq ($(PLATFORM),windows32)
 CORE_SOURCES += $(shell ls Windows/*.c)
@@ -367,6 +393,7 @@ IOS_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(IOS_SOURCES))
 QUICKLOOK_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(QUICKLOOK_SOURCES))
 SDL_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(SDL_SOURCES))
 TESTER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(TESTER_SOURCES))
+XDG_THUMBNAILER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(XDG_THUMBNAILER_SOURCES)) $(OBJ)/XdgThumbnailer/resources.c.o
 
 lib: $(PUBLIC_HEADERS)
 
@@ -410,9 +437,25 @@ $(OBJ)/SDL/%.c.o: SDL/%.c
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) $(FRONTEND_CFLAGS) $(FAT_FLAGS) $(SDL_CFLAGS) $(GL_CFLAGS) -c $< -o $@
 
+$(OBJ)/XdgThumbnailer/%.c.o: XdgThumbnailer/%.c
+	-@$(MKDIR) -p $(dir $@)
+	$(CC) $(CFLAGS) $(GIO_CFLAGS) $(GDK_PIXBUF_CFLAGS) -DG_LOG_DOMAIN='"sameboy-thumbnailer"' -c $< -o $@
+# Make sure not to attempt compiling this before generating the resource code.
+$(OBJ)/XdgThumbnailer/emulate.c.o: $(OBJ)/XdgThumbnailer/resources.h
+# Silence warnings for this. It is code generated not by us, so we do not want `-Werror` to break
+# compilation with some version of the generator and/or compiler.
+$(OBJ)/XdgThumbnailer/%.c.o: $(OBJ)/XdgThumbnailer/%.c
+	-@$(MKDIR) -p $(dir $@)
+	$(CC) $(CFLAGS) $(GIO_CFLAGS) $(GDK_PIXBUF_CFLAGS) -DG_LOG_DOMAIN='"sameboy-thumbnailer"' -w -c $< -o $@
+
+$(OBJ)/XdgThumbnailer/resources.c $(OBJ)/XdgThumbnailer/resources.h: %: XdgThumbnailer/resources.gresource.xml $(BIN)/BootROMs/cgb_boot_fast.bin
+	-@$(MKDIR) -p $(dir $@)
+	CC=$(CC) glib-compile-resources --dependency-file $@.mk --generate-phony-targets --generate --target $@ $<
+-include $(OBJ)/XdgThumbnailer/resources.c.mk $(OBJ)/XdgThumbnailer/resources.h.mk
+
 $(OBJ)/OpenDialog/%.c.o: OpenDialog/%.c
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $(CFLAGS) $(FRONTEND_CFLAGS) $(FAT_FLAGS) $(SDL_CFLAGS) $(GL_CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(SDL_CFLAGS) $(GL_CFLAGS) -c $< -o $@
 
 
 $(OBJ)/%.c.o: %.c
@@ -427,7 +470,7 @@ $(OBJ)/HexFiend/%.m.o: HexFiend/%.m
 $(OBJ)/%.m.o: %.m
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $(CFLAGS) $(FRONTEND_CFLAGS) $(FAT_FLAGS) $(OCFLAGS) -c $< -o $@
-    
+
 # iOS Port
 
 $(BIN)/SameBoy-iOS.app: $(BIN)/SameBoy-iOS.app/SameBoy \
@@ -530,7 +573,13 @@ endif
 $(BIN)/SameBoy.qlgenerator/Contents/Resources/cgb_boot_fast.bin: $(BIN)/BootROMs/cgb_boot_fast.bin
 	-@$(MKDIR) -p $(dir $@)
 	cp -f $^ $@
-	
+
+# XDG thumbnailer
+
+$(BIN)/XdgThumbnailer/sameboy-thumbnailer: $(CORE_OBJECTS) $(XDG_THUMBNAILER_OBJECTS)
+	-@$(MKDIR) -p $(dir $@)
+	$(CC) $^ -o $@ $(LDFLAGS) $(GIO_LDFLAGS) $(GDK_PIXBUF_LDFLAGS)
+
 # SDL Port
 
 # Unix versions build only one binary
@@ -584,41 +633,43 @@ $(BIN)/tester/sameboy_tester.exe: $(CORE_OBJECTS) $(SDL_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) -Wl,/subsystem:console
 
-$(BIN)/SDL/%.bin: $(BOOTROMS_DIR)/%.bin
-	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
-
 $(BIN)/tester/%.bin: $(BOOTROMS_DIR)/%.bin
 	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
+	cp -f $< $@
 
 $(BIN)/SameBoy.app/Contents/Resources/%.bin: $(BOOTROMS_DIR)/%.bin
 	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
+	cp -f $< $@
 
 $(BIN)/SameBoy-iOS.app/%.bin: $(BOOTROMS_DIR)/%.bin
 	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
+	cp -f $< $@
+
+$(BIN)/SDL/%.bin: $(BOOTROMS_DIR)/%.bin
+	-@$(MKDIR) -p $(dir $@)
+	cp -f $< $@
 
 $(BIN)/SDL/LICENSE: LICENSE
 	-@$(MKDIR) -p $(dir $@)
-	grep -v "^  " $^ > $@
+	grep -v "^  " $< > $@
 
 $(BIN)/SDL/registers.sym: Misc/registers.sym
 	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
+	cp -f $< $@
 
 $(BIN)/SDL/background.bmp: SDL/background.bmp
 	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
+	cp -f $< $@
 
-$(BIN)/SDL/Shaders: Shaders
+$(BIN)/SDL/Shaders: $(wildcard Shaders/*.fsh)
 	-@$(MKDIR) -p $@
-	cp -rf Shaders/*.fsh $@
-    
+	cp -f $^ $@
+	touch $@
+
 $(BIN)/SDL/Palettes: Misc/Palettes
 	-@$(MKDIR) -p $@
-	cp -rf Misc/Palettes/*.sbp $@
+	cp -f $</* $@
+	touch $@
 
 # Boot ROMs
 
@@ -647,54 +698,37 @@ $(BIN)/BootROMs/%.bin: BootROMs/%.asm $(OBJ)/BootROMs/SameBoyLogo.pb12
 
 # Libretro Core (uses its own build system)
 libretro:
-	CFLAGS="$(WARNINGS)" $(MAKE) -C libretro BOOTROMS_DIR=$(abspath $(BOOTROMS_DIR)) BIN=$(abspath $(BIN))
+	CC=$(CC) CFLAGS="$(WARNINGS)" $(MAKE) -C libretro BOOTROMS_DIR=$(abspath $(BOOTROMS_DIR)) BIN=$(abspath $(BIN))
 
-# install for Linux/FreeDesktop/etc.
-# Does not install mimetype icons because FreeDesktop is cursed abomination with no right to exist.
-# If you somehow find a reasonable way to make associate an icon with an extension in this dumpster
-# fire of a desktop environment, open an issue or a pull request
+# Install for Linux, and other FreeDesktop platforms.
 ifneq ($(FREEDESKTOP),)
-ICON_NAMES := apps/sameboy mimetypes/x-gameboy-rom mimetypes/x-gameboy-color-rom
-ICON_SIZES := 16x16 32x32 64x64 128x128 256x256 512x512
-ICONS := $(foreach name,$(ICON_NAMES), $(foreach size,$(ICON_SIZES),$(DESTDIR)$(PREFIX)/share/icons/hicolor/$(size)/$(name).png))
-install: sdl $(DESTDIR)$(PREFIX)/share/mime/packages/sameboy.xml $(ICONS) FreeDesktop/sameboy.desktop
-	-@$(MKDIR) -p $(dir $(DESTDIR)$(PREFIX))
-	mkdir -p $(DESTDIR)$(DATA_DIR)/ $(DESTDIR)$(PREFIX)/bin/
-	cp -rf $(BIN)/SDL/* $(DESTDIR)$(DATA_DIR)/
-	mv $(DESTDIR)$(DATA_DIR)/sameboy $(DESTDIR)$(PREFIX)/bin/sameboy
+install: $(BIN)/XdgThumbnailer/sameboy-thumbnailer sdl $(shell find FreeDesktop) XdgThumbnailer/sameboy.thumbnailer
+	(cd $(BIN)/SDL && find . \! -name sameboy -type f -exec install -Dm 644 -T {} "$(DESTDIR)$(DATA_DIR)/{}" \; )
+	install -Dm 755 -s $(BIN)/SDL/sameboy $(DESTDIR)$(PREFIX)/bin/sameboy
+	install -Dm 755 -s $(BIN)/XdgThumbnailer/sameboy-thumbnailer $(DESTDIR)$(PREFIX)/bin/sameboy-thumbnailer
+	install -Dm 644 XdgThumbnailer/sameboy.thumbnailer $(DESTDIR)$(PREFIX)/share/thumbnailers/sameboy.thumbnailer
 ifeq ($(DESTDIR),)
-	-update-mime-database -n $(PREFIX)/share/mime
-	-xdg-desktop-menu install --novendor --mode system FreeDesktop/sameboy.desktop
-	-xdg-icon-resource forceupdate --mode system
-	-xdg-desktop-menu forceupdate --mode system
-ifneq ($(SUDO_USER),)
-	-su $(SUDO_USER) -c "xdg-desktop-menu forceupdate --mode system"
-endif
+	xdg-mime install --novendor FreeDesktop/sameboy.xml
+	xdg-desktop-menu install --novendor FreeDesktop/sameboy.desktop
+	for size in 16 32 64 128 256 512; do \
+		xdg-icon-resource install --novendor --theme hicolor --size $$size --context apps FreeDesktop/AppIcon/$${size}x$${size}.png sameboy; \
+		xdg-icon-resource install --novendor --theme hicolor --size $$size --context mimetypes FreeDesktop/Cartridge/$${size}x$${size}.png x-gameboy-rom; \
+		xdg-icon-resource install --novendor --theme hicolor --size $$size --context mimetypes FreeDesktop/ColorCartridge/$${size}x$${size}.png x-gameboy-color-rom; \
+	done
 else
-	-@$(MKDIR) -p $(DESTDIR)$(PREFIX)/share/applications/
-	cp FreeDesktop/sameboy.desktop $(DESTDIR)$(PREFIX)/share/applications/sameboy.desktop
+	install -Dm 644 FreeDesktop/sameboy.xml $(DESTDIR)$(PREFIX)/share/mime/sameboy.xml
+	install -Dm 644 FreeDesktop/sameboy.desktop $(DESTDIR)$(PREFIX)/share/applications/sameboy.desktop
+	for size in 16x16 32x32 64x64 128x128 256x256 512x512; do \
+		install -Dm 644 FreeDesktop/AppIcon/$$size.png $(DESTDIR)$(PREFIX)/share/icons/hicolor/$$size/apps/sameboy.png; \
+		install -Dm 644 FreeDesktop/Cartridge/$$size.png $(DESTDIR)$(PREFIX)/share/icons/hicolor/$$size/mimetypes/x-gameboy-rom.png; \
+		install -Dm 644 FreeDesktop/ColorCartridge/$$size.png $(DESTDIR)$(PREFIX)/share/icons/hicolor/$$size/mimetypes/x-gameboy-color-rom.png; \
+	done
 endif
-
-$(DESTDIR)$(PREFIX)/share/icons/hicolor/%/apps/sameboy.png: FreeDesktop/AppIcon/%.png
-	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
-
-$(DESTDIR)$(PREFIX)/share/icons/hicolor/%/mimetypes/x-gameboy-rom.png: FreeDesktop/Cartridge/%.png
-	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
-
-$(DESTDIR)$(PREFIX)/share/icons/hicolor/%/mimetypes/x-gameboy-color-rom.png: FreeDesktop/ColorCartridge/%.png
-	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
-
-$(DESTDIR)$(PREFIX)/share/mime/packages/sameboy.xml: FreeDesktop/sameboy.xml
-	-@$(MKDIR) -p $(dir $@)
-	cp -f $^ $@
 endif
 
 ios:
 	@$(MAKE) _ios
-    
+
 $(BIN)/SameBoy-iOS.ipa: ios iOS/sideload.entitlements
 	$(MKDIR) -p $(OBJ)/Payload
 	cp -rf $(BIN)/SameBoy-iOS.app $(OBJ)/Payload/SameBoy-iOS.app
@@ -702,7 +736,7 @@ $(BIN)/SameBoy-iOS.ipa: ios iOS/sideload.entitlements
 	(cd $(OBJ) && zip -q $(abspath $@) -r Payload)
 	rm -rf $(OBJ)/Payload
 
-    
+
 $(BIN)/SameBoy-iOS.deb: $(OBJ)/debian-binary $(OBJ)/control.tar.gz $(OBJ)/data.tar.gz
 	-@$(MKDIR) -p $(dir $@)
 	(cd $(OBJ) && ar cr $(abspath $@) $(notdir $^))
