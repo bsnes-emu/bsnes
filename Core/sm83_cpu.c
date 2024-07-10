@@ -271,11 +271,10 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
             uint8_t old = gb->io_registers[GB_IO_LCDC];
             if ((~value & old) & GB_LCDC_TILE_SEL) {
                 GB_advance_cycles(gb, gb->pending_cycles);
-                GB_write_memory(gb, addr, value ^ GB_LCDC_TILE_SEL); // Write with the old TILE_SET first
+                GB_write_memory(gb, addr, value);
                 gb->tile_sel_glitch = true;
                 GB_advance_cycles(gb, 1);
                 gb->tile_sel_glitch = false;
-                GB_write_memory(gb, addr, value);
                 gb->pending_cycles = 3;
             }
             else {
@@ -288,23 +287,14 @@ static void cycle_write(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
         case GB_CONFLICT_LCDC_CGB_DOUBLE: {
             uint8_t old = gb->io_registers[GB_IO_LCDC];
             // TODO: Verify for CGB ≤ C for BG_EN and OBJ_EN.
+            GB_advance_cycles(gb, gb->pending_cycles - 2);
+            GB_write_memory(gb, addr, (value & ~(GB_LCDC_BG_EN | GB_LCDC_ENABLE)) | (old & (GB_LCDC_BG_EN | GB_LCDC_ENABLE)));
             // TODO: This condition is different from single speed mode. Why? What about odd modes?
-            if ((value ^ old) & GB_LCDC_TILE_SEL) {
-                GB_advance_cycles(gb, gb->pending_cycles - 2);
-                GB_write_memory(gb, addr, (value & (GB_LCDC_OBJ_EN | GB_LCDC_BG_EN)) | (old & ~(GB_LCDC_OBJ_EN | GB_LCDC_BG_EN)));
-                gb->tile_sel_glitch = true;
-                GB_advance_cycles(gb, 2);
-                gb->tile_sel_glitch = false;
-                GB_write_memory(gb, addr, value);
-                gb->pending_cycles = 4;
-            }
-            else {
-                GB_advance_cycles(gb, gb->pending_cycles - 2);
-                GB_write_memory(gb, addr, (value & (GB_LCDC_OBJ_EN | GB_LCDC_BG_EN)) | (old & ~(GB_LCDC_OBJ_EN | GB_LCDC_BG_EN)));
-                GB_advance_cycles(gb, 2);
-                GB_write_memory(gb, addr, value);
-                gb->pending_cycles = 4;
-            }
+            gb->tile_sel_glitch = ((value ^ old) & GB_LCDC_TILE_SEL);
+            GB_advance_cycles(gb, 2);
+            gb->tile_sel_glitch = false;
+            GB_write_memory(gb, addr, value);
+            gb->pending_cycles = 4;
             break;
         }
             

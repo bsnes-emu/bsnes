@@ -647,6 +647,7 @@ struct GB_gameboy_internal_s {
         bool insert_bg_pixel;
         uint8_t cpu_vram_bus;
         uint32_t frame_parity_ticks;
+        bool last_tileset;
     )
     
     GB_SECTION(accessory,
