@@ -1732,16 +1732,16 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     
                     if (should_activate_window) {
                         gb->window_y++;
+                        gb->window_tile_x = glitch_activate;
+                        if (!glitch_activate) {
+                            fifo_clear(&gb->bg_fifo);
+                        }
                         /* TODO: Verify fetcher access timings in this case */
                         if (gb->io_registers[GB_IO_WX] == 0 && (gb->io_registers[GB_IO_SCX] & 7)) {
                             gb->cycles_for_line++;
                             GB_SLEEP(gb, display, 42, 1);
                         }
                         gb->wx_triggered = true;
-                        gb->window_tile_x = glitch_activate;
-                        if (!glitch_activate) {
-                            fifo_clear(&gb->bg_fifo);
-                        }
                         gb->fetcher_state = 0;
                         gb->window_is_being_fetched = true;
                     }
