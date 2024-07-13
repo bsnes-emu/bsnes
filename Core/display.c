@@ -1330,6 +1330,7 @@ static inline uint16_t mode3_batching_length(GB_gameboy_t *gb)
     if (gb->hdma_on) return 0;
     if (gb->stopped) return 0;
     if (GB_is_dma_active(gb)) return 0;
+    if (gb->wx166_glitch) return 0;
     if (gb->wy_triggered) {
         if (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE) {
             if ((gb->io_registers[GB_IO_WX] < 8 || gb->io_registers[GB_IO_WX] == 166)) {
@@ -1697,8 +1698,9 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                    that point. The code should be updated to represent this, and this will fix the time travel hack in
                    WX's access conflict code. */
                 
-                if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE)) {
+                if (!gb->wx_triggered && (gb->wy_triggered || (gb->current_line == 0 && gb->wx166_glitch)) && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE)) {
                     bool should_activate_window = false;
+                    bool glitch_activate = false;
                     if (gb->io_registers[GB_IO_WX] == 0) {
                         static const uint8_t scx_to_wx0_comparisons[] = {-7, -1, -2, -3, -4, -5, -6, -6};
                         if (gb->position_in_line == scx_to_wx0_comparisons[gb->io_registers[GB_IO_SCX] & 7]) {
@@ -1706,10 +1708,11 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                         }
                     }
                     else if (gb->wx166_glitch) {
-                        static const uint8_t scx_to_wx166_comparisons[] = {-16, -1, -2, -3, -4, -5, -6, -7};
-                        if (gb->position_in_line == scx_to_wx166_comparisons[gb->io_registers[GB_IO_SCX] & 7]) {
+                        if (gb->position_in_line == (uint8_t)-16) {
                             should_activate_window = true;
+                            glitch_activate = true;
                         }
+                        gb->wx166_glitch = false;
                     }
                     else if (gb->io_registers[GB_IO_WX] < 166 + GB_is_cgb(gb)) {
                         if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7)) {
@@ -1735,8 +1738,10 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                             GB_SLEEP(gb, display, 42, 1);
                         }
                         gb->wx_triggered = true;
-                        gb->window_tile_x = 0;
-                        fifo_clear(&gb->bg_fifo);
+                        gb->window_tile_x = glitch_activate;
+                        if (!glitch_activate) {
+                            fifo_clear(&gb->bg_fifo);
+                        }
                         gb->fetcher_state = 0;
                         gb->window_is_being_fetched = true;
                     }
@@ -1952,7 +1957,6 @@ skip_slow_mode_3:
                 gb->icd_hreset_callback(gb);
             }
         }
-        gb->wx166_glitch = false;
         /* Lines 144 - 152 */
         for (; gb->current_line < VIRTUAL_LINES - 1; gb->current_line++) {
             gb->ly_for_comparison = -1;
