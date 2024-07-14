@@ -607,7 +607,7 @@ struct GB_gameboy_internal_s {
         uint8_t current_tile_data[2];
         uint8_t fetcher_state;
         bool window_is_being_fetched;
-        bool wx166_glitch;
+        GB_PADDING(bool, wx166_glitch);
         bool wx_triggered;
         uint8_t visible_objs[10];
         uint8_t objects_x[10];

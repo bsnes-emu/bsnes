@@ -795,7 +795,6 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
             
             if (!(gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE)) {
                 gb->wx_triggered = false;
-                gb->wx166_glitch = false;
             }
             
             if (gb->io_registers[GB_IO_LCDC] & GB_LCDC_BG_MAP && !gb->wx_triggered) {
@@ -1330,7 +1329,7 @@ static inline uint16_t mode3_batching_length(GB_gameboy_t *gb)
     if (gb->hdma_on) return 0;
     if (gb->stopped) return 0;
     if (GB_is_dma_active(gb)) return 0;
-    if (gb->wx166_glitch) return 0;
+    if (gb->wx_triggered) return 0;
     if (gb->wy_triggered) {
         if (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE) {
             if ((gb->io_registers[GB_IO_WX] < 8 || gb->io_registers[GB_IO_WX] == 166)) {
@@ -1531,7 +1530,6 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
     gb->vram_read_blocked = true;
     gb->vram_write_blocked = true;
     gb->wx_triggered = false;
-    gb->wx166_glitch = false;
     goto mode_3_start;
 
     // Mode 3 abort, state 9
@@ -1576,7 +1574,6 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
         
     while (true) {
         /* Lines 0 - 143 */
-        gb->window_y = -1;
         for (; gb->current_line < LINES; gb->current_line++) {
             if (unlikely(gb->lcd_line_callback)) {
                 gb->lcd_line_callback(gb, gb->current_line);
@@ -1698,21 +1695,13 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                    that point. The code should be updated to represent this, and this will fix the time travel hack in
                    WX's access conflict code. */
                 
-                if (!gb->wx_triggered && (gb->wy_triggered || (gb->current_line == 0 && gb->wx166_glitch)) && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE)) {
+                if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE)) {
                     bool should_activate_window = false;
-                    bool glitch_activate = false;
                     if (gb->io_registers[GB_IO_WX] == 0) {
                         static const uint8_t scx_to_wx0_comparisons[] = {-7, -1, -2, -3, -4, -5, -6, -6};
                         if (gb->position_in_line == scx_to_wx0_comparisons[gb->io_registers[GB_IO_SCX] & 7]) {
                             should_activate_window = true;
                         }
-                    }
-                    else if (gb->wx166_glitch) {
-                        if (gb->position_in_line == (uint8_t)-16) {
-                            should_activate_window = true;
-                            glitch_activate = true;
-                        }
-                        gb->wx166_glitch = false;
                     }
                     else if (gb->io_registers[GB_IO_WX] < 166 + GB_is_cgb(gb)) {
                         if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7)) {
@@ -1732,10 +1721,8 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     
                     if (should_activate_window) {
                         gb->window_y++;
-                        gb->window_tile_x = glitch_activate;
-                        if (!glitch_activate) {
-                            fifo_clear(&gb->bg_fifo);
-                        }
+                        gb->window_tile_x = 0;
+                        fifo_clear(&gb->bg_fifo);
                         /* TODO: Verify fetcher access timings in this case */
                         if (gb->io_registers[GB_IO_WX] == 0 && (gb->io_registers[GB_IO_SCX] & 7)) {
                             gb->cycles_for_line++;
@@ -1880,14 +1867,19 @@ skip_slow_mode_3:
 
             }
             
-            /* TODO: Verify timing */
+            /* TODO: Verify timing { */
+            if (gb->current_line == 143) {
+                gb->window_y = -1;
+            }
             if (!GB_is_cgb(gb) && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE) && gb->io_registers[GB_IO_WX] == 166) {
-                gb->wx166_glitch = true;
+                gb->wx_triggered = true;
+                gb->window_tile_x = 1;
+                gb->window_y++;
             }
             else {
-                gb->wx166_glitch = false;
+                gb->wx_triggered = false;
             }
-            gb->wx_triggered = false;
+            /* } */
             
             if (!gb->cgb_double_speed) {
                 gb->io_registers[GB_IO_STAT] &= ~3;
