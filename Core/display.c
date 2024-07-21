@@ -791,6 +791,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
 {
     switch ((fetcher_step_t)gb->fetcher_state) {
         case GB_FETCHER_GET_TILE_T1: {
+            gb->cgb_wx_glitch = GB_is_cgb(gb) && (uint8_t)(gb->position_in_line + 7 + gb->window_is_being_fetched) == gb->io_registers[GB_IO_WX];
             uint16_t map = 0x1800;
             
             if (!(gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE)) {
@@ -824,6 +825,10 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
         gb->fetcher_state++;
         break;
         case GB_FETCHER_GET_TILE_T2: {
+            if (gb->cgb_wx_glitch) {
+                gb->fetcher_state++;
+                break;
+            }
             dma_sync(gb, cycles);
             gb->current_tile = vram_read(gb, gb->last_tile_index_address);
             if (GB_is_cgb(gb)) {
@@ -836,6 +841,8 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
         break;
             
         case GB_FETCHER_GET_TILE_DATA_LOWER_T1: {
+            gb->cgb_wx_glitch = GB_is_cgb(gb) && (uint8_t)(gb->position_in_line + 7 + gb->window_is_being_fetched) == gb->io_registers[GB_IO_WX];
+            
             uint8_t y_flip = 0;
             uint16_t tile_address = 0;
             uint8_t y = gb->model > GB_MODEL_CGB_C ? gb->fetcher_y : fetcher_y(gb);
@@ -859,6 +866,11 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
         break;
             
         case GB_FETCHER_GET_TILE_DATA_LOWER_T2: {
+            if (gb->cgb_wx_glitch) {
+                gb->current_tile_data[0] = gb->current_tile_data[1];
+                gb->fetcher_state++;
+                break;
+            }
             dma_sync(gb, cycles);
             bool use_glitched = false;
             bool cgb_d_glitch = false;
@@ -880,6 +892,8 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
         break;
             
         case GB_FETCHER_GET_TILE_DATA_HIGH_T1: {
+            gb->cgb_wx_glitch = GB_is_cgb(gb) && (uint8_t)(gb->position_in_line + 7 + gb->window_is_being_fetched) == gb->io_registers[GB_IO_WX];
+            
             uint16_t tile_address = 0;
             uint8_t y = gb->model > GB_MODEL_CGB_C ? gb->fetcher_y : fetcher_y(gb);
             
@@ -903,6 +917,15 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
         break;
             
         case GB_FETCHER_GET_TILE_DATA_HIGH_T2: {
+            if (gb->cgb_wx_glitch) {
+                gb->current_tile_data[1] = gb->current_tile_data[0];
+                gb->fetcher_state++;
+                if (gb->wx_triggered) {
+                    gb->window_tile_x++;
+                    gb->window_tile_x &= 0x1F;
+                }
+                break;
+            }
             dma_sync(gb, cycles);
             bool use_glitched = false;
             bool cgb_d_glitch = false;
@@ -1707,7 +1730,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                         if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7)) {
                             should_activate_window = true;
                         }
-                        else if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 6) && !gb->wx_just_changed) {
+                        else if (!GB_is_cgb(gb) && gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 6) && !gb->wx_just_changed) {
                             should_activate_window = true;
                             /* LCD-PPU horizontal desync! It only appears to happen on DMGs, but not all of them.
                                This doesn't seem to be CPU revision dependent, but most revisions */

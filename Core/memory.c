@@ -1399,6 +1399,7 @@ static void write_high_memory(GB_gameboy_t *gb, uint16_t addr, uint8_t value)
                     gb->wy_triggered = true;
                 }
             case GB_IO_WX:
+                gb->cgb_wx_glitch = GB_is_cgb(gb) && (uint8_t)(gb->position_in_line + 7 + gb->window_is_being_fetched) == value;
             case GB_IO_IF:
             case GB_IO_SCX:
             case GB_IO_SCY:

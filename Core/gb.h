@@ -648,6 +648,7 @@ struct GB_gameboy_internal_s {
         uint8_t cpu_vram_bus;
         uint32_t frame_parity_ticks;
         bool last_tileset;
+        bool cgb_wx_glitch;
     )
     
     GB_SECTION(accessory,
