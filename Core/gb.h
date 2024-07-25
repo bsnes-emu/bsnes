@@ -649,6 +649,7 @@ struct GB_gameboy_internal_s {
         uint32_t frame_parity_ticks;
         bool last_tileset;
         bool cgb_wx_glitch;
+        bool line_has_fractional_scrolling;
     )
     
     GB_SECTION(accessory,

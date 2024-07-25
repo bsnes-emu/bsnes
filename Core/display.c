@@ -592,6 +592,9 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
             gb->position_in_line = -16;
             return;
         }
+        else {
+            gb->line_has_fractional_scrolling = true;
+        }
     }
 
     /* Drop pixels for scrollings */
@@ -787,11 +790,27 @@ static uint8_t data_for_tile_sel_glitch(GB_gameboy_t *gb, bool *should_use, bool
     return gb->data_for_sel_glitch;
 }
 
+internal void GB_update_wx_glitch(GB_gameboy_t *gb)
+{
+    if (!GB_is_cgb(gb)) return;
+    if (!(gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE) || !gb->wy_triggered) {
+        gb->cgb_wx_glitch = false;
+        return;
+    }
+    if (unlikely(gb->io_registers[GB_IO_WX] == 0)) {
+        // (gb->position_in_line + 16 <= 8) is (gb->position_in_line <= -8) in unsigned
+        gb->cgb_wx_glitch = ((uint8_t)(gb->position_in_line + 16) <= 8 ||
+                             (gb->position_in_line == (uint8_t)-7 && gb->line_has_fractional_scrolling));
+        return;
+    }
+    gb->cgb_wx_glitch = (uint8_t)(gb->position_in_line + 7 + gb->window_is_being_fetched) == gb->io_registers[GB_IO_WX];
+}
+
 static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
 {
     switch ((fetcher_step_t)gb->fetcher_state) {
         case GB_FETCHER_GET_TILE_T1: {
-            gb->cgb_wx_glitch = GB_is_cgb(gb) && (uint8_t)(gb->position_in_line + 7 + gb->window_is_being_fetched) == gb->io_registers[GB_IO_WX];
+            GB_update_wx_glitch(gb);
             uint16_t map = 0x1800;
             
             if (!(gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE)) {
@@ -841,8 +860,8 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
         break;
             
         case GB_FETCHER_GET_TILE_DATA_LOWER_T1: {
-            gb->cgb_wx_glitch = GB_is_cgb(gb) && (uint8_t)(gb->position_in_line + 7 + gb->window_is_being_fetched) == gb->io_registers[GB_IO_WX];
-            
+            GB_update_wx_glitch(gb);
+
             uint8_t y_flip = 0;
             uint16_t tile_address = 0;
             uint8_t y = gb->model > GB_MODEL_CGB_C ? gb->fetcher_y : fetcher_y(gb);
@@ -879,7 +898,6 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
             }
             if (!use_glitched) {
                 gb->current_tile_data[0] = vram_read(gb, gb->last_tile_data_address);
-
             }
             if (gb->last_tileset && gb->tile_sel_glitch) {
                 gb->data_for_sel_glitch = vram_read(gb, gb->last_tile_data_address);
@@ -892,8 +910,8 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
         break;
             
         case GB_FETCHER_GET_TILE_DATA_HIGH_T1: {
-            gb->cgb_wx_glitch = GB_is_cgb(gb) && (uint8_t)(gb->position_in_line + 7 + gb->window_is_being_fetched) == gb->io_registers[GB_IO_WX];
-            
+            GB_update_wx_glitch(gb);
+
             uint16_t tile_address = 0;
             uint8_t y = gb->model > GB_MODEL_CGB_C ? gb->fetcher_y : fetcher_y(gb);
             
@@ -955,9 +973,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
         // fallthrough
         default:
         case GB_FETCHER_PUSH: {
-            if (gb->fetcher_state < 7) {
-                gb->fetcher_state++;
-            }
+            gb->fetcher_state = GB_FETCHER_PUSH;
             if (fifo_size(&gb->bg_fifo) > 0) break;
             
             if (unlikely(gb->wy_triggered && !(gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE) && !GB_is_cgb(gb) && !gb->disable_window_pixel_insertion_glitch)) {
@@ -977,7 +993,7 @@ static void advance_fetcher_state_machine(GB_gameboy_t *gb, unsigned *cycles)
             
             fifo_push_bg_row(&gb->bg_fifo, gb->current_tile_data[0], gb->current_tile_data[1],
                              gb->current_tile_attributes & 7, gb->current_tile_attributes & 0x80, gb->current_tile_attributes & 0x20);
-            gb->fetcher_state = 0;
+            gb->fetcher_state = GB_FETCHER_GET_TILE_T1;
         }
         break;
     }
@@ -1509,6 +1525,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
     gb->window_y = -1;
     gb->wy_triggered = false;
     gb->position_in_line = -16;
+    gb->line_has_fractional_scrolling = false;
     
     gb->ly_for_comparison = 0;
     gb->io_registers[GB_IO_STAT] &= ~3;
@@ -1592,6 +1609,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                 gb->delayed_glitch_hblank_interrupt = true;
             }
             gb->position_in_line = -16;
+            gb->line_has_fractional_scrolling = false;
         }
     }
         
@@ -1693,7 +1711,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
             gb->lcd_x = 0;
             
             /* The actual rendering cycle */
-            gb->fetcher_state = 0;
+            gb->fetcher_state = GB_FETCHER_GET_TILE_T1;
             if ((gb->mode3_batching_length = mode3_batching_length(gb))) {
                 GB_BATCHPOINT(gb, display, 3, gb->mode3_batching_length);
                 if (GB_BATCHED_CYCLES(gb, display) >= gb->mode3_batching_length) {
@@ -1710,6 +1728,15 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     goto skip_slow_mode_3;
                 }
             }
+            if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE)) {
+                if (gb->io_registers[GB_IO_WX] == 0) {
+                    fifo_clear(&gb->bg_fifo);
+                    fifo_clear(&gb->oam_fifo);
+                    gb->wx_triggered = true;
+                    gb->window_y++;
+                    gb->window_tile_x = 0;
+                }
+            }
             while (true) {
                 /* Handle window */
                 /* TODO: It appears that WX checks if the window begins *next* pixel, not *this* pixel. For this reason,
@@ -1720,13 +1747,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                 
                 if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE)) {
                     bool should_activate_window = false;
-                    if (gb->io_registers[GB_IO_WX] == 0) {
-                        static const uint8_t scx_to_wx0_comparisons[] = {-7, -1, -2, -3, -4, -5, -6, -6};
-                        if (gb->position_in_line == scx_to_wx0_comparisons[gb->io_registers[GB_IO_SCX] & 7]) {
-                            should_activate_window = true;
-                        }
-                    }
-                    else if (gb->io_registers[GB_IO_WX] < 166 + GB_is_cgb(gb)) {
+                    if (gb->io_registers[GB_IO_WX] < 166 + GB_is_cgb(gb)) {
                         if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7)) {
                             should_activate_window = true;
                         }
@@ -1752,7 +1773,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                             GB_SLEEP(gb, display, 42, 1);
                         }
                         gb->wx_triggered = true;
-                        gb->fetcher_state = 0;
+                        gb->fetcher_state = GB_FETCHER_GET_TILE_T1;
                         gb->window_is_being_fetched = true;
                     }
                     else if (!GB_is_cgb(gb) && gb->io_registers[GB_IO_WX] == 166 && gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7)) {
@@ -1762,7 +1783,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
 
                 /* TODO: What happens when WX=0?*/
                 if (!GB_is_cgb(gb) && gb->wx_triggered && !gb->window_is_being_fetched &&
-                    gb->fetcher_state == 0 && gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) && gb->bg_fifo.size == 8) {
+                    gb->fetcher_state == GB_FETCHER_GET_TILE_T1 && gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) && gb->bg_fifo.size == 8) {
                     // Insert a pixel right at the FIFO's end
                     gb->insert_bg_pixel = true;
                 }
@@ -1859,19 +1880,26 @@ abort_fetching_object:
                 
                 render_pixel_if_possible(gb);
                 advance_fetcher_state_machine(gb, &cycles);
-
                 if (gb->position_in_line == 160) break;
+
                 gb->cycles_for_line++;
                 GB_SLEEP(gb, display, 21, 1);
             }
 skip_slow_mode_3:
             gb->position_in_line = -16;
+            gb->line_has_fractional_scrolling = false;
+            
 
-            /* TODO: This seems incorrect (glitches Tesserae), verify further */
-            /*
-            if (gb->fetcher_state == 4 || gb->fetcher_state == 5) {
-                gb->data_for_sel_glitch = gb->current_tile_data[0];
+            /* TODO: Commented code seems incorrect (glitches Tesserae), verify further */
+
+            if (gb->fetcher_state == GB_FETCHER_GET_TILE_DATA_HIGH_T1 ||
+                gb->fetcher_state == GB_FETCHER_GET_TILE_DATA_HIGH_T2) {
+                // Make sure current_tile_data[1] holds the last tile data byte read
+                gb->current_tile_data[1] = gb->current_tile_data[0];
+                
+                //gb->data_for_sel_glitch = gb->current_tile_data[0];
             }
+            /*
             else {
                 gb->data_for_sel_glitch = gb->current_tile_data[1];
             }
