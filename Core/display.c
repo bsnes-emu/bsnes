@@ -1728,15 +1728,6 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     goto skip_slow_mode_3;
                 }
             }
-            if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE)) {
-                if (gb->io_registers[GB_IO_WX] == 0) {
-                    fifo_clear(&gb->bg_fifo);
-                    fifo_clear(&gb->oam_fifo);
-                    gb->wx_triggered = true;
-                    gb->window_y++;
-                    gb->window_tile_x = 0;
-                }
-            }
             while (true) {
                 /* Handle window */
                 /* TODO: It appears that WX checks if the window begins *next* pixel, not *this* pixel. For this reason,
@@ -1747,7 +1738,10 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                 
                 if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE)) {
                     bool should_activate_window = false;
-                    if (gb->io_registers[GB_IO_WX] < 166 + GB_is_cgb(gb)) {
+                    if (unlikely(gb->io_registers[GB_IO_WX] == 0)) {
+                        should_activate_window = (gb->position_in_line == (uint8_t)-16 && (gb->io_registers[GB_IO_SCX] & 7)) || (gb->position_in_line == (uint8_t)-7);
+                    }
+                    else if (gb->io_registers[GB_IO_WX] < 166 + GB_is_cgb(gb)) {
                         if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7)) {
                             should_activate_window = true;
                         }
