@@ -431,9 +431,7 @@ static void stop(GB_gameboy_t *gb, uint8_t opcode)
             gb->speed_switch_freeze = 1;
         }
         
-        if (interrupt_pending) {
-        }
-        else {
+        if (!interrupt_pending) {
             gb->speed_switch_halt_countdown = 0x20008;
             gb->speed_switch_freeze = 5;
         }
