@@ -650,6 +650,10 @@ struct GB_gameboy_internal_s {
         bool last_tileset;
         bool cgb_wx_glitch;
         bool line_has_fractional_scrolling;
+        uint8_t wy_check_modulo;
+        bool wy_check_scheduled;
+        bool wy_just_checked;
+        bool wx_166_interrupt_glitch;
     )
     
     GB_SECTION(accessory,

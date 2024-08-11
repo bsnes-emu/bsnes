@@ -420,6 +420,21 @@ void GB_set_light_temperature(GB_gameboy_t *gb, double temperature)
     }
 }
 
+static void wy_check(GB_gameboy_t *gb)
+{
+    if (!(gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE)) return;
+    
+    uint8_t comparison = gb->current_line;
+    if ((!GB_is_cgb(gb) || gb->cgb_double_speed) && gb->ly_for_comparison != (uint8_t)-1) {
+        comparison = gb->ly_for_comparison;
+    }
+    
+    if ((gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE) &&
+        gb->io_registers[GB_IO_WY] == comparison) {
+        gb->wy_triggered = true;
+    }
+}
+
 void GB_STAT_update(GB_gameboy_t *gb)
 {
     if (!(gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE)) return;
@@ -585,7 +600,13 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     
     // (gb->position_in_line + 16 < 8) is (gb->position_in_line < -8) in unsigned logic
     if (((uint8_t)(gb->position_in_line + 16) < 8)) {
-        if ((gb->position_in_line & 7) == (gb->io_registers[GB_IO_SCX] & 7)) {
+        if (gb->position_in_line == (uint8_t)-17) {
+            gb->position_in_line = -16;
+        }
+        else if ((gb->position_in_line & 7) == (gb->io_registers[GB_IO_SCX] & 7)) {
+            gb->position_in_line = -8;
+        }
+        else if (gb->window_is_being_fetched && (gb->position_in_line & 7) == 6 && (gb->io_registers[GB_IO_SCX] & 7) == 7) { // TODO: Why does this happen?
             gb->position_in_line = -8;
         }
         else if (gb->position_in_line == (uint8_t) -9) {
@@ -597,6 +618,8 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
         }
     }
 
+    gb->window_is_being_fetched = false;
+    
     /* Drop pixels for scrollings */
     if (gb->position_in_line >= 160 || (gb->disable_rendering && !gb->sgb)) {
         gb->position_in_line++;
@@ -689,7 +712,6 @@ static void render_pixel_if_possible(GB_gameboy_t *gb)
     
     gb->position_in_line++;
     gb->lcd_x++;
-    gb->window_is_being_fetched = false;
 }
 
 static inline void dma_sync(GB_gameboy_t *gb, unsigned *cycles)
@@ -1371,7 +1393,7 @@ static inline uint16_t mode3_batching_length(GB_gameboy_t *gb)
     if (gb->wx_triggered) return 0;
     if (gb->wy_triggered) {
         if (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE) {
-            if ((gb->io_registers[GB_IO_WX] < 8 || gb->io_registers[GB_IO_WX] == 166)) {
+            if ((gb->io_registers[GB_IO_WX] < 7 || gb->io_registers[GB_IO_WX] == 166 || gb->io_registers[GB_IO_WX] == 167)) {
                 return 0;
             }
         }
@@ -1425,7 +1447,33 @@ static void update_frame_parity(GB_gameboy_t *gb)
  */
 void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
 {
-    gb->frame_parity_ticks += cycles;
+    if (gb->wy_triggered) {
+        gb->wy_check_scheduled = false;
+    }
+    else if (gb->wy_check_scheduled) {
+        force = true;
+        unsigned cycles_to_check;
+        // TODO: When speed-switching while the LCD is on, the modulo might be affected. Odd-modes are going to be fun.
+        if (gb->cgb_double_speed) {
+            cycles_to_check = (8 - ((gb->wy_check_modulo + 6) & 7));
+        }
+        else if (GB_is_cgb(gb)) {
+            cycles_to_check = (8 - ((gb->wy_check_modulo + 0) & 7));
+        }
+        else {
+            cycles_to_check = (8 - ((gb->wy_check_modulo + 2) & 7));
+        }
+        
+        if (cycles >= cycles_to_check) {
+            gb->wy_check_scheduled = false;
+            GB_display_run(gb, cycles_to_check, true);
+            wy_check(gb);
+            if (gb->display_state == 21 && GB_is_cgb(gb) && !gb->cgb_double_speed) {
+                gb->wy_just_checked = true;
+            }
+            cycles -= cycles_to_check;
+        }
+    }
 
     if (unlikely((gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE) && (signed)(gb->cycles_for_line * 2 + cycles + gb->display_cycles) > LINE_LENGTH * 2)) {
         unsigned first_batch = (LINE_LENGTH * 2 - gb->cycles_for_line * 2 + gb->display_cycles);
@@ -1446,6 +1494,9 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
         gb->mode_for_interrupt = 3;
     }
     gb->cycles_since_vblank_callback += cycles / 2;
+    
+    gb->frame_parity_ticks += cycles;
+    gb->wy_check_modulo += cycles;
     
     if (cycles < gb->frame_repeat_countdown) {
         gb->frame_repeat_countdown -= cycles;
@@ -1480,6 +1531,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
         GB_STATE(gb, display, 15);
         GB_STATE(gb, display, 16);
         GB_STATE(gb, display, 17);
+        
         GB_STATE(gb, display, 19);
         GB_STATE(gb, display, 20);
         GB_STATE(gb, display, 21);
@@ -1490,6 +1542,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
         GB_STATE(gb, display, 27);
         GB_STATE(gb, display, 28);
         GB_STATE(gb, display, 29);
+        
         GB_STATE(gb, display, 31);
         GB_STATE(gb, display, 32);
         GB_STATE(gb, display, 33);
@@ -1504,6 +1557,9 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
         GB_STATE(gb, display, 42);
         GB_STATE(gb, display, 43);
     }
+    
+    gb->wy_check_modulo = cycles;
+    gb->wy_just_checked = false;
     
     if (!(gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE)) {
         while (true) {
@@ -1592,6 +1648,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
         }
         gb->n_visible_objs = gb->orig_n_visible_objs;
         gb->current_line++;
+        wy_check(gb);
         gb->cycles_for_line = 0;
         if (gb->current_line != LINES) {
             gb->cycles_for_line = 2;
@@ -1616,6 +1673,8 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
     while (true) {
         /* Lines 0 - 143 */
         for (; gb->current_line < LINES; gb->current_line++) {
+            wy_check(gb);
+            
             if (unlikely(gb->lcd_line_callback)) {
                 gb->lcd_line_callback(gb, gb->current_line);
             }
@@ -1649,6 +1708,8 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
             gb->mode_for_interrupt = 2;
             gb->oam_write_blocked = true;
             gb->ly_for_comparison = gb->current_line;
+            wy_check(gb);
+            
             GB_STAT_update(gb);
             gb->mode_for_interrupt = -1;
             GB_STAT_update(gb);
@@ -1698,11 +1759,6 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
             GB_SLEEP(gb, display, 32, 2);
         mode_3_start:
             gb->disable_window_pixel_insertion_glitch = false;
-            /* TODO: Timing seems incorrect, might need an access conflict handling. */
-            if ((gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE) &&
-                gb->io_registers[GB_IO_WY] == gb->current_line) {
-                gb->wy_triggered = true;
-            }
 
             fifo_clear(&gb->bg_fifo);
             fifo_clear(&gb->oam_fifo);
@@ -1735,8 +1791,11 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                    has weird artifacts (It appears to activate the window during HBlank, as PPU X is temporarily 160 at
                    that point. The code should be updated to represent this, and this will fix the time travel hack in
                    WX's access conflict code. */
-                
-                if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE)) {
+                gb->wx_166_interrupt_glitch = false;
+                if (unlikely(gb->wy_just_checked)) {
+                    gb->wy_just_checked = false;
+                }
+                else if (!gb->wx_triggered && gb->wy_triggered && (gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE)) {
                     bool should_activate_window = false;
                     if (unlikely(gb->io_registers[GB_IO_WX] == 0)) {
                         if (gb->position_in_line == (uint8_t)-7) {
@@ -1749,7 +1808,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                             should_activate_window = true;
                         }
                     }
-                    else if (gb->io_registers[GB_IO_WX] < 166 + GB_is_cgb(gb)) {
+                    else if (gb->io_registers[GB_IO_WX] < 166 + GB_is_cgb(gb)) { // TODO: 166 on the CGB behaves a bit weird
                         if (gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7)) {
                             should_activate_window = true;
                         }
@@ -1770,9 +1829,12 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                         gb->window_tile_x = 0;
                         fifo_clear(&gb->bg_fifo);
                         /* TODO: Verify fetcher access timings in this case */
-                        if (gb->io_registers[GB_IO_WX] == 0 && (gb->io_registers[GB_IO_SCX] & 7)) {
-                            gb->cycles_for_line++;
+                        if (gb->io_registers[GB_IO_WX] == 0 && (gb->io_registers[GB_IO_SCX] & 7) && !GB_is_cgb(gb)) {
+                            gb->cycles_for_line += 1;
                             GB_SLEEP(gb, display, 42, 1);
+                        }
+                        else if (gb->io_registers[GB_IO_WX] == 166) {
+                            gb->wx_166_interrupt_glitch = true;
                         }
                         gb->wx_triggered = true;
                         gb->fetcher_state = GB_FETCHER_GET_TILE_T1;
@@ -1783,8 +1845,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     }
                 }
 
-                /* TODO: What happens when WX=0?*/
-                if (!GB_is_cgb(gb) && gb->wx_triggered && !gb->window_is_being_fetched &&
+                if ((!GB_is_cgb(gb) || gb->io_registers[GB_IO_WX] == 0) && gb->wx_triggered && !gb->window_is_being_fetched &&
                     gb->fetcher_state == GB_FETCHER_GET_TILE_T1 && gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) && gb->bg_fifo.size == 8) {
                     // Insert a pixel right at the FIFO's end
                     gb->insert_bg_pixel = true;
@@ -1804,7 +1865,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                        (gb->io_registers[GB_IO_LCDC] & GB_LCDC_OBJ_EN || GB_is_cgb(gb)) &&
                        gb->objects_x[gb->n_visible_objs - 1] == x_for_object_match(gb)) {
                     
-                    while (gb->fetcher_state < 5 || fifo_size(&gb->bg_fifo) == 0) {
+                    while (gb->fetcher_state < GB_FETCHER_GET_TILE_DATA_HIGH_T2 || fifo_size(&gb->bg_fifo) == 0) {
                         advance_fetcher_state_machine(gb, &cycles);
                         gb->cycles_for_line++;
                         GB_SLEEP(gb, display, 27, 1);
@@ -1886,6 +1947,10 @@ abort_fetching_object:
 
                 gb->cycles_for_line++;
                 GB_SLEEP(gb, display, 21, 1);
+                if (unlikely(gb->wx_166_interrupt_glitch)) {
+                    gb->mode_for_interrupt = 0;
+                    GB_STAT_update(gb);
+                }
             }
 skip_slow_mode_3:
             gb->position_in_line = -16;
@@ -1978,14 +2043,7 @@ skip_slow_mode_3:
                 gb->cycles_for_line = 0;
                 GB_SLEEP(gb, display, 11, LINE_LENGTH - cycles_for_line - 2);
             }
-            /*
-             TODO: Verify double speed timing
-             TODO: Timing differs on a DMG
-            */
-            if ((gb->io_registers[GB_IO_LCDC] & GB_LCDC_WIN_ENABLE) &&
-                (gb->io_registers[GB_IO_WY] == gb->current_line)) {
-                gb->wy_triggered = true;
-            }
+            
             gb->cycles_for_line = 0;
             GB_SLEEP(gb, display, 31, 2);
             if (gb->current_line != LINES - 1) {
