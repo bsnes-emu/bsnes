@@ -444,7 +444,7 @@ void GB_STAT_update(GB_gameboy_t *gb)
     
     bool previous_interrupt_line = gb->stat_interrupt_line;
     /* Set LY=LYC bit */
-    if (gb->ly_for_comparison != (uint16_t)-1 || gb->model <= GB_MODEL_CGB_C) {
+    if (gb->ly_for_comparison != (uint16_t)-1 || (gb->model <= GB_MODEL_CGB_C && !gb->cgb_double_speed)) {
         if (gb->ly_for_comparison == gb->io_registers[GB_IO_LYC]) {
             gb->lyc_interrupt_line = true;
             gb->io_registers[GB_IO_STAT] |= 4;
@@ -2141,7 +2141,7 @@ skip_slow_mode_3:
         GB_SLEEP(gb, display, 15, (gb->model > GB_MODEL_CGB_C)? 4: 2);
         
         gb->io_registers[GB_IO_LY] = 0;
-        gb->ly_for_comparison = (gb->model > GB_MODEL_CGB_C)? 153 : -1;
+        gb->ly_for_comparison = (gb->model > GB_MODEL_CGB_C || gb->cgb_double_speed)? 153 : -1;
         GB_STAT_update(gb);
         GB_SLEEP(gb, display, 16, 4);
         
