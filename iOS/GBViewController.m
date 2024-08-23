@@ -64,6 +64,9 @@
     dispatch_queue_t _cameraQueue;
     
     bool _runModeFromController;
+    
+    UIWindow *_mirrorWindow;
+    GBView *_mirrorView;
 }
 
 static void loadBootROM(GB_gameboy_t *gb, GB_boot_rom_t type)
@@ -333,7 +336,49 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
                                                  name:GCControllerDidConnectNotification
                                                object:nil];
     
+    for (NSString *name in @[UIScreenDidConnectNotification,
+                             UIScreenDidDisconnectNotification,
+                             UIScreenModeDidChangeNotification]) {
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(updateMirrorWindow)
+                                                     name:name
+                                                   object:nil];
+    }
+    
+    
+    
+    [self updateMirrorWindow];
+    
     return true;
+}
+
+- (void)updateMirrorWindow
+{
+    if ([UIScreen screens].count == 1) {
+        _mirrorWindow = nil;
+        _mirrorView = nil;
+        return;
+    }
+    if (_mirrorWindow && ![[UIScreen screens] containsObject:_mirrorWindow.screen]) {
+        _mirrorWindow = nil;
+        _mirrorView = nil;
+    }
+    for (UIScreen *screen in [UIScreen screens]) {
+        if (screen == UIScreen.mainScreen) continue;
+        CGRect rect = screen.bounds;
+        rect.size.height = floor(rect.size.height / 144) * 144;
+        rect.size.width = rect.size.height / 144 * 160;
+        rect.origin.x = (screen.bounds.size.width - rect.size.width) / 2;
+        rect.origin.y = (screen.bounds.size.height - rect.size.height) / 2;
+        _mirrorWindow = [[UIWindow alloc] initWithFrame:screen.bounds];
+        _mirrorWindow.screen = screen;
+        _mirrorView = [_gbView mirroredView];
+        _mirrorView.frame = rect;
+        _mirrorWindow.backgroundColor = [UIColor blackColor];
+        [_mirrorWindow addSubview:_mirrorView];
+        [_mirrorWindow setHidden:false];
+        break;
+    }
 }
 
 
