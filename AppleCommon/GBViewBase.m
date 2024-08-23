@@ -45,7 +45,7 @@
 
 - (uint32_t *)currentBuffer
 {
-    if (unlikely(_parent)) {
+    if (GB_unlikely(_parent)) {
         return [_parent currentBuffer];
     }
     return _imageBuffers[_currentBuffer];
@@ -53,7 +53,7 @@
 
 - (uint32_t *)previousBuffer
 {
-    if (unlikely(_parent)) {
+    if (GB_unlikely(_parent)) {
         return [_parent previousBuffer];
     }
     return _imageBuffers[(_currentBuffer + 2) % self.numberOfBuffers];
@@ -74,7 +74,7 @@
 
 - (GB_frame_blending_mode_t)frameBlendingMode
 {
-    if (unlikely(_parent)) {
+    if (GB_unlikely(_parent)) {
         return [_parent frameBlendingMode];
     }
     if (_frameBlendingMode == GB_FRAME_BLENDING_MODE_ACCURATE) {
