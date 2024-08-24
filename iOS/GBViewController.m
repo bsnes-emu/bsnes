@@ -336,6 +336,11 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
                                                  name:GCControllerDidConnectNotification
                                                object:nil];
     
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(controllerDisconnected:)
+                                                 name:GCControllerDidDisconnectNotification
+                                               object:nil];
+    
     for (NSString *name in @[UIScreenDidConnectNotification,
                              UIScreenDidDisconnectNotification,
                              UIScreenModeDidChangeNotification]) {
@@ -381,6 +386,12 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     }
 }
 
+- (void)controllerDisconnected:(NSNotification *)notification
+{
+    if (notification.object == _lastController) {
+        _backgroundView.fullScreenMode = false;
+    }
+}
 
 - (void)setControllerHandlers
 {
@@ -419,6 +430,10 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 - (void)controller:(GCController *)controller buttonChanged:(GCControllerButtonInput *)button usage:(GBControllerUsage)usage
 {
     [self updateLastController:controller];
+    if (_running && button.value > 0.25 &&
+        [[NSUserDefaults standardUserDefaults] boolForKey:@"GBControllersHideInterface"]) {
+        _backgroundView.fullScreenMode = true;
+    }
     
     GBButton gbButton = [GBSettingsViewController controller:controller convertUsageToButton:usage];
     static const double analogThreshold = 0.0625;
@@ -488,11 +503,20 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 - (void)controller:(GCController *)controller axisChanged:(GCControllerDirectionPad *)axis usage:(GBControllerUsage)usage
 {
     [self updateLastController:controller];
+    bool left = axis.left.value > 0.5;
+    bool right = axis.right.value > 0.5;
+    bool up = axis.up.value > 0.5;
+    bool down = axis.down.value > 0.5;
     
-    GB_set_key_state(&_gb, GB_KEY_LEFT, axis.left.value > 0.5);
-    GB_set_key_state(&_gb, GB_KEY_RIGHT, axis.right.value > 0.5);
-    GB_set_key_state(&_gb, GB_KEY_UP, axis.up.value > 0.5);
-    GB_set_key_state(&_gb, GB_KEY_DOWN, axis.down.value > 0.5);
+    if (_running && (left || right || up || down ) &&
+        [[NSUserDefaults standardUserDefaults] boolForKey:@"GBControllersHideInterface"]) {
+        _backgroundView.fullScreenMode = true;
+    }
+    
+    GB_set_key_state(&_gb, GB_KEY_LEFT, left);
+    GB_set_key_state(&_gb, GB_KEY_RIGHT, right);
+    GB_set_key_state(&_gb, GB_KEY_UP, up);
+    GB_set_key_state(&_gb, GB_KEY_DOWN, down);
 }
 
 - (void)controller:(GCController *)controller motionChanged:(GCMotion *)motion
@@ -793,7 +817,8 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     _backgroundView.frame = [layout viewRectForOrientation:orientation];
     _backgroundView.layout = layout;
     if (!self.presentedViewController) {
-        _window.backgroundColor = layout.theme.backgroundGradientBottom;
+        _window.backgroundColor = _backgroundView.fullScreenMode? [UIColor blackColor] :
+                                                                  layout.theme.backgroundGradientBottom;
     }
 }
 
@@ -850,9 +875,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 - (UIStatusBarStyle)preferredStatusBarStyle
 {
     if (@available(iOS 13.0, *)) {
-        return _verticalLayout.theme.isDark? UIStatusBarStyleLightContent : UIStatusBarStyleDarkContent;
+        return (_verticalLayout.theme.isDark || _backgroundView.fullScreenMode)? UIStatusBarStyleLightContent : UIStatusBarStyleDarkContent;
     }
-    return _verticalLayout.theme.isDark? UIStatusBarStyleLightContent : UIStatusBarStyleDefault;
+    return (_verticalLayout.theme.isDark || _backgroundView.fullScreenMode)? UIStatusBarStyleLightContent : UIStatusBarStyleDefault;
 }
 
 

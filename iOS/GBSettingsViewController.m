@@ -399,10 +399,16 @@ static NSString const *typeLightTemp = @"typeLightTemp";
             ],
             @"footer": ^NSString *(){
                 if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBSwipeState"]) {
-                    return @"Swipe down on the Game Boy to save the state into state slot 1. Swipe up to load the state from state slot 1";
+                    return @"Swipe down on the Game Boy to save the state into state slot 1. Swipe up to load the state from state slot 1.";
                 }
                 return @" "; // This space is needed, otherwise UITableView spacing breaks
             },
+        },
+        @{
+            @"items": @[
+                @{@"type": typeCheck, @"pref": @"GBControllersHideInterface", @"title": @"Hide UI While Using a Controller"},
+            ],
+            @"footer": @"When enabled, the on-screen user interface will be hidden while a game controller is being used."
         },
         @{
             @"header": @"Enable Rumble",
