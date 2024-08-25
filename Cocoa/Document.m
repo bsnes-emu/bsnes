@@ -1250,7 +1250,12 @@ static bool is_path_writeable(const char *path)
 - (BOOL)validateUserInterfaceItem:(id<NSValidatedUserInterfaceItem>)anItem
 {
     if ([anItem action] == @selector(mute:)) {
-        [(NSMenuItem *)anItem setState:!_audioClient.isPlaying];
+        if (_running) {
+            [(NSMenuItem *)anItem setState:!_audioClient.isPlaying];
+        }
+        else {
+            [(NSMenuItem *)anItem setState:[[NSUserDefaults standardUserDefaults] boolForKey:@"Mute"]];
+        }
     }
     else if ([anItem action] == @selector(togglePause:)) {
         [(NSMenuItem *)anItem setState:self.isPaused];
