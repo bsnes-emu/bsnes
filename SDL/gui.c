@@ -933,26 +933,35 @@ static void enter_help_menu(unsigned index)
 
 static void cycle_model(unsigned index)
 {
-    
-    configuration.model++;
-    if (configuration.model == MODEL_MAX) {
-        configuration.model = 0;
+    switch (configuration.model) {
+        case MODEL_DMG:  configuration.model = MODEL_MGB;  break;
+        case MODEL_MGB:  configuration.model = MODEL_SGB;  break;
+        case MODEL_SGB:  configuration.model = MODEL_CGB;  break;
+        case MODEL_CGB:  configuration.model = MODEL_AGB;  break;
+        case MODEL_AGB:  configuration.model = MODEL_AUTO; break;
+        case MODEL_AUTO: configuration.model = MODEL_DMG;  break;
+        default: configuration.model = MODEL_AUTO;
     }
     pending_command = GB_SDL_RESET_COMMAND;
 }
 
 static void cycle_model_backwards(unsigned index)
 {
-    if (configuration.model == 0) {
-        configuration.model = MODEL_MAX;
+    switch (configuration.model) {
+        case MODEL_MGB:  configuration.model = MODEL_DMG;  break;
+        case MODEL_SGB:  configuration.model = MODEL_MGB;  break;
+        case MODEL_CGB:  configuration.model = MODEL_SGB;  break;
+        case MODEL_AGB:  configuration.model = MODEL_CGB;  break;
+        case MODEL_AUTO: configuration.model = MODEL_AGB;  break;
+        case MODEL_DMG:  configuration.model = MODEL_AUTO; break;
+        default: configuration.model = MODEL_AUTO;
     }
-    configuration.model--;
     pending_command = GB_SDL_RESET_COMMAND;
 }
 
 static const char *current_model_string(unsigned index)
 {
-    return GB_inline_const(const char *[], {"Game Boy", "Game Boy Color", "Game Boy Advance", "Super Game Boy", "Game Boy Pocket"})
+    return GB_inline_const(const char *[], {"Game Boy", "Game Boy Color", "Game Boy Advance", "Super Game Boy", "Game Boy Pocket", "Pick Automatically"})
         [configuration.model];
 }
 

@@ -83,6 +83,8 @@ static uint32_t color_to_int(NSColor *color)
                                                               @"GBJoyConAutoPair": @YES,
                                                               @"GBJoyConsDefaultsToHorizontal": @YES,
                                                               
+                                                              @"GBEmulatedModel": @(MODEL_AUTO),
+                                                              
                                                               // Default themes
                                                               @"GBThemes": @{
                                                                       @"Desert": @{

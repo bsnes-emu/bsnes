@@ -6,6 +6,18 @@
 #import "GBOSDView.h"
 #import "GBDebuggerButton.h"
 
+enum model {
+    MODEL_NONE,
+    MODEL_DMG,
+    MODEL_CGB,
+    MODEL_AGB,
+    MODEL_SGB,
+    MODEL_MGB,
+    MODEL_AUTO,
+    
+    MODEL_QUICK_RESET = -1,
+};
+
 @class GBCheatWindowController;
 @class GBPaletteView;
 @class GBObjectView;
