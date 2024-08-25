@@ -256,7 +256,7 @@ contextMenuConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath
         UIAction *deleteAction = [UIAction actionWithTitle:@"Delete"
                                                      image:[UIImage systemImageNamed:@"trash"]
                                                 identifier:nil
-                                                   handler:^(__kindof UIAction * _Nonnull action) {
+                                                   handler:^(UIAction *action) {
             [self tableView:tableView
          commitEditingStyle:UITableViewCellEditingStyleDelete
           forRowAtIndexPath:indexPath];
