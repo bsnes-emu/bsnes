@@ -427,10 +427,16 @@
                                     <action selector="toggleCheats:" target="-1" id="gsw-UY-fhu"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Show Cheats" id="LZV-QK-YXi">
+                            <menuItem title="Show Cheats" id="Nf8-F1-YyD">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="showCheats:" target="-1" id="tfr-qM-q8X"/>
+                                    <action selector="showCheats:" target="-1" id="stn-Ei-aFE"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Search Cheats" id="LZV-QK-YXi">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="showCheatSearch:" target="-1" id="eI1-x0-ykn"/>
                                 </connections>
                             </menuItem>
                         </items>

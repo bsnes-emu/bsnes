@@ -230,6 +230,9 @@ void GB_free(GB_gameboy_t *gb)
         GB_remove_cheat(gb, gb->cheats[0]);
     }
 #endif
+#ifndef GB_DISABLE_CHEAT_SEARCH
+    GB_cheat_search_reset(gb);
+#endif
     GB_stop_audio_recording(gb);
         memset(gb, 0, sizeof(*gb));
 }
@@ -1690,7 +1693,7 @@ static void GB_reset_internal(GB_gameboy_t *gb, bool quick)
         uint8_t extra_oam[sizeof(gb->extra_oam)];
         uint8_t dma, obp0, obp1;
     } *preserved_state = NULL;
-    
+        
     if (quick) {
         preserved_state = alloca(sizeof(*preserved_state));
         memcpy(preserved_state->hram, gb->hram, sizeof(gb->hram));
@@ -1810,6 +1813,11 @@ void GB_quick_reset(GB_gameboy_t *gb)
 void GB_switch_model_and_reset(GB_gameboy_t *gb, GB_model_t model)
 {
     GB_ASSERT_NOT_RUNNING(gb)
+    
+#ifndef GB_DISABLE_CHEAT_SEARCH
+    GB_cheat_search_reset(gb);
+#endif
+    
     gb->model = model;
     if (GB_is_cgb(gb)) {
         gb->ram = realloc(gb->ram, gb->ram_size = 0x1000 * 8);

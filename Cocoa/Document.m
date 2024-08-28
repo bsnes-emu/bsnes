@@ -11,6 +11,7 @@
 #import "GBTerminalTextFieldCell.h"
 #import "BigSurToolbar.h"
 #import "GBPaletteEditorController.h"
+#import "GBCheatSearchController.h"
 #import "GBObjectView.h"
 #import "GBPaletteView.h"
 #import "GBHexStatusBarRepresenter.h"
@@ -117,6 +118,8 @@
     
     NSDate *_fileModificationTime;
     __weak NSThread *_emulationThread;
+    
+    GBCheatSearchController *_cheatSearchController;
 }
 
 static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
@@ -1775,6 +1778,11 @@ enum GBWindowResizeAction
     if (self.memoryWindow.isVisible) {
         [_hexController reloadData];
     }
+    if (_cheatSearchController.window.isVisible) {
+        if ([_cheatSearchController.tableView editedColumn] != 2) {
+            [_cheatSearchController.tableView reloadData];
+        }
+    }
 }
 
 - (IBAction) reloadVRAMData: (id) sender
@@ -2398,6 +2406,14 @@ enum GBWindowResizeAction
 - (IBAction)showCheats:(id)sender
 {
     [self.cheatsWindow makeKeyAndOrderFront:nil];
+}
+
+- (IBAction)showCheatSearch:(id)sender
+{
+    if (!_cheatSearchController) {
+        _cheatSearchController = [GBCheatSearchController controllerWithDocument:self];
+    }
+    [_cheatSearchController.window makeKeyAndOrderFront:sender];
 }
 
 - (IBAction)toggleCheats:(id)sender
