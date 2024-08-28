@@ -71,6 +71,7 @@ ifneq ($(DISABLE_DEBUGGER),)
 CFLAGS += -DGB_DISABLE_DEBUGGER
 CPPP_FLAGS += -DGB_DISABLE_DEBUGGER
 CORE_FILTER += Core/debugger.c Core/sm83_disassembler.c Core/symbol_hash.c
+DISABLE_CHEAT_SEARCH := 1
 else
 CPPP_FLAGS += -UGB_DISABLE_DEBUGGER
 endif
@@ -79,8 +80,17 @@ ifneq ($(DISABLE_CHEATS),)
 CFLAGS += -DGB_DISABLE_CHEATS
 CPPP_FLAGS += -DGB_DISABLE_CHEATS
 CORE_FILTER += Core/cheats.c
+DISABLE_CHEAT_SEARCH := 1
 else
 CPPP_FLAGS += -UGB_DISABLE_CHEATS
+endif
+
+ifneq ($(DISABLE_CHEAT_SEARCH),)
+CFLAGS += -DGB_DISABLE_CHEAT_SEARCH
+CPPP_FLAGS += -DGB_DISABLE_CHEAT_SEARCH
+CORE_FILTER += Core/cheat_search.c
+else
+CPPP_FLAGS += -UGB_DISABLE_CHEAT_SEARCH
 endif
 
 ifneq ($(CORE_FILTER)$(DISABLE_TIMEKEEPING),)
@@ -268,7 +278,7 @@ ifeq ($(SYSROOT),)
 $(error Could not find an iOS SDK)
 endif
 CFLAGS += -arch arm64 -miphoneos-version-min=$(IOS_MIN) -isysroot $(SYSROOT) -IAppleCommon -DGB_DISABLE_DEBUGGER
-CORE_FILTER += Core/debugger.c Core/sm83_disassembler.c Core/symbol_hash.c
+CORE_FILTER += Core/debugger.c Core/sm83_disassembler.c Core/symbol_hash.c Core/cheat_search.c
 LDFLAGS += -arch arm64
 OCFLAGS += -x objective-c -fobjc-arc -Wno-deprecated-declarations -isysroot $(SYSROOT)
 LDFLAGS += -miphoneos-version-min=$(IOS_MIN)  -isysroot $(SYSROOT)
