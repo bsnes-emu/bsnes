@@ -86,7 +86,7 @@
             </connections>
             <point key="canvasLocation" x="293" y="347"/>
         </window>
-        <window title="Debug Console" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="21F-Ah-yHX" customClass="NSPanel">
+        <window title="Debug Console" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="21F-Ah-yHX" customClass="GBPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" resizable="YES" utility="YES" HUD="YES"/>
             <windowCollectionBehavior key="collectionBehavior" fullScreenAuxiliary="YES"/>
             <rect key="contentRect" x="0.0" y="0.0" width="921" height="400"/>
@@ -318,9 +318,12 @@
                     </splitView>
                 </subviews>
             </view>
+            <connections>
+                <outlet property="ownerWindow" destination="xOd-HO-29H" id="beo-JZ-Ekb"/>
+            </connections>
             <point key="canvasLocation" x="347.5" y="-29"/>
         </window>
-        <window title="Memory" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" toolbarStyle="expanded" id="mRm-dL-mCj" customClass="NSPanel">
+        <window title="Memory" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" toolbarStyle="expanded" id="mRm-dL-mCj" customClass="GBPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" resizable="YES"/>
             <windowCollectionBehavior key="collectionBehavior" fullScreenAuxiliary="YES"/>
             <rect key="contentRect" x="0.0" y="0.0" width="528" height="320"/>
@@ -400,10 +403,13 @@
                     <toolbarItem reference="rLO-D7-zRG"/>
                 </defaultToolbarItems>
             </toolbar>
+            <connections>
+                <outlet property="ownerWindow" destination="xOd-HO-29H" id="wCE-dT-kGv"/>
+            </connections>
             <point key="canvasLocation" x="-185" y="61"/>
         </window>
         <menuItem title="Cartridge RAM" id="ylM-ah-PNQ"/>
-        <window title="VRAM Viewer" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" toolbarStyle="expanded" id="mbr-db-iZh" customClass="NSPanel">
+        <window title="VRAM Viewer" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" toolbarStyle="expanded" id="mbr-db-iZh" customClass="GBPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES"/>
             <windowCollectionBehavior key="collectionBehavior" fullScreenAuxiliary="YES"/>
             <rect key="contentRect" x="0.0" y="0.0" width="512" height="432"/>
@@ -667,9 +673,12 @@
                 </defaultToolbarItems>
             </toolbar>
             <contentBorderThickness minY="24"/>
+            <connections>
+                <outlet property="ownerWindow" destination="xOd-HO-29H" id="hkb-AH-4fo"/>
+            </connections>
             <point key="canvasLocation" x="182" y="760"/>
         </window>
-        <window title="Printer Feed" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" hidesOnDeactivate="YES" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="NdE-0B-WCf" customClass="NSPanel">
+        <window title="Printer Feed" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" hidesOnDeactivate="YES" releasedWhenClosed="NO" visibleAtLaunch="NO" animationBehavior="default" id="NdE-0B-WCf" customClass="GBPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" resizable="YES"/>
             <rect key="contentRect" x="0.0" y="0.0" width="320" height="288"/>
             <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
@@ -717,9 +726,12 @@
                     <toolbarItem reference="L6N-6G-UWl"/>
                 </defaultToolbarItems>
             </toolbar>
+            <connections>
+                <outlet property="ownerWindow" destination="xOd-HO-29H" id="8Lk-t1-HNi"/>
+            </connections>
             <point key="canvasLocation" x="-159" y="356"/>
         </window>
-        <window title="Cheats" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="4Yb-Np-JrF" customClass="NSPanel">
+        <window title="Cheats" allowsToolTipsWhenApplicationIsInactive="NO" autorecalculatesKeyViewLoop="NO" restorable="NO" releasedWhenClosed="NO" visibleAtLaunch="NO" frameAutosaveName="" animationBehavior="default" id="4Yb-Np-JrF" customClass="GBPanel">
             <windowStyleMask key="styleMask" titled="YES" closable="YES" miniaturizable="YES" resizable="YES"/>
             <rect key="contentRect" x="0.0" y="0.0" width="604" height="400"/>
             <rect key="screenRect" x="0.0" y="0.0" width="2560" height="1415"/>
@@ -798,7 +810,7 @@
                             </subviews>
                         </clipView>
                         <scroller key="horizontalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="3Hg-LL-VqH">
-                            <rect key="frame" x="1" y="119" width="223" height="15"/>
+                            <rect key="frame" x="1" y="242" width="604" height="16"/>
                             <autoresizingMask key="autoresizingMask"/>
                         </scroller>
                         <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" doubleValue="1" horizontal="NO" id="zET-KH-qF4">
@@ -955,6 +967,9 @@
                     </box>
                 </subviews>
             </view>
+            <connections>
+                <outlet property="ownerWindow" destination="xOd-HO-29H" id="ZQr-6h-iby"/>
+            </connections>
             <point key="canvasLocation" x="210" y="-399"/>
         </window>
         <customObject id="v7q-gT-jHT" customClass="GBCheatWindowController">

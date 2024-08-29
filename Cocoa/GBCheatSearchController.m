@@ -1,6 +1,7 @@
 #import "GBCheatSearchController.h"
 #import "GBWarningPopover.h"
 #import "GBCheatWindowController.h"
+#import "GBPanel.h"
 
 @interface GBCheatSearchController() <NSTableViewDelegate, NSTableViewDataSource>
 @property IBOutlet NSPopUpButton *dataTypeButton;
@@ -16,6 +17,7 @@
     __weak Document *_document;
     size_t _resultCount;
     GB_cheat_search_result_t *_results;
+    GBPanel *_window;
 }
 
 + (instancetype)controllerWithDocument:(Document *)document
@@ -26,6 +28,7 @@
     [[NSBundle mainBundle] loadNibNamed:@"CheatSearch" owner:ret topLevelObjects:&objects];
     ret->_resultsLabel.stringValue = @"";
     ret->_resultsLabel.cell.backgroundStyle = NSBackgroundStyleRaised;
+    ret->_window.ownerWindow = document.mainWindow;
     return ret;
 }
 
