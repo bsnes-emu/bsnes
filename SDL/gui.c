@@ -1764,16 +1764,17 @@ static const struct menu_item keyboard_menu[] = {
     {"Turbo:", modify_key, key_name,},
     {"Rewind:", modify_key, key_name,},
     {"Slow-Motion:", modify_key, key_name,},
+    {"Rapid A:", modify_key, key_name,},
+    {"Rapid B:", modify_key, key_name,},
     {"Back", enter_controls_menu},
     {NULL,}
 };
 
 static const char *key_name(unsigned index)
 {
-    if (index > 8) {
-        return SDL_GetScancodeName(configuration.keys_2[index - 9]);
-    }
-    return SDL_GetScancodeName(configuration.keys[index]);
+    SDL_Scancode code = index >= GB_CONF_KEYS_COUNT? configuration.keys_2[index - GB_CONF_KEYS_COUNT] : configuration.keys[index];
+    if (!code) return "Not Set";
+    return SDL_GetScancodeName(code);
 }
 
 static void enter_keyboard_menu(unsigned index)
@@ -2532,7 +2533,7 @@ void run_gui(bool is_running)
                 }
                 else if (gui_state == WAITING_FOR_KEY) {
                     if (current_selection > 8) {
-                        configuration.keys_2[current_selection - 9] = event.key.keysym.scancode;
+                        configuration.keys_2[current_selection - GB_CONF_KEYS_COUNT] = event.key.keysym.scancode;
                     }
                     else {
                         configuration.keys[current_selection] = event.key.keysym.scancode;
@@ -2773,6 +2774,8 @@ void run_gui(bool is_running)
                                            "Slow-Motion",
                                            "Hotkey 1",
                                            "Hotkey 2",
+                                           "Rapid A",
+                                           "Rapid B",
                                            "",
                                       }) [joypad_configuration_progress],
                                       gui_palette_native[3], gui_palette_native[0], STYLE_CENTER);

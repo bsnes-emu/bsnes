@@ -26,6 +26,8 @@ static bool paused = false;
 static uint32_t pixel_buffer_1[256 * 224], pixel_buffer_2[256 * 224];
 static uint32_t *active_pixel_buffer = pixel_buffer_1, *previous_pixel_buffer = pixel_buffer_2;
 static bool underclock_down = false, rewind_down = false, do_rewind = false, rewind_paused = false, turbo_down = false;
+static bool rapid_a = false, rapid_b = false;
+static uint8_t rapid_a_count = 0, rapid_b_count = 0;
 static double clock_mutliplier = 1.0;
 
 char *filename = NULL;
@@ -322,8 +324,18 @@ static void handle_events(GB_gameboy_t *gb)
                             break;
                     }
                 }
+                else if (button == JOYPAD_BUTTON_RAPID_A) {
+                    rapid_a = event.type == SDL_JOYBUTTONDOWN;
+                    rapid_a_count = 0;
+                    GB_set_key_state(gb, GB_KEY_A, event.type == SDL_JOYBUTTONDOWN);
+                }
+                else if (button == JOYPAD_BUTTON_RAPID_B) {
+                    rapid_b = event.type == SDL_JOYBUTTONDOWN;
+                    rapid_b_count = 0;
+                    GB_set_key_state(gb, GB_KEY_B, event.type == SDL_JOYBUTTONDOWN);
+                }
             }
-                break;
+            break;
                 
             case SDL_JOYAXISMOTION: {
                 static bool axis_active[2] = {false, false};
@@ -475,20 +487,30 @@ static void handle_events(GB_gameboy_t *gb)
                         break;
                 }
             case SDL_KEYUP: // Fallthrough
-                if (event.key.keysym.scancode == configuration.keys[8]) {
+                if (event.key.keysym.scancode == configuration.keys[GB_CONF_KEYS_TURBO]) {
                     turbo_down = event.type == SDL_KEYDOWN;
                     GB_audio_clear_queue();
                     GB_set_turbo_mode(gb, turbo_down, turbo_down && rewind_down);
                 }
-                else if (event.key.keysym.scancode == configuration.keys_2[0]) {
+                else if (event.key.keysym.scancode == configuration.keys_2[GB_CONF_KEYS2_REWIND]) {
                     rewind_down = event.type == SDL_KEYDOWN;
                     if (event.type == SDL_KEYUP) {
                         rewind_paused = false;
                     }
                     GB_set_turbo_mode(gb, turbo_down, turbo_down && rewind_down);
                 }
-                else if (event.key.keysym.scancode == configuration.keys_2[1]) {
+                else if (event.key.keysym.scancode == configuration.keys_2[GB_CONF_KEYS2_UNDERCLOCK]) {
                     underclock_down = event.type == SDL_KEYDOWN;
+                }
+                else if (event.key.keysym.scancode == configuration.keys_2[GB_CONF_KEYS2_RAPID_A]) {
+                    rapid_a = event.type == SDL_KEYDOWN;
+                    rapid_a_count = 0;
+                    GB_set_key_state(gb, GB_KEY_A, event.type == SDL_KEYDOWN);
+                }
+                else if (event.key.keysym.scancode == configuration.keys_2[GB_CONF_KEYS2_RAPID_B]) {
+                    rapid_b = event.type == SDL_KEYDOWN;
+                    rapid_b_count = 0;
+                    GB_set_key_state(gb, GB_KEY_B, event.type == SDL_KEYDOWN);
                 }
                 else {
                     for (unsigned i = 0; i < GB_KEY_MAX; i++) {
@@ -518,6 +540,15 @@ static void vblank(GB_gameboy_t *gb, GB_vblank_type_t type)
     else if (!underclock_down && clock_mutliplier < 1.0) {
         clock_mutliplier += 1.0/16;
         GB_set_clock_multiplier(gb, clock_mutliplier);
+    }
+    
+    if (rapid_a) {
+        rapid_a_count++;
+        GB_set_key_state(gb, GB_KEY_A, !(rapid_a_count & 2));
+    }
+    if (rapid_b) {
+        rapid_b_count++;
+        GB_set_key_state(gb, GB_KEY_B, !(rapid_b_count & 2));
     }
     
     if (turbo_down) {
