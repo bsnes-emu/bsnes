@@ -271,7 +271,7 @@ auto SuperFamicom::board() const -> string {
   //Bishoujo Senshi Sailor Moon SuperS - Fuwafuwa Panic (Japan)
   //so we identify it with this embedded string
   string sufamiSignature = "BANDAI SFC-ADX";
-  if (string(data.view(0, sufamiSignature.length())) == sufamiSignature) board.append("ST-", mode);
+  if (string_view(data.data(), sufamiSignature.length()) == sufamiSignature) board.append("ST-", mode);
 
   //this game's title ovewrites the map mode with '!' (0x21), but is a LOROM game
   if(title() == "YUYU NO QUIZ DE GO!GO") mode = "LOROM-";
