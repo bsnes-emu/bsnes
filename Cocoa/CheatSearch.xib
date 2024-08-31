@@ -149,23 +149,23 @@
                     <popUpButton verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="6RO-h8-lZ8">
                         <rect key="frame" x="133" y="89" width="197" height="25"/>
                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                        <popUpButtonCell key="cell" type="push" title="Is Equal To..." bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="Vfb-Dg-Jkb" id="DPm-QO-c64">
+                        <popUpButtonCell key="cell" type="push" title="Is Equal To…" bezelStyle="rounded" alignment="left" lineBreakMode="truncatingTail" state="on" borderStyle="borderAndBezel" imageScaling="proportionallyDown" inset="2" selectedItem="Vfb-Dg-Jkb" id="DPm-QO-c64">
                             <behavior key="behavior" lightByBackground="YES" lightByGray="YES"/>
                             <font key="font" metaFont="menu"/>
                             <menu key="menu" id="Kg9-Rd-1GQ">
                                 <items>
                                     <menuItem title="Any" id="cEg-eI-4hb"/>
-                                    <menuItem title="Is Equal To..." state="on" id="Vfb-Dg-Jkb"/>
-                                    <menuItem title="Is Different From..." id="JDg-d9-5Ux"/>
-                                    <menuItem title="Is Greater Than..." id="Rir-w0-737"/>
-                                    <menuItem title="Is Equal or Greater Than..." id="Lvo-pV-Syt"/>
-                                    <menuItem title="Is Less Than..." id="VUW-DY-2cI"/>
-                                    <menuItem title="Is Equal or Less Than..." id="rDN-UF-tIo"/>
+                                    <menuItem title="Is Equal To…" state="on" id="Vfb-Dg-Jkb"/>
+                                    <menuItem title="Is Different From…" id="JDg-d9-5Ux"/>
+                                    <menuItem title="Is Greater Than…" id="Rir-w0-737"/>
+                                    <menuItem title="Is Equal or Greater Than…" id="Lvo-pV-Syt"/>
+                                    <menuItem title="Is Less Than…" id="VUW-DY-2cI"/>
+                                    <menuItem title="Is Equal or Less Than…" id="rDN-UF-tIo"/>
                                     <menuItem title="Did Change" id="JdI-CW-E8H"/>
                                     <menuItem title="Did Not Change" id="sWc-Yz-Cve"/>
                                     <menuItem title="Did Increase" id="LHF-Lf-7tK"/>
                                     <menuItem title="Did Decrease" id="8s2-8n-aQO"/>
-                                    <menuItem title="Custom..." id="8xc-2v-YQj"/>
+                                    <menuItem title="Custom…" id="8xc-2v-YQj"/>
                                 </items>
                             </menu>
                         </popUpButtonCell>

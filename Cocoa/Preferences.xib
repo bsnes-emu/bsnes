@@ -514,7 +514,7 @@
                                 </menuItem>
                                 <menuItem id="Dzv-Gc-zoL"/>
                                 <menuItem isSeparatorItem="YES" id="BqG-uI-xqE"/>
-                                <menuItem title="Other..." id="ikb-cd-hZe">
+                                <menuItem title="Other…" id="ikb-cd-hZe">
                                     <connections>
                                         <action selector="selectOtherBootROMFolder:" target="QvC-M9-y7g" id="ofn-ll-0bo"/>
                                     </connections>

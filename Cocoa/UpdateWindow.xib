@@ -123,7 +123,7 @@ Gw
                     <textField horizontalHuggingPriority="251" verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wIm-GX-c6B">
                         <rect key="frame" x="58" y="15" width="359" height="24"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
-                        <textFieldCell key="cell" lineBreakMode="clipping" title="Downloading update..." id="qmF-X1-v5B">
+                        <textFieldCell key="cell" lineBreakMode="clipping" title="Downloading update…" id="qmF-X1-v5B">
                             <font key="font" usesAppearanceFont="YES"/>
                             <color key="textColor" name="labelColor" catalog="System" colorSpace="catalog"/>
                             <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
