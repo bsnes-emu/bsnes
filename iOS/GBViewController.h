@@ -22,6 +22,8 @@ typedef enum {
 - (void)openStates;
 - (void)openSettings;
 - (void)showAbout;
+- (void)openConnectMenu;
+- (void)emptyPrinterFeed;
 - (void)saveStateToFile:(NSString *)file;
 - (bool)loadStateFromFile:(NSString *)file;
 - (bool)handleOpenURLs:(NSArray <NSURL *> *)urls openInPlace:(bool)inPlace;

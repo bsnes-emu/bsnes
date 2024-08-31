@@ -54,27 +54,30 @@ static NSString *const tips[] = {
         NSString *label;
         NSString *image;
         NSString *selector;
+        bool requireRunning;
     } buttons[] = {
-        {@"Reset", @"arrow.2.circlepath", SelectorString(reset)},
+        {@"Reset", @"arrow.2.circlepath", SelectorString(reset), true},
         {@"Library", @"bookmark", SelectorString(openLibrary)},
+        {@"Connect", @"LinkCableTemplate", SelectorString(openConnectMenu), true},
         {@"Model", @"ModelTemplate", SelectorString(changeModel)},
-        {@"States", @"square.stack", SelectorString(openStates)},
+        {@"States", @"square.stack", SelectorString(openStates), true},
+        {@"Cheats", @"wand.and.stars", nil}, // TODO
         {@"Settings", @"gear", SelectorString(openSettings)},
         {@"About", @"info.circle", SelectorString(showAbout)},
     };
     
-    double width = self.view.frame.size.width / 3;
+    double width = self.view.frame.size.width / 4;
     double height = 88;
-    for (unsigned i = 0; i < 6; i++) {
-        unsigned x = i % 3;
-        unsigned y = i / 3;
+    for (unsigned i = 0; i < 8; i++) {
+        unsigned x = i % 4;
+        unsigned y = i / 4;
         GBMenuButton *button = [GBMenuButton buttonWithType:UIButtonTypeSystem];
         [button setTitle:buttons[i].label forState:UIControlStateNormal];
         if (@available(iOS 13.0, *)) {
             UIImage *image = [UIImage imageNamed:buttons[i].image] ?: [UIImage systemImageNamed:buttons[i].image];
             [button setImage:image forState:UIControlStateNormal];
         }
-        button.frame = CGRectMake(width * x, height * y, width, height);
+        button.frame = CGRectMake(round(width * x), height * y, round(width), height);
         button.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin;
         [self.view addSubview:button];
 
@@ -82,9 +85,12 @@ static NSString *const tips[] = {
             button.enabled = false;
             continue;
         }
+        if (buttons[i].selector == nil) {
+            button.enabled = false;
+            continue;
+        }
         SEL selector = NSSelectorFromString(buttons[i].selector);
-        if ((selector == @selector(reset) || selector == @selector(openStates))
-            && ![GBROMManager sharedManager].currentROM) {
+        if (buttons[i].requireRunning && ![GBROMManager sharedManager].currentROM) {
             button.enabled = false;
             continue;
         }
@@ -149,8 +155,32 @@ static NSString *const tips[] = {
 
 - (void)viewDidLayoutSubviews
 {
-    if (self.view.bounds.size.height < 88 * 2) {
-        [self.view.heightAnchor constraintEqualToConstant:self.view.bounds.size.height + 88 * 2].active = true;
+    CGRect frame = self.view.frame;
+    if (frame.size.height < 88 * 2) {
+        [self.view.heightAnchor constraintEqualToConstant:frame.size.height + 88 * 2].active = true;
+    }
+    double width = MIN(MIN(UIScreen.mainScreen.bounds.size.width, UIScreen.mainScreen.bounds.size.height) - 16, 400);
+    /* Damn I hate NSLayoutConstraints */
+    if (frame.size.width != width) {
+        for (UIView *subview in self.view.subviews) {
+            if (![subview isKindOfClass:[GBMenuButton class]]) {
+                for (NSLayoutConstraint *constraint in subview.constraints) {
+                    if (constraint.constant == frame.size.width) {
+                        constraint.active = false;
+                    }
+                }
+                [subview.widthAnchor constraintEqualToConstant:width].active = true;
+                for (UIView *subsubview in subview.subviews) {
+                    for (NSLayoutConstraint *constraint in subsubview.constraints) {
+                        if (constraint.constant == frame.size.width) {
+                            constraint.active = false;
+                        }
+                    }
+                    [subsubview.widthAnchor constraintEqualToConstant:width].active = true;
+                }
+            }
+        }
+        [self.view.widthAnchor constraintEqualToConstant:width].active = true;
     }
     [self layoutTip];
     [super viewDidLayoutSubviews];

@@ -12,6 +12,8 @@
 #import "GBAboutController.h"
 #import "GBSettingsViewController.h"
 #import "GBStatesViewController.h"
+#import "GBCheckableAlertController.h"
+#import "GBPrinterFeedController.h"
 #import "GCExtendedGamepad+AllElements.h"
 #import "GBZipReader.h"
 #import <sys/stat.h>
@@ -67,6 +69,11 @@
     
     UIWindow *_mirrorWindow;
     GBView *_mirrorView;
+    
+    bool _printerConnected;
+    UIButton *_printerButton;
+    UIActivityIndicatorView *_printerSpinner;
+    NSMutableData *_currentPrinterImageData;
 }
 
 static void loadBootROM(GB_gameboy_t *gb, GB_boot_rom_t type)
@@ -80,6 +87,21 @@ static void vblank(GB_gameboy_t *gb, GB_vblank_type_t type)
     GBViewController *self = (__bridge GBViewController *)GB_get_user_data(gb);
     [self vblankWithType:type];
 }
+
+
+static void printImage(GB_gameboy_t *gb, uint32_t *image, uint8_t height,
+                       uint8_t top_margin, uint8_t bottom_margin, uint8_t exposure)
+{
+    GBViewController *self = (__bridge GBViewController *)GB_get_user_data(gb);
+    [self printImage:image height:height topMargin:top_margin bottomMargin:bottom_margin exposure:exposure];
+}
+
+static void printDone(GB_gameboy_t *gb)
+{
+    GBViewController *self = (__bridge GBViewController *)GB_get_user_data(gb);
+    [self printDone];
+}
+
 
 static void consoleLog(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes)
 {
@@ -350,7 +372,33 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
                                                    object:nil];
     }
     
+    _printerButton = [[UIButton alloc] init];
+    _printerSpinner = [[UIActivityIndicatorView alloc] init];
+    [self didRotateFromInterfaceOrientation:[UIApplication sharedApplication].statusBarOrientation];
     
+    if (@available(iOS 13.0, *)) {
+        [_printerButton  setImage:[UIImage systemImageNamed:@"printer"
+                                          withConfiguration:[UIImageSymbolConfiguration configurationWithScale:UIImageSymbolScaleLarge]]
+                         forState:UIControlStateNormal];
+        _printerButton.backgroundColor = [UIColor systemBackgroundColor];
+    }
+    else {
+        UIImage *rotateImage = [[UIImage imageNamed:@"PrinterTemplate"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+        [_printerButton setImage:rotateImage
+                               forState:UIControlStateNormal];
+        _printerButton.backgroundColor = [UIColor whiteColor];
+    }
+    
+    _printerButton.layer.cornerRadius = 6;
+    _printerButton.alpha = 0;
+    [_printerButton addTarget:self
+                       action:@selector(showPrinterFeed)
+             forControlEvents:UIControlEventTouchUpInside];
+    
+    
+    [_backgroundView addSubview:_printerButton];
+    [_backgroundView addSubview:_printerSpinner];
+
     
     [self updateMirrorWindow];
     
@@ -835,6 +883,16 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
                                                32,
                                                32);
     }
+    _printerButton.frame = CGRectMake(_backgroundView.bounds.size.width - 8 - insets.right - 32,
+                                      _backgroundView.bounds.size.height - 8 - insets.bottom - 32,
+                                      32,
+                                      32);
+    
+    _printerSpinner.frame = CGRectMake(_backgroundView.bounds.size.width - 8 - insets.right - 32,
+                                       _backgroundView.bounds.size.height - 8 - insets.bottom - 32 - 32 - 8,
+                                       32,
+                                       32);
+
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations
@@ -1582,6 +1640,87 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
             GB_camera_updated(&_gb);
         }
     });
+}
+
+- (void)openConnectMenu
+{
+    UIAlertControllerStyle style = [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad?
+    UIAlertControllerStyleAlert : UIAlertControllerStyleActionSheet;
+    GBCheckableAlertController *menu = [GBCheckableAlertController alertControllerWithTitle:@"Connect which accessory?"
+                                                                                    message:nil
+                                                                             preferredStyle:style];
+    [menu addAction:[UIAlertAction actionWithTitle:@"None"
+                                             style:UIAlertActionStyleDefault
+                                           handler:^(UIAlertAction *action) {
+        _printerConnected = false;
+        _currentPrinterImageData = nil;
+        [UIView animateWithDuration:0.25 animations:^{
+            _printerButton.alpha = 0;
+        }];
+        [_printerSpinner stopAnimating];
+        GB_disconnect_serial(&_gb);
+    }]];
+    [menu addAction:[UIAlertAction actionWithTitle:@"Game Boy Printer"
+                                             style:UIAlertActionStyleDefault
+                                           handler:^(UIAlertAction *action) {
+        _printerConnected = true;
+        GB_connect_printer(&_gb, printImage, printDone);
+    }]];
+    menu.selectedAction = menu.actions[_printerConnected];
+    [menu addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                            style:UIAlertActionStyleCancel
+                                          handler:nil]];
+    [self presentViewController:menu animated:true completion:nil];
+}
+
+- (void)printImage:(uint32_t *)imageBytes height:(unsigned) height
+         topMargin:(unsigned) topMargin bottomMargin: (unsigned) bottomMargin
+          exposure:(unsigned) exposure
+{
+    uint32_t paddedImage[160 * (topMargin + height + bottomMargin)];
+    memset(paddedImage, 0xFF, sizeof(paddedImage));
+    memcpy(paddedImage + (160 * topMargin), imageBytes, 160 * height * sizeof(imageBytes[0]));
+    if (!_currentPrinterImageData) {
+        _currentPrinterImageData = [[NSMutableData alloc] init];
+    }
+    [_currentPrinterImageData appendBytes:paddedImage length:sizeof(paddedImage)];
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [UIView animateWithDuration:0.25 animations:^{
+            _printerButton.alpha = 1;
+        }];
+        [_printerSpinner startAnimating];
+    });
+    
+}
+
+- (void)printDone
+{
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [_printerSpinner stopAnimating];
+    });
+}
+
+- (void)showPrinterFeed
+{
+    UIImage *image = [self imageFromData:_currentPrinterImageData
+                                   width:160
+                                  height:_currentPrinterImageData.length / 160 / sizeof(uint32_t)];
+
+    [self presentViewController:[[GBPrinterFeedController alloc] initWithImage:image]
+                       animated:true
+                     completion:nil];
+    
+}
+
+- (void)emptyPrinterFeed
+{
+    _currentPrinterImageData = nil;
+    [UIView animateWithDuration:0.25 animations:^{
+        _printerButton.alpha = 0;
+    }];
+    [_printerSpinner stopAnimating];
+    [self dismissViewController];
 }
 
 @end
