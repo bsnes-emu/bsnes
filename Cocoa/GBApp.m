@@ -218,7 +218,10 @@ static uint32_t color_to_int(NSColor *color)
         [item.image setSize:NSMakeSize(16, 16)];
         [items addObject:item];
     }
-    menu.itemArray = items;
+    [menu removeAllItems];
+    for (NSMenuItem *item in items) {
+        [menu addItem:item];
+    }
 }
 
 - (IBAction) showPreferences: (id) sender
