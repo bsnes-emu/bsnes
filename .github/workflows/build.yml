@@ -29,7 +29,7 @@ jobs:
     - name: Make
       run: make -j4 -C bsnes local=false
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: bsnes-${{ matrix.os.name }}
         path: bsnes/out/bsnes*
