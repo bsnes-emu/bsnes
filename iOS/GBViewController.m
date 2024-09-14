@@ -32,6 +32,7 @@
     bool _rewindOver;
     bool _romLoaded;
     bool _swappingROM;
+    bool _loadingState;
     
     UIInterfaceOrientation _orientation;
     GBHorizontalLayout *_horizontalLayout;
@@ -265,12 +266,12 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     
     _audioLock = [[NSCondition alloc] init];
     
-    [self loadROM];
     [[NSNotificationCenter defaultCenter] addObserverForName:@"GBROMChanged"
                                                       object:nil
                                                        queue:nil
                                                   usingBlock:^(NSNotification *note) {
-        [self loadROM];
+        _swappingROM = true;
+        [self stop];
         [self start];
     }];
     
@@ -628,9 +629,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"SameBoy is not properly signed and might not be able to open ROMs"
                                                                        message:[NSString stringWithFormat:@"The bundle identifier in the Info.plist file (“%@”) does not match the one in the entitlements (“%@”)", plistIdentifier, entIdentifier]
                                                                 preferredStyle:UIAlertControllerStyleAlert];
-        [alert  addAction:[UIAlertAction actionWithTitle:@"Close"
-                                                   style:UIAlertActionStyleCancel
-                                                 handler:nil]];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Close"
+                                                  style:UIAlertActionStyleCancel
+                                                handler:nil]];
         [self presentViewController:alert animated:true completion:nil];
     }
 }
@@ -648,7 +649,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (bool)loadStateFromFile:(NSString *)file
 {
-    [self stop];
+    _loadingState = true;
     GB_model_t model;
     if (!GB_get_state_model(file.fileSystemRepresentation, &model)) {
         if (GB_get_model(&_gb) != model) {
@@ -656,53 +657,56 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         }
         return GB_load_state(&_gb, file.fileSystemRepresentation) == 0;
     }
+
     return false;
 }
 
 - (void)loadROM
 {
-    _swappingROM = true;
-    [self stop];
     GBROMManager *romManager = [GBROMManager sharedManager];
     if (romManager.romFile) {
-        // Todo: display errors and warnings
-        if ([romManager.romFile.pathExtension.lowercaseString isEqualToString:@"isx"]) {
-            _romLoaded = GB_load_isx(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
-        }
-        else {
-            _romLoaded = GB_load_rom(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
-        }
-        if (_romLoaded) {
-            GB_reset(&_gb);
-            GB_load_battery(&_gb, [GBROMManager sharedManager].batterySaveFile.fileSystemRepresentation);
-            GB_remove_all_cheats(&_gb);
-            GB_load_cheats(&_gb, [GBROMManager sharedManager].cheatsFile.UTF8String, false);
-            if (![self loadStateFromFile:[GBROMManager sharedManager].autosaveStateFile]) {
-                // Newly played ROM, pick the best model
-                uint8_t *rom = GB_get_direct_access(&_gb, GB_DIRECT_ACCESS_ROM, NULL, NULL);
-
-                if ((rom[0x143] & 0x80)) {
-                    if (!GB_is_cgb(&_gb)) {
-                        GB_switch_model_and_reset(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBCGBModel"]);
+        if (!_loadingState) {
+            // Todo: display errors and warnings
+            if ([romManager.romFile.pathExtension.lowercaseString isEqualToString:@"isx"]) {
+                _romLoaded = GB_load_isx(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
+            }
+            else {
+                _romLoaded = GB_load_rom(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
+            }
+            if (_romLoaded) {
+                GB_reset(&_gb);
+                GB_load_battery(&_gb, [GBROMManager sharedManager].batterySaveFile.fileSystemRepresentation);
+                GB_remove_all_cheats(&_gb);
+                GB_load_cheats(&_gb, [GBROMManager sharedManager].cheatsFile.UTF8String, false);
+                if (![self loadStateFromFile:[GBROMManager sharedManager].autosaveStateFile]) {
+                    // Newly played ROM, pick the best model
+                    uint8_t *rom = GB_get_direct_access(&_gb, GB_DIRECT_ACCESS_ROM, NULL, NULL);
+                    
+                    if ((rom[0x143] & 0x80)) {
+                        if (!GB_is_cgb(&_gb)) {
+                            GB_switch_model_and_reset(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBCGBModel"]);
+                        }
+                    }
+                    else if ((rom[0x146]  == 3) && !GB_is_sgb(&_gb)) {
+                        GB_switch_model_and_reset(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBSGBModel"]);
                     }
                 }
-                else if ((rom[0x146]  == 3) && !GB_is_sgb(&_gb)) {
-                    GB_switch_model_and_reset(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBSGBModel"]);
-                }
             }
+            GB_rewind_reset(&_gb);
         }
-        GB_rewind_reset(&_gb);
     }
     else {
         _romLoaded = false;
     }
-    _gbView.hidden = !_romLoaded;
+    dispatch_async(dispatch_get_main_queue(), ^{
+        _gbView.hidden = !_romLoaded;
+    });
     _swappingROM = false;
+    _loadingState = false;
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
-    if (self.presentedViewController) return;
     [self start];
 }
 
@@ -758,9 +762,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
                 UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"SameBoy is not a Game Boy Advance Emulator"
                                                                                message:@"SameBoy cannot play GBA games. Changing the model to Game Boy Advance lets you play Game Boy games as if on a Game Boy Advance in Game Boy Color mode."
                                                                         preferredStyle:UIAlertControllerStyleAlert];
-                [alert  addAction:[UIAlertAction actionWithTitle:@"Close"
-                                                           style:UIAlertActionStyleCancel
-                                                         handler:^(UIAlertAction *action) {
+                [alert addAction:[UIAlertAction actionWithTitle:@"Close"
+                                                          style:UIAlertActionStyleCancel
+                                                        handler:^(UIAlertAction *action) {
                     [self start];
                     [[NSUserDefaults standardUserDefaults] setBool:true forKey:@"GBShownGBAWarning"];
                 }]];
@@ -836,9 +840,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         if (completion) {
             completion();
         }
-        if (!self.presentedViewController) {
+        dispatch_async(dispatch_get_main_queue(), ^{
             [self start];
-        }
+        });
     }];
 }
 
@@ -846,9 +850,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 {
     /* Hack. Some view controllers dismiss without calling the method above. */
     [super setNeedsUpdateOfSupportedInterfaceOrientations];
-    if (!self.presentedViewController) {
+    dispatch_async(dispatch_get_main_queue(), ^{
         [self start];
-    }
+    });
 }
 
 - (void)dismissViewController
@@ -1047,6 +1051,12 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)run
 {
+    [self loadROM];
+    if (!_romLoaded) {
+        _running = false;
+        _stopping = false;
+        return;
+    }
     [self preRun];
     while (_running) {
         if (_rewind) {
@@ -1168,8 +1178,8 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 
 - (void)start
 {
-    if (!_romLoaded) return;
     if (_running) return;
+    if (self.presentedViewController) return;
     _running = true;
     [[[NSThread alloc] initWithTarget:self selector:@selector(run) object:nil] start];
 }
@@ -1289,7 +1299,8 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     GB_set_palette(&_gb, &_palette);
 }
 
-- (bool)handleOpenURLs:(NSArray <NSURL *> *)urls openInPlace:(bool)inPlace
+- (bool)handleOpenURLs:(NSArray <NSURL *> *)urls
+           openInPlace:(bool)inPlace
 {
     NSMutableArray<NSURL *> *validURLs = [NSMutableArray array];
     NSMutableArray<NSString *> *skippedBasenames = [NSMutableArray array];
@@ -1335,10 +1346,9 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
                                                                        message:[NSString stringWithFormat:@"Could not find any Game Boy ROM files in the following archives:\n%@",
                                                                                 [unusedZips componentsJoinedByString:@"\n"]]
                                                                 preferredStyle:UIAlertControllerStyleAlert];
-        [alert  addAction:[UIAlertAction actionWithTitle:@"Close"
-                                                   style:UIAlertActionStyleCancel
-                                                 handler:nil]];
-        [self stop];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Close"
+                                                  style:UIAlertActionStyleCancel
+                                                handler:nil]];
         [self presentViewController:alert animated:true completion:nil];
     }
     
@@ -1347,14 +1357,14 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
                                                                        message:[NSString stringWithFormat:@"Could not import the following files because they're not supported:\n%@",
                                                                                 [skippedBasenames componentsJoinedByString:@"\n"]]
                                                                 preferredStyle:UIAlertControllerStyleAlert];
-        [alert  addAction:[UIAlertAction actionWithTitle:@"Close"
-                                                   style:UIAlertActionStyleCancel
-                                                 handler:^(UIAlertAction *action) {
+        [alert addAction:[UIAlertAction actionWithTitle:@"Close"
+                                                  style:UIAlertActionStyleCancel
+                                                handler:^(UIAlertAction *action) {
             [[NSUserDefaults standardUserDefaults] setBool:false forKey:@"GBShownUTIWarning"]; // Somebody might need a reminder
         }]];
-        [self stop];
         [self presentViewController:alert animated:true completion:nil];
     }
+    
     
     if (validURLs.count == 1 && urls.count == 1) {
         NSURL *url = validURLs.firstObject;
@@ -1369,7 +1379,6 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
                                        keepOriginal:![url.path hasPrefix:tempDir] && !inPlace];
             [url stopAccessingSecurityScopedResource];
         }
-        [[NSNotificationCenter defaultCenter] postNotificationName:@"GBROMChanged" object:nil];
         return true;
     }
     for (NSURL *url in validURLs) {
@@ -1383,7 +1392,6 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
                                    keepOriginal:![url.path hasPrefix:tempDir] && !inPlace];
         [url stopAccessingSecurityScopedResource];
     }
-    [self stop];
     [self openLibrary];
     
     return validURLs.count;
@@ -1391,15 +1399,18 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
+    if (self.presentedViewController && ![self.presentedViewController isKindOfClass:[UIAlertController class]]) {
+        [self dismissViewController];
+    }
     NSString *potentialROM = [[url.path stringByDeletingLastPathComponent] lastPathComponent];
     if ([[[GBROMManager sharedManager] romFileForROM:potentialROM].stringByStandardizingPath isEqualToString:url.path.stringByStandardizingPath]) {
         [self stop];
         [GBROMManager sharedManager].currentROM = potentialROM;
-        [self loadROM];
         [self start];
         return [GBROMManager sharedManager].currentROM != nil;
     }
-    return [self handleOpenURLs:@[url] openInPlace:[options[UIApplicationOpenURLOptionsOpenInPlaceKey] boolValue]];
+    return [self handleOpenURLs:@[url]
+                    openInPlace:[options[UIApplicationOpenURLOptionsOpenInPlaceKey] boolValue]];
 }
 
 - (void)setRunMode:(GBRunMode)runMode ignoreDynamicSpeed:(bool)ignoreDynamicSpeed

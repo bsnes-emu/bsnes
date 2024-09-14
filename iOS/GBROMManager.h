@@ -10,6 +10,8 @@
 @property (readonly) NSString *batterySaveFile;
 @property (readonly) NSString *autosaveStateFile;
 @property (readonly) NSString *cheatsFile;
+
+@property (readonly) NSString *localRoot;
 - (NSString *)stateFile:(unsigned)index;
 
 - (NSString *)romFileForROM:(NSString *)rom;
@@ -21,4 +23,5 @@
 - (NSString *)renameROM:(NSString *)rom toName:(NSString *)newName;
 - (NSString *)duplicateROM:(NSString *)rom;
 - (void)deleteROM:(NSString *)rom;
+
 @end

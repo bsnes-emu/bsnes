@@ -4,6 +4,8 @@
 @implementation GBROMManager
 {
     NSString *_romFile;
+    NSMutableDictionary<NSString *,NSString *> *_cloudNameToFile;
+    bool _doneInitializing;
 }
 
 + (instancetype)sharedManager
@@ -21,6 +23,7 @@
     self = [super init];
     if (!self) return nil;
     self.currentROM = [[NSUserDefaults standardUserDefaults] stringForKey:@"GBLastROM"];
+    _doneInitializing = true;
     return self;
 }
 
@@ -28,11 +31,16 @@
 {
     _romFile = nil;
     _currentROM = currentROM;
-    if (currentROM && !self.romFile) {
+    bool foundROM = self.romFile;
+    
+    if (currentROM && !foundROM) {
         _currentROM = nil;
     }
     
     [[NSUserDefaults standardUserDefaults] setObject:_currentROM forKey:@"GBLastROM"];
+    if (_doneInitializing) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"GBROMChanged" object:nil];
+    }
 }
 
 - (NSString *)romFileForDirectory:(NSString *)romDirectory
@@ -47,13 +55,17 @@
     return nil;
 }
 
+- (NSString *)romDirectoryForROM:(NSString *)romFile
+{
+
+    return [self.localRoot stringByAppendingPathComponent:romFile];
+}
+
 - (NSString *)romFile
 {
     if (_romFile) return _romFile;
     if (!_currentROM) return nil;
-    NSString *root = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstObject;
-    NSString *romDirectory = [root stringByAppendingPathComponent:_currentROM];
-    return _romFile = [self romFileForDirectory:romDirectory];
+    return _romFile = [self romFileForDirectory:[self romDirectoryForROM:_currentROM]];
 }
 
 - (NSString *)romFileForROM:(NSString *)rom
@@ -63,9 +75,9 @@
     if (rom == _currentROM) {
         return self.romFile;
     }
-    NSString *root = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstObject;
-    NSString *romDirectory = [root stringByAppendingPathComponent:rom];
-    return [self romFileForDirectory:romDirectory];
+    
+    
+    return [self romFileForDirectory:[self romDirectoryForROM:rom]];
 }
 
 - (NSString *)auxilaryFileForROM:(NSString *)rom withExtension:(NSString *)extension
@@ -117,7 +129,7 @@
 - (NSArray<NSString *> *)allROMs
 {
     NSMutableArray<NSString *> *ret = [NSMutableArray array];
-    NSString *root = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstObject;
+    NSString *root = self.localRoot;
     for (NSString *romDirectory in [NSFileManager.defaultManager contentsOfDirectoryAtPath:root
                                                                                      error:nil]) {
         if ([romDirectory hasPrefix:@"."] || [romDirectory isEqualToString:@"Inbox"]) continue;
@@ -130,7 +142,7 @@
 
 - (NSString *)makeNameUnique:(NSString *)name
 {
-    NSString *root = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstObject;
+    NSString *root = self.localRoot;
     if (![[NSFileManager defaultManager] fileExistsAtPath:[root stringByAppendingPathComponent:name]]) return name;
     
     unsigned i = 2;
@@ -150,27 +162,14 @@
     NSString *friendlyName = [[romFile lastPathComponent] stringByDeletingPathExtension];
     friendlyName = [regex stringByReplacingMatchesInString:friendlyName options:0 range:NSMakeRange(0, [friendlyName length]) withTemplate:@""];
     friendlyName = [friendlyName stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
-    
-    NSString *root = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstObject;
-    if ([[NSFileManager defaultManager] fileExistsAtPath:[root stringByAppendingPathComponent:friendlyName]]) {
-        unsigned i = 2;
-        while (true) {
-            NSString *attempt = [friendlyName stringByAppendingFormat:@" %u", i];
-            if ([[NSFileManager defaultManager] fileExistsAtPath:[root stringByAppendingPathComponent:attempt]]) {
-                i++;
-                continue;
-            }
-            friendlyName = attempt;
-            break;
-        }
-    }
+    friendlyName = [self makeNameUnique:friendlyName];
 
     return [self importROM:romFile withName:friendlyName keepOriginal:keep];
 }
 
 - (NSString *)importROM:(NSString *)romFile withName:(NSString *)friendlyName keepOriginal:(bool)keep
 {
-    NSString *root = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstObject;
+    NSString *root = self.localRoot;
     NSString *romFolder = [root stringByAppendingPathComponent:friendlyName];
     [[NSFileManager defaultManager] createDirectoryAtPath:romFolder
                               withIntermediateDirectories:false
@@ -205,9 +204,9 @@
 {
     newName = [self makeNameUnique:newName];
     if ([rom isEqualToString:_currentROM]) {
-        _currentROM = newName;
+        self.currentROM = newName;
     }
-    NSString *root = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstObject;
+    NSString *root = self.localRoot;
 
     [[NSFileManager defaultManager] moveItemAtPath:[root stringByAppendingPathComponent:rom]
                                             toPath:[root stringByAppendingPathComponent:newName] error:nil];
@@ -224,9 +223,14 @@
 
 - (void)deleteROM:(NSString *)rom
 {
-    NSString *root = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstObject;
+    NSString *root = self.localRoot;
     NSString *romDirectory = [root stringByAppendingPathComponent:rom];
     [[NSFileManager defaultManager] removeItemAtPath:romDirectory error:nil];
 }
 
+
+- (NSString *)localRoot
+{
+    return  NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, true).firstObject;
+}
 @end

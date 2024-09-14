@@ -57,16 +57,16 @@
         // No supporter-only themes outside the App Store release
     }
     else {
-        [alert  addAction:[UIAlertAction actionWithTitle:@"Apply Theme"
-                                                   style:UIAlertActionStyleDefault
-                                                 handler:^(UIAlertAction *action) {
+        [alert addAction:[UIAlertAction actionWithTitle:@"Apply Theme"
+                                                  style:UIAlertActionStyleDefault
+                                                handler:^(UIAlertAction *action) {
             [[NSUserDefaults standardUserDefaults] setObject:_verticalLayout.theme.name forKey:@"GBInterfaceTheme"];
             [[self presentingViewController] dismissViewControllerAnimated:true completion:nil];
         }]];
     }
-    [alert  addAction:[UIAlertAction actionWithTitle:@"Exit Preview"
-                                               style:UIAlertActionStyleDefault
-                                             handler:^(UIAlertAction *action) {
+    [alert addAction:[UIAlertAction actionWithTitle:@"Exit Preview"
+                                              style:UIAlertActionStyleDefault
+                                            handler:^(UIAlertAction *action) {
         [[self presentingViewController] dismissViewControllerAnimated:true completion:nil];
     }]];
     [self presentViewController:alert animated:true completion:^{

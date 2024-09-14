@@ -1,7 +1,9 @@
 #import "GBLibraryViewController.h"
-#import "GBLoadROMTableViewController.h"
+#import "GBROMViewController.h"
 #import "GBHubViewController.h"
 #import "GBViewController.h"
+#import "GBROMManager.h"
+
 
 @implementation GBLibraryViewController
 
@@ -19,8 +21,9 @@
 - (void)viewDidLoad
 {
     [super viewDidLoad];
+    
     self.viewControllers = @[
-        [self.class wrapViewController:[[GBLoadROMTableViewController alloc] init]],
+        [self.class wrapViewController:[[GBROMViewController alloc] init]],
         [self.class wrapViewController:[[GBHubViewController alloc] init]],
     ];
     if (@available(iOS 13.0, *)) {
@@ -42,12 +45,13 @@
             }
         }
         self.viewControllers[0].tabBarItem.image = [UIImage systemImageNamed:symbol] ?: [UIImage systemImageNamed:@"folder.fill"];
-        self.viewControllers[1].tabBarItem.image = [UIImage systemImageNamed:@"globe"];
+        self.viewControllers.lastObject.tabBarItem.image = [UIImage systemImageNamed:@"globe"];
     }
     else {
         self.viewControllers[0].tabBarItem.image = [UIImage imageNamed:@"FolderTemplate"];
         self.viewControllers[1].tabBarItem.image = [UIImage imageNamed:@"GlobeTemplate"];
     }
 }
+
 
 @end
