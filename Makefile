@@ -736,7 +736,7 @@ else
 endif
 endif
 
-ios:
+ios: bootroms
 	@$(MAKE) _ios
 
 $(BIN)/SameBoy-iOS.ipa: ios iOS/sideload.entitlements
