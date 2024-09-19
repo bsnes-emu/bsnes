@@ -33,7 +33,7 @@
     bool _rewindOver;
     bool _romLoaded;
     bool _swappingROM;
-    bool _loadingState;
+    bool _skipAutoLoad;
     
     UIInterfaceOrientation _orientation;
     GBHorizontalLayout *_horizontalLayout;
@@ -650,7 +650,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (bool)loadStateFromFile:(NSString *)file
 {
-    _loadingState = true;
+    _skipAutoLoad = true;
     GB_model_t model;
     if (!GB_get_state_model(file.fileSystemRepresentation, &model)) {
         if (GB_get_model(&_gb) != model) {
@@ -666,7 +666,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 {
     GBROMManager *romManager = [GBROMManager sharedManager];
     if (romManager.romFile) {
-        if (!_loadingState) {
+        if (!_skipAutoLoad) {
             // Todo: display errors and warnings
             if ([romManager.romFile.pathExtension.lowercaseString isEqualToString:@"isx"]) {
                 _romLoaded = GB_load_isx(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
@@ -703,7 +703,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         _gbView.hidden = !_romLoaded;
     });
     _swappingROM = false;
-    _loadingState = false;
+    _skipAutoLoad = false;
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
@@ -722,6 +722,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 - (void)reset
 {
     [self stop];
+    _skipAutoLoad = true;
     GB_reset(&_gb);
     [self start];
 }
@@ -758,6 +759,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         }
         [controller addOption:items[i].title withCheckmark:items[i].checked action:^{
             [self stop];
+            _skipAutoLoad = true;
             GB_switch_model_and_reset(&_gb, model);
             if (model > GB_MODEL_CGB_E && ![[NSUserDefaults standardUserDefaults] boolForKey:@"GBShownGBAWarning"]) {
                 UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"SameBoy is not a Game Boy Advance Emulator"
