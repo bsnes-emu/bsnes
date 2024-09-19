@@ -3,6 +3,7 @@
 @interface GBPalettePicker ()
 {
     NSArray <NSString *>* _cacheNames;
+    NSIndexPath *_renamingPath;
 }
 
 @end
@@ -73,15 +74,24 @@
     return ret;
 }
 
+- (instancetype)initWithStyle:(UITableViewStyle)style
+{
+    self = [super initWithStyle:style];
+    self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    return self;
+}
+
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    return 2;
+    return 3;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     if (section == 0) return 4;
-    return [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBThemes"].count;
+    if (section == 2) return 1;
+    _cacheNames = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBThemes"].allKeys sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
+    return _cacheNames.count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -89,7 +99,11 @@
     UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleValue1 reuseIdentifier:nil];
     
     NSString *name = nil;
-    if (indexPath.section == 0) {
+    if (indexPath.section == 2) {
+        cell.textLabel.text = @"Restore Defaults";
+        return cell;
+    }
+    else if (indexPath.section == 0) {
         name = @[
             @"Greyscale",
             @"Lime (Game Boy)",
@@ -98,9 +112,6 @@
         ][indexPath.row];
     }
     else {
-        if (!_cacheNames) {
-            _cacheNames = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBThemes"].allKeys sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
-        }
         name = _cacheNames[indexPath.row];
     }
     
@@ -116,7 +127,23 @@
 
 - (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    
+    if (indexPath.section == 2) {
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Restore default palettes?"
+                                                                       message: @"The defaults palettes will be restored, changes will be reverted, and created or imported palettes will be deleted. This change cannot be undone."
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Restore"
+                                                  style:UIAlertActionStyleDestructive
+                                                handler:^(UIAlertAction *action) {
+            [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"GBCurrentTheme"];
+            [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"GBThemes"];
+            [self.tableView reloadData];
+        }]];
+        [alert addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                                  style:UIAlertActionStyleCancel
+                                                handler:nil]];
+        [self presentViewController:alert animated:true completion:nil];
+
+    }
     [[NSUserDefaults standardUserDefaults] setObject:[self.tableView cellForRowAtIndexPath:indexPath].textLabel.text
                                               forKey:@"GBCurrentTheme"];
     [self.tableView reloadData];
@@ -127,6 +154,132 @@
 - (NSString *)title
 {
     return @"Monochrome Palette";
+}
+
+- (void)renameRow:(NSIndexPath *)indexPath
+{
+    if (indexPath.section != 1) return;
+    
+    UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+    CGRect frame = cell.textLabel.frame;
+    frame.size.width = cell.textLabel.superview.frame.size.width - 8 - frame.origin.x;
+    UITextField *field = [[UITextField alloc] initWithFrame:frame];
+    field.font = cell.textLabel.font;
+    field.text = cell.textLabel.text;
+    cell.textLabel.textColor = [UIColor clearColor];
+    [[cell.textLabel superview] addSubview:field];
+    [field becomeFirstResponder];
+    [field selectAll:nil];
+    _renamingPath = indexPath;
+    [field addTarget:self action:@selector(doneRename:) forControlEvents:UIControlEventEditingDidEnd | UIControlEventEditingDidEndOnExit];
+}
+
+- (void)doneRename:(UITextField *)sender
+{
+    if (!_renamingPath) return;
+    NSString *newName = sender.text;
+    NSString *oldName = [self.tableView cellForRowAtIndexPath:_renamingPath].textLabel.text;
+    
+    _renamingPath = nil;
+    if ([newName isEqualToString:oldName]) {
+        [self.tableView reloadData];
+        return;
+    }
+    
+    NSArray *builtins = @[
+        @"Greyscale",
+        @"Lime (Game Boy)",
+        @"Olive (Pocket)",
+        @"Teal (Light)",
+    ];
+    
+    NSMutableDictionary *dict = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBThemes"].mutableCopy;
+    if (dict[newName] || [builtins containsObject:newName]) {
+        unsigned i = 2;
+        while (true) {
+            NSString *attempt = [NSString stringWithFormat:@"%@ %u", newName, i];
+            if (!dict[attempt] && ![builtins containsObject:newName]) {
+                newName = attempt;
+                break;
+            }
+            i++;
+        }
+    }
+    
+    dict[newName] = dict[oldName];
+    [dict removeObjectForKey:oldName];
+    [[NSUserDefaults standardUserDefaults] setObject:dict forKey:@"GBThemes"];
+    if ([[[NSUserDefaults standardUserDefaults] stringForKey:@"GBCurrentTheme"] isEqual:oldName]) {
+        [[NSUserDefaults standardUserDefaults] setObject:newName forKey:@"GBCurrentTheme"];
+    }
+    [self.tableView reloadData];
+    _renamingPath = nil;
+}
+
+
+- (void)tableView:(UITableView *)tableView commitEditingStyle:(UITableViewCellEditingStyle)editingStyle forRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    if (indexPath.section != 1) return;
+    
+    if (editingStyle != UITableViewCellEditingStyleDelete) return;
+    NSString *rom = [self.tableView cellForRowAtIndexPath:indexPath].textLabel.text;
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:[NSString stringWithFormat:@"Delete “%@”?", rom]
+                                                                   message: @"This change cannot be undone."
+                                                            preferredStyle:UIAlertControllerStyleAlert];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Delete"
+                                              style:UIAlertActionStyleDestructive
+                                            handler:^(UIAlertAction *action) {
+        NSMutableDictionary *dict = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBThemes"].mutableCopy;
+        NSString *name = _cacheNames[indexPath.row];
+        [dict removeObjectForKey:name];
+        [[NSUserDefaults standardUserDefaults] setObject:dict forKey:@"GBThemes"];
+        [self.tableView deleteRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
+
+        if ([[[NSUserDefaults standardUserDefaults] stringForKey:@"GBCurrentTheme"] isEqual:name]) {
+            [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"GBCurrentTheme"];
+            [self.tableView reloadRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:1 inSection:0]] withRowAnimation:UITableViewRowAnimationFade];
+        }
+    }]];
+    [alert addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                              style:UIAlertActionStyleCancel
+                                            handler:nil]];
+    [self presentViewController:alert animated:true completion:nil];
+}
+
+- (BOOL)tableView:(UITableView *)tableView canEditRowAtIndexPath:(NSIndexPath *)indexPath
+{
+    return indexPath.section == 1;
+}
+
+// Leave these ROM management to iOS 13.0 and up for now
+- (UIContextMenuConfiguration *)tableView:(UITableView *)tableView
+contextMenuConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath
+                                    point:(CGPoint)point API_AVAILABLE(ios(13.0))
+{
+    if (indexPath.section != 1) return nil;
+    
+    return [UIContextMenuConfiguration configurationWithIdentifier:nil
+                                                   previewProvider:nil
+                                                    actionProvider:^UIMenu *(NSArray<UIMenuElement *> *suggestedActions) {
+        UIAction *deleteAction = [UIAction actionWithTitle:@"Delete"
+                                                     image:[UIImage systemImageNamed:@"trash"]
+                                                identifier:nil
+                                                   handler:^(UIAction *action) {
+            [self tableView:tableView
+         commitEditingStyle:UITableViewCellEditingStyleDelete
+          forRowAtIndexPath:indexPath];
+        }];
+        deleteAction.attributes = UIMenuElementAttributesDestructive;
+        return [UIMenu menuWithTitle:nil children:@[
+            [UIAction actionWithTitle:@"Rename"
+                                image:[UIImage systemImageNamed:@"pencil"]
+                           identifier:nil
+                              handler:^(__kindof UIAction *action) {
+                [self renameRow:indexPath];
+            }],
+            deleteAction,
+        ]];
+    }];
 }
 
 @end
