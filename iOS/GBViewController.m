@@ -11,6 +11,7 @@
 #import "GBOptionViewController.h"
 #import "GBAboutController.h"
 #import "GBSettingsViewController.h"
+#import "GBPalettePicker.h"
 #import "GBStatesViewController.h"
 #import "GBCheckableAlertController.h"
 #import "GBPrinterFeedController.h"
@@ -1294,7 +1295,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 - (void)updatePalette
 {
     memcpy(&_palette,
-           [GBSettingsViewController paletteForTheme:[[NSUserDefaults standardUserDefaults] stringForKey:@"GBCurrentTheme"]],
+           [GBPalettePicker paletteForTheme:[[NSUserDefaults standardUserDefaults] stringForKey:@"GBCurrentTheme"]],
            sizeof(_palette));
     GB_set_palette(&_gb, &_palette);
 }

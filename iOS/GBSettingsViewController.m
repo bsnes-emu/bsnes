@@ -2,6 +2,7 @@
 #import "GBTemperatureSlider.h"
 #import "GBViewBase.h"
 #import "GBThemesViewController.h"
+#import "GBPalettePicker.h"
 #import "GBHapticManager.h"
 #import "GCExtendedGamepad+AllElements.h"
 #import <objc/runtime.h>
@@ -21,95 +22,6 @@ static NSString const *typeLightTemp = @"typeLightTemp";
     NSArray<NSDictionary *> *_structure;
     UINavigationController *_detailsNavigation;
     NSArray<NSArray<GBTheme *> *> *_themes; // For prewarming
-}
-
-+ (const GB_palette_t *)paletteForTheme:(NSString *)theme
-{
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    if ([theme isEqualToString:@"Greyscale"]) {
-        return &GB_PALETTE_GREY;
-    }
-    if ([theme isEqualToString:@"Lime (Game Boy)"]) {
-        return &GB_PALETTE_DMG;
-    }
-    if ([theme isEqualToString:@"Olive (Pocket)"]) {
-        return &GB_PALETTE_MGB;
-    }
-    if ([theme isEqualToString:@"Teal (Light)"]) {
-        return &GB_PALETTE_GBL;
-    }
-    static GB_palette_t customPalette;
-    NSArray *colors = [defaults dictionaryForKey:@"GBThemes"][theme][@"Colors"];
-    if (colors.count != 5) return &GB_PALETTE_DMG;
-    unsigned i = 0;
-    for (NSNumber *color in colors) {
-        uint32_t c = [color unsignedIntValue];
-        customPalette.colors[i++] = (struct GB_color_s) {c, c >> 8, c >> 16};
-    }
-    return &customPalette;
-}
-
-+ (UIColor *) colorFromGBColor:(const struct GB_color_s *)color
-{
-    return [UIColor colorWithRed:color->r / 255.0
-                           green:color->g / 255.0
-                            blue:color->b / 255.0
-                           alpha:1.0];
-}
-
-+ (UIImage *)previewImageForTheme:(NSString *)theme
-{
-    const GB_palette_t *palette = [self paletteForTheme:theme];
-    UIGraphicsBeginImageContextWithOptions((CGSize){29, 29}, false, [UIScreen mainScreen].scale);
-    UIBezierPath *path = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(0, 0, 29, 29) cornerRadius:7];
-    [[self colorFromGBColor:&palette->colors[4]] set];
-    [path fill];
-    
-    path = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(4, 4, 9, 9) cornerRadius:2];
-    [[self colorFromGBColor:&palette->colors[0]] set];
-    [path fill];
-    
-    path = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(16, 4, 9, 9) cornerRadius:2];
-    [[self colorFromGBColor:&palette->colors[1]] set];
-    [path fill];
-    
-    path = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(4, 16, 9, 9) cornerRadius:2];
-    [[self colorFromGBColor:&palette->colors[2]] set];
-    [path fill];
-    
-    path = [UIBezierPath bezierPathWithRoundedRect:CGRectMake(16, 16, 9, 9) cornerRadius:2];
-    [[self colorFromGBColor:&palette->colors[3]] set];
-    [path fill];
-    
-    UIImage *ret = UIGraphicsGetImageFromCurrentImageContext();
-    UIGraphicsEndImageContext();
-    
-    return ret;
-}
-
-+ (NSArray<NSDictionary *> *)paletteMenu
-{
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    NSArray *themes = [@[
-        @"Greyscale",
-        @"Lime (Game Boy)",
-        @"Olive (Pocket)",
-        @"Teal (Light)",
-    ] arrayByAddingObjectsFromArray:[[defaults dictionaryForKey:@"GBThemes"] allKeys]];
-    NSMutableArray<NSDictionary *> *themeItems = [NSMutableArray arrayWithCapacity:themes.count];
-    for (NSString *theme in themes) {
-        [themeItems addObject: @{@"type": typeRadio, @"pref": @"GBCurrentTheme",
-                                 @"title": theme, @"value": theme,
-                                 @"image": [self previewImageForTheme:theme]}];
-    }
-    return @[
-        @{
-            @"items": [themeItems subarrayWithRange:(NSRange){0, 4}]
-        },
-        @{
-            @"items": [themeItems subarrayWithRange:(NSRange){4, themeItems.count - 4}]
-        }
-    ];
 }
 
 + (NSArray<NSDictionary *> *)rootStructure
@@ -306,8 +218,16 @@ static NSString const *typeLightTemp = @"typeLightTemp";
         @{
             @"items": @[@{
                 @"title": @"Monochrome Palette",
-                @"type": typeOptionSubmenu,
-                @"submenu": [self paletteMenu]
+                @"type": typeBlock,
+                @"block": ^bool(GBSettingsViewController *controller) {
+                    UITableViewStyle style = UITableViewStyleGrouped;
+                    if (@available(iOS 13.0, *)) {
+                        style = UITableViewStyleInsetGrouped;
+                    }
+                    [controller.navigationController pushViewController:[[GBPalettePicker alloc] initWithStyle:style] animated:true];
+                    return true;
+                },
+                @"pref": @"GBCurrentTheme",
             }],
             @"footer": @"This palette will be used when emulating a monochrome model such as the original Game Boy."
         }
@@ -790,6 +710,9 @@ static id ValueForItem(NSDictionary *item)
                     }
                 }
             }
+        }
+        else if (item[@"pref"]) {
+            cell.detailTextLabel.text = [[NSUserDefaults standardUserDefaults] stringForKey:item[@"pref"]];
         }
     }
     else if (item[@"type"] == typeRadio) {
