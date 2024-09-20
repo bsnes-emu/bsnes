@@ -3,5 +3,6 @@
 
 @interface GBPalettePicker : UITableViewController
 + (const GB_palette_t *)paletteForTheme:(NSString *)theme;
++ (bool)importPalette:(NSString *)path;
 @end
 

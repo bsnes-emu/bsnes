@@ -1,14 +1,30 @@
 #import "GBPalettePicker.h"
+#import <CoreServices/CoreServices.h>
 
-@interface GBPalettePicker ()
-{
-    NSArray <NSString *>* _cacheNames;
-    NSIndexPath *_renamingPath;
-}
+/* TODO: Unify with Cocoa? */
+#define MAGIC 'SBPL'
 
+typedef struct __attribute__ ((packed)) {
+    uint32_t magic;
+    bool manual:1;
+    bool disabled_lcd_color:1;
+    unsigned padding:6;
+    struct GB_color_s colors[5];
+    int32_t brightness_bias;
+    uint32_t hue_bias;
+    uint32_t hue_bias_strength;
+} theme_t;
+
+
+@interface GBPalettePicker () <UIDocumentPickerDelegate>
 @end
 
 @implementation GBPalettePicker
+{
+    NSArray <NSString *>* _cacheNames;
+    NSIndexPath *_renamingPath;
+    NSMutableSet *_tempFiles;
+}
 
 + (const GB_palette_t *)paletteForTheme:(NSString *)theme
 {
@@ -78,6 +94,7 @@
 {
     self = [super initWithStyle:style];
     self.navigationItem.rightBarButtonItem = self.editButtonItem;
+    _tempFiles = [NSMutableSet set];
     return self;
 }
 
@@ -89,7 +106,7 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     if (section == 0) return 4;
-    if (section == 2) return 1;
+    if (section == 2) return 2;
     _cacheNames = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBThemes"].allKeys sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     return _cacheNames.count;
 }
@@ -100,7 +117,15 @@
     
     NSString *name = nil;
     if (indexPath.section == 2) {
-        cell.textLabel.text = @"Restore Defaults";
+        switch (indexPath.row) {
+            case 0:
+                cell.textLabel.text = @"Import Palette";
+                break;
+            case 1:
+                cell.textLabel.text = @"Restore Defaults";
+                cell.textLabel.textColor = [UIColor systemRedColor];
+                break;
+        }
         return cell;
     }
     else if (indexPath.section == 0) {
@@ -125,23 +150,60 @@
 
 }
 
+
+- (void)documentPicker:(UIDocumentPickerViewController *)controller didPickDocumentAtURL:(NSURL *)url
+{
+    [url startAccessingSecurityScopedResource];
+    if ([self.class importPalette:url.path]) {
+        [self.tableView reloadData];
+    }
+    else {
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Import Failed"
+                                                                                 message:@"The imported palette file is invalid."
+                                                                          preferredStyle:UIAlertControllerStyleAlert];
+        [alertController addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
+        [self presentViewController:alertController animated:true completion:nil];
+        return;
+    }
+    [url stopAccessingSecurityScopedResource];
+}
+
 - (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     if (indexPath.section == 2) {
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Restore default palettes?"
-                                                                       message: @"The defaults palettes will be restored, changes will be reverted, and created or imported palettes will be deleted. This change cannot be undone."
-                                                                preferredStyle:UIAlertControllerStyleAlert];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Restore"
-                                                  style:UIAlertActionStyleDestructive
-                                                handler:^(UIAlertAction *action) {
-            [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"GBCurrentTheme"];
-            [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"GBThemes"];
-            [self.tableView reloadData];
-        }]];
-        [alert addAction:[UIAlertAction actionWithTitle:@"Cancel"
-                                                  style:UIAlertActionStyleCancel
-                                                handler:nil]];
-        [self presentViewController:alert animated:true completion:nil];
+        switch (indexPath.row) {
+            case 0: {
+                [self setEditing:false animated:true];
+                NSString *sbpUTI = (__bridge_transfer NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)@"sbp", NULL);
+                
+                
+                UIDocumentPickerViewController *picker = [[UIDocumentPickerViewController alloc] initWithDocumentTypes:@[sbpUTI]
+                                                                                                                inMode:UIDocumentPickerModeImport];
+                if (@available(iOS 13.0, *)) {
+                    picker.shouldShowFileExtensions = true;
+                }
+                picker.delegate = self;
+                [self presentViewController:picker animated:true completion:nil];
+                break;
+            }
+            case 1: {
+                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Restore default palettes?"
+                                                                               message: @"The defaults palettes will be restored, changes will be reverted, and created or imported palettes will be deleted. This change cannot be undone."
+                                                                        preferredStyle:UIAlertControllerStyleAlert];
+                [alert addAction:[UIAlertAction actionWithTitle:@"Restore"
+                                                          style:UIAlertActionStyleDestructive
+                                                        handler:^(UIAlertAction *action) {
+                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"GBCurrentTheme"];
+                    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"GBThemes"];
+                    [self.tableView reloadData];
+                }]];
+                [alert addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                                          style:UIAlertActionStyleCancel
+                                                        handler:nil]];
+                [self presentViewController:alert animated:true completion:nil];
+                break;
+            }
+        }
 
     }
     [[NSUserDefaults standardUserDefaults] setObject:[self.tableView cellForRowAtIndexPath:indexPath].textLabel.text
@@ -251,7 +313,92 @@
     return indexPath.section == 1;
 }
 
-// Leave these ROM management to iOS 13.0 and up for now
+- (NSString *)exportTheme:(NSString *)name
+{
+    theme_t theme = {0,};
+    theme.magic = MAGIC;
+    
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSDictionary *themeDict = [defaults dictionaryForKey:@"GBThemes"][name];
+    NSArray *colors = themeDict[@"Colors"];
+    if (colors.count <= 5) {
+        unsigned i = 0;
+        for (NSNumber *color in colors) {
+            uint32_t c = [color unsignedIntValue];
+            theme.colors[i++] = (struct GB_color_s){
+                (c & 0xFF),
+                ((c >> 8) & 0xFF),
+                ((c >> 16) & 0xFF)};
+        }
+    }
+    
+    theme.manual = [themeDict[@"Manual"] boolValue];
+    theme.disabled_lcd_color = [themeDict[@"DisabledLCDColor"] boolValue];
+
+    theme.brightness_bias = ([themeDict[@"BrightnessBias"] doubleValue] * 0x40000000);
+    theme.hue_bias = round([themeDict[@"HueBias"] doubleValue] * 0x80000000);
+    theme.hue_bias_strength = round([themeDict[@"HueBiasStrength"] doubleValue] * 0x80000000);
+    
+    size_t size = sizeof(theme);
+    if (theme.manual) {
+        size = theme.disabled_lcd_color? 5 + 5 * sizeof(theme.colors[0]) : 5 + 4 * sizeof(theme.colors[0]);
+    }
+    
+    NSString *path = [[NSTemporaryDirectory() stringByAppendingPathComponent:name] stringByAppendingPathExtension:@"sbp"];
+    [[NSData dataWithBytes:&theme length:size] writeToFile:path atomically:false];
+    [_tempFiles addObject:path];
+    return path;
+}
+
++ (bool)importPalette:(NSString *)path
+{
+    NSData *data = [NSData dataWithContentsOfFile:path];
+    theme_t theme = {0,};
+    memcpy(&theme, data.bytes, MIN(sizeof(theme), data.length));
+    if (theme.magic != MAGIC) {
+        return false;
+    }
+    
+    NSMutableDictionary *themeDict = [NSMutableDictionary dictionary];
+    themeDict[@"Manual"] = theme.manual? @YES : @NO;
+    themeDict[@"DisabledLCDColor"] = theme.disabled_lcd_color? @YES : @NO;
+    unsigned i = 0;
+    
+#define COLOR_TO_INT(color) ((color.r << 0) | (color.g << 8) | (color.b << 16) | 0xFF000000)
+    themeDict[@"Colors"] = @[
+        @(COLOR_TO_INT(theme.colors[0])),
+        @(COLOR_TO_INT(theme.colors[1])),
+        @(COLOR_TO_INT(theme.colors[2])),
+        @(COLOR_TO_INT(theme.colors[3])),
+        @(COLOR_TO_INT(theme.colors[theme.disabled_lcd_color? 4 : 3])),
+    ];
+
+    
+    themeDict[@"DisabledLCDColor"] = @(theme.brightness_bias / 0x40000000);
+    themeDict[@"HueBias"] = @(theme.hue_bias / 0x80000000);
+    themeDict[@"HueBiasStrength"] = @(theme.hue_bias_strength / 0x80000000);
+        
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSMutableDictionary *themes = [defaults dictionaryForKey:@"GBThemes"].mutableCopy;
+    NSString *baseName = path.lastPathComponent.stringByDeletingPathExtension;
+    NSString *newName = baseName;
+    i = 2;
+    NSArray *builtins = @[
+        @"Greyscale",
+        @"Lime (Game Boy)",
+        @"Olive (Pocket)",
+        @"Teal (Light)",
+    ];
+    
+    while (themes[newName] || [builtins containsObject:newName]) {
+        newName = [NSString stringWithFormat:@"%@ %d", baseName, i++];
+    }
+    themes[newName] = themeDict;
+    [defaults setObject:themes forKey:@"GBThemes"];
+    [defaults setObject:newName forKey:@"GBCurrentTheme"];
+    return true;
+}
+
 - (UIContextMenuConfiguration *)tableView:(UITableView *)tableView
 contextMenuConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath
                                     point:(CGPoint)point API_AVAILABLE(ios(13.0))
@@ -269,8 +416,28 @@ contextMenuConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath
          commitEditingStyle:UITableViewCellEditingStyleDelete
           forRowAtIndexPath:indexPath];
         }];
+        
         deleteAction.attributes = UIMenuElementAttributesDestructive;
         return [UIMenu menuWithTitle:nil children:@[
+            [UIAction actionWithTitle:@"Share"
+                                image:[UIImage systemImageNamed:@"square.and.arrow.up"]
+                           identifier:nil
+                              handler:^(__kindof UIAction *action) {
+                [self setEditing:false animated:true];
+                UITableViewCell *cell = [self.tableView cellForRowAtIndexPath:indexPath];
+                NSString *file = [self exportTheme:cell.textLabel.text];
+                NSURL *url = [NSURL fileURLWithPath:file];
+                UIActivityViewController *controller = [[UIActivityViewController alloc] initWithActivityItems:@[url]
+                                                                                         applicationActivities:nil];
+                
+                if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+                    controller.popoverPresentationController.sourceView = cell.contentView;
+                }
+                
+                [self presentViewController:controller
+                                   animated:true
+                                 completion:nil];
+            }],
             [UIAction actionWithTitle:@"Rename"
                                 image:[UIImage systemImageNamed:@"pencil"]
                            identifier:nil
@@ -280,6 +447,13 @@ contextMenuConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath
             deleteAction,
         ]];
     }];
+}
+
+- (void)dealloc
+{
+    for (NSString *file in _tempFiles) {
+        [[NSFileManager defaultManager] removeItemAtPath:file error:nil];
+    }
 }
 
 @end

@@ -1400,10 +1400,77 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     return validURLs.count;
 }
 
+- (void)doImportedPaletteNotification
+{
+    UIVisualEffectView *effectView = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleProminent]];
+    effectView.layer.cornerRadius = 8;
+    effectView.layer.masksToBounds = true;
+    [self.view addSubview:effectView];
+    UILabel *tipLabel = [[UILabel alloc] init];
+    tipLabel.text = [NSString stringWithFormat:@"Imported palette “%@”", [[NSUserDefaults standardUserDefaults] stringForKey:@"GBCurrentTheme"]];
+    if (@available(iOS 13.0, *)) {
+        tipLabel.textColor = [UIColor labelColor];
+    }
+    tipLabel.font = [UIFont systemFontOfSize:16];
+    tipLabel.alpha = 0.8;
+    [effectView.contentView addSubview:tipLabel];
+    
+    UIView *view = self.view;
+    CGSize outerSize = view.frame.size;
+    CGSize size = [tipLabel textRectForBounds:(CGRect){{0, 0},
+        {outerSize.width - 32,
+            outerSize.height - 32}}
+                       limitedToNumberOfLines:1].size;
+    size.width = ceil(size.width);
+    tipLabel.frame = (CGRect){{8, 8}, size};
+    CGRect finalFrame = (CGRect) {
+        {round((outerSize.width - size.width - 16) / 2), view.window.safeAreaInsets.top + 12},
+        {size.width + 16, size.height + 16}
+    };
+    
+    CGRect initFrame = finalFrame;
+    initFrame.origin.y = -initFrame.size.height;
+    effectView.frame = initFrame;
+    
+    effectView.alpha = 0;
+    [UIView animateWithDuration:0.5 animations:^{
+        effectView.alpha = 1.0;
+        effectView.frame = finalFrame;
+    }];
+    
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(NSEC_PER_SEC * 1.5)), dispatch_get_main_queue(), ^{
+        [UIView animateWithDuration:0.5 animations:^{
+            effectView.alpha = 0.0;
+            effectView.frame = initFrame;
+        } completion:^(BOOL finished) {
+            if (finished) {
+                [effectView removeFromSuperview];
+            }
+        }];
+    });
+
+}
+
 - (BOOL)application:(UIApplication *)app openURL:(NSURL *)url options:(NSDictionary<UIApplicationOpenURLOptionsKey,id> *)options
 {
     if (self.presentedViewController && ![self.presentedViewController isKindOfClass:[UIAlertController class]]) {
         [self dismissViewController];
+    }
+    if ([url.pathExtension.lowercaseString isEqual:@"sbp"]) {
+        [url startAccessingSecurityScopedResource];
+        bool success = [GBPalettePicker importPalette:url.path];
+        [url stopAccessingSecurityScopedResource];
+        if (!success) {
+            UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Palette Import Failed"
+                                                                                     message:@"The imported palette file is invalid."
+                                                                              preferredStyle:UIAlertControllerStyleAlert];
+            [alertController addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
+            [self presentViewController:alertController animated:true completion:nil];
+        }
+        else {
+            [self doImportedPaletteNotification];
+        }
+        return success;
     }
     NSString *potentialROM = [[url.path stringByDeletingLastPathComponent] lastPathComponent];
     if ([[[GBROMManager sharedManager] romFileForROM:potentialROM].stringByStandardizingPath isEqualToString:url.path.stringByStandardizingPath]) {
