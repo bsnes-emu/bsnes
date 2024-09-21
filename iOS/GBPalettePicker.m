@@ -27,6 +27,29 @@ typedef struct __attribute__ ((packed)) {
     NSMutableSet *_tempFiles;
 }
 
++ (NSString *)makeUnique:(NSString *)name
+{
+    NSArray *builtins = @[
+        @"Greyscale",
+        @"Lime (Game Boy)",
+        @"Olive (Pocket)",
+        @"Teal (Light)",
+    ];
+    
+    NSDictionary *dict = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBThemes"];
+    if (dict[name] || [builtins containsObject:name]) {
+        unsigned i = 2;
+        while (true) {
+            NSString *attempt = [NSString stringWithFormat:@"%@ %u", name, i];
+            if (!dict[attempt] && ![builtins containsObject:attempt]) {
+                return attempt;
+            }
+            i++;
+        }
+    }
+    return name;
+}
+
 + (const GB_palette_t *)paletteForTheme:(NSString *)theme
 {
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
@@ -96,6 +119,7 @@ typedef struct __attribute__ ((packed)) {
     self = [super initWithStyle:style];
     self.navigationItem.rightBarButtonItem = self.editButtonItem;
     _tempFiles = [NSMutableSet set];
+    self.tableView.allowsSelectionDuringEditing = true;
     return self;
 }
 
@@ -107,7 +131,7 @@ typedef struct __attribute__ ((packed)) {
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     if (section == 0) return 4;
-    if (section == 2) return 2;
+    if (section == 2) return 3;
     _cacheNames = [[[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBThemes"].allKeys sortedArrayUsingSelector:@selector(localizedCaseInsensitiveCompare:)];
     return _cacheNames.count;
 }
@@ -120,9 +144,12 @@ typedef struct __attribute__ ((packed)) {
     if (indexPath.section == 2) {
         switch (indexPath.row) {
             case 0:
-                cell.textLabel.text = @"Import Palette";
+                cell.textLabel.text = @"New Palette";
                 break;
             case 1:
+                cell.textLabel.text = @"Import Palette";
+                break;
+            case 2:
                 cell.textLabel.text = @"Restore Defaults";
                 cell.textLabel.textColor = [UIColor systemRedColor];
                 break;
@@ -171,9 +198,43 @@ typedef struct __attribute__ ((packed)) {
 
 - (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    if (self.editing) {
+        if (indexPath.section != 1) return nil;
+        if (@available(iOS 14.0, *)) {
+            [self.navigationController pushViewController:[[GBPaletteEditor alloc] initForPalette:[self.tableView cellForRowAtIndexPath:indexPath].textLabel.text]
+                                                 animated:true];
+        }
+        return nil;
+    }
     if (indexPath.section == 2) {
         switch (indexPath.row) {
             case 0: {
+                if (@available(iOS 14.0, *)) {
+                    NSString *name = [self.class makeUnique:@"Untitled Palette"];
+                    NSMutableDictionary *dict = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBThemes"].mutableCopy;
+                    srandom(time(NULL));
+                    dict[name] = @{
+                        @"BrightnessBias": @((random() & 0xFFF) / (double)0xFFF * 2 - 1),
+                        @"Colors": @[@((random() & 0x3f3f3f) | 0xFF000000), @0, @0, @0, @((random() | 0xffc0c0c0))],
+                        @"DisabledLCDColor": @YES,
+                        @"HueBias": @((random() & 0xFFF) / (double)0xFFF),
+                        @"HueBiasStrength": @((random() & 0xFFF) / (double)0xFFF),
+                        @"Manual": @NO,
+                    };
+                    [[NSUserDefaults standardUserDefaults] setObject:dict forKey:@"GBThemes"];
+                    [self.navigationController pushViewController:[[GBPaletteEditor alloc] initForPalette:name]
+                                                         animated:true];
+                }
+                else {
+                    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Palette Editor Unavailable"
+                                                                                             message:@"The palette editor requires iOS 14 or newer."
+                                                                                      preferredStyle:UIAlertControllerStyleAlert];
+                    [alertController addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
+                    [self presentViewController:alertController animated:true completion:nil];
+                }
+                break;
+            }
+            case 1: {
                 [self setEditing:false animated:true];
                 NSString *sbpUTI = (__bridge_transfer NSString *)UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, (__bridge CFStringRef)@"sbp", NULL);
                 
@@ -187,7 +248,7 @@ typedef struct __attribute__ ((packed)) {
                 [self presentViewController:picker animated:true completion:nil];
                 break;
             }
-            case 1: {
+            case 2: {
                 UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Restore default palettes?"
                                                                                message: @"The defaults palettes will be restored, changes will be reverted, and created or imported palettes will be deleted. This change cannot be undone."
                                                                         preferredStyle:UIAlertControllerStyleAlert];
@@ -205,7 +266,7 @@ typedef struct __attribute__ ((packed)) {
                 break;
             }
         }
-
+        return nil;
     }
     [[NSUserDefaults standardUserDefaults] setObject:[self.tableView cellForRowAtIndexPath:indexPath].textLabel.text
                                               forKey:@"GBCurrentTheme"];
@@ -249,25 +310,8 @@ typedef struct __attribute__ ((packed)) {
         return;
     }
     
-    NSArray *builtins = @[
-        @"Greyscale",
-        @"Lime (Game Boy)",
-        @"Olive (Pocket)",
-        @"Teal (Light)",
-    ];
-    
     NSMutableDictionary *dict = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBThemes"].mutableCopy;
-    if (dict[newName] || [builtins containsObject:newName]) {
-        unsigned i = 2;
-        while (true) {
-            NSString *attempt = [NSString stringWithFormat:@"%@ %u", newName, i];
-            if (!dict[attempt] && ![builtins containsObject:newName]) {
-                newName = attempt;
-                break;
-            }
-            i++;
-        }
-    }
+    newName = [self.class makeUnique:newName];
     
     dict[newName] = dict[oldName];
     [dict removeObjectForKey:oldName];
@@ -363,7 +407,6 @@ typedef struct __attribute__ ((packed)) {
     NSMutableDictionary *themeDict = [NSMutableDictionary dictionary];
     themeDict[@"Manual"] = theme.manual? @YES : @NO;
     themeDict[@"DisabledLCDColor"] = theme.disabled_lcd_color? @YES : @NO;
-    unsigned i = 0;
     
 #define COLOR_TO_INT(color) ((color.r << 0) | (color.g << 8) | (color.b << 16) | 0xFF000000)
     themeDict[@"Colors"] = @[
@@ -375,25 +418,14 @@ typedef struct __attribute__ ((packed)) {
     ];
 
     
-    themeDict[@"DisabledLCDColor"] = @(theme.brightness_bias / 0x40000000);
-    themeDict[@"HueBias"] = @(theme.hue_bias / 0x80000000);
-    themeDict[@"HueBiasStrength"] = @(theme.hue_bias_strength / 0x80000000);
+    themeDict[@"BrightnessBias"] = @(theme.brightness_bias / (double)0x40000000);
+    themeDict[@"HueBias"] = @(theme.hue_bias / (double)0x80000000);
+    themeDict[@"HueBiasStrength"] = @(theme.hue_bias_strength / (double)0x80000000);
         
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     NSMutableDictionary *themes = [defaults dictionaryForKey:@"GBThemes"].mutableCopy;
     NSString *baseName = path.lastPathComponent.stringByDeletingPathExtension;
-    NSString *newName = baseName;
-    i = 2;
-    NSArray *builtins = @[
-        @"Greyscale",
-        @"Lime (Game Boy)",
-        @"Olive (Pocket)",
-        @"Teal (Light)",
-    ];
-    
-    while (themes[newName] || [builtins containsObject:newName]) {
-        newName = [NSString stringWithFormat:@"%@ %d", baseName, i++];
-    }
+    NSString *newName = [self.class makeUnique:baseName];
     themes[newName] = themeDict;
     [defaults setObject:themes forKey:@"GBThemes"];
     [defaults setObject:newName forKey:@"GBCurrentTheme"];

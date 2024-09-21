@@ -1,6 +1,7 @@
 #import "GBPaletteEditor.h"
 #import "GBColorWell.h"
 #import "GBSlider.h"
+#import "GBPalettePicker.h"
 
 static double blend(double from, double to, double position)
 {
@@ -215,6 +216,7 @@ static double blend(double from, double to, double position)
         _colorWells[2].selectedColor = [self autoColorAtPositon:2 / 3.0];
         _colorWells[3].selectedColor = _colorWells[4].selectedColor;
     }
+    [self save];
 }
 - (void)updateToggles
 {
@@ -229,6 +231,7 @@ static double blend(double from, double to, double position)
             [self.tableView deleteSections:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(2, 3)]
                           withRowAnimation:UITableViewRowAnimationFade];
         }
+        [self save];
     }
     else {
         _colorWells[1].enabled = false;
@@ -309,21 +312,12 @@ static double blend(double from, double to, double position)
               0xFF000000));
 }
 
-- (void)viewWillDisappear:(BOOL)animated
+- (void)save
 {
     NSMutableDictionary *themes = [[NSUserDefaults standardUserDefaults] dictionaryForKey:@"GBThemes"].mutableCopy;
     [themes removeObjectForKey:_paletteName];
-    _paletteName = _nameField.text;
-    unsigned i = 2;
-    NSArray *builtins = @[
-        @"Greyscale",
-        @"Lime (Game Boy)",
-        @"Olive (Pocket)",
-        @"Teal (Light)",
-    ];
-    
-    while (themes[_paletteName] || [builtins containsObject:_paletteName]) {
-        _paletteName = [NSString stringWithFormat:@"%@ %d", _nameField.text, i++];
+    if (![_paletteName isEqual:_nameField.text]) {
+        _paletteName = [GBPalettePicker makeUnique:_nameField.text];
     }
     
     themes[_paletteName] = @{
@@ -344,6 +338,11 @@ static double blend(double from, double to, double position)
         [[NSUserDefaults standardUserDefaults] setObject:@"" forKey:@"GBCurrentTheme"]; // Force a reload
         [[NSUserDefaults standardUserDefaults] setObject:_paletteName forKey:@"GBCurrentTheme"];
     }
+}
+- (void)viewWillDisappear:(BOOL)animated
+{
+    [super viewWillDisappear:animated];
+    [self save];
 }
 
 @end
