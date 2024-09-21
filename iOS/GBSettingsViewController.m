@@ -1,5 +1,5 @@
 #import "GBSettingsViewController.h"
-#import "GBTemperatureSlider.h"
+#import "GBSlider.h"
 #import "GBViewBase.h"
 #import "GBThemesViewController.h"
 #import "GBPalettePicker.h"
@@ -764,7 +764,7 @@ static id ValueForItem(NSDictionary *item)
         rect.size.height -= 24;
         rect.origin.x += 12;
         rect.origin.y += 12;
-        UISlider *slider = [item[@"type"] == typeLightTemp? [GBTemperatureSlider alloc] : [UISlider alloc] initWithFrame:rect];
+        UISlider *slider = [item[@"type"] == typeLightTemp? [GBSlider alloc] : [UISlider alloc] initWithFrame:rect];
         slider.continuous = true;
         slider.minimumValue = [item[@"min"] floatValue];
         slider.maximumValue = [item[@"max"] floatValue];

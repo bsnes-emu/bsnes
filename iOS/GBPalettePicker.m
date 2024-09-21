@@ -1,4 +1,5 @@
 #import "GBPalettePicker.h"
+#import "GBPaletteEditor.h"
 #import <CoreServices/CoreServices.h>
 
 /* TODO: Unify with Cocoa? */
@@ -419,6 +420,23 @@ contextMenuConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath
         
         deleteAction.attributes = UIMenuElementAttributesDestructive;
         return [UIMenu menuWithTitle:nil children:@[
+            [UIAction actionWithTitle:@"Edit"
+                                image:[UIImage systemImageNamed:@"paintbrush"]
+                           identifier:nil
+                              handler:^(__kindof UIAction *action) {
+                if (@available(iOS 14.0, *)) {
+                    [self.navigationController pushViewController:[[GBPaletteEditor alloc] initForPalette:[self.tableView cellForRowAtIndexPath:indexPath].textLabel.text]
+                                                         animated:true];
+                }
+                else {
+                    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"Palette Editor Unavailable"
+                                                                                             message:@"The palette editor requires iOS 14 or newer."
+                                                                                      preferredStyle:UIAlertControllerStyleAlert];
+                    [alertController addAction:[UIAlertAction actionWithTitle:@"Close" style:UIAlertActionStyleDefault handler:nil]];
+                    [self presentViewController:alertController animated:true completion:nil];
+                    return;
+                }
+            }],
             [UIAction actionWithTitle:@"Share"
                                 image:[UIImage systemImageNamed:@"square.and.arrow.up"]
                            identifier:nil
@@ -454,6 +472,11 @@ contextMenuConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath
     for (NSString *file in _tempFiles) {
         [[NSFileManager defaultManager] removeItemAtPath:file error:nil];
     }
+}
+
+- (void)viewWillAppear:(BOOL)animated
+{
+    [self.tableView reloadData];
 }
 
 @end
