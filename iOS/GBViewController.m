@@ -36,7 +36,8 @@
     bool _skipAutoLoad;
     
     UIInterfaceOrientation _orientation;
-    GBHorizontalLayout *_horizontalLayout;
+    GBHorizontalLayout *_horizontalLayoutLeft;
+    GBHorizontalLayout *_horizontalLayoutRight;
     GBVerticalLayout *_verticalLayout;
     GBBackgroundView *_backgroundView;
     
@@ -223,7 +224,10 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 #pragma clang diagnostic ignored "-Warc-retain-cycles"
     [self addDefaultObserver:^(id newValue) {
         GBTheme *theme = [GBSettingsViewController themeNamed:newValue];
-        _horizontalLayout = [[GBHorizontalLayout alloc] initWithTheme:theme];
+        _horizontalLayoutLeft = [[GBHorizontalLayout alloc] initWithTheme:theme cutoutOnRight:false];
+        _horizontalLayoutRight = _horizontalLayoutLeft.cutout?
+            [[GBHorizontalLayout alloc] initWithTheme:theme cutoutOnRight:true] :
+            _horizontalLayoutLeft;
         _verticalLayout = [[GBVerticalLayout alloc] initWithTheme:theme];
         _printerSpinner.color = theme.brandColor;
 
@@ -870,11 +874,23 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)orientation duration:(NSTimeInterval)duration
 {
-    GBLayout *layout = _horizontalLayout;
+    GBLayout *layout = nil;
     _orientation = orientation;
-    if (orientation == UIInterfaceOrientationPortrait || orientation == UIInterfaceOrientationPortraitUpsideDown) {
-        layout = _verticalLayout;
+    switch (orientation) {
+        default:
+        case UIInterfaceOrientationUnknown:
+        case UIInterfaceOrientationPortrait:
+        case UIInterfaceOrientationPortraitUpsideDown:
+            layout = _verticalLayout;
+            break;
+        case UIInterfaceOrientationLandscapeRight:
+            layout = _horizontalLayoutLeft;
+            break;
+        case UIInterfaceOrientationLandscapeLeft:
+            layout = _horizontalLayoutRight;
+            break;
     }
+    
     _backgroundView.frame = [layout viewRectForOrientation:orientation];
     _backgroundView.layout = layout;
     if (!self.presentedViewController) {
