@@ -30,6 +30,30 @@ game
       size: 0x80000
       content: Program
 
+//Prototypes (USA)
+
+database
+  revision: 2022-03-14
+
+game
+  sha256:   4362afe51da8a01a67a1c2d6c2545d9e7cbaf8c42fd8f319dd8b61fe328512e1
+  name:     Super FX voxel demo
+  title:    Super FX voxel demo
+  label:    Voxels in progress
+  region:   USA
+  revision: 1.0
+  board:    GSU-RAM
+    memory
+      type: ROM
+      size: 0x60000
+      content: Program
+    memory
+      type: RAM
+      size: 0x10000
+      content: Save
+    oscillator
+      frequency: 21440000
+
 //Super Comboy (KOR)
 
 database
