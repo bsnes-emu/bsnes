@@ -204,6 +204,10 @@ ifeq (,$(PKG_CONFIG))
 SDL_CFLAGS := $(shell sdl2-config --cflags)
 SDL_LDFLAGS := $(shell sdl2-config --libs) -lpthread
 
+ifeq ($(PLATFORM),Darwin)
+SDL_LDFLAGS += -framework AppKit
+endif
+
 # We cannot detect the presence of OpenAL dev headers,
 # so we must do this manually
 ifeq ($(ENABLE_OPENAL),1)
