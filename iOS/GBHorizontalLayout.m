@@ -112,6 +112,7 @@
 - (instancetype)initWithTheme:(GBTheme *)theme
 {
     assert(false);
+    __builtin_unreachable();
 }
 
 - (CGRect)viewRectForOrientation:(UIInterfaceOrientation)orientation
