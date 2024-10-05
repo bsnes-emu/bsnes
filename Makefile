@@ -129,8 +129,8 @@ endif
 
 # Find libraries with pkg-config if available.
 ifneq (, $(shell which pkg-config 2> $(NULL)))
-# But not on macOS, it's annoying
-ifneq ($(PLATFORM),Darwin)
+# But not on macOS, it's annoying, and not on Haiku, where OpenGL is broken
+ifeq ($(filter Darwin Haiku,$(PLATFORM)),)
 PKG_CONFIG := pkg-config
 endif
 endif
@@ -272,7 +272,11 @@ LDFLAGS += -lxaudio2_9redist
 sdl: $(BIN)/SDL/xaudio2_9redist.dll
 endif
 else
-LDFLAGS += -lc -lm -ldl
+LDFLAGS += -lc -lm
+# libdl is not available as a standalone library in Haiku
+ifneq ($(PLATFORM),Haiku)
+LDFLAGS += -ldl
+endif
 endif
 
 ifeq ($(MAKECMDGOALS),_ios)
