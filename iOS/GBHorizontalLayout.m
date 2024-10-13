@@ -63,6 +63,8 @@
         self.dpadLocation.y,
     };
     
+    self.abComboLocation = buttonsCenter;
+    
     self.aLocation = (CGPoint) {
         round(buttonsCenter.x + buttonsDelta.width / 2),
         round(buttonsCenter.y - buttonsDelta.height / 2)
