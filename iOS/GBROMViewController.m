@@ -38,7 +38,9 @@
 {
     UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
     cell.textLabel.text = rom.lastPathComponent;
-    cell.accessoryType = [rom isEqualToString:[GBROMManager sharedManager].currentROM]? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
+    bool isCurrentROM = [rom isEqualToString:[GBROMManager sharedManager].currentROM];
+    bool checkmark = isCurrentROM;
+    cell.accessoryType = checkmark? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
     
     NSString *pngPath = [[[GBROMManager sharedManager] autosaveStateFileForROM:rom] stringByAppendingPathExtension:@"png"];
     UIGraphicsBeginImageContextWithOptions((CGSize){60, 60}, false, self.view.window.screen.scale);
@@ -94,7 +96,8 @@
 
 - (void)romSelectedAtIndex:(unsigned)index
 {
-    [GBROMManager sharedManager].currentROM = [GBROMManager sharedManager].allROMs[index];
+    NSString *rom = [GBROMManager sharedManager].allROMs[index];
+    [GBROMManager sharedManager].currentROM = rom;
     [self.presentingViewController dismissViewControllerAnimated:true completion:nil];
 }
 
@@ -286,7 +289,7 @@ contextMenuConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath
           forRowAtIndexPath:indexPath];
         }];
         deleteAction.attributes = UIMenuElementAttributesDestructive;
-        return [UIMenu menuWithTitle:nil children:@[
+        NSMutableArray *items = @[
             [UIAction actionWithTitle:@"Rename"
                                 image:[UIImage systemImageNamed:@"pencil"]
                            identifier:nil
@@ -299,8 +302,9 @@ contextMenuConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath
                               handler:^(__kindof UIAction *action) {
                 [self duplicateROMAtIndex:indexPath.row];
             }],
-            deleteAction,
-        ]];
+        ].mutableCopy;
+        [items addObject:deleteAction];
+        return [UIMenu menuWithTitle:nil children:items];
     }];
 }
 

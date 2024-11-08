@@ -1,5 +1,6 @@
 #import "GBROMManager.h"
 #import <copyfile.h>
+#import <sys/stat.h>
 
 @implementation GBROMManager
 {

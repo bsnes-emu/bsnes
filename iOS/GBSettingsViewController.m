@@ -351,9 +351,8 @@ static NSString const *typeLightTemp = @"typeLightTemp";
         },
     ];
     
-    return @[
-        @{
-            @"items": @[
+    
+    NSArray *rootItems = @[
                     @{
                         @"title": @"Emulation",
                         @"type": typeSubmenu,
@@ -384,7 +383,12 @@ static NSString const *typeLightTemp = @"typeLightTemp";
                         @"class": [GBThemesViewController class],
                         @"image": [UIImage imageNamed:@"themeSettings"],
                     },
-            ]
+    ];
+    
+
+     return @[
+        @{
+            @"items": rootItems,
         }
     ];
 }
@@ -716,7 +720,9 @@ static id ValueForItem(NSDictionary *item)
         }
     }
     else if (item[@"type"] == typeRadio) {
-        if ([ValueForItem(item) isEqual:item[@"value"]]) {
+        id settingValue = ValueForItem(item);
+        id itemValue = item[@"value"];
+        if (settingValue == itemValue || [settingValue isEqual:itemValue]) {
             cell.accessoryType = UITableViewCellAccessoryCheckmark;
         }
     }
