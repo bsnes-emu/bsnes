@@ -337,6 +337,14 @@ static void debuggerReloadCallback(GB_gameboy_t *gb)
     [self observeStandardDefaultsKey:@"GBRumbleMode" withBlock:^(NSNumber *value) {
         GB_set_rumble_mode(gb, value.unsignedIntValue);
     }];
+    
+    [self observeStandardDefaultsKey:@"GBDebuggerFont" withBlock:^(NSString *value) {
+        [self updateFonts];
+    }];
+    
+    [self observeStandardDefaultsKey:@"GBDebuggerFontSize" withBlock:^(NSString *value) {
+        [self updateFonts];
+    }];
 }
 
 - (void)updateMinSize
@@ -766,6 +774,65 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     }
 }
 
+- (NSFont *)debuggerFontOfSize:(unsigned)size
+{
+    if (!size) {
+        size = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBDebuggerFontSize"];
+    }
+    
+    bool retry = false;
+    
+again:;
+    NSString *selectedFont = [[NSUserDefaults standardUserDefaults] stringForKey:@"GBDebuggerFont"];
+    if (@available(macOS 10.15, *)) {
+        if ([selectedFont isEqual:@"SF Mono"]) {
+            return [NSFont monospacedSystemFontOfSize:size weight:NSFontWeightRegular];
+        }
+    }
+    
+    NSFont *ret = [NSFont fontWithName:selectedFont size:size];
+    if (ret) return ret;
+    
+    if (retry) {
+        return [NSFont userFixedPitchFontOfSize:size];
+    }
+    [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"GBDebuggerFont"];
+    retry = true;
+    goto again;
+}
+
+
+- (void)updateFonts
+{
+    _hexController.font = [self debuggerFontOfSize:12];
+    [self.paletteView reloadData:self];
+    [self.objectView reloadData:self];
+    
+    NSFont *newFont = [self debuggerFontOfSize:0];
+    NSFont *newBoldFont = [[NSFontManager sharedFontManager] convertFont:newFont toHaveTrait:NSBoldFontMask];
+    self.debuggerSideViewInput.font = newFont;
+    for (NSTextView *view in @[_debuggerSideView, _consoleOutput]) {
+        NSMutableAttributedString *newString = view.attributedString.mutableCopy;
+        [view.attributedString enumerateAttribute:NSFontAttributeName
+                                          inRange:NSMakeRange(0, view.attributedString.length)
+                                          options:0
+                                       usingBlock:^(NSFont *value, NSRange range, BOOL *stop) {
+            if ([[NSFontManager sharedFontManager] fontNamed:value.fontName hasTraits:NSBoldFontMask]) {
+                [newString addAttributes:@{
+                    NSFontAttributeName: newBoldFont
+                } range:range];
+            }
+            else {
+                [newString addAttributes:@{
+                    NSFontAttributeName: newFont
+                } range:range];
+            }
+        }];
+        [view.textStorage setAttributedString:newString];
+    }
+    [_consoleOutput scrollToEndOfDocument:nil];
+}
+
 - (void)windowControllerDidLoadNib:(NSWindowController *)aController 
 {
     [super windowControllerDidLoadNib:aController];
@@ -781,7 +848,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     NSMutableParagraphStyle *paragraph_style = [[NSMutableParagraphStyle alloc] init];
     [paragraph_style setLineSpacing:2];
         
-    self.debuggerSideViewInput.font = [NSFont userFixedPitchFontOfSize:12];
+    self.debuggerSideViewInput.font = [self debuggerFontOfSize:0];
     self.debuggerSideViewInput.textColor = [NSColor whiteColor];
     self.debuggerSideViewInput.defaultParagraphStyle = paragraph_style;
     [self.debuggerSideViewInput setString:@"registers\nbacktrace\n"];
@@ -907,9 +974,10 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     }
 }
 
-- (void) initMemoryView
+- (void)initMemoryView
 {
     _hexController = [[HFController alloc] init];
+    _hexController.font = [self debuggerFontOfSize:12];
     [_hexController setBytesPerColumn:1];
     [_hexController setEditMode:HFOverwriteMode];
     
@@ -953,6 +1021,16 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     [self.memoryView addSubview:layoutView];
     self.memoryView = layoutView;
 
+    CGSize contentSize = _memoryWindow.contentView.frame.size;
+    while (_hexController.bytesPerLine < 16) {
+        contentSize.width += 4;
+        [_memoryWindow setContentSize:contentSize];
+    }
+    while (_hexController.bytesPerLine > 16) {
+        contentSize.width -= 4;
+        [_memoryWindow setContentSize:contentSize];
+    }
+    
     self.memoryBankItem.enabled = false;
 }
 
@@ -1456,7 +1534,7 @@ enum GBWindowResizeAction
     [_consoleOutputLock unlock];
 }
 
-- (void) log: (const char *) string withAttributes: (GB_log_attributes) attributes
+- (void)log:(const char *)string withAttributes:(GB_log_attributes)attributes
 {
     NSString *nsstring = @(string); // For ref-counting
     if (_capturedOutput) {
@@ -1465,7 +1543,7 @@ enum GBWindowResizeAction
     }
     
     
-    NSFont *font = [NSFont userFixedPitchFontOfSize:12];
+    NSFont *font = [self debuggerFontOfSize:0];
     NSUnderlineStyle underline = NSUnderlineStyleNone;
     if (attributes & GB_LOG_BOLD) {
         font = [[NSFontManager sharedFontManager] convertFont:font toHaveTrait:NSBoldFontMask];
