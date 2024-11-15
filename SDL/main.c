@@ -18,6 +18,7 @@
 #include <fcntl.h>
 #else
 #include <Windows.h>
+#include <associations.h>
 #endif
 
 static bool stop_on_start = false;
@@ -1252,6 +1253,36 @@ int main(int argc, char **argv)
         init_shader_with_name(&shader, "NearestNeighbor");
     }
     update_viewport();
+    
+#ifdef _WIN32
+    if (!configuration.windows_associations_prompted) {
+        configuration.windows_associations_prompted = true;
+        save_configuration();
+        SDL_MessageBoxButtonData buttons[2] = {
+            {
+                .flags = SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT,
+                .buttonid = 0,
+                .text = "No",
+            },
+            {
+                .flags = SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT,
+                .buttonid = 1,
+                .text = "Yes",
+            },
+        };
+        SDL_MessageBoxData box = {
+            .title = "Associate SameBoy with Game Boy ROMs",
+            .message = "Would you like to associate SameBoy with Game Boy ROMs?\nThis can be also done later in the Options menu.",
+            .numbuttons = 2,
+            .buttons = buttons,
+        };
+        int button;
+        SDL_ShowMessageBox(&box, &button);
+        if (button) {
+            GB_do_windows_association();
+        }
+    }
+#endif
     
     if (filename == NULL) {
         stop_on_start = false;
