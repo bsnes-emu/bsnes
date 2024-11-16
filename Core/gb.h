@@ -723,8 +723,8 @@ struct GB_gameboy_internal_s {
         GB_boot_rom_load_callback_t boot_rom_load_callback;
         GB_print_image_callback_t printer_callback;
         GB_printer_done_callback_t printer_done_callback;
-        GB_workboy_set_time_callback workboy_set_time_callback;
-        GB_workboy_get_time_callback workboy_get_time_callback;
+        GB_workboy_set_time_callback_t workboy_set_time_callback;
+        GB_workboy_get_time_callback_t workboy_get_time_callback;
         GB_execution_callback_t execution_callback;
         GB_lcd_line_callback_t lcd_line_callback;
         GB_lcd_status_callback_t lcd_status_callback;
@@ -898,7 +898,7 @@ typedef enum {
     GB_DIRECT_ACCESS_CART_RAM,
     GB_DIRECT_ACCESS_VRAM,
     GB_DIRECT_ACCESS_HRAM,
-    GB_DIRECT_ACCESS_IO, /* Warning: Some registers can only be read/written correctly via GB_memory_read/write. */
+    GB_DIRECT_ACCESS_IO, /* Warning: Some registers can only be read/written correctly via GB_read/write_memory. */
     GB_DIRECT_ACCESS_BOOTROM,
     GB_DIRECT_ACCESS_OAM,
     GB_DIRECT_ACCESS_BGP,
