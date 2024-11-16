@@ -64,6 +64,21 @@ static void band_limited_update(GB_band_limited_t *band_limited, const GB_sample
     }
 }
 
+static void band_limited_update_unfiltered(GB_band_limited_t *band_limited, const GB_sample_t *input, unsigned delay)
+{
+    if (input->packed == band_limited->input.packed) return;
+    
+    GB_sample_t delta = {
+        .left = input->left - band_limited->input.left,
+        .right = input->right - band_limited->input.right,
+    };
+    band_limited->input.packed = input->packed;
+    
+    unsigned offset = (band_limited->pos + delay) & (sizeof(band_limited->buffer) / sizeof(band_limited->buffer[0]) - 1);
+    band_limited->buffer[offset].left += delta.left * GB_BAND_LIMITED_ONE;
+    band_limited->buffer[offset].right += delta.right * GB_BAND_LIMITED_ONE;
+}
+
 static void band_limited_read(GB_band_limited_t *band_limited, GB_sample_t *output, uint32_t multiplier)
 {
     band_limited->output.left += band_limited->buffer[band_limited->pos].left;
@@ -161,9 +176,14 @@ static void update_sample(GB_gameboy_t *gb, GB_channel_t index, int8_t value, un
                 output.left = output.right = 0;
             }
             
-            band_limited_update(&gb->apu_output.band_limited[index],
-                                &output,
-                                (gb->apu_output.cycles_since_render + cycles_offset) * GB_BAND_LIMITED_PHASES / gb->apu_output.max_cycles_per_sample);
+            if (unlikely(gb->apu_output.max_cycles_per_sample == 1)) {
+                band_limited_update_unfiltered(&gb->apu_output.band_limited[index], &output, cycles_offset);
+            }
+            else {
+                band_limited_update(&gb->apu_output.band_limited[index],
+                                    &output,
+                                    (gb->apu_output.cycles_since_render + cycles_offset) * GB_BAND_LIMITED_PHASES / gb->apu_output.max_cycles_per_sample);
+            }
         }
         
         return;
@@ -191,9 +211,14 @@ static void update_sample(GB_gameboy_t *gb, GB_channel_t index, int8_t value, un
         if (likely(!gb->apu_output.channel_muted[index])) {
             output = (GB_sample_t){(0xF - value * 2) * left_volume, (0xF - value * 2) * right_volume};
         }
-        band_limited_update(&gb->apu_output.band_limited[index],
-                            &output,
-                            (gb->apu_output.cycles_since_render + cycles_offset) * GB_BAND_LIMITED_PHASES / gb->apu_output.max_cycles_per_sample);
+        if (unlikely(gb->apu_output.max_cycles_per_sample == 1)) {
+            band_limited_update_unfiltered(&gb->apu_output.band_limited[index], &output, cycles_offset);
+        }
+        else {
+            band_limited_update(&gb->apu_output.band_limited[index],
+                                &output,
+                                (gb->apu_output.cycles_since_render + cycles_offset) * GB_BAND_LIMITED_PHASES / gb->apu_output.max_cycles_per_sample);
+        }
     }
 }
 
