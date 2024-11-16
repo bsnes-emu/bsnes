@@ -13,7 +13,7 @@
 #include "gb.h"
 
 
-void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, va_list args)
+void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes_t attributes, const char *fmt, va_list args)
 {
     char *string = NULL;
     vasprintf(&string, fmt, args);
@@ -29,7 +29,7 @@ void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes attributes, const ch
     free(string);
 }
 
-void GB_attributed_log(GB_gameboy_t *gb, GB_log_attributes attributes, const char *fmt, ...)
+void GB_attributed_log(GB_gameboy_t *gb, GB_log_attributes_t attributes, const char *fmt, ...)
 {
     va_list args;
     va_start(args, fmt);

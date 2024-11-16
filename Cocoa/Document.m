@@ -134,7 +134,7 @@ static void vblank(GB_gameboy_t *gb, GB_vblank_type_t type)
     [self vblankWithType:type];
 }
 
-static void consoleLog(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes)
+static void consoleLog(GB_gameboy_t *gb, const char *string, GB_log_attributes_t attributes)
 {
     Document *self = (__bridge Document *)GB_get_user_data(gb);
     [self log:string withAttributes: attributes];
@@ -1534,7 +1534,7 @@ enum GBWindowResizeAction
     [_consoleOutputLock unlock];
 }
 
-- (void)log:(const char *)string withAttributes:(GB_log_attributes)attributes
+- (void)log:(const char *)string withAttributes:(GB_log_attributes_t)attributes
 {
     NSString *nsstring = @(string); // For ref-counting
     if (_capturedOutput) {

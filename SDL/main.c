@@ -61,7 +61,7 @@ static char *completer(const char *substring, uintptr_t *context)
     return ret;
 }
 
-static void log_callback(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes)
+static void log_callback(GB_gameboy_t *gb, const char *string, GB_log_attributes_t attributes)
 {
     CON_attributes_t con_attributes = {0,};
     con_attributes.bold = attributes & GB_LOG_BOLD;
@@ -128,7 +128,7 @@ retry: {
 
 static char *captured_log = NULL;
 
-static void log_capture_callback(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes)
+static void log_capture_callback(GB_gameboy_t *gb, const char *string, GB_log_attributes_t attributes)
 {
     size_t current_len = strlen(captured_log);
     size_t len_to_add = strlen(string);
