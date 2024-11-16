@@ -66,17 +66,6 @@ extern "C" {
                           l, h
 #endif
 
-typedef struct {
-    struct GB_color_s {
-        uint8_t r, g, b;
-    } colors[5];
-} GB_palette_t;
-
-extern const GB_palette_t GB_PALETTE_GREY;
-extern const GB_palette_t GB_PALETTE_DMG;
-extern const GB_palette_t GB_PALETTE_MGB;
-extern const GB_palette_t GB_PALETTE_GBL;
-
 typedef union {
     struct {
         uint8_t seconds;
@@ -276,11 +265,9 @@ typedef enum {
 
 #endif
 
-typedef void (*GB_vblank_callback_t)(GB_gameboy_t *gb, GB_vblank_type_t type);
 typedef void (*GB_log_callback_t)(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes);
 typedef char *(*GB_input_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_debugger_reload_callback_t)(GB_gameboy_t *gb);
-typedef uint32_t (*GB_rgb_encode_callback_t)(GB_gameboy_t *gb, uint8_t r, uint8_t g, uint8_t b);
 typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on);
 typedef void (*GB_rumble_callback_t)(GB_gameboy_t *gb, double rumble_amplitude);
 typedef void (*GB_serial_transfer_bit_start_callback_t)(GB_gameboy_t *gb, bool bit_to_send);
@@ -298,20 +285,6 @@ typedef void (*GB_lcd_status_callback_t)(GB_gameboy_t *gb, bool on);
 
 struct GB_breakpoint_s;
 struct GB_watchpoint_s;
-
-typedef struct {
-    uint8_t pixel; // Color, 0-3
-    uint8_t palette; // Palette, 0 - 7 (CGB); 0-1 in DMG (or just 0 for BG)
-    uint8_t priority; // Object priority – 0 in DMG, OAM index in CGB
-    bool bg_priority; // For object FIFO – the BG priority bit. For the BG FIFO – the CGB attributes priority bit
-} GB_fifo_item_t;
-
-#define GB_FIFO_LENGTH 8
-typedef struct {
-    GB_fifo_item_t fifo[GB_FIFO_LENGTH];
-    uint8_t read_end;
-    uint8_t size;
-} GB_fifo_t;
 
 typedef struct {
     uint32_t magic;
@@ -970,12 +943,10 @@ void GB_set_border_mode(GB_gameboy_t *gb, GB_border_mode_t border_mode);
     
 void GB_set_infrared_input(GB_gameboy_t *gb, bool state);
     
-void GB_set_vblank_callback(GB_gameboy_t *gb, GB_vblank_callback_t callback);
 void GB_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback);
 void GB_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
 void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
 void GB_set_debugger_reload_callback(GB_gameboy_t *gb, GB_debugger_reload_callback_t callback);
-void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback);
 void GB_set_infrared_callback(GB_gameboy_t *gb, GB_infrared_callback_t callback);
 void GB_set_rumble_callback(GB_gameboy_t *gb, GB_rumble_callback_t callback);
 void GB_set_update_input_hint_callback(GB_gameboy_t *gb, GB_update_input_hint_callback_t callback);
@@ -985,9 +956,6 @@ void GB_set_boot_rom_load_callback(GB_gameboy_t *gb, GB_boot_rom_load_callback_t
 void GB_set_execution_callback(GB_gameboy_t *gb, GB_execution_callback_t callback);
 void GB_set_lcd_line_callback(GB_gameboy_t *gb, GB_lcd_line_callback_t callback);
 void GB_set_lcd_status_callback(GB_gameboy_t *gb, GB_lcd_status_callback_t callback);
-
-void GB_set_palette(GB_gameboy_t *gb, const GB_palette_t *palette);
-const GB_palette_t *GB_get_palette(GB_gameboy_t *gb);
 
 /* These APIs are used when using internal clock */
 void GB_set_serial_transfer_bit_start_callback(GB_gameboy_t *gb, GB_serial_transfer_bit_start_callback_t callback);
