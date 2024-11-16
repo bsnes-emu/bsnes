@@ -42,7 +42,9 @@ extern "C" {
 #include "workboy.h"
 #include "random.h"
 
-#define GB_STRUCT_VERSION 15
+#ifdef GB_INTERNAL
+#define STRUCT_VERSION 15
+#endif
 
 #define GB_REWIND_FRAMES_PER_KEY 255
 
