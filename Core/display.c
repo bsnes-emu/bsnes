@@ -57,6 +57,12 @@ void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callb
     }
 }
 
+void GB_set_pixels_output(GB_gameboy_t *gb, uint32_t *output)
+{
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    gb->screen = output;
+}
+
 /* FIFO functions */
 
 static inline unsigned fifo_size(GB_fifo_t *fifo)

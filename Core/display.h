@@ -100,6 +100,7 @@ void GB_set_palette(GB_gameboy_t *gb, const GB_palette_t *palette);
 const GB_palette_t *GB_get_palette(GB_gameboy_t *gb);
 void GB_set_color_correction_mode(GB_gameboy_t *gb, GB_color_correction_mode_t mode);
 void GB_set_light_temperature(GB_gameboy_t *gb, double temperature);
+void GB_set_pixels_output(GB_gameboy_t *gb, uint32_t *output);
 
 bool GB_is_odd_frame(GB_gameboy_t *gb);
 uint32_t GB_convert_rgb15(GB_gameboy_t *gb, uint16_t color, bool for_border);

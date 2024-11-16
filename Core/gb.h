@@ -269,12 +269,10 @@ typedef enum {
 
 typedef void (*GB_log_callback_t)(GB_gameboy_t *gb, const char *string, GB_log_attributes_t attributes);
 typedef char *(*GB_input_callback_t)(GB_gameboy_t *gb);
-typedef void (*GB_debugger_reload_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_infrared_callback_t)(GB_gameboy_t *gb, bool on);
 typedef void (*GB_rumble_callback_t)(GB_gameboy_t *gb, double rumble_amplitude);
 typedef void (*GB_serial_transfer_bit_start_callback_t)(GB_gameboy_t *gb, bool bit_to_send);
 typedef bool (*GB_serial_transfer_bit_end_callback_t)(GB_gameboy_t *gb);
-typedef void (*GB_update_input_hint_callback_t)(GB_gameboy_t *gb);
 typedef void (*GB_joyp_write_callback_t)(GB_gameboy_t *gb, uint8_t value);
 typedef void (*GB_icd_pixel_callback_t)(GB_gameboy_t *gb, uint8_t row);
 typedef void (*GB_icd_hreset_callback_t)(GB_gameboy_t *gb);
@@ -939,7 +937,6 @@ void GB_set_rendering_disabled(GB_gameboy_t *gb, bool disabled);
 void GB_log(GB_gameboy_t *gb, const char *fmt, ...) __printflike(2, 3);
 void GB_attributed_log(GB_gameboy_t *gb, GB_log_attributes_t attributes, const char *fmt, ...) __printflike(3, 4);
 
-void GB_set_pixels_output(GB_gameboy_t *gb, uint32_t *output);
 uint32_t *GB_get_pixels_output(GB_gameboy_t *gb);
 void GB_set_border_mode(GB_gameboy_t *gb, GB_border_mode_t border_mode);
     
@@ -948,10 +945,8 @@ void GB_set_infrared_input(GB_gameboy_t *gb, bool state);
 void GB_set_log_callback(GB_gameboy_t *gb, GB_log_callback_t callback);
 void GB_set_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
 void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback);
-void GB_set_debugger_reload_callback(GB_gameboy_t *gb, GB_debugger_reload_callback_t callback);
 void GB_set_infrared_callback(GB_gameboy_t *gb, GB_infrared_callback_t callback);
 void GB_set_rumble_callback(GB_gameboy_t *gb, GB_rumble_callback_t callback);
-void GB_set_update_input_hint_callback(GB_gameboy_t *gb, GB_update_input_hint_callback_t callback);
 /* Called when a new boot ROM is needed. The callback should call GB_load_boot_rom or GB_load_boot_rom_from_buffer */
 void GB_set_boot_rom_load_callback(GB_gameboy_t *gb, GB_boot_rom_load_callback_t callback);
     

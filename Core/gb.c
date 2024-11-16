@@ -1234,12 +1234,6 @@ uint64_t GB_run_frame(GB_gameboy_t *gb)
     return gb->cycles_since_last_sync * 1000000000LL / 2 / GB_get_clock_rate(gb); /* / 2 because we use 8MHz units */
 }
 
-void GB_set_pixels_output(GB_gameboy_t *gb, uint32_t *output)
-{
-    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
-    gb->screen = output;
-}
-
 uint32_t *GB_get_pixels_output(GB_gameboy_t *gb)
 {
     return gb->screen;
@@ -1265,11 +1259,6 @@ void GB_set_async_input_callback(GB_gameboy_t *gb, GB_input_callback_t callback)
 #ifndef GB_DISABLE_DEBUGGER
     gb->async_input_callback = callback;
 #endif
-}
-
-void GB_set_debugger_reload_callback(GB_gameboy_t *gb, GB_debugger_reload_callback_t callback)
-{
-    gb->debugger_reload_callback = callback;
 }
 
 void GB_set_execution_callback(GB_gameboy_t *gb, GB_execution_callback_t callback)
@@ -1943,11 +1932,6 @@ unsigned GB_get_screen_height(GB_gameboy_t *gb)
 unsigned GB_get_player_count(GB_gameboy_t *gb)
 {
     return GB_is_hle_sgb(gb)? gb->sgb->player_count : 1;
-}
-
-void GB_set_update_input_hint_callback(GB_gameboy_t *gb, GB_update_input_hint_callback_t callback)
-{
-    gb->update_input_hint_callback = callback;
 }
 
 double GB_get_usual_frame_rate(GB_gameboy_t *gb)

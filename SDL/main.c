@@ -875,7 +875,7 @@ restart:;
             GB_set_async_input_callback(&gb, asyc_input_callback);
         }
         
-        GB_set_debugger_reload_callback(&gb, debugger_reload_callback);
+        GB_debugger_set_reload_callback(&gb, debugger_reload_callback);
     }
     if (stop_on_start) {
         stop_on_start = false;

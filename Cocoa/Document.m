@@ -298,7 +298,7 @@ static void debuggerReloadCallback(GB_gameboy_t *gb)
     GB_apu_set_sample_callback(&_gb, audioCallback);
     GB_set_rumble_callback(&_gb, rumbleCallback);
     GB_set_infrared_callback(&_gb, infraredStateChanged);
-    GB_set_debugger_reload_callback(&_gb, debuggerReloadCallback);
+    GB_debugger_set_reload_callback(&_gb, debuggerReloadCallback);
     
     GB_gameboy_t *gb = &_gb;
     __unsafe_unretained Document *weakSelf = self;
