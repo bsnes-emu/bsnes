@@ -27,10 +27,10 @@ static void __attribute__((constructor)) band_limited_init(void)
         }
     }
     
-    for (unsigned phase = 0; phase < GB_BAND_LIMITED_PHASES; phase++) {
+    nounroll for (unsigned phase = 0; phase < GB_BAND_LIMITED_PHASES; phase++) {
         int32_t error = GB_BAND_LIMITED_ONE;
         int32_t prev = 0;
-        for (unsigned i = 0; i < GB_BAND_LIMITED_WIDTH; i++) {
+        nounroll for (unsigned i = 0; i < GB_BAND_LIMITED_WIDTH; i++) {
             int32_t cur = master[(GB_BAND_LIMITED_PHASES - 1 - phase) + i * GB_BAND_LIMITED_PHASES] * GB_BAND_LIMITED_ONE;
             int32_t delta = cur - prev;
             error = error - delta;
