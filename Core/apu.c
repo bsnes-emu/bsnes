@@ -306,7 +306,7 @@ static void render(GB_gameboy_t *gb)
     if (gb->sgb && gb->sgb->intro_animation < GB_SGB_INTRO_ANIMATION_LENGTH) return;
 
     GB_sample_t filtered_output = gb->apu_output.highpass_mode?
-        (GB_sample_t) {output.left - gb->apu_output.highpass_diff.left,
+        (GB_sample_t) {output.left  - gb->apu_output.highpass_diff.left,
                        output.right - gb->apu_output.highpass_diff.right} :
         output;
 
@@ -315,9 +315,10 @@ static void render(GB_gameboy_t *gb)
             gb->apu_output.highpass_diff = (GB_double_sample_t) {0, 0};
             break;
         case GB_HIGHPASS_ACCURATE:
-            gb->apu_output.highpass_diff = (GB_double_sample_t)
-                {output.left - filtered_output.left * gb->apu_output.highpass_rate,
-                    output.right - filtered_output.right * gb->apu_output.highpass_rate};
+            gb->apu_output.highpass_diff = (GB_double_sample_t) {
+                output.left  - (output.left  - gb->apu_output.highpass_diff.left)  * gb->apu_output.highpass_rate,
+                output.right - (output.right - gb->apu_output.highpass_diff.right) * gb->apu_output.highpass_rate
+            };
             break;
         case GB_HIGHPASS_REMOVE_DC_OFFSET: {
             unsigned mask = gb->io_registers[GB_IO_NR51];
@@ -334,9 +335,10 @@ static void render(GB_gameboy_t *gb)
                 }
                 mask >>= 1;
             }
-            gb->apu_output.highpass_diff = (GB_double_sample_t)
-            {left_volume * (1 - gb->apu_output.highpass_rate) + gb->apu_output.highpass_diff.left * gb->apu_output.highpass_rate,
-                right_volume * (1 - gb->apu_output.highpass_rate) + gb->apu_output.highpass_diff.right * gb->apu_output.highpass_rate};
+            gb->apu_output.highpass_diff = (GB_double_sample_t) {
+                left_volume  * (1 - gb->apu_output.highpass_rate) + gb->apu_output.highpass_diff.left * gb->apu_output.highpass_rate,
+                right_volume * (1 - gb->apu_output.highpass_rate) + gb->apu_output.highpass_diff.right * gb->apu_output.highpass_rate
+            };
 
         case GB_HIGHPASS_MAX:;
         }
@@ -1748,7 +1750,7 @@ void GB_set_sample_rate(GB_gameboy_t *gb, unsigned sample_rate)
 {
     gb->apu_output.sample_rate = sample_rate;
     if (sample_rate) {
-        gb->apu_output.highpass_rate = pow(0.999958,  GB_get_clock_rate(gb) / (double)sample_rate);
+        gb->apu_output.highpass_rate = pow(0.999958, GB_get_clock_rate(gb) / (double)sample_rate);
         gb->apu_output.max_cycles_per_sample = ceil(GB_get_clock_rate(gb) / 2.0 / sample_rate);
     }
     else {
