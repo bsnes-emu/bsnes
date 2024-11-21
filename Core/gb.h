@@ -728,7 +728,6 @@ struct GB_gameboy_internal_s {
         GB_execution_callback_t execution_callback;
         GB_lcd_line_callback_t lcd_line_callback;
         GB_lcd_status_callback_t lcd_status_callback;
-        GB_debugger_reload_callback_t debugger_reload_callback;
                
 #ifndef GB_DISABLE_DEBUGGER
         /*** Debugger ***/
@@ -773,6 +772,9 @@ struct GB_gameboy_internal_s {
         /* Undo */
         uint8_t *undo_state;
         const char *undo_label;
+               
+        /* Callbacks */
+        GB_debugger_reload_callback_t debugger_reload_callback;
 #endif
 
 #ifndef GB_DISABLE_REWIND
