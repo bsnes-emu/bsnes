@@ -8,6 +8,7 @@
 @implementation GBROMViewController
 {
     NSIndexPath *_renamingPath;
+    NSArray *_roms;
 }
 
 - (instancetype)init
@@ -17,6 +18,11 @@
     
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(deselectRow)
+                                                 name:UIApplicationDidBecomeActiveNotification
+                                               object:nil];
+    
+    [[NSNotificationCenter defaultCenter] addObserver:self.tableView
+                                             selector:@selector(reloadData)
                                                  name:UIApplicationDidBecomeActiveNotification
                                                object:nil];
     
@@ -31,7 +37,7 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     if (section == 1) return 2;
-    return [GBROMManager sharedManager].allROMs.count;
+    return (_roms = [GBROMManager sharedManager].allROMs).count;
 }
 
 - (UITableViewCell *)cellForROM:(NSString *)rom
@@ -72,7 +78,7 @@
         }
         return cell;
     }
-    return [self cellForROM:[GBROMManager sharedManager].allROMs[[indexPath indexAtPosition:1]]];
+    return [self cellForROM:_roms[[indexPath indexAtPosition:1]]];
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -96,7 +102,7 @@
 
 - (void)romSelectedAtIndex:(unsigned)index
 {
-    NSString *rom = [GBROMManager sharedManager].allROMs[index];
+    NSString *rom = _roms[index];
     [GBROMManager sharedManager].currentROM = rom;
     [self.presentingViewController dismissViewControllerAnimated:true completion:nil];
 }
@@ -178,7 +184,7 @@
 
 - (void)deleteROMAtIndex:(unsigned)index
 {
-    NSString *rom = [GBROMManager sharedManager].allROMs[index];
+    NSString *rom = _roms[index];
 
     [[GBROMManager sharedManager] deleteROM:rom];
     [self.tableView deleteRowsAtIndexPaths:@[[NSIndexPath indexPathForRow:index inSection:0]] withRowAnimation:UITableViewRowAnimationAutomatic];
@@ -265,7 +271,7 @@
 
 - (void)duplicateROMAtIndex:(unsigned)index
 {
-    [[GBROMManager sharedManager] duplicateROM:[GBROMManager sharedManager].allROMs[index]];
+    [[GBROMManager sharedManager] duplicateROM:_roms[index]];
     [self.tableView reloadData];
 }
 
