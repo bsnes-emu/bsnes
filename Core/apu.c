@@ -1854,18 +1854,20 @@ int GB_start_audio_recording(GB_gameboy_t *gb, const char *path, GB_audio_format
         case GB_AUDIO_FORMAT_AIFF: {
             aiff_header_t header = {0,};
             if (fwrite(&header, sizeof(header), 1, gb->apu_output.output_file) != 1) {
+                int ret = errno ?: EIO;
                 fclose(gb->apu_output.output_file);
                 gb->apu_output.output_file = NULL;
-                return errno;
+                return ret;
             }
             return 0;
         }
         case GB_AUDIO_FORMAT_WAV: {
             wav_header_t header = {0,};
             if (fwrite(&header, sizeof(header), 1, gb->apu_output.output_file) != 1) {
+                int ret = errno ?: EIO;
                 fclose(gb->apu_output.output_file);
                 gb->apu_output.output_file = NULL;
-                return errno;
+                return ret;
             }
             return 0;
         }

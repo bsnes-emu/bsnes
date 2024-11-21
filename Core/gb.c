@@ -15,6 +15,7 @@
 
 void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes_t attributes, const char *fmt, va_list args)
 {
+    int errno_backup = errno;
     char *string = NULL;
     vasprintf(&string, fmt, args);
     if (string) {
@@ -27,6 +28,7 @@ void GB_attributed_logv(GB_gameboy_t *gb, GB_log_attributes_t attributes, const 
         }
     }
     free(string);
+    errno = errno_backup;
 }
 
 void GB_attributed_log(GB_gameboy_t *gb, GB_log_attributes_t attributes, const char *fmt, ...)
@@ -877,8 +879,7 @@ int GB_save_battery_to_buffer(GB_gameboy_t *gb, uint8_t *buffer, size_t size)
         memcpy(buffer + gb->mbc_ram_size, &rtc_save.vba64, sizeof(rtc_save.vba64));
     }
 
-    errno = 0;
-    return errno;
+    return 0;
 }
 
 int GB_save_battery(GB_gameboy_t *gb, const char *path)
@@ -942,9 +943,8 @@ int GB_save_battery(GB_gameboy_t *gb, const char *path)
 
     }
 
-    errno = 0;
     fclose(f);
-    return errno;
+    return 0;
 }
 
 static void load_tpp1_save_data(GB_gameboy_t *gb, const tpp1_rtc_save_t *data)
