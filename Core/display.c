@@ -588,7 +588,7 @@ static void add_object_from_index(GB_gameboy_t *gb, unsigned index)
         gb->mode2_x_bus = oam_read(gb, index * 4 + 1);
     }
 
-    if (gb->n_visible_objs == 10) return;
+    if (unlikely(gb->n_visible_objs == 10)) return;
     
     /* TODO: It appears that DMA blocks PPU access to OAM, but it needs verification. */
     if (unlikely(GB_is_dma_active(gb) && (gb->halted || gb->stopped))) {
@@ -1903,8 +1903,11 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
                     }
                 }
 
-                if ((!GB_is_cgb(gb) || gb->io_registers[GB_IO_WX] == 0) && gb->wx_triggered && !gb->window_is_being_fetched &&
-                    gb->fetcher_state == GB_FETCHER_GET_TILE_T1 && gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) && gb->bg_fifo.size == 8) {
+                if (unlikely(gb->io_registers[GB_IO_WX] == (uint8_t) (gb->position_in_line + 7) &&
+                             (!GB_is_cgb(gb) || gb->io_registers[GB_IO_WX] == 0) &&
+                             gb->wx_triggered && !gb->window_is_being_fetched &&
+                             gb->fetcher_state == GB_FETCHER_GET_TILE_T1 &&
+                             gb->bg_fifo.size == 8)) {
                     // Insert a pixel right at the FIFO's end
                     gb->insert_bg_pixel = true;
                 }

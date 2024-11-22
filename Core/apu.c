@@ -310,8 +310,8 @@ static void render(GB_gameboy_t *gb)
     if (gb->sgb && gb->sgb->intro_animation < GB_SGB_INTRO_ANIMATION_LENGTH) return;
 
     GB_sample_t filtered_output = gb->apu_output.highpass_mode?
-        (GB_sample_t) {output.left  - gb->apu_output.highpass_diff.left,
-                       output.right - gb->apu_output.highpass_diff.right} :
+        (GB_sample_t) {output.left  - (int16_t)gb->apu_output.highpass_diff.left,
+                       output.right - (int16_t)gb->apu_output.highpass_diff.right} :
         output;
 
     switch (gb->apu_output.highpass_mode) {
