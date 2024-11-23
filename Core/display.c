@@ -42,11 +42,17 @@ const GB_palette_t *GB_get_palette(GB_gameboy_t *gb)
 
 void GB_set_vblank_callback(GB_gameboy_t *gb, GB_vblank_callback_t callback)
 {
+    if (!callback) {
+        GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    }
     gb->vblank_callback = callback;
 }
 
 void GB_set_rgb_encode_callback(GB_gameboy_t *gb, GB_rgb_encode_callback_t callback)
 {
+    if (!callback) {
+        GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    }
     
     gb->rgb_encode_callback = callback;
     GB_update_dmg_palette(gb);
