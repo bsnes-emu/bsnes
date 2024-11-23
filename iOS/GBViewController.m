@@ -78,6 +78,9 @@
     UIButton *_printerButton;
     UIActivityIndicatorView *_printerSpinner;
     NSMutableData *_currentPrinterImageData;
+    
+    NSString *_lastSavedROM;
+    NSDate *_saveDate;
 }
 
 static void loadBootROM(GB_gameboy_t *gb, GB_boot_rom_t type)
@@ -697,7 +700,17 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
                     }
                 }
             }
-            GB_rewind_reset(&_gb);
+            
+            NSDate *date = nil;
+            [[NSURL fileURLWithPath:[GBROMManager sharedManager].autosaveStateFile] getResourceValue:&date
+                                                                                              forKey:NSURLContentModificationDateKey
+                                                                                               error:nil];
+            
+            // Reset the rewind buffer only if we switched ROMs or had the save state change externally
+            if (![_lastSavedROM isEqual:[GBROMManager sharedManager].currentROM] ||
+                ![_saveDate isEqual:date]) {
+                GB_rewind_reset(&_gb);
+            }
         }
     }
     else {
@@ -1155,6 +1168,14 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     if (!_swappingROM) {
         GB_save_battery(&_gb, [GBROMManager sharedManager].batterySaveFile.fileSystemRepresentation);
         [self saveStateToFile:[GBROMManager sharedManager].autosaveStateFile];
+
+        NSDate *date;
+        [[NSURL fileURLWithPath:[GBROMManager sharedManager].autosaveStateFile] getResourceValue:&date
+                                                                                          forKey:NSURLContentModificationDateKey
+                                                                                           error:nil];
+        _saveDate = date;
+        _lastSavedROM = [GBROMManager sharedManager].currentROM;
+
     }
     [[GBHapticManager sharedManager] setRumbleStrength:0];
     if (@available(iOS 14.0, *)) {
