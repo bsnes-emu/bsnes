@@ -218,6 +218,18 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     ((__bridge void(^)(id))context)(change[NSKeyValueChangeNewKey]);
 }
 
+- (NSArray<NSNumber *> *)zoomFactorsForDevice:(AVCaptureDevice *)device
+{
+    if (@available(iOS 13.0, *)) {
+        return device.virtualDeviceSwitchOverVideoZoomFactors;
+    }
+    double factor = device.dualCameraSwitchOverVideoZoomFactor;
+    if (factor == 1.0) {
+        return @[];
+    }
+    return @[@(factor)];
+}
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
     _window = [[UIWindow alloc] init];
@@ -308,7 +320,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     for (AVCaptureDevice *device in cameraDiscoverySession.devices) {
         if ([device position] == AVCaptureDevicePositionBack) {
             if (!_backCaptureDevice ||
-                _backCaptureDevice.virtualDeviceSwitchOverVideoZoomFactors.count < device.virtualDeviceSwitchOverVideoZoomFactors.count) {
+                [self zoomFactorsForDevice:_backCaptureDevice].count < [self zoomFactorsForDevice:device].count) {
                 _backCaptureDevice = device;
             }
         }
@@ -317,7 +329,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         }
     }
     
-    _zoomLevels = _backCaptureDevice.virtualDeviceSwitchOverVideoZoomFactors.mutableCopy;
+    _zoomLevels = [self zoomFactorsForDevice:_backCaptureDevice].mutableCopy;
     [_zoomLevels insertObject:@1 atIndex:0];
     if (_zoomLevels.count == 3 && _zoomLevels[2].doubleValue > 5.5 && _zoomLevels[1].doubleValue < 3.5) {
         [_zoomLevels insertObject:@4 atIndex:2];
