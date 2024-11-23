@@ -819,6 +819,8 @@ uint8_t GB_read_memory(GB_gameboy_t *gb, uint16_t addr)
 
 uint8_t GB_safe_read_memory(GB_gameboy_t *gb, uint16_t addr)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+
     if (unlikely(addr == 0xFF00 + GB_IO_JOYP)) {
         return gb->io_registers[GB_IO_JOYP];
     }
