@@ -1365,8 +1365,8 @@ void GB_serial_set_data_bit(GB_gameboy_t *gb, bool data)
     gb->io_registers[GB_IO_SB] |= data;
     gb->serial_count++;
     if (gb->serial_count == 8) {
-        gb->io_registers[GB_IO_IF] |= 8;
         gb->io_registers[GB_IO_SC] &= ~0x80;
+        gb->io_registers[GB_IO_IF] |= 8;
         gb->serial_count = 0;
     }
 }
