@@ -803,7 +803,7 @@ $(LIBDIR)/libsameboy.a: $(LIBDIR)/libsameboy.o
 	
 $(LIBDIR)/libsameboy.$(DL_EXT): $(CORE_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $(LDFLAGS) -shared $(FAT_FLAGS) $(CFLAGS) $^ -o $@
+	$(CC) $(LDFLAGS) -fPIC -shared $(FAT_FLAGS) $(CFLAGS) $^ -o $@
 ifeq ($(CONF), release)
 	$(STRIP) $@
 	$(CODESIGN)$@
