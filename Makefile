@@ -198,7 +198,7 @@ endif
 
 CFLAGS += $(WARNINGS)
 
-CFLAGS += -std=gnu11 -D_GNU_SOURCE -DGB_VERSION='"$(VERSION)"' -DGB_COPYRIGHT_YEAR='"$(COPYRIGHT_YEAR)"' -I. -D_USE_MATH_DEFINES
+CFLAGS += -std=gnu11 -D_GNU_SOURCE -DGB_VERSION='"$(VERSION)"' -DGB_COPYRIGHT_YEAR='"$(COPYRIGHT_YEAR)"' -I. -D_USE_MATH_DEFINES -fPIC
 ifneq (,$(UPDATE_SUPPORT))
 CFLAGS += -DUPDATE_SUPPORT
 endif
@@ -803,7 +803,7 @@ $(LIBDIR)/libsameboy.a: $(LIBDIR)/libsameboy.o
 	
 $(LIBDIR)/libsameboy.$(DL_EXT): $(CORE_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
-	$(CC) $(LDFLAGS) -fPIC -shared $(FAT_FLAGS) $(CFLAGS) $^ -o $@
+	$(CC) $(LDFLAGS) -shared $(FAT_FLAGS) $(CFLAGS) $^ -o $@
 ifeq ($(CONF), release)
 	$(STRIP) $@
 	$(CODESIGN)$@
