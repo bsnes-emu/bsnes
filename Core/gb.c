@@ -1549,16 +1549,13 @@ static void reset_ram(GB_gameboy_t *gb)
         case GB_MODEL_SGB_PAL_NO_SFC: /* Unverified */
         case GB_MODEL_SGB2:
         case GB_MODEL_SGB2_NO_SFC:
-            for (unsigned i = 0; i < 8; i++) {
+            for (unsigned i = 0; i < sizeof(gb->oam); i++) {
                 if (i & 2) {
                     gb->oam[i] = GB_random() & GB_random() & GB_random();
                 }
                 else {
                     gb->oam[i] = GB_random() | GB_random() | GB_random();
                 }
-            }
-            nounroll for (unsigned i = 8; i < sizeof(gb->oam); i++) {
-                gb->oam[i] = gb->oam[i - 8];
             }
             break;
     }
