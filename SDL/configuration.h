@@ -157,6 +157,9 @@ typedef struct {
         
         /* v1.0 */
         bool windows_associations_prompted; // Windows only
+        
+        /* v1.0.1 */
+        bool disable_rounded_corners; // Windows only
     };
 } configuration_t;
 

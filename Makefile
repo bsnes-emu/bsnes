@@ -272,7 +272,7 @@ endif
 
 ifeq ($(PLATFORM),windows32)
 CFLAGS += -IWindows -Drandom=rand --target=x86_64-pc-windows
-LDFLAGS += -lmsvcrt -lcomdlg32 -luser32 -lshell32 -lole32 -ladvapi32 -lSDL2main -Wl,/MANIFESTFILE:NUL --target=x86_64-pc-windows
+LDFLAGS += -lmsvcrt -lkernel32 -lcomdlg32 -luser32 -lshell32 -lole32 -ladvapi32 -ldwmapi -lSDL2main -Wl,/MANIFESTFILE:NUL --target=x86_64-pc-windows -v
 
 SDL_LDFLAGS := -lSDL2
 GL_LDFLAGS := -lopengl32
@@ -692,7 +692,7 @@ ifeq ($(CONF), release)
 	$(CODESIGN) $@
 endif
 
-$(BIN)/tester/sameboy_tester.exe: $(CORE_OBJECTS) $(SDL_OBJECTS)
+$(BIN)/tester/sameboy_tester.exe: $(CORE_OBJECTS)
 	-@$(MKDIR) -p $(dir $@)
 	$(CC) $^ -o $@ $(LDFLAGS) -Wl,/subsystem:console
 

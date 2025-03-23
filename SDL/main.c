@@ -1221,6 +1221,10 @@ int main(int argc, char **argv)
     if (fullscreen) {
         SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
     }
+
+#ifdef _WIN32
+    configure_window_corners();
+#endif
     
     gl_context = nogl? NULL : SDL_GL_CreateContext(window);
     

@@ -67,3 +67,7 @@ extern unsigned osd_text_lines;
 void convert_mouse_coordinates(signed *x, signed *y);
 const GB_palette_t *current_dmg_palette(void);
 void update_swap_interval(void);
+
+#ifdef _WIN32
+void configure_window_corners(void);
+#endif
