@@ -322,6 +322,13 @@ CFLAGS += -Wno-deprecated-declarations
 ifeq ($(PLATFORM),windows32)
 CFLAGS += -Wno-deprecated-declarations # Seems like Microsoft deprecated every single LIBC function
 LDFLAGS += -Wl,/NODEFAULTLIB:libcmt.lib
+
+ifneq ($(USE_MSVCRT_DLL),)
+CFLAGS += -D_NO_CRT_STDIO_INLINE -DUSE_MSVCRT_DLL
+$(BIN)/SDL/sameboy.exe: $(OBJ)/Windows/msvcrt.lib
+$(BIN)/SDL/sameboy_debugger.exe: $(OBJ)/Windows/msvcrt.lib
+endif
+
 endif
 endif
 
@@ -893,6 +900,10 @@ $(LIBDIR)/libsameboy.dll: $(CORE_OBJECTS) | $(OBJ)/exports.def
 $(INC)/%.h: Core/%.h
 	-@$(MKDIR) -p $(dir $@)
 	sed "s/'/@SINGLE_QUOTE@/g" $^ | cppp $(CPPP_FLAGS) | sed "s/@SINGLE_QUOTE@/'/g" > $@
+	
+# Generate msvcrt.lib so we can use the always-present msvcrt.dll
+$(OBJ)/Windows/msvcrt.lib: Windows/msvcrt.def
+	lib.exe /MACHINE:X64 /def:$< /out:$@
 	
 # Clean
 clean:
