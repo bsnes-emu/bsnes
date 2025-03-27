@@ -14,7 +14,7 @@
 
 #ifdef _WIN32
 #include <dwmapi.h>
-#include <associations.h>
+#include "windows_associations.h"
 #include <SDL_syswm.h>
 #endif
 

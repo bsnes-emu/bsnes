@@ -80,6 +80,11 @@ int _seh_filter_exe(unsigned exception_num, void *exception)
     return 0;
 }
 
+int _seh_filter_dll(unsigned ExceptionNum, struct _EXCEPTION_POINTERS *ExceptionPtr)
+{
+    return 0;
+}
+
 void _set_app_type(unsigned type)
 {
 }
@@ -87,5 +92,14 @@ void _set_app_type(unsigned type)
 int _set_new_mode(int new_mode)
 {
     return 0;
+}
+
+int _execute_onexit_table(void *Table)
+{
+    return 0;
+}
+
+void __std_type_info_destroy_list(void *const root_node)
+{
 }
 #endif
