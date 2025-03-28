@@ -495,6 +495,7 @@ static void handle_events(GB_gameboy_t *gb)
                     case SDL_SCANCODE_R:
                         if (event.key.keysym.mod & MODIFIER) {
                             pending_command = GB_SDL_RESET_COMMAND;
+                            paused = false;
                         }
                         break;
                         
