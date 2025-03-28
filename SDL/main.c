@@ -123,6 +123,9 @@ retry: {
 #endif
         SDL_Event event;
         SDL_WaitEvent(&event);
+        if (pending_command == GB_SDL_QUIT_COMMAND) {
+            return strdup("c");
+        }
         switch (event.type) {
             case SDL_DISPLAYEVENT:
                 update_swap_interval();
@@ -673,7 +676,15 @@ static void rumble(GB_gameboy_t *gb, double amp)
 
 static void debugger_interrupt(int ignore)
 {
+#ifndef _WIN32
+    if (GB_debugger_is_stopped(&gb)) {
+        pending_command = GB_SDL_QUIT_COMMAND;
+        console_line_ready(); // Force the debugger wait-loop to process the command
+        return;
+    }
+#endif
     pending_command = GB_SDL_DEBUGGER_INTERRUPT_COMMAND;
+
 }
 
 #ifndef _WIN32
