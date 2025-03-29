@@ -1984,6 +1984,16 @@ static const char *current_rumble_mode(unsigned index)
         [configuration.rumble_mode];
 }
 
+static void toggle_use_faux_analog_inputs(unsigned index)
+{
+    configuration.use_faux_analog_inputs ^= true;
+}
+
+static const char *current_faux_analog_inputs(unsigned index)
+{
+    return configuration.use_faux_analog_inputs? "Faux Analog" : "Digital";
+}
+
 static void toggle_allow_background_controllers(unsigned index)
 {
     configuration.allow_background_controllers ^= true;
@@ -2054,6 +2064,7 @@ static const struct menu_item joypad_menu[] = {
     {"Hotkey 1 Action:", cycle_hotkey, current_hotkey, cycle_hotkey_backwards},
     {"Hotkey 2 Action:", cycle_hotkey, current_hotkey, cycle_hotkey_backwards},
     {"Rumble Mode:", cycle_rumble_mode, current_rumble_mode, cycle_rumble_mode_backwards},
+    {"Analog Stick Behavior:", toggle_use_faux_analog_inputs, current_faux_analog_inputs, toggle_use_faux_analog_inputs},
     {"Enable Control:", toggle_allow_background_controllers, current_background_control_mode, toggle_allow_background_controllers},
     {"Back", enter_controls_menu},
     {NULL,}

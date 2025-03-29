@@ -423,19 +423,25 @@ static void handle_events(GB_gameboy_t *gb)
             case SDL_JOYAXISMOTION: {
                 static bool axis_active[2] = {false, false};
                 static double accel_values[2] = {0, 0};
+                static double axis_values[2] = {0, 0};
                 joypad_axis_t axis = get_joypad_axis(event.jaxis.axis);
                 if (axis == JOYPAD_AXISES_X) {
                     if (GB_has_accelerometer(gb)) {
                         accel_values[0] = event.jaxis.value / (double)32768.0;
                         GB_set_accelerometer_values(gb, -accel_values[0], -accel_values[1]);
                     }
+                    else if (configuration.use_faux_analog_inputs) {
+                        axis_values[0] = event.jaxis.value / (double)32768.0;
+                    }
                     else if (event.jaxis.value > JOYSTICK_HIGH) {
                         axis_active[0] = true;
+                        GB_set_use_faux_analog_inputs(gb, 0, false);
                         GB_set_key_state(gb, GB_KEY_RIGHT, true);
                         GB_set_key_state(gb, GB_KEY_LEFT, false);
                     }
                     else if (event.jaxis.value < -JOYSTICK_HIGH) {
                         axis_active[0] = true;
+                        GB_set_use_faux_analog_inputs(gb, 0, false);
                         GB_set_key_state(gb, GB_KEY_RIGHT, false);
                         GB_set_key_state(gb, GB_KEY_LEFT, true);
                     }
@@ -450,13 +456,18 @@ static void handle_events(GB_gameboy_t *gb)
                         accel_values[1] = event.jaxis.value / (double)32768.0;
                         GB_set_accelerometer_values(gb, -accel_values[0], -accel_values[1]);
                     }
+                    else if (configuration.use_faux_analog_inputs) {
+                        axis_values[1] = event.jaxis.value / (double)32768.0;
+                    }
                     else if (event.jaxis.value > JOYSTICK_HIGH) {
                         axis_active[1] = true;
+                        GB_set_use_faux_analog_inputs(gb, 0, false);
                         GB_set_key_state(gb, GB_KEY_DOWN, true);
                         GB_set_key_state(gb, GB_KEY_UP, false);
                     }
                     else if (event.jaxis.value < -JOYSTICK_HIGH) {
                         axis_active[1] = true;
+                        GB_set_use_faux_analog_inputs(gb, 0, false);
                         GB_set_key_state(gb, GB_KEY_DOWN, false);
                         GB_set_key_state(gb, GB_KEY_UP, true);
                     }
@@ -466,8 +477,12 @@ static void handle_events(GB_gameboy_t *gb)
                         GB_set_key_state(gb, GB_KEY_UP, false);
                     }
                 }
-            }
+                if (configuration.use_faux_analog_inputs && !GB_has_accelerometer(gb)) {
+                    GB_set_use_faux_analog_inputs(gb, 0, true);
+                    GB_set_faux_analog_inputs(gb, 0, axis_values[0], axis_values[1]);
+                }
                 break;
+            }
                 
             case SDL_JOYHATMOTION: {
                 uint8_t value = event.jhat.value;
@@ -476,6 +491,7 @@ static void handle_events(GB_gameboy_t *gb)
                 int8_t leftright =
                 value == SDL_HAT_LEFTUP || value == SDL_HAT_LEFT || value == SDL_HAT_LEFTDOWN ? -1 : (value == SDL_HAT_RIGHTUP || value == SDL_HAT_RIGHT || value == SDL_HAT_RIGHTDOWN ? 1 : 0);
                 
+                GB_set_use_faux_analog_inputs(gb, 0, false);
                 GB_set_key_state(gb, GB_KEY_LEFT, leftright == -1);
                 GB_set_key_state(gb, GB_KEY_RIGHT, leftright == 1);
                 GB_set_key_state(gb, GB_KEY_UP, updown == -1);
@@ -598,6 +614,9 @@ static void handle_events(GB_gameboy_t *gb)
                 else {
                     for (unsigned i = 0; i < GB_KEY_MAX; i++) {
                         if (event.key.keysym.scancode == configuration.keys[i]) {
+                            if (i <= GB_KEY_DOWN) {
+                                GB_set_use_faux_analog_inputs(gb, 0, false);
+                            }
                             GB_set_key_state(gb, i, event.type == SDL_KEYDOWN);
                         }
                     }

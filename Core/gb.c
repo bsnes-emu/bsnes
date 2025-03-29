@@ -1205,6 +1205,7 @@ unsigned GB_run(GB_gameboy_t *gb)
     GB_cpu_run(gb);
     GB_clear_running_thread(gb);
     if (unlikely(gb->vblank_just_occured)) {
+        GB_update_faux_analog(gb);
         GB_debugger_handle_async_commands(gb);
         GB_set_running_thread(gb);
         GB_rewind_push(gb);
