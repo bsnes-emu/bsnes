@@ -45,6 +45,8 @@ static unsigned factor;
 
 static SDL_Surface *converted_background = NULL;
 
+bool screen_manually_resized = false;
+
 void render_texture(void *pixels,  void *previous)
 {
     if (renderer) {
@@ -1253,6 +1255,7 @@ static void cycle_scaling_backwards(unsigned index)
     }
     update_viewport();
     render_texture(NULL, NULL);
+    screen_manually_resized = false;
 }
 
 static void cycle_default_scale(unsigned index)
@@ -1266,6 +1269,7 @@ static void cycle_default_scale(unsigned index)
 
     rescale_window();
     update_viewport();
+    screen_manually_resized = false;
 }
 
 static void cycle_default_scale_backwards(unsigned index)
@@ -1279,6 +1283,7 @@ static void cycle_default_scale_backwards(unsigned index)
 
     rescale_window();
     update_viewport();
+    screen_manually_resized = false;
 }
 
 static void cycle_color_correction(unsigned index)
@@ -2485,6 +2490,7 @@ void run_gui(bool is_running)
                 if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
                     update_viewport();
                     render_texture(NULL, NULL);
+                    screen_manually_resized = true;
                 }
                 if (event.window.type == SDL_WINDOWEVENT_MOVED
 #if SDL_COMPILEDVERSION > 2018
@@ -2639,6 +2645,7 @@ void run_gui(bool is_running)
                     }
                     update_swap_interval();
                     update_viewport();
+                    screen_manually_resized = true;
                 }
                 else if (event_hotkey_code(&event) == SDL_SCANCODE_O) {
                     if (event.key.keysym.mod & MODIFIER) {
