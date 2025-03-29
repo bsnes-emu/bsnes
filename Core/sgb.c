@@ -640,7 +640,9 @@ void GB_sgb_render(GB_gameboy_t *gb)
                     for (unsigned x = 0; x < 8; x++) {
                         *data |= pixel_to_bits[gb->sgb->screen_buffer[(tile_x + x) + (tile_y + y) * 160] & 3] >> x;
                     }
-                    *data = LE16(*data);
+                    if (gb->sgb->transfer_dest == TRANSFER_PALETTES || gb->sgb->transfer_dest == TRANSFER_BORDER_DATA) {
+                        *data = LE16(*data);
+                    }
                     data++;
                 }
             }
