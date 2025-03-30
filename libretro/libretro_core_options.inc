@@ -310,12 +310,13 @@ struct retro_core_option_v2_definition option_defs_us[] = {
         "sameboy_audio_output",
         "System - Audio Output",
         "Audio Output",
-        "Selects which of the two emulated Game Boy systems should output audio.",
+        "Selects which of the two emulated Game Boy systems should output audio. If Mix Both is chosen, both Game Boys must have the same clock speed.",
         NULL,
         "system",
         {
             { "Game Boy #1", NULL },
             { "Game Boy #2", NULL },
+            { "Mix Both", NULL },
             { NULL, NULL },
         },
         "Game Boy #1"
