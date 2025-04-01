@@ -833,6 +833,7 @@ void GB_sgb_load_default_data(GB_gameboy_t *gb)
 
 static double fm_sin(double phase)
 {
+#define SIN_TABLE_LENGTH 128
     phase /= 2 * M_PI;
     phase = fabs(phase);
     phase -= floor(phase);
@@ -844,16 +845,15 @@ static double fm_sin(double phase)
     }
     
     static bool once = false;
-    static const size_t table_length = 128;
-    static double table[table_length + 1];
+    static double table[SIN_TABLE_LENGTH + 1];
     if (!once) {
-        for (unsigned i = 0; i < table_length + 1; i++) {
-            table[i] = sin(i * M_PI / 2 / table_length);
+        for (unsigned i = 0; i < SIN_TABLE_LENGTH + 1; i++) {
+            table[i] = sin(i * M_PI / 2 / SIN_TABLE_LENGTH);
         }
         once = true;
     }
     
-    phase *= 4 * table_length;
+    phase *= 4 * SIN_TABLE_LENGTH;
     double fraction = phase - floor(phase);
     return table[(unsigned)floor(phase)] * (1 - fraction) + table[(unsigned)ceil(phase)] * (fraction);
 }
