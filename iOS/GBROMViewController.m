@@ -9,6 +9,7 @@
 {
     NSIndexPath *_renamingPath;
     NSArray *_roms;
+    __weak UIAlertController *_alertToRemove;
 }
 
 - (instancetype)init
@@ -204,6 +205,7 @@
     [alert addAction:[UIAlertAction actionWithTitle:@"Cancel"
                                               style:UIAlertActionStyleCancel
                                             handler:nil]];
+    _alertToRemove = alert; // indexPath becoomes invalid if we reload, dismiss the alert if it happens
     [self presentViewController:alert animated:true completion:nil];
 }
 
@@ -321,6 +323,9 @@ contextMenuConfigurationForRowAtIndexPath:(NSIndexPath *)indexPath
     // Do not auto-reload if busy
     if (self.view.window.userInteractionEnabled) {
         [self.tableView reloadData];
+        if (self.presentedViewController == _alertToRemove) {
+            [self dismissViewControllerAnimated:true completion:nil];
+        }
     }
 }
 
