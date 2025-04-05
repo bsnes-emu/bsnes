@@ -282,9 +282,11 @@ sdl: $(BIN)/SDL/xaudio2_9redist.dll
 endif
 else
 LDFLAGS += -lc -lm
-# libdl is not available as a standalone library in Haiku
+# libdl is not available as a standalone library in Haiku or OpenBSD
 ifneq ($(PLATFORM),Haiku)
+ifneq ($(PLATFORM),OpenBSD)
 LDFLAGS += -ldl
+endif
 endif
 endif
 
