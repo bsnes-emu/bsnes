@@ -1,6 +1,9 @@
 #pragma once
 
 #ifdef __cplusplus
+#if defined(__STRICT_ANSI__) && !defined(typeof)
+#define typeof decltype
+#endif
 extern "C" {
 #endif
 
