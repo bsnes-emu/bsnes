@@ -1382,7 +1382,9 @@ int main(int argc, char **argv)
     signal(SIGUSR1, debugger_reset);
 #endif
 
-    SDL_Init(SDL_INIT_EVERYTHING & ~SDL_INIT_AUDIO);
+    if (SDL_Init(SDL_INIT_EVERYTHING & ~SDL_INIT_AUDIO) < 0) {
+        fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
+    }
     // This is, essentially, best-effort.
     // This function will not be called if the process is terminated in any way, anyhow.
     atexit(SDL_Quit);
