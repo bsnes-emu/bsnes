@@ -132,13 +132,20 @@ void GB_remove_cheat(GB_gameboy_t *gb, const GB_cheat_t *cheat)
                 *hash = NULL;
             }
             else {
-                *hash = malloc(sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
+                *hash = realloc(*hash, sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
             }
             break;
         }
     }
     
     free((void *)cheat);
+}
+
+void GB_remove_all_cheats(GB_gameboy_t *gb)
+{
+    while (gb->cheats) {
+        GB_remove_cheat(gb, gb->cheats[0]);
+    }
 }
 
 const GB_cheat_t *GB_import_cheat(GB_gameboy_t *gb, const char *cheat, const char *description, bool enabled)
@@ -152,15 +159,12 @@ const GB_cheat_t *GB_import_cheat(GB_gameboy_t *gb, const char *cheat, const cha
         uint8_t value;
         uint16_t address;
         if (sscanf(cheat, "%02hhx%02hhx%04hx%c", &bank, &value, &address, &dummy) == 3) {
-            if (bank >= 0x80) {
-                bank &= 0xF;
-            }
             address = __builtin_bswap16(address);
-            return GB_add_cheat(gb, description, address, bank, value, 0, false, enabled);
+            return GB_add_cheat(gb, description, address, bank == 1? GB_CHEAT_ANY_BANK : (bank & 0xF), value, 0, false, enabled);
         }
     }
     
-    /* GameGenie */
+    /* Game Genie */
     {
         char stripped_cheat[10] = {0,};
         for (unsigned i = 0; i < 9 && *cheat; i++) {
@@ -216,6 +220,7 @@ void GB_update_cheat(GB_gameboy_t *gb, const GB_cheat_t *_cheat, const char *des
     }
     
     assert(cheat);
+    if (!cheat) return;
     
     if (cheat->address != address) {
         /* Remove from old bucket */
@@ -228,7 +233,7 @@ void GB_update_cheat(GB_gameboy_t *gb, const GB_cheat_t *_cheat, const char *des
                     *hash = NULL;
                 }
                 else {
-                    *hash = malloc(sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
+                    *hash = realloc(*hash, sizeof(GB_cheat_hash_t) + sizeof(cheat) * (*hash)->size);
                 }
                 break;
             }
@@ -261,13 +266,13 @@ void GB_update_cheat(GB_gameboy_t *gb, const GB_cheat_t *_cheat, const char *des
 
 #define CHEAT_MAGIC 'SBCh'
 
-void GB_load_cheats(GB_gameboy_t *gb, const char *path)
+int GB_load_cheats(GB_gameboy_t *gb, const char *path, bool replace_existing)
 {
     GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
     
     FILE *f = fopen(path, "rb");
     if (!f) {
-        return;
+        return errno;
     }
     
     uint32_t magic = 0;
@@ -276,17 +281,17 @@ void GB_load_cheats(GB_gameboy_t *gb, const char *path)
     fread(&struct_size, sizeof(struct_size), 1, f);
     if (magic != LE32(CHEAT_MAGIC) && magic != BE32(CHEAT_MAGIC)) {
         GB_log(gb, "The file is not a SameBoy cheat database");
-        return;
+        return -1;
     }
     
     if (struct_size != sizeof(GB_cheat_t)) {
         GB_log(gb, "This cheat database is not compatible with this version of SameBoy");
-        return;
+        return -1;
     }
     
     // Remove all cheats first
-    while (gb->cheats) {
-        GB_remove_cheat(gb, gb->cheats[0]);
+    if (replace_existing) {
+        GB_remove_all_cheats(gb);
     }
     
     GB_cheat_t cheat;
@@ -299,7 +304,7 @@ void GB_load_cheats(GB_gameboy_t *gb, const char *path)
         GB_add_cheat(gb, cheat.description, cheat.address, cheat.bank, cheat.value, cheat.old_value, cheat.use_old_value, cheat.enabled);
     }
     
-    return;
+    return 0;
 }
 
 int GB_save_cheats(GB_gameboy_t *gb, const char *path)
@@ -331,7 +336,6 @@ int GB_save_cheats(GB_gameboy_t *gb, const char *path)
         }
     }
     
-    errno = 0;
     fclose(f);
-    return errno;
+    return 0;
 }

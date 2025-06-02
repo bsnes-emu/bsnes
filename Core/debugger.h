@@ -5,6 +5,8 @@
 #include "defs.h"
 #include "symbol_hash.h"
 
+typedef void (*GB_debugger_reload_callback_t)(GB_gameboy_t *gb);
+
 void GB_debugger_break(GB_gameboy_t *gb);
 #ifdef GB_INTERNAL
 bool /* Returns true if debugger waits for more commands. Not relevant for non-GB_INTERNAL */
@@ -21,6 +23,7 @@ bool GB_debugger_evaluate(GB_gameboy_t *gb, const char *string, uint16_t *result
 bool GB_debugger_is_stopped(GB_gameboy_t *gb);
 void GB_debugger_set_disabled(GB_gameboy_t *gb, bool disabled);
 void GB_debugger_clear_symbols(GB_gameboy_t *gb);
+void GB_debugger_set_reload_callback(GB_gameboy_t *gb, GB_debugger_reload_callback_t callback);
 
 #ifdef GB_INTERNAL
 internal void GB_debugger_run(GB_gameboy_t *gb);
@@ -31,6 +34,9 @@ internal void GB_debugger_test_write_watchpoint(GB_gameboy_t *gb, uint16_t addr,
 internal void GB_debugger_test_read_watchpoint(GB_gameboy_t *gb, uint16_t addr);
 internal const GB_bank_symbol_t *GB_debugger_find_symbol(GB_gameboy_t *gb, uint16_t addr, bool prefer_local);
 internal void GB_debugger_add_symbol(GB_gameboy_t *gb, uint16_t bank, uint16_t address, const char *symbol);
+#ifndef GB_DISABLE_CHEAT_SEARCH
+internal bool GB_debugger_evaluate_cheat_filter(GB_gameboy_t *gb, const char *string, bool *result, uint16_t old, uint16_t new);
+#endif
 #endif
 
 #else // GB_DISABLE_DEBUGGER

@@ -226,22 +226,22 @@ void GB_set_internal_div_counter(GB_gameboy_t *gb, uint16_t value)
 {
     /* TIMA increases when a specific high-bit becomes a low-bit. */
     uint16_t triggers = gb->div_counter & ~value;
-    if ((gb->io_registers[GB_IO_TAC] & 4) && (triggers & TAC_TRIGGER_BITS[gb->io_registers[GB_IO_TAC] & 3])) {
+    if ((gb->io_registers[GB_IO_TAC] & 4) && unlikely(triggers & TAC_TRIGGER_BITS[gb->io_registers[GB_IO_TAC] & 3])) {
         increase_tima(gb);
     }
     
-    if (triggers & gb->serial_mask) {
+    if (unlikely(triggers & gb->serial_mask)) {
         GB_serial_master_edge(gb);
     }
     
     /* TODO: Can switching to double speed mode trigger an event? */
     uint16_t apu_bit = gb->cgb_double_speed? 0x2000 : 0x1000;
-    if (triggers & apu_bit) {
+    if (unlikely(triggers & apu_bit)) {
         GB_apu_div_event(gb);
     }
     else {
         uint16_t secondary_triggers = ~gb->div_counter & value;
-        if (secondary_triggers & apu_bit) {
+        if (unlikely(secondary_triggers & apu_bit)) {
             GB_apu_div_secondary_event(gb);
         }
     }
@@ -252,8 +252,9 @@ static void timers_run(GB_gameboy_t *gb, uint8_t cycles)
 {
     if (gb->stopped) {
         if (GB_is_cgb(gb)) {
-            gb->apu.apu_cycles += 4 << !gb->cgb_double_speed;
+            gb->apu.apu_cycles += 1 << !gb->cgb_double_speed;
         }
+        gb->apu_output.sample_cycles += (gb->apu_output.sample_rate << !gb->cgb_double_speed) << 1;
         return;
     }
     
@@ -266,7 +267,8 @@ static void timers_run(GB_gameboy_t *gb, uint8_t cycles)
     while (true) {
         advance_tima_state_machine(gb);
         GB_set_internal_div_counter(gb, gb->div_counter + 4);
-        gb->apu.apu_cycles += 4 << !gb->cgb_double_speed;
+        gb->apu.apu_cycles += 1 << !gb->cgb_double_speed;
+        gb->apu_output.sample_cycles += (gb->apu_output.sample_rate << !gb->cgb_double_speed) << 1;
         GB_SLEEP(gb, div, 2, 4);
     }
 }
@@ -476,7 +478,6 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     if (likely(gb->io_registers[GB_IO_LCDC] & GB_LCDC_ENABLE)) {
         gb->double_speed_alignment += cycles;
     }
-    gb->apu_output.sample_cycles += cycles * gb->apu_output.sample_rate;
     gb->cycles_since_last_sync += cycles;
     gb->cycles_since_run += cycles;
     

@@ -425,6 +425,15 @@ static void sanitize_state(GB_gameboy_t *gb)
     if (gb->camera_update_request_callback) {
         GB_camera_updated(gb);
     }
+    
+    if (!gb->apu.apu_cycles_in_2mhz) {
+        gb->apu.apu_cycles >>= 2;
+        gb->apu.apu_cycles_in_2mhz = true;
+    }
+    
+    if (gb->n_visible_objs > 10) {
+        gb->n_visible_objs = 10;
+    }
 }
 
 static bool dump_section(virtual_file_t *file, const void *src, uint32_t size)
@@ -829,9 +838,8 @@ static int save_state_internal(GB_gameboy_t *gb, virtual_file_t *file, bool appe
         goto error;
     }
     
-    errno = 0;
 error:
-    return errno;
+    return 0;
 }
 
 int GB_save_state(GB_gameboy_t *gb, const char *path)
@@ -1347,10 +1355,12 @@ static int load_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
         return errno ?: EIO;
     }
     
-    size_t orig_ram_size = gb->ram_size;
+    uint32_t ram_size = gb->ram_size;
+    uint32_t mbc_ram_size = gb->mbc_ram_size;
     memcpy(gb, &save, sizeof(save));
-    gb->ram_size = orig_ram_size;
-    
+    gb->ram_size = ram_size;
+    gb->mbc_ram_size = mbc_ram_size;
+
     sanitize_state(gb);
     GB_rewind_invalidate_for_backstepping(gb);
     return 0;

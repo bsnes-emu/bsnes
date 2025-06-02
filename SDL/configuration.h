@@ -11,6 +11,27 @@ enum scaling_mode {
     GB_SDL_SCALING_MAX,
 };
 
+enum {
+    GB_CONF_KEYS_RIGHT = GB_KEY_RIGHT,
+    GB_CONF_KEYS_LEFT = GB_KEY_LEFT,
+    GB_CONF_KEYS_UP = GB_KEY_UP,
+    GB_CONF_KEYS_DOWN = GB_KEY_DOWN,
+    GB_CONF_KEYS_A = GB_KEY_A,
+    GB_CONF_KEYS_B = GB_KEY_B,
+    GB_CONF_KEYS_SELECT = GB_KEY_SELECT,
+    GB_CONF_KEYS_START = GB_KEY_START,
+    GB_CONF_KEYS_TURBO,
+    GB_CONF_KEYS_COUNT,
+};
+
+enum {
+    GB_CONF_KEYS2_REWIND,
+    GB_CONF_KEYS2_UNDERCLOCK,
+    GB_CONF_KEYS2_RAPID_A,
+    GB_CONF_KEYS2_RAPID_B,
+    GB_CONF_KEYS2_COUNT = 32,
+};
+
 typedef enum {
     JOYPAD_BUTTON_RIGHT,
     JOYPAD_BUTTON_LEFT,
@@ -26,6 +47,8 @@ typedef enum {
     JOYPAD_BUTTON_SLOW_MOTION,
     JOYPAD_BUTTON_HOTKEY_1,
     JOYPAD_BUTTON_HOTKEY_2,
+    JOYPAD_BUTTON_RAPID_A,
+    JOYPAD_BUTTON_RAPID_B,
     JOYPAD_BUTTONS_MAX
 } joypad_button_t;
 
@@ -65,7 +88,7 @@ typedef enum {
 } hotkey_action_t;
 
 typedef struct {
-    SDL_Scancode keys[9];
+    SDL_Scancode keys[GB_CONF_KEYS_COUNT];
     GB_color_correction_mode_t color_correction_mode;
     enum scaling_mode scaling_mode;
     uint8_t blending_mode;
@@ -83,12 +106,13 @@ typedef struct {
         MODEL_AGB,
         MODEL_SGB,
         MODEL_MGB,
+        MODEL_AUTO,
         MODEL_MAX,
     } model;
     
     /* v0.11 */
     uint32_t rewind_length;
-    SDL_Scancode keys_2[32]; /* Rewind and underclock, + padding for the future */
+    SDL_Scancode keys_2[GB_CONF_KEYS2_COUNT]; /* Rewind and underclock, + padding for the future */
     uint8_t joypad_configuration[32]; /* 14 Keys + padding for the future*/;
     uint8_t joypad_axises[JOYPAD_AXISES_MAX];
     
@@ -119,7 +143,6 @@ typedef struct {
     bool osd;
     
     struct __attribute__((packed, aligned(4))) {
-        
         /* v0.15 */
         bool allow_mouse_controls;
         uint8_t cgb_revision;
@@ -127,10 +150,17 @@ typedef struct {
         char audio_driver[16];
         /* v0.15.2 */
         bool allow_background_controllers;
-        bool gui_pallete_enabled; // Change the GUI palette only once the user changed the DMG palette
+        bool gui_palette_enabled; // Change the GUI palette only once the user changed the DMG palette
         char dmg_palette_name[25];
         hotkey_action_t hotkey_actions[2];
         uint16_t agb_revision;
+        
+        /* v1.0 */
+        bool windows_associations_prompted; // Windows only
+        
+        /* v1.0.1 */
+        bool disable_rounded_corners; // Windows only
+        bool use_faux_analog_inputs;
     };
 } configuration_t;
 

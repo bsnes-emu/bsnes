@@ -1,7 +1,7 @@
 Package: com.github.liji32.sameboy.ios
 Name: SameBoy
 Depends: firmware (>= 11.0)
-Architecture: iphoneos-arm
+Architecture: all
 Description: A Game Boy emulator for iOS
 Maintainer: Lior Halphon
 Author: Lior Halphon

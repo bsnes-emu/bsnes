@@ -43,10 +43,15 @@ static uint32_t color_to_int(NSColor *color)
     [NSApplication sharedApplication].applicationIconImage = [NSImage imageNamed:@"AppIcon"];
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    for (unsigned i = 0; i < GBButtonCount; i++) {
+    for (unsigned i = 0; i < GBKeyboardButtonCount; i++) {
         if ([[defaults objectForKey:button_to_preference_name(i, 0)] isKindOfClass:[NSString class]]) {
             [defaults removeObjectForKey:button_to_preference_name(i, 0)];
         }
+    }
+    
+    bool hasSFMono = false;
+    if (@available(macOS 10.15, *)) {
+        hasSFMono = [[NSFont monospacedSystemFontOfSize:12 weight:NSFontWeightRegular].displayName containsString:@"SF"];
     }
     [[NSUserDefaults standardUserDefaults] registerDefaults:@{
                                                               @"GBRight": @(kVK_RightArrow),
@@ -66,7 +71,7 @@ static uint32_t color_to_int(NSColor *color)
                                                               @"GBFilter": @"NearestNeighbor",
                                                               @"GBColorCorrection": @(GB_COLOR_CORRECTION_MODERN_BALANCED),
                                                               @"GBHighpassFilter": @(GB_HIGHPASS_ACCURATE),
-                                                              @"GBRewindLength": @(10),
+                                                              @"GBRewindLength": @(120),
                                                               @"GBFrameBlendingMode": @([defaults boolForKey:@"DisableFrameBlending"]? GB_FRAME_BLENDING_MODE_DISABLED : GB_FRAME_BLENDING_MODE_ACCURATE),
                                                               
                                                               @"GBDMGModel": @(GB_MODEL_DMG_B),
@@ -83,8 +88,21 @@ static uint32_t color_to_int(NSColor *color)
                                                               @"GBJoyConAutoPair": @YES,
                                                               @"GBJoyConsDefaultsToHorizontal": @YES,
                                                               
+                                                              @"GBEmulatedModel": @(MODEL_AUTO),
+                                                              
+                                                              @"GBDebuggerFont": hasSFMono? @"SF Mono" : @"Menlo",
+                                                              @"GBDebuggerFontSize": @12,
+                                                              
                                                               // Default themes
                                                               @"GBThemes": @{
+                                                                      @"Canyon": @{
+                                                                              @"BrightnessBias": @0.1227009965823247,
+                                                                              @"Colors": @[@0xff0c1e20, @0xff122b91, @0xff466aa2, @0xfff1efae, @0xfff1efae],
+                                                                              @"DisabledLCDColor": @NO,
+                                                                              @"HueBias": @0.01782661816105247,
+                                                                              @"HueBiasStrength": @1,
+                                                                              @"Manual": @NO,
+                                                                      },
                                                                       @"Desert": @{
                                                                               @"BrightnessBias": @0.0,
                                                                               @"Colors": @[@0xff302f3e, @0xff576674, @0xff839ba4, @0xffb1d0d2, @0xffb7d7d8],
@@ -109,6 +127,30 @@ static uint32_t color_to_int(NSColor *color)
                                                                               @"HueBiasStrength": @0.18424738545816732,
                                                                               @"Manual": @NO,
                                                                       },
+                                                                      @"Green Slate": @{
+                                                                              @"BrightnessBias": @0.2210012227296829,
+                                                                              @"Colors": @[@0xff343117, @0xff6a876f, @0xff98b4a1, @0xffc3daca, @0xffc8decf],
+                                                                              @"DisabledLCDColor": @YES,
+                                                                              @"HueBias": @0.1887667975388467,
+                                                                              @"HueBiasStrength": @0.1272283345460892,
+                                                                              @"Manual": @NO,
+                                                                      },
+                                                                      @"Green Tea": @{
+                                                                              @"BrightnessBias": @-0.4946326622596153,
+                                                                              @"Colors": @[@0xff1a1d08, @0xff1d5231, @0xff3b9774, @0xff97e4c6, @0xffa9eed1],
+                                                                              @"DisabledLCDColor": @YES,
+                                                                              @"HueBias": @0.1912955007245464,
+                                                                              @"HueBiasStrength": @0.3621708039314516,
+                                                                              @"Manual": @NO,
+                                                                      },
+                                                                      @"Lavender": @{
+                                                                              @"BrightnessBias": @0.10072476038566,
+                                                                              @"Colors": @[@0xff2b2a3a, @0xff8c507c, @0xffbf82a8, @0xffe9bcce, @0xffeec3d3],
+                                                                              @"DisabledLCDColor": @YES,
+                                                                              @"HueBias": @0.7914529587142169,
+                                                                              @"HueBiasStrength": @0.2498168498277664,
+                                                                              @"Manual": @NO,
+                                                                      },
                                                                       @"Magic Eggplant": @{
                                                                               @"BrightnessBias": @0.0,
                                                                               @"Colors": @[@0xff3c2136, @0xff942e84, @0xffc7699d, @0xfff1e4b0, @0xfff6f9b2],
@@ -117,12 +159,36 @@ static uint32_t color_to_int(NSColor *color)
                                                                               @"HueBiasStrength": @0.65018052788844627,
                                                                               @"Manual": @NO,
                                                                       },
+                                                                      @"Mystic Blue": @{
+                                                                              @"BrightnessBias": @-0.3291049897670746,
+                                                                              @"Colors": @[@0xff3b2306, @0xffa27807, @0xffd1b523, @0xfff6ebbe, @0xfffaf1e4],
+                                                                              @"DisabledLCDColor": @YES,
+                                                                              @"HueBias": @0.5282051088288426,
+                                                                              @"HueBiasStrength": @0.7699633836746216,
+                                                                              @"Manual": @NO,
+                                                                      },
+                                                                      @"Pink Pop": @{
+                                                                              @"BrightnessBias": @0.624908447265625,
+                                                                              @"Colors": @[@0xff28140a, @0xff7c42cb, @0xffaa83de, @0xffd1ceeb, @0xffd5d8ec],
+                                                                              @"DisabledLCDColor": @YES,
+                                                                              @"HueBias": @0.9477411056868732,
+                                                                              @"HueBiasStrength": @0.80024421215057373,
+                                                                              @"Manual": @NO,
+                                                                      },
                                                                       @"Radioactive Pea": @{
                                                                               @"BrightnessBias": @-0.48079556772908372,
                                                                               @"Colors": @[@0xff215200, @0xff1f7306, @0xff169e34, @0xff03ceb8, @0xff00d4d1],
                                                                               @"DisabledLCDColor": @YES,
                                                                               @"HueBias": @0.3795131972111554,
                                                                               @"HueBiasStrength": @0.34337649402390436,
+                                                                              @"Manual": @NO,
+                                                                      },
+                                                                      @"Rose": @{
+                                                                              @"BrightnessBias": @0.2727272808551788,
+                                                                              @"Colors": @[@0xff001500, @0xff4e1fae, @0xff865ac4, @0xffb7e6d3, @0xffbdffd4],
+                                                                              @"DisabledLCDColor": @YES,
+                                                                              @"HueBias": @0.9238900924101472,
+                                                                              @"HueBiasStrength": @0.9957716464996338,
                                                                               @"Manual": @NO,
                                                                       },
                                                                       @"Seaweed": @{
@@ -168,6 +234,31 @@ static uint32_t color_to_int(NSColor *color)
     
     if ([[NSProcessInfo processInfo].arguments containsObject:@"--update-launch"]) {
         [NSApp activateIgnoringOtherApps:true];
+    }
+    
+    if (![[[NSUserDefaults standardUserDefaults] stringForKey:@"GBThemesVersion"] isEqualToString:@(GB_VERSION)]) {
+        [self updateThemesDefault:false];
+        [[NSUserDefaults standardUserDefaults] setObject:@(GB_VERSION) forKey:@"GBThemesVersion"];
+    }
+}
+
+- (void)updateThemesDefault:(bool)overwrite
+{
+    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+    NSMutableDictionary *currentThemes = [defaults dictionaryForKey:@"GBThemes"].mutableCopy;
+    [defaults removeObjectForKey:@"GBThemes"];
+    NSMutableDictionary *defaultThemes = [defaults dictionaryForKey:@"GBThemes"].mutableCopy;
+    if (![[NSUserDefaults standardUserDefaults] stringForKey:@"GBThemesVersion"]) {
+        // Force update the Pink Pop theme, it was glitchy in 1.0
+        [currentThemes removeObjectForKey:@"Pink Pop"];
+    }
+    if (overwrite) {
+        [currentThemes addEntriesFromDictionary:defaultThemes];
+        [defaults setObject:currentThemes forKey:@"GBThemes"];
+    }
+    else {
+        [defaultThemes addEntriesFromDictionary:currentThemes];
+        [defaults setObject:defaultThemes forKey:@"GBThemes"];
     }
 }
 
@@ -216,7 +307,10 @@ static uint32_t color_to_int(NSColor *color)
         [item.image setSize:NSMakeSize(16, 16)];
         [items addObject:item];
     }
-    menu.itemArray = items;
+    [menu removeAllItems];
+    for (NSMenuItem *item in items) {
+        [menu addItem:item];
+    }
 }
 
 - (IBAction) showPreferences: (id) sender
@@ -285,7 +379,15 @@ static uint32_t color_to_int(NSColor *color)
             dispatch_async(dispatch_get_main_queue(), ^{
                 NSArray *objects;
                 [[NSBundle mainBundle] loadNibNamed:@"UpdateWindow" owner:self topLevelObjects:&objects];
-                self.updateChanges.preferences.standardFontFamily = [NSFont systemFontOfSize:0].familyName;
+                if (@available(macOS 10.11, *)) {
+                    self.updateChanges.preferences.standardFontFamily = @"-apple-system";
+                }
+                else if (@available(macOS 10.10, *)) {
+                    self.updateChanges.preferences.standardFontFamily = @"Helvetica Neue";
+                }
+                else {
+                    self.updateChanges.preferences.standardFontFamily = @"Lucida Grande";
+                }
                 self.updateChanges.preferences.fixedFontFamily = @"Menlo";
                 self.updateChanges.drawsBackground = false;
                 [self.updateChanges.mainFrame loadHTMLString:html baseURL:nil];

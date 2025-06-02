@@ -367,7 +367,7 @@ typedef union {
                 if (!other) goto single;
                 if (other.usage >= element.usage) goto single;
                 if (other.reportID != element.reportID) goto single;
-                if (![axisGroups[@(other.usage)] isEqualTo: axisGroups[@(element.usage)]]) goto single;
+                if (![axisGroups[@(other.usage)] isEqual: axisGroups[@(element.usage)]]) goto single;
                 if (other.parentID != element.parentID) goto single;
                 
                 JOYAxes2D *axes = nil;
@@ -1450,7 +1450,7 @@ typedef union {
     }
 }
 
-- (uint8_t)LEDMaskForPlayer:(unsigned int)player
+- (uint8_t)LEDMaskForPlayer:(unsigned)player
 {
     return player;
 }

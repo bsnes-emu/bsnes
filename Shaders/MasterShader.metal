@@ -42,7 +42,7 @@ static inline float4 texture(texture2d<half> texture, float2 pos)
 
 __attribute__((unused)) static inline float4 texture_relative(texture2d<half> t, float2 pos, float2 offset)
 {
-    float2 input_resolution = float2(t.get_width(), t.get_height());;
+    float2 input_resolution = float2(t.get_width(), t.get_height());
     float2 origin = (floor(pos * input_resolution)) + float2(0.5, 0.5);
     return texture(t, (origin + offset) / input_resolution);
 }
@@ -50,7 +50,7 @@ __attribute__((unused)) static inline float4 texture_relative(texture2d<half> t,
 #line 1
 {filter}
 
-#define BLEND_BIAS (2.0/5.0)
+#define BLEND_BIAS (1.0/3.0)
 
 enum frame_blending_mode {
     DISABLED,

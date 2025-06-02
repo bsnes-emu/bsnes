@@ -30,7 +30,7 @@ vec4 texture_relative(sampler2D t, vec2 pos, vec2 offset)
 {filter}
 
 
-#define BLEND_BIAS (2.0/5.0)
+#define BLEND_BIAS (1.0/3.0)
 
 #define DISABLED 0
 #define SIMPLE 1

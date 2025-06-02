@@ -40,16 +40,16 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
 - (NSInteger)numberOfRowsInTableView:(NSTableView *)tableView
 {
     if (self.playerListButton.selectedTag == 0) {
-        return GBButtonCount;
+        return GBKeyboardButtonCount;
     }
-    return GBGameBoyButtonCount;
+    return GBPerPlayerButtonCount;
 }
 
 - (unsigned) usesForKey:(unsigned) key
 {
     unsigned ret = 0;
     for (unsigned player = 4; player--;) {
-        for (unsigned button = player == 0? GBButtonCount:GBGameBoyButtonCount; button--;) {
+        for (unsigned button = player == 0? GBKeyboardButtonCount:GBPerPlayerButtonCount; button--;) {
             NSNumber *other = [[NSUserDefaults standardUserDefaults] valueForKey:button_to_preference_name(button, player)];
             if (other && [other unsignedIntValue] == key) {
                 ret++;
@@ -205,7 +205,7 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
     if (joystick_configuration_state == GBUnderclock) {
         [self.configureJoypadButton setTitle:@"Press Button for Slo-Mo"]; // Full name is too long :<
     }
-    else if (joystick_configuration_state < GBJoypadButtonCount) {
+    else if (joystick_configuration_state < GBTotalButtonCount) {
         [self.configureJoypadButton setTitle:[NSString stringWithFormat:@"Press Button for %@", GBButtonNames[joystick_configuration_state]]];
     }
     else {
@@ -227,7 +227,7 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
         
     if (!button.isPressed) return;
     if (joystick_configuration_state == -1) return;
-    if (joystick_configuration_state == GBJoypadButtonCount) return;
+    if (joystick_configuration_state == GBTotalButtonCount) return;
     if (!joystick_being_configured) {
         joystick_being_configured = controller.uniqueID;
     }
@@ -266,6 +266,8 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
     [GBB] = JOYButtonUsageB,
     [GBSelect] = JOYButtonUsageSelect,
     [GBStart] = JOYButtonUsageStart,
+    [GBRapidA] = GBJoyKitRapidA,
+    [GBRapidB] = GBJoyKitRapidB,
     [GBTurbo] = JOYButtonUsageL1,
     [GBRewind] = JOYButtonUsageL2,
     [GBUnderclock] = JOYButtonUsageR1,
@@ -337,6 +339,63 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
     else {
         [_colorPalettePopupButton selectItemWithTitle:[[NSUserDefaults standardUserDefaults] stringForKey:@"GBCurrentTheme"] ?: @""];
     }
+    
+    _fontSizeStepper.intValue = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBDebuggerFontSize"];
+    [self updateFonts];
+}
+
+- (IBAction)fontSizeChanged:(id)sender
+{
+    NSString *selectedFont = [[NSUserDefaults standardUserDefaults] stringForKey:@"GBDebuggerFont"];
+    [[NSUserDefaults standardUserDefaults] setInteger:[sender intValue] forKey:@"GBDebuggerFontSize"];
+    [_fontPopupButton setDisplayTitle:[NSString stringWithFormat:@"%@ %upt", selectedFont, (unsigned)[[NSUserDefaults standardUserDefaults] integerForKey:@"GBDebuggerFontSize"]]];
+}
+
+- (IBAction)fontChanged:(id)sender
+{
+    NSString *selectedFont = _fontPopupButton.selectedItem.title;
+    [[NSUserDefaults standardUserDefaults] setObject:selectedFont forKey:@"GBDebuggerFont"];
+    [_fontPopupButton setDisplayTitle:[NSString stringWithFormat:@"%@ %upt", selectedFont, (unsigned)[[NSUserDefaults standardUserDefaults] integerForKey:@"GBDebuggerFontSize"]]];
+
+}
+
+- (void)updateFonts
+{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        NSFontManager *fontManager = [NSFontManager sharedFontManager];
+        NSArray *allFamilies = [fontManager availableFontFamilies];
+        NSMutableSet *families = [NSMutableSet set];
+        for (NSString *family in allFamilies) {
+            if ([fontManager fontNamed:family hasTraits:NSFixedPitchFontMask]) {
+                [families addObject:family];
+            }
+        }
+        
+        bool hasSFMono = false;
+        if (@available(macOS 10.15, *)) {
+            hasSFMono = [[NSFont monospacedSystemFontOfSize:12 weight:NSFontWeightRegular].displayName containsString:@"SF"];
+        }
+        
+        if (hasSFMono) {
+            [families addObject:@"SF Mono"];
+        }
+    
+        NSArray *sortedFamilies = [[families allObjects] sortedArrayUsingSelector:@selector(compare:)];
+
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (![families containsObject:[[NSUserDefaults standardUserDefaults] stringForKey:@"GBDebuggerFont"]]) {
+                [[NSUserDefaults standardUserDefaults] removeObjectForKey:@"GBDebuggerFont"];
+            }
+            
+            [_fontPopupButton.menu removeAllItems];
+            for (NSString *family in sortedFamilies) {
+                [_fontPopupButton addItemWithTitle:family];
+            }
+            NSString *selectedFont = [[NSUserDefaults standardUserDefaults] stringForKey:@"GBDebuggerFont"];
+            [_fontPopupButton selectItemWithTitle:selectedFont];
+            [_fontPopupButton setDisplayTitle:[NSString stringWithFormat:@"%@ %upt", selectedFont, (unsigned)[[NSUserDefaults standardUserDefaults] integerForKey:@"GBDebuggerFontSize"]]];
+        });
+    });
 }
 
 - (void)dealloc
@@ -461,7 +520,7 @@ static inline NSString *keyEquivalentString(NSMenuItem *item)
             [GB_COLOR_CORRECTION_MODERN_BALANCED] = @"Emulates a modern display. Blue contrast is moderately enhanced at the cost of slight hue inaccuracy.",
             [GB_COLOR_CORRECTION_MODERN_BOOST_CONTRAST] = @"Like Modern – Balanced, but further boosts the contrast of greens and magentas that is lacking on the original hardware.",
             [GB_COLOR_CORRECTION_REDUCE_CONTRAST] = @"Slightly reduce the contrast to better represent the tint and contrast of the original display.",
-            [GB_COLOR_CORRECTION_LOW_CONTRAST] = @"Harshly reduce the contrast to accurately represent the tint and low constrast of the original display.",
+            [GB_COLOR_CORRECTION_LOW_CONTRAST] = @"Harshly reduce the contrast to accurately represent the tint and low contrast of the original display.",
             [GB_COLOR_CORRECTION_MODERN_ACCURATE] = @"Emulates a modern display. Colors have their hues and brightness corrected.",
          }) [self.colorCorrectionPopupButton.selectedItem.tag]
                                    title:self.colorCorrectionPopupButton.selectedItem.title

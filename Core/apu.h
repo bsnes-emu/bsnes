@@ -5,19 +5,19 @@
 #include <stdio.h>
 #include "defs.h"
 
+#define GB_BAND_LIMITED_WIDTH 16
+#define GB_BAND_LIMITED_PHASES 512
+
 #ifdef GB_INTERNAL
+#define GB_BAND_LIMITED_ONE 0x10000 // fixed point value equal to 1
+
 /* Speed = 1 / Length (in seconds) */
 #define DAC_DECAY_SPEED 20000
 #define DAC_ATTACK_SPEED 20000
 
 
 /* Divides nicely and never overflows with 4 channels and 8 (1-8) volume levels */
-#ifdef WIIU
-/* Todo: Remove this hack once https://github.com/libretro/RetroArch/issues/6252 is fixed*/
-#define MAX_CH_AMP (0xFF0 / 2)
-#else
 #define MAX_CH_AMP 0xFF0
-#endif
 #define CH_STEP (MAX_CH_AMP/0xF/8)
 #endif
 
@@ -25,11 +25,22 @@
 
 /* APU ticks are 2MHz, triggered by an internal APU clock. */
 
+#ifdef GB_INTERNAL
+typedef union
+{
+    struct {
+        int16_t left;
+        int16_t right;
+    };
+    uint32_t packed;
+} GB_sample_t;
+#else
 typedef struct
 {
     int16_t left;
     int16_t right;
 } GB_sample_t;
+#endif
 
 typedef struct
 {
@@ -75,8 +86,8 @@ typedef struct
     uint16_t sweep_length_addend;
     uint16_t shadow_sweep_sample_length;
     bool unshifted_sweep;
-    bool square_sweep_stop_calc_if_no_zombie_write;
-    
+    bool square_sweep_instant_calculation_done;
+
     uint8_t channel_1_restart_hold;
     uint16_t channel1_completed_addend;
     struct {
@@ -91,7 +102,9 @@ typedef struct
         bool length_enabled; // NRX4
         GB_envelope_clock_t envelope_clock;
         uint8_t delay; // Hack for CGB D/E phantom step due to how sample_countdown is implemented in SameBoy
-        bool did_tick;
+        bool did_tick:1;
+        bool just_reloaded:1;
+        uint8_t padding:6;
     } square_channels[2];
 
     struct {
@@ -135,6 +148,8 @@ typedef struct
         GB_SKIP_DIV_EVENT_SKIP,
     }) skip_div_event;
     uint8_t pcm_mask[2]; // For CGB-0 to CGB-C PCM read glitch
+    
+    bool apu_cycles_in_2mhz; // For compatibility with 0.16.x save states
 } GB_apu_t;
 
 typedef enum {
@@ -151,15 +166,21 @@ typedef enum {
 } GB_audio_format_t;
 
 typedef struct {
+    struct {
+        int32_t left, right;
+    } buffer[GB_BAND_LIMITED_WIDTH * 2], output;
+    uint8_t pos;
+    GB_sample_t input;
+} GB_band_limited_t;
+
+typedef struct {
     unsigned sample_rate;
 
     unsigned sample_cycles; // Counts by sample_rate until it reaches the clock frequency
+    unsigned max_cycles_per_sample;
 
-    // Samples are NOT normalized to MAX_CH_AMP * 4 at this stage!
-    unsigned cycles_since_render;
-    unsigned last_update[GB_N_CHANNELS];
-    GB_sample_t current_sample[GB_N_CHANNELS];
-    GB_sample_t summed_samples[GB_N_CHANNELS];
+    uint32_t cycles_since_render;
+    GB_band_limited_t band_limited[GB_N_CHANNELS];
     double dac_discharge[GB_N_CHANNELS];
     bool channel_muted[GB_N_CHANNELS];
     bool edge_triggered[GB_N_CHANNELS];
@@ -177,6 +198,8 @@ typedef struct {
     GB_audio_format_t output_format;
     int output_error;
     
+    /* Not output related, but it's temp state so I'll put it here */
+    bool square_sweep_disable_stepping;
 } GB_apu_output_t;
 
 void GB_set_channel_muted(GB_gameboy_t *gb, GB_channel_t channel, bool muted);

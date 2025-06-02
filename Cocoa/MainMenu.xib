@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14868" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="21507" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14868"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="21507"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
@@ -208,10 +208,59 @@
                                     <action selector="reset:" target="-1" id="VV1-VP-L7g"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Reload ROM" alternate="YES" keyEquivalent="R" id="eQP-Fb-nkz">
+                                <connections>
+                                    <action selector="reloadROM:" target="-1" id="BpN-8V-Csg"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Pause" keyEquivalent="p" id="4K4-hw-R7Q">
                                 <connections>
                                     <action selector="togglePause:" target="-1" id="osW-wt-QAa"/>
                                 </connections>
+                            </menuItem>
+                            <menuItem title="Emulated Model" id="Cip-1S-4Zp">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="Emulated Model" id="MtH-V4-vUi">
+                                    <items>
+                                        <menuItem title="Pick Automatically" tag="6" id="GXg-yH-3dl">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="reset:" target="-1" id="ao2-FI-kk1"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="Nyl-zW-Uez"/>
+                                        <menuItem title="Game Boy" tag="1" id="g7C-LA-VAr">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="reset:" target="-1" id="rxG-cz-s1S"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Game Boy Pocket/Light" tag="5" id="1bM-CT-hoW">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="reset:" target="-1" id="U7l-BM-kB1"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Super Game Boy" tag="4" id="vc7-yy-ARW">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="reset:" target="-1" id="E4M-QG-ua9"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Game Boy Color" tag="2" id="hdG-Bl-8nJ">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="reset:" target="-1" id="xAz-cr-0u2"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Game Boy Advance" tag="3" id="7jw-B1-tf5">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="reset:" target="-1" id="xQk-4e-kd7"/>
+                                            </connections>
+                                        </menuItem>
+                                    </items>
+                                </menu>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="QIS-av-Byy"/>
                             <menuItem title="Save State" id="Hdz-ut-okE">
@@ -355,37 +404,6 @@
                                     <action selector="copyScreenshot:" target="-1" id="XJC-EB-HNl"/>
                                 </connections>
                             </menuItem>
-                            <menuItem isSeparatorItem="YES" id="zk7-gf-LXN"/>
-                            <menuItem title="Game Boy" tag="1" id="g7C-LA-VAr">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="reset:" target="-1" id="rxG-cz-s1S"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Game Boy Pocket/Light" tag="5" id="1bM-CT-hoW">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="reset:" target="-1" id="U7l-BM-kB1"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Super Game Boy" tag="4" id="vc7-yy-ARW">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="reset:" target="-1" id="E4M-QG-ua9"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Game Boy Color" tag="2" id="hdG-Bl-8nJ">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="reset:" target="-1" id="xAz-cr-0u2"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Game Boy Advance" tag="3" id="7jw-B1-tf5">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="reset:" target="-1" id="xQk-4e-kd7"/>
-                                </connections>
-                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="DPb-Sh-5tg"/>
                             <menuItem title="Start Audio Recording…" keyEquivalent="A" id="1UK-8n-QPP">
                                 <connections>
@@ -409,10 +427,16 @@
                                     <action selector="toggleCheats:" target="-1" id="gsw-UY-fhu"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Show Cheats" id="LZV-QK-YXi">
+                            <menuItem title="Show Cheats" id="Nf8-F1-YyD">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="showCheats:" target="-1" id="tfr-qM-q8X"/>
+                                    <action selector="showCheats:" target="-1" id="stn-Ei-aFE"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Search Cheats" id="LZV-QK-YXi">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="showCheatSearch:" target="-1" id="eI1-x0-ykn"/>
                                 </connections>
                             </menuItem>
                         </items>
@@ -551,6 +575,16 @@
                             <menuItem title="Minimize" keyEquivalent="m" id="OY7-WF-poV">
                                 <connections>
                                     <action selector="performMiniaturize:" target="-1" id="VwT-WD-YPe"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Increase Window Size" keyEquivalent="+" id="jh7-RG-JP7">
+                                <connections>
+                                    <action selector="increaseWindowSize:" target="-1" id="yXg-4S-0VI"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Decrease Window Size" keyEquivalent="-" id="wsI-Is-iNn">
+                                <connections>
+                                    <action selector="decreaseWindowSize:" target="-1" id="sFZ-b4-gIp"/>
                                 </connections>
                             </menuItem>
                             <menuItem title="Zoom" id="R4o-n2-Eq4">

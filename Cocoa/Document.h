@@ -6,6 +6,18 @@
 #import "GBOSDView.h"
 #import "GBDebuggerButton.h"
 
+enum model {
+    MODEL_NONE,
+    MODEL_DMG,
+    MODEL_CGB,
+    MODEL_AGB,
+    MODEL_SGB,
+    MODEL_MGB,
+    MODEL_AUTO,
+    
+    MODEL_QUICK_RESET = -1,
+};
+
 @class GBCheatWindowController;
 @class GBPaletteView;
 @class GBObjectView;
@@ -67,14 +79,17 @@
 @property IBOutlet GBDebuggerButton *debuggerNextButton;
 @property IBOutlet GBDebuggerButton *debuggerStepButton;
 @property IBOutlet GBDebuggerButton *debuggerFinishButton;
-@property (strong) IBOutlet GBDebuggerButton *debuggerBackstepButton;
+@property IBOutlet GBDebuggerButton *debuggerBackstepButton;
+
+@property IBOutlet NSScrollView *debuggerScrollView;
+@property IBOutlet NSView *debugBar;
 
 
 + (NSImage *) imageFromData:(NSData *)data width:(NSUInteger) width height:(NSUInteger) height scale:(double) scale;
--(uint8_t) readMemory:(uint16_t) addr;
--(void) writeMemory:(uint16_t) addr value:(uint8_t)value;
--(void) performAtomicBlock: (void (^)())block;
--(void) connectLinkCable:(NSMenuItem *)sender;
--(int)loadStateFile:(const char *)path noErrorOnNotFound:(bool)noErrorOnFileNotFound;
+- (void) performAtomicBlock: (void (^)())block;
+- (void) connectLinkCable:(NSMenuItem *)sender;
+- (int)loadStateFile:(const char *)path noErrorOnNotFound:(bool)noErrorOnFileNotFound;
+- (NSString *)captureOutputForBlock: (void (^)())block;
+- (NSFont *)debuggerFontOfSize:(unsigned)size;
 @end
 

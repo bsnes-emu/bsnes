@@ -195,6 +195,14 @@ void GB_configure_cart(GB_gameboy_t *gb)
             GB_log(gb, "Cartridge type %02x is not yet supported.\n", gb->rom[0x147]);
         }
     }
+    
+    if (!gb->cartridge_type->has_ram &&
+        gb->cartridge_type->mbc_type != GB_NO_MBC &&
+        gb->cartridge_type->mbc_type != GB_TPP1 &&
+        gb->rom[0x149]) {
+        GB_log(gb, "ROM header reports no RAM, but also reports a non-zero RAM size. Assuming cartridge has RAM.\n");
+        gb->cartridge_type++;
+    }
         
     size_t old_mbc_ram_size = gb->mbc_ram_size;
     gb->mbc_ram_size = 0;
@@ -219,6 +227,12 @@ void GB_configure_cart(GB_gameboy_t *gb)
             else {
                 gb->mbc_ram_size = ram_sizes[gb->rom[0x149]];
             }
+        }
+        
+        if (gb->mbc_ram_size && gb->mbc_ram_size < 0x2000 &&
+            gb->cartridge_type->mbc_type != GB_MBC2 &&
+            gb->cartridge_type->mbc_type != GB_MBC7) {
+            GB_log(gb, "This ROM requests a RAM size smaller than a bank, it may misbehave if this was not done intentionally.\n");
         }
         
         if (gb->mbc_ram && old_mbc_ram_size != gb->mbc_ram_size) {

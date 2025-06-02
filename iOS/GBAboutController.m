@@ -1,9 +1,5 @@
 #import "GBAboutController.h"
 
-@interface GBAboutController ()
-
-@end
-
 @implementation GBAboutController
 {
     UILabel *_titleLabel;
@@ -240,5 +236,10 @@
 - (UIModalPresentationStyle)modalPresentationStyle
 {
     return UIModalPresentationFormSheet;
+}
+
+- (void)dismissViewController
+{
+    [self dismissViewControllerAnimated:true completion:nil];
 }
 @end

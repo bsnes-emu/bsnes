@@ -1,1 +1,1 @@
-VERSION := 0.15.8
+VERSION := 1.0.1
