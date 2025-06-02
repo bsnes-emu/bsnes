@@ -42,7 +42,7 @@ static NSString *const tips[] = {
     [ret addAction:[UIAlertAction actionWithTitle:@"Close"
                                             style:UIAlertActionStyleCancel
                                           handler:nil]];
-    ret.selectedButtonIndex = 0;
+    ret.selectedButtonIndex = -1;
     ret->_buttons = [[NSMutableArray alloc] init];
     return ret;
 }
@@ -207,44 +207,62 @@ static NSString *const tips[] = {
 {
     return @[
         [UIKeyCommand keyCommandWithInput:@"h" modifierFlags:0 action:@selector(moveLeft)],
+        [UIKeyCommand keyCommandWithInput:UIKeyInputLeftArrow modifierFlags:0 action:@selector(moveLeft)],
         [UIKeyCommand keyCommandWithInput:@"j" modifierFlags:0 action:@selector(moveDown)],
+        [UIKeyCommand keyCommandWithInput:UIKeyInputDownArrow modifierFlags:0 action:@selector(moveDown)],
         [UIKeyCommand keyCommandWithInput:@"k" modifierFlags:0 action:@selector(moveUp)],
+        [UIKeyCommand keyCommandWithInput:UIKeyInputUpArrow modifierFlags:0 action:@selector(moveUp)],
         [UIKeyCommand keyCommandWithInput:@"l" modifierFlags:0 action:@selector(moveRight)],
+        [UIKeyCommand keyCommandWithInput:UIKeyInputRightArrow modifierFlags:0 action:@selector(moveRight)],
         [UIKeyCommand keyCommandWithInput:@"\r" modifierFlags:0 action:@selector(activateSelected)],
         [UIKeyCommand keyCommandWithInput:@" " modifierFlags:0 action:@selector(activateSelected)],
+        [UIKeyCommand keyCommandWithInput:UIKeyInputEscape modifierFlags:0 action:@selector(dismissSelf)],
     ];
 }
 
 - (void)moveLeft
 {
-    if (self.selectedButtonIndex % 4 > 0) {
-        self.selectedButtonIndex--;
-        [self updateSelectedButton];
+    if (self.selectedButtonIndex == -1) {
+        self.selectedButtonIndex = 0;
     }
+    else if (self.selectedButtonIndex % 4 > 0) {
+        self.selectedButtonIndex--;
+    }
+    [self updateSelectedButton];
 }
 
 - (void)moveRight
 {
-    if (self.selectedButtonIndex % 4 < 3 && self.selectedButtonIndex + 1 < self.menuButtons.count) {
-        self.selectedButtonIndex++;
-        [self updateSelectedButton];
+    if (self.selectedButtonIndex == -1) {
+        self.selectedButtonIndex = 0;
     }
+    else if (self.selectedButtonIndex % 4 < 3 && self.selectedButtonIndex + 1 < self.menuButtons.count) {
+        self.selectedButtonIndex++;
+    }
+    [self updateSelectedButton];
+
 }
 
 - (void)moveUp
 {
-    if (self.selectedButtonIndex >= 4) {
-        self.selectedButtonIndex -= 4;
-        [self updateSelectedButton];
+    if (self.selectedButtonIndex == -1) {
+        self.selectedButtonIndex = 0;
     }
+    else if (self.selectedButtonIndex >= 4) {
+        self.selectedButtonIndex -= 4;
+    }
+    [self updateSelectedButton];
 }
 
 - (void)moveDown
 {
-    if (self.selectedButtonIndex + 4 < self.menuButtons.count) {
-        self.selectedButtonIndex += 4;
-        [self updateSelectedButton];
+    if (self.selectedButtonIndex == -1) {
+        self.selectedButtonIndex = 0;
     }
+    else if (self.selectedButtonIndex + 4 < self.menuButtons.count) {
+        self.selectedButtonIndex += 4;
+    }
+    [self updateSelectedButton];
 }
 
 - (void)activateSelected
@@ -266,7 +284,8 @@ static NSString *const tips[] = {
             button.layer.borderWidth = 2.0;
             button.layer.borderColor = [UIColor systemBlueColor].CGColor;
             button.layer.cornerRadius = 8.0;
-        } else {
+        }
+        else {
             button.backgroundColor = [UIColor clearColor];
             button.layer.borderWidth = 0.0;
             button.layer.borderColor = [UIColor clearColor].CGColor;
@@ -280,4 +299,8 @@ static NSString *const tips[] = {
     [self becomeFirstResponder];
 }
 
+- (void)dismissSelf
+{
+    [self.presentingViewController dismissViewControllerAnimated:true completion:nil];
+}
 @end
