@@ -364,6 +364,18 @@ static void debuggerReloadCallback(GB_gameboy_t *gb)
             [_gbsVisualizer setNeedsDisplay:true];
         });
     }
+    
+    double frameUsage = GB_debugger_get_frame_cpu_usage(&_gb);
+    [_cpuView addSample:frameUsage];
+    
+    if (self.consoleWindow.visible) {
+        double secondUsage = GB_debugger_get_second_cpu_usage(&_gb);
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [_cpuView setNeedsDisplay:true];
+            _cpuCounter.stringValue = [NSString stringWithFormat:@"%.2f%%", secondUsage * 100];
+        });
+    }
+    
     if (type != GB_VBLANK_TYPE_REPEAT) {
         [self.view flip];
         if (_borderModeChanged) {
@@ -1325,6 +1337,8 @@ static bool is_path_writeable(const char *path)
     GB_debugger_break(&_gb);
     [self start];
     [self.consoleWindow makeKeyAndOrderFront:nil];
+    double secondUsage = GB_debugger_get_second_cpu_usage(&_gb);
+    _cpuCounter.stringValue = [NSString stringWithFormat:@"%.2f%%", secondUsage * 100];
     [self.consoleInput becomeFirstResponder];
 }
 
@@ -1606,6 +1620,8 @@ enum GBWindowResizeAction
 - (IBAction)showConsoleWindow:(id)sender
 {
     [self.consoleWindow orderBack:nil];
+    double secondUsage = GB_debugger_get_second_cpu_usage(&_gb);
+    _cpuCounter.stringValue = [NSString stringWithFormat:@"%.2f%%", secondUsage * 100];
 }
 
 - (void)queueDebuggerCommand:(NSString *)command

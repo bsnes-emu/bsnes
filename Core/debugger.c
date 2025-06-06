@@ -1728,6 +1728,24 @@ static bool ticks(GB_gameboy_t *gb, char *arguments, char *modifiers, const debu
     return true;
 }
 
+double GB_debugger_get_frame_cpu_usage(GB_gameboy_t *gb)
+{
+    if (gb->last_frame_busy_cycles || gb->last_frame_idle_cycles) {
+        return (double)gb->last_frame_busy_cycles / (gb->last_frame_busy_cycles + gb->last_frame_idle_cycles);
+    }
+    return 0;
+}
+
+double GB_debugger_get_second_cpu_usage(GB_gameboy_t *gb)
+{
+    if (gb->last_second_busy_cycles || gb->last_second_idle_cycles) {
+        return (double)gb->last_second_busy_cycles / (gb->last_second_busy_cycles + gb->last_second_idle_cycles);
+    }
+    return 0;
+}
+
+double GB_debugger_get_second_cpu_usage(GB_gameboy_t *gb);
+
 static bool usage(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
     NO_MODIFIERS
