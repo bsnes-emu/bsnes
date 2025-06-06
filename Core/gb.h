@@ -785,6 +785,14 @@ struct GB_gameboy_internal_s {
                
         /* Callbacks */
         GB_debugger_reload_callback_t debugger_reload_callback;
+               
+        /* CPU usage */
+        uint32_t current_frame_idle_cycles, current_frame_busy_cycles;
+        uint32_t last_frame_idle_cycles, last_frame_busy_cycles;
+        
+        uint32_t current_second_idle_cycles, current_second_busy_cycles;
+        uint32_t last_second_idle_cycles, last_second_busy_cycles;
+        uint8_t usage_frame_count;
 #endif
 
 #ifndef GB_DISABLE_REWIND

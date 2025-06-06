@@ -1728,6 +1728,31 @@ static bool ticks(GB_gameboy_t *gb, char *arguments, char *modifiers, const debu
     return true;
 }
 
+static bool usage(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
+{
+    NO_MODIFIERS
+    
+    if (strlen(lstrip(arguments))) {
+        print_usage(gb, command);
+        return true;
+    }
+    
+    if (gb->last_frame_busy_cycles || gb->last_frame_idle_cycles) {
+        GB_log(gb, "CPU usage (last frame): %.2f%%\n", (double)gb->last_frame_busy_cycles / (gb->last_frame_busy_cycles + gb->last_frame_idle_cycles) * 100);
+    }
+    else {
+        GB_log(gb, "CPU usage (last frame): N/A\n");
+    }
+    
+    if (gb->last_second_busy_cycles || gb->last_second_idle_cycles) {
+        GB_log(gb, "CPU usage (last 60 frames): %.2f%%\n", (double)gb->last_second_busy_cycles / (gb->last_second_busy_cycles + gb->last_second_idle_cycles) * 100);
+    }
+    else {
+        GB_log(gb, "CPU usage (last 60 frames): N/A\n");
+    }
+    
+    return true;
+}
 
 static bool palettes(GB_gameboy_t *gb, char *arguments, char *modifiers, const debugger_command_t *command)
 {
@@ -2184,6 +2209,7 @@ static const debugger_command_t commands[] = {
     {"ticks", 2, ticks, "Display the number of CPU ticks since the last time 'ticks' was "
                         "used. Use 'keep' as an argument to display ticks without reseeting "
                         "the count.", "(keep)", .argument_completer = keep_completer},
+    {"usage", 2, usage, "Display CPU usage"},
     {"cartridge", 2, mbc, "Display information about the MBC and cartridge"},
     {"mbc", 3, }, /* Alias */
     {"apu", 3, apu, "Display information about the current state of the audio processing unit",

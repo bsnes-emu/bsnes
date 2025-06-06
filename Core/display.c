@@ -176,6 +176,21 @@ void GB_display_vblank(GB_gameboy_t *gb, GB_vblank_type_t type)
     gb->cycles_since_vblank_callback = 0;
     gb->lcd_disabled_outside_of_vblank = false;
     
+#ifndef GB_DISABLE_DEBUGGER
+    gb->last_frame_idle_cycles = gb->current_frame_idle_cycles;
+    gb->last_frame_busy_cycles = gb->current_frame_busy_cycles;
+    gb->current_frame_idle_cycles = 0;
+    gb->current_frame_busy_cycles = 0;
+    
+    if (gb->usage_frame_count++ == 60) {
+        gb->last_second_idle_cycles = gb->current_second_idle_cycles;
+        gb->last_second_busy_cycles = gb->current_second_busy_cycles;
+        gb->current_second_idle_cycles = 0;
+        gb->current_second_busy_cycles = 0;
+        gb->usage_frame_count = 0;
+    }
+#endif
+    
     /* TODO: Slow in turbo mode! */
     if (GB_is_hle_sgb(gb)) {
         GB_sgb_render(gb);
