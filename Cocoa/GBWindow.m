@@ -13,7 +13,7 @@
 - (void)_zoomFill:(id)sender
 {
     if (sender == [self standardWindowButton:NSWindowZoomButton] &&
-        (self.currentEvent.modifierFlags & NSEventModifierFlagOption)) {
+        ((self.currentEvent.modifierFlags & NSEventModifierFlagDeviceIndependentFlagsMask) == NSEventModifierFlagOption)) {
         [self zoom:sender];
         return;
     }
