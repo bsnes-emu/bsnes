@@ -1568,7 +1568,9 @@ enum GBWindowResizeAction
         [self reloadVRAMData: nil];
         
         [textView.textStorage appendAttributedString:_pendingConsoleOutput];
-        [textView scrollToEndOfDocument:nil];
+        if (!_logToSideView) {
+            [textView scrollToEndOfDocument:nil];
+        }
         if ([[NSUserDefaults standardUserDefaults] boolForKey:@"DeveloperMode"]) {
             [self.consoleWindow orderFront:nil];
         }
