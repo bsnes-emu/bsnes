@@ -288,6 +288,7 @@ static void debuggerReloadCallback(GB_gameboy_t *gb)
     GB_set_user_data(&_gb, (__bridge void *)(self));
     GB_set_boot_rom_load_callback(&_gb, (GB_boot_rom_load_callback_t)boot_rom_load);
     GB_set_vblank_callback(&_gb, (GB_vblank_callback_t) vblank);
+    GB_set_enable_skipped_frame_vblank_callbacks(&_gb, true);
     GB_set_log_callback(&_gb, (GB_log_callback_t) consoleLog);
     GB_set_input_callback(&_gb, (GB_input_callback_t) consoleInput);
     GB_set_async_input_callback(&_gb, (GB_input_callback_t) asyncConsoleInput);
@@ -359,6 +360,12 @@ static void debuggerReloadCallback(GB_gameboy_t *gb)
 
 - (void)vblankWithType:(GB_vblank_type_t)type
 {
+    if (type == GB_VBLANK_TYPE_SKIPPED_FRAME) {
+        double frameUsage = GB_debugger_get_frame_cpu_usage(&_gb);
+        [_cpuView addSample:frameUsage];
+        return;
+    }
+    
     if (_gbsVisualizer) {
         dispatch_async(dispatch_get_main_queue(), ^{
             [_gbsVisualizer setNeedsDisplay:true];

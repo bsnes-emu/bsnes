@@ -833,6 +833,7 @@ struct GB_gameboy_internal_s {
         /* Misc */
         bool turbo;
         bool turbo_dont_skip;
+        bool enable_skipped_frame_vblank_callbacks;
         bool disable_rendering;
         uint8_t boot_rom[0x900];
         bool vblank_just_occured; // For slow operations involving syscalls; these should only run once per vblank
