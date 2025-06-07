@@ -878,7 +878,7 @@ again:;
 {
     [super windowControllerDidLoadNib:aController];
     // Interface Builder bug?
-    [self.consoleWindow setContentSize:self.consoleWindow.minSize];
+    [self.consoleWindow setContentSize:self.consoleWindow.frame.size];
     /* Close Open Panels, if any */
     for (NSWindow *window in [[NSApplication sharedApplication] windows]) {
         if ([window isKindOfClass:[NSOpenPanel class]]) {
