@@ -569,6 +569,8 @@ static NSString *LocalizedNameForElement(GCControllerElement *element, GBControl
                 @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"B",           @"value": @(GBB)},
                 @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"Select",      @"value": @(GBSelect)},
                 @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"Start",       @"value": @(GBStart)},
+                @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"Rapid A",     @"value": @(GBRapidA)},
+                @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"Rapid B",     @"value": @(GBRapidB)},
                 @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"Turbo",       @"value": @(GBTurbo)},
                 @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"Rewind",      @"value": @(GBRewind)},
                 @{@"type": typeRadio, @"getter": getter, @"setter": setter, @"title": @"Slow-motion", @"value": @(GBUnderclock)},
