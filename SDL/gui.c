@@ -1598,6 +1598,40 @@ static const char *current_osd_mode(unsigned index)
     return configuration.osd? "Enabled" : "Disabled";
 }
 
+static const char *current_vsync_mode(unsigned index)
+{
+    switch (configuration.vsync_mode) {
+        default:
+        case 0: return "Disabled";
+        case 1: return "Enabled";
+        case -1: return "Adaptive";
+    }
+}
+
+static void cycle_vsync(unsigned index)
+{
+retry:
+    configuration.vsync_mode++;
+    if (configuration.vsync_mode == 2) {
+        configuration.vsync_mode = -1;
+    }
+    if (SDL_GL_SetSwapInterval(configuration.vsync_mode) && configuration.vsync_mode != 0) {
+        goto retry;
+    }
+}
+
+static void cycle_vsync_backwards(unsigned index)
+{
+retry:
+    configuration.vsync_mode--;
+    if (configuration.vsync_mode == -2) {
+        configuration.vsync_mode = 1;
+    }
+    if (SDL_GL_SetSwapInterval(configuration.vsync_mode) && configuration.vsync_mode != 0) {
+        goto retry;
+    }
+}
+
 #ifdef _WIN32
 
 // Don't use the standard header definitions because we might not have the newest headers
@@ -1652,6 +1686,7 @@ static const struct menu_item graphics_menu[] = {
     {"Mono Palette:", cycle_palette, current_palette, cycle_palette_backwards},
     {"Display Border:", cycle_border_mode, current_border_mode, cycle_border_mode_backwards},
     {"On-Screen Display:", toggle_osd, current_osd_mode, toggle_osd},
+    {"Vsync Mode:", cycle_vsync, current_vsync_mode, cycle_vsync_backwards},
 #ifdef _WIN32
     {"Window Corners:", toggle_corners, current_corner_mode, toggle_corners},
 #endif

@@ -1538,6 +1538,8 @@ int main(int argc, char **argv)
     }
 #endif
     
+    SDL_GL_SetSwapInterval(configuration.vsync_mode);
+    
     if (filename == NULL) {
         stop_on_start = false;
         run_gui(false);
