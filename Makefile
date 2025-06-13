@@ -543,7 +543,7 @@ $(OBJ)/installer: iOS/installer.m
 # Cocoa Port
 
 $(BIN)/SameBoy.app: $(BIN)/SameBoy.app/Contents/MacOS/SameBoy \
-                    $(shell ls Cocoa/*.icns Cocoa/*.png) \
+                    $(shell ls Cocoa/*.icns Cocoa/*.png Cocoa/*.car) \
                     Cocoa/License.html \
                     Cocoa/Info.plist \
                     Misc/registers.sym \
@@ -560,7 +560,7 @@ $(BIN)/SameBoy.app: $(BIN)/SameBoy.app/Contents/MacOS/SameBoy \
 					$(BIN)/SameBoy.app/Contents/PlugIns/Previewer.appex \
                     Shaders
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Resources
-	cp Cocoa/*.icns Cocoa/*.png Misc/registers.sym $(BIN)/SameBoy.app/Contents/Resources/
+	cp Cocoa/*.icns Cocoa/*.png Cocoa/*.car Misc/registers.sym $(BIN)/SameBoy.app/Contents/Resources/
 	sed "s/@VERSION/$(VERSION)/;s/@COPYRIGHT_YEAR/$(COPYRIGHT_YEAR)/" < Cocoa/Info.plist > $(BIN)/SameBoy.app/Contents/Info.plist
 	sed "s/@COPYRIGHT_YEAR/$(COPYRIGHT_YEAR)/" < Cocoa/License.html > $(BIN)/SameBoy.app/Contents/Resources/Credits.html
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Resources/Shaders

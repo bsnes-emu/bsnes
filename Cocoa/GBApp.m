@@ -40,7 +40,12 @@ static uint32_t color_to_int(NSColor *color)
 - (void) applicationDidFinishLaunching:(NSNotification *)notification
 {
     // Refresh icon if launched via a software update
-    [NSApplication sharedApplication].applicationIconImage = [NSImage imageNamed:@"AppIcon"];
+    if (@available(macOS 16.0, *)) { 
+        // Can this be done without breaking Icon Composer-based icons?
+    }
+    else {
+        [NSApplication sharedApplication].applicationIconImage = [NSImage imageNamed:@"AppIcon"];
+    }
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     for (unsigned i = 0; i < GBKeyboardButtonCount; i++) {
