@@ -916,9 +916,16 @@ again:;
     [self.vramWindow setFrame:vram_window_rect display:true animate:false];
     
     
-    self.consoleWindow.title = [NSString stringWithFormat:@"Debug Console – %@", [self.fileURL.path lastPathComponent]];
-    self.memoryWindow.title = [NSString stringWithFormat:@"Memory – %@", [self.fileURL.path lastPathComponent]];
-    self.vramWindow.title = [NSString stringWithFormat:@"VRAM Viewer – %@", [self.fileURL.path lastPathComponent]];
+    if (@available(macOS 11.0, *)) {
+        self.consoleWindow.subtitle = [self.fileURL.path lastPathComponent];
+        self.memoryWindow.subtitle = [self.fileURL.path lastPathComponent];
+        self.vramWindow.subtitle = [self.fileURL.path lastPathComponent];
+    }
+    else {
+        self.consoleWindow.title = [NSString stringWithFormat:@"Debug Console – %@", [self.fileURL.path lastPathComponent]];
+        self.memoryWindow.title = [NSString stringWithFormat:@"Memory – %@", [self.fileURL.path lastPathComponent]];
+        self.vramWindow.title = [NSString stringWithFormat:@"VRAM Viewer – %@", [self.fileURL.path lastPathComponent]];
+    }
     
     self.consoleWindow.level = NSNormalWindowLevel;
     
@@ -1170,6 +1177,17 @@ again:;
     
     if (@available(macOS 10.10, *)) {
         _mainWindow.titlebarAppearsTransparent = true;
+    }
+    
+    if (@available(macOS 26.0, *)) {
+        // There's a new minimum width for segmented controls in Solarium
+        NSRect frame = _gbsNextPrevButton.frame;
+        frame.origin.x -= 16;
+        _gbsNextPrevButton.frame = frame;
+        
+        frame = _gbsTracks.frame;
+        frame.size.width -= 16;
+        _gbsTracks.frame = frame;
     }
 }
 
@@ -1628,7 +1646,7 @@ enum GBWindowResizeAction
 
 - (IBAction)showConsoleWindow:(id)sender
 {
-    [self.consoleWindow orderBack:nil];
+    [self.consoleWindow orderFront:nil];
     double secondUsage = GB_debugger_get_second_cpu_usage(&_gb);
     _cpuCounter.stringValue = [NSString stringWithFormat:@"%.2f%%", secondUsage * 100];
 }
@@ -2477,9 +2495,16 @@ enum GBWindowResizeAction
 - (void)setFileURL:(NSURL *)fileURL
 {
     [super setFileURL:fileURL];
-    self.consoleWindow.title = [NSString stringWithFormat:@"Debug Console – %@", [[fileURL path] lastPathComponent]];
-    self.memoryWindow.title = [NSString stringWithFormat:@"Memory – %@", [[fileURL path] lastPathComponent]];
-    self.vramWindow.title = [NSString stringWithFormat:@"VRAM Viewer – %@", [[fileURL path] lastPathComponent]];
+    if (@available(macOS 11.0, *)) {
+        self.consoleWindow.subtitle = [self.fileURL.path lastPathComponent];
+        self.memoryWindow.subtitle = [self.fileURL.path lastPathComponent];
+        self.vramWindow.subtitle = [self.fileURL.path lastPathComponent];
+    }
+    else {
+        self.consoleWindow.title = [NSString stringWithFormat:@"Debug Console – %@", [self.fileURL.path lastPathComponent]];
+        self.memoryWindow.title = [NSString stringWithFormat:@"Memory – %@", [self.fileURL.path lastPathComponent]];
+        self.vramWindow.title = [NSString stringWithFormat:@"VRAM Viewer – %@", [self.fileURL.path lastPathComponent]];
+    }
 }
 
 - (BOOL)splitView:(GBSplitView *)splitView canCollapseSubview:(NSView *)subview;

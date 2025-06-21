@@ -26,7 +26,7 @@
     field_editor->_field = (NSTextField *)controlView;
     ((NSTextFieldCell *)controlView.cell).textInset =
         field_editor.textContainerInset =
-        NSMakeSize(0, 2);
+        NSMakeSize(7, 2);
     return field_editor;
 }
 

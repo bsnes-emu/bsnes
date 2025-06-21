@@ -285,7 +285,9 @@ static const uint8_t workboy_vk_to_key[] = {
 
 - (void)setFrame:(NSRect)frame
 {
-    frame = self.superview.frame;
+    NSView *superview = self.superview;
+    if (GB_unlikely(!superview)) return;
+    frame = superview.frame;
     if (_gb && ![[NSUserDefaults standardUserDefaults] boolForKey:@"GBAspectRatioUnkept"]) {
         double ratio = frame.size.width / frame.size.height;
         double width = GB_get_screen_width(_gb);
