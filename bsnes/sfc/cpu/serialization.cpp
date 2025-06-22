@@ -45,6 +45,9 @@ auto CPU::serialize(serializer& s) -> void {
 
   s.integer(status.autoJoypadCounter);
 
+  s.integer(status.autoJoypadPort0);
+  s.integer(status.autoJoypadPort1);
+
   s.integer(io.wramAddress);
 
   s.boolean(io.hirqEnable);
