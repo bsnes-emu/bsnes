@@ -238,7 +238,7 @@ auto CPU::joypadEdge() -> void {
     return;
   }
 
-  if(status.autoJoypadCounter >= 2 && !(status.autoJoypadCounter & 1)) {
+  if(status.autoJoypadCounter >= 2 && (status.autoJoypadCounter & 1)) {
     //sixteen bits are shifted into joy{1-4}, one bit per 256 clocks
     uint2 port0 = controllerPort1.device->data();
     uint2 port1 = controllerPort2.device->data();
