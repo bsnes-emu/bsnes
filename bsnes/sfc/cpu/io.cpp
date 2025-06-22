@@ -136,7 +136,14 @@ auto CPU::writeCPU(uint addr, uint8 data) -> void {
 
   case 0x4200:  //NMITIMEN
     io.autoJoypadPoll = data & 1;
-    if(!io.autoJoypadPoll) status.autoJoypadCounter = 33; // Disable auto-joypad read
+    if(status.autoJoypadCounter < 2) {
+      // allow controller latches during this time
+      controllerPort1.device->latch(io.autoJoypadPoll);
+      controllerPort2.device->latch(io.autoJoypadPoll);
+    }else if (!io.autoJoypadPoll) {
+      status.autoJoypadCounter = 33; // Disable auto-joypad read
+    }
+
     nmitimenUpdate(data);
     return;
 
