@@ -214,15 +214,9 @@ auto CPU::joypadEdge() -> void {
 
   if(status.autoJoypadCounter == 0) {
     //latch controller states on the first polling cycle
-    controllerPort1.device->latch(io.autoJoypadPoll);
-    controllerPort2.device->latch(io.autoJoypadPoll);
-  }
-
-  if(status.autoJoypadCounter == 1) {
-    //release latch and begin reading on the second cycle
-    controllerPort1.device->latch(0);
-    controllerPort2.device->latch(0);
-
+    status.autoJoypadLatch = io.autoJoypadPoll;
+    controllerPort1.device->latch(status.autoJoypadLatch | status.cpuLatch);
+    controllerPort2.device->latch(status.autoJoypadLatch | status.cpuLatch);
     if(io.autoJoypadPoll) {
       //shift registers are cleared to zero at start of auto-joypad polling
       io.joy1 = 0;
@@ -232,13 +226,20 @@ auto CPU::joypadEdge() -> void {
     }
   }
 
-  if(status.autoJoypadCounter >= 2) {
-    if (!io.autoJoypadPoll) {
-      // if auto-joypad polling is disabled at this point skip the rest of the polling
-      status.autoJoypadCounter = 33;
-      return;
-    }
+  if(status.autoJoypadCounter == 1) {
+    //release latch and begin reading on the second cycle
+    status.autoJoypadLatch = 0;
+    controllerPort1.device->latch(status.autoJoypadLatch | status.cpuLatch);
+    controllerPort2.device->latch(status.autoJoypadLatch | status.cpuLatch);
+  }
 
+  if(status.autoJoypadCounter != 1 && !io.autoJoypadPoll) {
+    // if auto-joypad polling is disabled at this point skip the rest of the polling
+    status.autoJoypadCounter = 33;
+    return;
+  }
+
+  if(status.autoJoypadCounter >= 2) {
     //sixteen bits are shifted into joy{1-4}, one bit per 256 clocks
     //the bits are read on one 128-clock cycle and written on the next
     if ((status.autoJoypadCounter & 1) == 0) {
