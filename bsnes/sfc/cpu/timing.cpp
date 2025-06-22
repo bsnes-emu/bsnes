@@ -202,21 +202,20 @@ auto CPU::dmaEdge() -> void {
 
 //called every 128 clocks from inside the CPU::stepOnce() function
 auto CPU::joypadEdge() -> void {
-  //it is not yet confirmed if polling can be stopped early and/or (re)started later
-  if(!io.autoJoypadPoll) return;
-
-  if(vcounter() == ppu.vdisp() && hcounter() >= 130 && hcounter() <= 256) {
+  if(vcounter() == ppu.vdisp() && (counter.cpu & 255) == 0 && hcounter() >= 130 && hcounter() <= 384) {
     //begin new polling sequence
     status.autoJoypadCounter = 0;
-  }
+  } else {
+    //stop after polling has been completed for this frame
+    if(status.autoJoypadCounter >= 33) return;
 
-  //stop after polling has been completed for this frame
-  if(status.autoJoypadCounter >= 33) return;
+    status.autoJoypadCounter++;
+  }
 
   if(status.autoJoypadCounter == 0) {
     //latch controller states on the first polling cycle
-    controllerPort1.device->latch(1);
-    controllerPort2.device->latch(1);
+    controllerPort1.device->latch(io.autoJoypadPoll);
+    controllerPort2.device->latch(io.autoJoypadPoll);
   }
 
   if(status.autoJoypadCounter == 1) {
@@ -224,11 +223,19 @@ auto CPU::joypadEdge() -> void {
     controllerPort1.device->latch(0);
     controllerPort2.device->latch(0);
 
-    //shift registers are cleared to zero at start of auto-joypad polling
-    io.joy1 = 0;
-    io.joy2 = 0;
-    io.joy3 = 0;
-    io.joy4 = 0;
+    if(io.autoJoypadPoll) {
+      //shift registers are cleared to zero at start of auto-joypad polling
+      io.joy1 = 0;
+      io.joy2 = 0;
+      io.joy3 = 0;
+      io.joy4 = 0;
+    }
+  }
+
+  if(status.autoJoypadCounter >= 2 && !io.autoJoypadPoll) {
+    // if auto-joypad polling is disabled at this point skip the rest of the polling
+    status.autoJoypadCounter = 33;
+    return;
   }
 
   if(status.autoJoypadCounter >= 2 && !(status.autoJoypadCounter & 1)) {
@@ -241,6 +248,4 @@ auto CPU::joypadEdge() -> void {
     io.joy3 = io.joy3 << 1 | port0.bit(1);
     io.joy4 = io.joy4 << 1 | port1.bit(1);
   }
-
-  status.autoJoypadCounter++;
 }
