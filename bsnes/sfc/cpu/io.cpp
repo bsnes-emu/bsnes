@@ -130,18 +130,20 @@ auto CPU::writeCPU(uint addr, uint8 data) -> void {
     //bit 0 is shared between JOYSER0 and JOYSER1:
     //strobing $4016.d0 affects both controller port latches.
     //$4017 bit 0 writes are ignored.
-    controllerPort1.device->latch(data & 1);
-    controllerPort2.device->latch(data & 1);
+    status.cpuLatch = data & 1;
+    controllerPort1.device->latch(status.autoJoypadLatch | status.cpuLatch);
+    controllerPort2.device->latch(status.autoJoypadLatch | status.cpuLatch);
     return;
 
   case 0x4200:  //NMITIMEN
     io.autoJoypadPoll = data & 1;
-    if(status.autoJoypadCounter < 2) {
+    if(status.autoJoypadCounter == 0) {
       // allow controller latches during this time
-      controllerPort1.device->latch(io.autoJoypadPoll);
-      controllerPort2.device->latch(io.autoJoypadPoll);
-    }else if (!io.autoJoypadPoll) {
-      status.autoJoypadCounter = 33; // Disable auto-joypad read
+      status.autoJoypadLatch = io.autoJoypadPoll;
+      controllerPort1.device->latch(status.autoJoypadLatch | status.cpuLatch);
+      controllerPort2.device->latch(status.autoJoypadLatch | status.cpuLatch);
+    } else if (!io.autoJoypadPoll && status.autoJoypadCounter >= 2) {
+      status.autoJoypadCounter = 33;
     }
 
     nmitimenUpdate(data);

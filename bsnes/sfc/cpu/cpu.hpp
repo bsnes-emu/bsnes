@@ -122,6 +122,9 @@ private:
 
     uint2 autoJoypadPort0 = 0;
     uint2 autoJoypadPort1 = 0;
+
+    bool cpuLatch = false;
+    bool autoJoypadLatch = false;
   } status;
 
   struct IO {
