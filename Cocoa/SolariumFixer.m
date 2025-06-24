@@ -1,7 +1,7 @@
 #import <Cocoa/Cocoa.h>
 #import <objc/runtime.h>
 
-// Uncomment to debug
+// Comment out to debug
 #define NSLog(...)
 
 // Solarium has weird proportions, we need to fix them.
@@ -101,6 +101,54 @@
             CGRect frame = self.frame;
             frame.origin.y += 3;
             self.frame = frame;
+        }
+    }
+}
+
+@end
+
+@implementation NSToolbarItem (SolariumFixer)
+
+- (void)awakeFromNib
+{
+    if (@available(macOS 26.0, *)) {
+        NSLog(@"Toolbar item %@ has view %@", self.label, self.view);
+        if ([self.view isKindOfClass:[NSTextField class]]) {
+            NSLog(@"Handling (Text field)");
+            self.bordered = true;
+            
+            NSSize maxSize = self.maxSize;
+            maxSize.height = 36;
+            self.maxSize = maxSize;
+            
+            NSSize minSize = self.minSize;
+            minSize.height = 36;
+            self.minSize = minSize;
+            
+            ((NSTextField *)self.view).backgroundColor = [NSColor clearColor];
+            ((NSTextField *)self.view).bezeled = false;
+            ((NSTextField *)self.view).bordered = true;
+
+            // Work around even more AppKit bugs
+            self.toolbar.displayMode++;
+            self.toolbar.displayMode--;
+        }
+        else if ([self.view isKindOfClass:[NSPopUpButton class]]) {
+            NSLog(@"Handling (Pop up button)");
+            self.bordered = true;
+            
+            NSSize maxSize = self.maxSize;
+            maxSize.height = 28;
+            self.maxSize = maxSize;
+            
+            NSSize minSize = self.minSize;
+            minSize.height = 28;
+            self.minSize = minSize;
+        }
+    }
+    else if (@available(macOS 11.0, *)) { // While at it, make macOS 11-15 a bit more consistent
+        if ([self.view isKindOfClass:[NSTextField class]]) {
+            ((NSTextField *)self.view).bezelStyle = NSTextFieldRoundedBezel;
         }
     }
 }

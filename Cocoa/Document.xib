@@ -162,7 +162,7 @@
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                         <subviews>
                                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="ybQ-jy-NgI" customClass="GBDebuggerButton">
-                                                <rect key="frame" x="0.0" y="0.0" width="26" height="26"/>
+                                                <rect key="frame" x="4" y="0.0" width="26" height="26"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <buttonCell key="cell" type="bevel" title="Interrupt" alternateTitle="interrupt" bezelStyle="rounded" image="InterruptTemplate" imagePosition="only" alignment="center" imageScaling="proportionallyDown" inset="2" id="Yd7-kY-21r">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -175,7 +175,7 @@
                                                 </connections>
                                             </button>
                                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jdD-yP-Nr6" customClass="GBDebuggerButton">
-                                                <rect key="frame" x="76" y="0.0" width="26" height="26"/>
+                                                <rect key="frame" x="80" y="0.0" width="26" height="26"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <buttonCell key="cell" type="bevel" title="Step Out" alternateTitle="finish" bezelStyle="rounded" image="FinishTemplate" imagePosition="only" alignment="center" enabled="NO" imageScaling="proportionallyDown" inset="2" id="16t-ix-lOh">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -187,7 +187,7 @@
                                                 </connections>
                                             </button>
                                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="tTP-Zs-Ohu" customClass="GBDebuggerButton">
-                                                <rect key="frame" x="26" y="0.0" width="26" height="26"/>
+                                                <rect key="frame" x="30" y="0.0" width="26" height="26"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <buttonCell key="cell" type="bevel" title="Step Over" alternateTitle="next" bezelStyle="rounded" image="NextTemplate" imagePosition="only" alignment="center" enabled="NO" imageScaling="proportionallyDown" inset="2" id="835-qy-CNq">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -199,7 +199,7 @@
                                                 </connections>
                                             </button>
                                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="E87-Uq-f2l" customClass="GBDebuggerButton">
-                                                <rect key="frame" x="100" y="0.0" width="26" height="26"/>
+                                                <rect key="frame" x="104" y="0.0" width="26" height="26"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <buttonCell key="cell" type="bevel" title="Step Backward" alternateTitle="backstep" bezelStyle="rounded" image="BackstepTemplate" imagePosition="only" alignment="center" enabled="NO" imageScaling="proportionallyDown" inset="2" id="yr5-aU-Fli">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -211,7 +211,7 @@
                                                 </connections>
                                             </button>
                                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="fsQ-dD-A8C" customClass="GBDebuggerButton">
-                                                <rect key="frame" x="52" y="0.0" width="26" height="26"/>
+                                                <rect key="frame" x="56" y="0.0" width="26" height="26"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                 <buttonCell key="cell" type="bevel" title="Step Into" alternateTitle="step" bezelStyle="rounded" image="StepTemplate" imagePosition="only" alignment="center" enabled="NO" imageScaling="proportionallyDown" inset="2" id="lau-41-TYH">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -231,7 +231,7 @@
                                                 <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                             </box>
                                             <button verticalHuggingPriority="750" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0Jt-TO-8CM" customClass="GBDebuggerButton">
-                                                <rect key="frame" x="565" y="0.0" width="26" height="26"/>
+                                                <rect key="frame" x="561" y="0.0" width="26" height="26"/>
                                                 <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxY="YES"/>
                                                 <buttonCell key="cell" type="bevel" title="Help" alternateTitle="help" bezelStyle="rounded" image="HelpTemplate" imagePosition="only" alignment="center" imageScaling="proportionallyDown" inset="2" id="fVh-bT-eYs">
                                                     <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
@@ -376,11 +376,11 @@
                     <toolbarItem implicitItemIdentifier="NSToolbarFlexibleSpaceItem" id="E3z-um-6KG"/>
                     <toolbarItem implicitItemIdentifier="4F6AAE25-1E9D-4111-9E5B-91F0792E56CD" label="Address Space" paletteLabel="Address Space" id="VTy-lj-K0H">
                         <nil key="toolTip"/>
-                        <size key="minSize" width="100" height="25"/>
+                        <size key="minSize" width="160" height="25"/>
                         <size key="maxSize" width="160" height="25"/>
                         <popUpButton key="view" verticalHuggingPriority="750" id="vfJ-vu-gqJ">
                             <rect key="frame" x="0.0" y="14" width="160" height="25"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES" flexibleMaxY="YES"/>
                             <popUpButtonCell key="cell" type="roundTextured" bezelStyle="texturedRounded" alignment="left" lineBreakMode="truncatingTail" borderStyle="border" imageScaling="proportionallyDown" inset="2" id="bpD-j9-omo">
                                 <behavior key="behavior" pushIn="YES" lightByBackground="YES" lightByGray="YES"/>
                                 <font key="font" metaFont="message"/>
@@ -402,31 +402,37 @@
                     <toolbarItem implicitItemIdentifier="D16C64D2-2F0D-4033-A1EC-A1E699522ECE" label="Bank" paletteLabel="Bank" id="bWC-FW-IYP">
                         <nil key="toolTip"/>
                         <size key="minSize" width="64" height="22"/>
-                        <size key="maxSize" width="64" height="22"/>
+                        <size key="maxSize" width="80" height="22"/>
                         <textField key="view" focusRingType="none" verticalHuggingPriority="750" id="rdV-q6-hc6">
                             <rect key="frame" x="0.0" y="14" width="64" height="22"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="YES" state="on" borderStyle="bezel" drawsBackground="YES" id="JCn-Y1-eHS">
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="NO" state="on" borderStyle="bezel" placeholderString="Bank" drawsBackground="YES" id="JCn-Y1-eHS" customClass="GBToolbarFieldCell">
                                 <font key="font" metaFont="system"/>
                                 <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="boolean" keyPath="sendsWholeSearchString" value="YES"/>
+                                </userDefinedRuntimeAttributes>
                             </textFieldCell>
                             <connections>
                                 <action selector="hexUpdateBank:" target="-2" id="Mx9-WI-wgO"/>
                             </connections>
                         </textField>
                     </toolbarItem>
-                    <toolbarItem implicitItemIdentifier="F9723DA8-D79F-43AB-876B-783DD0204AA6" label="Go to" paletteLabel="Go to" id="rLO-D7-zRG">
+                    <toolbarItem implicitItemIdentifier="F9723DA8-D79F-43AB-876B-783DD0204AA6" label="Go To" paletteLabel="Go To" id="rLO-D7-zRG">
                         <nil key="toolTip"/>
-                        <size key="minSize" width="96" height="22"/>
-                        <size key="maxSize" width="128" height="22"/>
+                        <size key="minSize" width="160" height="22"/>
+                        <size key="maxSize" width="160" height="22"/>
                         <textField key="view" focusRingType="none" verticalHuggingPriority="750" id="EJd-jG-hmH">
-                            <rect key="frame" x="0.0" y="14" width="96" height="22"/>
-                            <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMinY="YES"/>
-                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" state="on" borderStyle="bezel" bezelStyle="round" id="vg5-Nn-abb">
+                            <rect key="frame" x="0.0" y="14" width="160" height="22"/>
+                            <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
+                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="NO" state="on" borderStyle="bezel" placeholderString="Address" bezelStyle="round" id="vg5-Nn-abb" customClass="GBToolbarFieldCell">
                                 <font key="font" metaFont="system"/>
                                 <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
                                 <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
+                                <userDefinedRuntimeAttributes>
+                                    <userDefinedRuntimeAttribute type="boolean" keyPath="sendsWholeSearchString" value="YES"/>
+                                </userDefinedRuntimeAttributes>
                             </textFieldCell>
                             <connections>
                                 <action selector="hexGoTo:" target="-2" id="7WG-8C-SK8"/>
@@ -1000,7 +1006,7 @@
                         </connections>
                     </button>
                     <box horizontalHuggingPriority="750" fixedFrame="YES" boxType="separator" translatesAutoresizingMaskIntoConstraints="NO" id="P90-u5-8ko">
-                        <rect key="frame" x="304" y="12" width="5" height="123"/>
+                        <rect key="frame" x="302" y="12" width="5" height="123"/>
                         <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMaxX="YES" flexibleMaxY="YES"/>
                     </box>
                 </subviews>
