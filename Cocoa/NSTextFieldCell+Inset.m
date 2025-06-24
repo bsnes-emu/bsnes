@@ -66,7 +66,11 @@
 
 + (void)load
 {
-    method_exchangeImplementations(class_getInstanceMethod(self, @selector(wantsUpdateLayer)),
+    Method method = class_getInstanceMethod(self, @selector(wantsUpdateLayer));
+    if (class_addMethod(self, @selector(wantsUpdateLayer), method_getImplementation(method), method_getTypeEncoding(method))) {
+        method = class_getInstanceMethod(self, @selector(wantsUpdateLayer));
+    }
+    method_exchangeImplementations(method,
                                    class_getInstanceMethod(self, @selector(wantsUpdateLayerHook)));
 }
 

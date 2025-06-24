@@ -406,13 +406,9 @@
                         <textField key="view" focusRingType="none" verticalHuggingPriority="750" id="rdV-q6-hc6">
                             <rect key="frame" x="0.0" y="14" width="64" height="22"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="NO" state="on" borderStyle="bezel" placeholderString="Bank" drawsBackground="YES" id="JCn-Y1-eHS" customClass="GBToolbarFieldCell">
+                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" state="on" borderStyle="bezel" placeholderString="Bank" drawsBackground="NO" id="JCn-Y1-eHS" customClass="GBToolbarFieldCell">
                                 <font key="font" metaFont="system"/>
                                 <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="boolean" keyPath="sendsWholeSearchString" value="YES"/>
-                                </userDefinedRuntimeAttributes>
                             </textFieldCell>
                             <connections>
                                 <action selector="hexUpdateBank:" target="-2" id="Mx9-WI-wgO"/>
@@ -426,13 +422,9 @@
                         <textField key="view" focusRingType="none" verticalHuggingPriority="750" id="EJd-jG-hmH">
                             <rect key="frame" x="0.0" y="14" width="160" height="22"/>
                             <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
-                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" sendsActionOnEndEditing="NO" state="on" borderStyle="bezel" placeholderString="Address" bezelStyle="round" id="vg5-Nn-abb" customClass="GBToolbarFieldCell">
+                            <textFieldCell key="cell" scrollable="YES" lineBreakMode="clipping" selectable="YES" editable="YES" state="on" borderStyle="bezel" placeholderString="Address" bezelStyle="round" id="vg5-Nn-abb" customClass="GBToolbarFieldCell">
                                 <font key="font" metaFont="system"/>
                                 <color key="textColor" name="controlTextColor" catalog="System" colorSpace="catalog"/>
-                                <color key="backgroundColor" name="textBackgroundColor" catalog="System" colorSpace="catalog"/>
-                                <userDefinedRuntimeAttributes>
-                                    <userDefinedRuntimeAttribute type="boolean" keyPath="sendsWholeSearchString" value="YES"/>
-                                </userDefinedRuntimeAttributes>
                             </textFieldCell>
                             <connections>
                                 <action selector="hexGoTo:" target="-2" id="7WG-8C-SK8"/>

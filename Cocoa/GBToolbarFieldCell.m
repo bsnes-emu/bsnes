@@ -20,4 +20,13 @@
     method_setImplementation(class_getInstanceMethod([GBToolbarFieldCell class], _cmd), imp);
     ((void(*)(id, SEL, id))imp)(self, _cmd, textObj);
 }
+
+// We only need this hack on Solarium, avoid regressions
++ (instancetype)allocWithZone:(struct _NSZone *)zone
+{
+    if (@available(macOS 26.0, *)) {
+        return [super allocWithZone:zone];
+    }
+    return (id)[NSTextFieldCell allocWithZone:zone];
+}
 @end
