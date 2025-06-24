@@ -2775,6 +2775,9 @@ const char *GB_debugger_describe_address(GB_gameboy_t *gb,
     if (bank == (uint16_t)-1) {
         bank = bank_for_addr(gb, addr);
     }
+    if ((addr >> 12) == 0xC) {
+        bank = 0;
+    }
     if (exact_match) {
         const GB_bank_symbol_t *symbol = GB_map_find_symbol(get_symbol_map(gb, bank), addr, prefer_local);
         if (symbol && symbol->addr == addr) return symbol->name;
