@@ -1354,6 +1354,7 @@ static bool is_path_writeable(const char *path)
     [self.vramWindow close];
     [self.printerFeedWindow close];
     [self.cheatsWindow close];
+    [_cheatSearchController.window close];
     [super close];
 }
 
