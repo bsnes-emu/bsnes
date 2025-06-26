@@ -749,11 +749,12 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     if (old_width != GB_get_screen_width(&_gb)) {
         [self.view screenSizeChanged];
     }
-    
     [self updateMinSize];
     
-
     [self start];
+    if (_gbsTracks) {
+        [self changeGBSTrack:sender];
+    }
 
     if (_hexController) {
         /* Verify bank sanity, especially when switching models. */
@@ -1444,6 +1445,9 @@ static bool is_path_writeable(const char *path)
     }
     else if ([anItem action] == @selector(decreaseWindowSize:)) {
         return [self newRect:NULL forWindow:_mainWindow action:GBWindowResizeActionDecrease];
+    }
+    else if ([anItem action] == @selector(reloadROM:)) {
+        return !_gbsTracks;
     }
     
     return [super validateUserInterfaceItem:anItem];
