@@ -1814,8 +1814,8 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 {
     UIAlertControllerStyle style = [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad?
     UIAlertControllerStyleAlert : UIAlertControllerStyleActionSheet;
-    GBCheckableAlertController *menu = [GBCheckableAlertController alertControllerWithTitle:@"Connect which accessory?"
-                                                                                    message:nil
+    GBCheckableAlertController *menu = [GBCheckableAlertController alertControllerWithTitle:@"Connect Accessory"
+                                                                                    message:@"Choose an accessory to connect."
                                                                              preferredStyle:style];
     [menu addAction:[UIAlertAction actionWithTitle:@"None"
                                              style:UIAlertActionStyleDefault

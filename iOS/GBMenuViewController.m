@@ -283,7 +283,12 @@ static NSString *const tips[] = {
             button.backgroundColor = [UIColor colorWithWhite:0.5 alpha:0.3];
             button.layer.borderWidth = 2.0;
             button.layer.borderColor = [UIColor systemBlueColor].CGColor;
-            button.layer.cornerRadius = 8.0;
+            if (@available(iOS 19.0, *)) {
+                button.layer.cornerRadius = 32.0;
+            }
+            else {
+                button.layer.cornerRadius = 8.0;
+            }
         }
         else {
             button.backgroundColor = [UIColor clearColor];
