@@ -120,7 +120,7 @@ static NSString *const tips[] = {
     _effectView = [[UIVisualEffectView alloc] initWithEffect:effect];
     _effectView.layer.cornerRadius = 8;
     _effectView.layer.masksToBounds = true;
-    [self.view.superview addSubview:_effectView];
+    [self.view.window addSubview:_effectView];
     _tipLabel = [[UILabel alloc] init];
     unsigned tipIndex = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBTipIndex"];
     _tipLabel.text = tips[tipIndex % (sizeof(tips) / sizeof(tips[0]))];
@@ -144,6 +144,7 @@ static NSString *const tips[] = {
 
 - (void)layoutTip
 {
+    [self.view.window addSubview:_effectView];
     UIView *view = self.view.superview;
     CGSize outerSize = view.frame.size;
     CGSize size = [_tipLabel textRectForBounds:(CGRect){{0, 0},
