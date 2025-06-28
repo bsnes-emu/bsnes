@@ -1508,7 +1508,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
             [url startAccessingSecurityScopedResource];
             [GBROMManager sharedManager].currentROM =
             [[GBROMManager sharedManager] importROM:url.path
-                                       keepOriginal:![url.path hasPrefix:tempDir] && !inPlace];
+                                       keepOriginal:![url.path hasPrefix:tempDir] && inPlace];
             [url stopAccessingSecurityScopedResource];
         }
         return true;
@@ -1521,7 +1521,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
         }
         [url startAccessingSecurityScopedResource];
         [[GBROMManager sharedManager] importROM:url.path
-                                   keepOriginal:![url.path hasPrefix:tempDir] && !inPlace];
+                                   keepOriginal:![url.path hasPrefix:tempDir] && inPlace];
         [url stopAccessingSecurityScopedResource];
     }
     [self openLibrary];

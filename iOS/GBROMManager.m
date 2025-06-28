@@ -25,6 +25,12 @@
     if (!self) return nil;
     self.currentROM = [[NSUserDefaults standardUserDefaults] stringForKey:@"GBLastROM"];
     _doneInitializing = true;
+    
+    // Pre 1.0.2 versions might have kept temp files in there incorrectly
+    if (![[NSUserDefaults standardUserDefaults] boolForKey:@"GBDeletedInbox"]) {
+        [[NSFileManager defaultManager] removeItemAtPath:[self.localRoot stringByAppendingPathComponent:@"Inbox"] error:nil];
+        [[NSUserDefaults standardUserDefaults] setBool:true forKey:@"GBDeletedInbox"];
+    }
     return self;
 }
 
@@ -195,8 +201,10 @@
             [[NSFileManager defaultManager] removeItemAtPath:romFolder error:nil];
             return nil;
         }
-        
     }
+    
+    // Remove the Inbox directory if empty after import
+    rmdir([self.localRoot stringByAppendingPathComponent:@"Inbox"].UTF8String);
     
     return friendlyName;
 }
