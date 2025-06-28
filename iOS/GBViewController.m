@@ -437,6 +437,16 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     return true;
 }
 
+- (void)orderFrontPreferencesPanel:(id)sender
+{
+    [self openSettings];
+}
+
+- (void)open:(id)sender
+{
+    [self openLibrary];
+}
+
 - (void)updateMirrorWindow
 {
     if ([UIScreen screens].count == 1) {
@@ -793,7 +803,21 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)openLibrary
 {
-    [self presentViewController:[[GBLibraryViewController alloc] init]
+    static __weak UIViewController *presentedController;
+    if (presentedController) return;
+    if (self.presentedViewController) {
+        if (![self.presentedViewController isKindOfClass:[UIAlertController class]]) {
+            [self dismissViewController];
+        }
+        else {
+            return;;
+        }
+    }
+    
+    UIViewController *controller = [[GBLibraryViewController alloc] init];
+    presentedController = controller;
+    
+    [self presentViewController:controller
                        animated:true
                      completion:nil];
 }
@@ -874,11 +898,24 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)openSettings
 {
+    static __weak UIViewController *presentedController;
+    if (presentedController) return;
+    if (self.presentedViewController) {
+        if (![self.presentedViewController isKindOfClass:[UIAlertController class]]) {
+            [self dismissViewController];
+        }
+        else {
+            return;;
+        }
+    }
+    
     UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:@"Close"
                                                               style:UIBarButtonItemStylePlain
                                                              target:self
                                                              action:@selector(dismissViewController)];
-    [self presentViewController:[GBSettingsViewController settingsViewControllerWithLeftButton:close]
+    UIViewController *controller = [GBSettingsViewController settingsViewControllerWithLeftButton:close];
+    presentedController = controller;
+    [self presentViewController:controller
                        animated:true
                      completion:nil];
 }
