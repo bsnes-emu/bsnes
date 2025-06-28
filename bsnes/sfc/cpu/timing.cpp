@@ -243,13 +243,13 @@ auto CPU::joypadEdge() -> void {
     //sixteen bits are shifted into joy{1-4}, one bit per 256 clocks
     //the bits are read on one 128-clock cycle and written on the next
     if ((status.autoJoypadCounter & 1) == 0) {
-      status.autoJoypadPort0 = controllerPort1.device->data();
-      status.autoJoypadPort1 = controllerPort2.device->data();
+      status.autoJoypadPort1 = controllerPort1.device->data();
+      status.autoJoypadPort2 = controllerPort2.device->data();
     } else {
-      io.joy1 = io.joy1 << 1 | status.autoJoypadPort0.bit(0);
-      io.joy2 = io.joy2 << 1 | status.autoJoypadPort1.bit(0);
-      io.joy3 = io.joy3 << 1 | status.autoJoypadPort0.bit(1);
-      io.joy4 = io.joy4 << 1 | status.autoJoypadPort1.bit(1);
+      io.joy1 = io.joy1 << 1 | status.autoJoypadPort1.bit(0);
+      io.joy2 = io.joy2 << 1 | status.autoJoypadPort2.bit(0);
+      io.joy3 = io.joy3 << 1 | status.autoJoypadPort1.bit(1);
+      io.joy4 = io.joy4 << 1 | status.autoJoypadPort2.bit(1);
     }
   }
 }

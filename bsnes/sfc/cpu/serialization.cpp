@@ -45,8 +45,8 @@ auto CPU::serialize(serializer& s) -> void {
 
   s.integer(status.autoJoypadCounter);
 
-  s.integer(status.autoJoypadPort0);
   s.integer(status.autoJoypadPort1);
+  s.integer(status.autoJoypadPort2);
 
   s.boolean(status.cpuLatch);
   s.boolean(status.autoJoypadLatch);
