@@ -212,7 +212,8 @@
         self.toolbarItems = @[export,
                               flexItem,
                               import, [UIBarButtonItem fixedSpaceItemOfWidth:0], add];
-    } else {
+    }
+    else {
         self.toolbarItems = @[export,
                               flexItem,
                               import, add];

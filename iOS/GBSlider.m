@@ -173,7 +173,7 @@ static inline void temperature_tint(double temperature, double *r, double *g, do
 - (void)setStyle:(GBSliderStyle)style
 {
     _style = style;
-    if (@available(iOS 26.0, *)) {
+    if (@available(iOS 19.0, *)) {
         switch (_style) {
             case GBSliderStyleTemperature:
             case GBSliderStyleTicks: {
