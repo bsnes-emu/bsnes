@@ -1,4 +1,19 @@
 #import "GBSlider.h"
+#import <objc/runtime.h>
+
+#if !__has_include(<UIKit/UISliderTrackConfiguration.h>)
+/* Building with older SDKs */
+API_AVAILABLE(ios(26.0))
+@interface UISliderTrackConfiguration : NSObject
+@property (nonatomic, readwrite) bool allowsTickValuesOnly;
+@property (nonatomic, readwrite) float neutralValue;
++ (instancetype)configurationWithNumberOfTicks:(NSInteger)ticks;
+@end
+
+@interface UISlider (configuration)
+@property(nonatomic, copy, nullable) UISliderTrackConfiguration *trackConfiguration API_AVAILABLE(ios(26.0));
+@end
+#endif
 
 static inline void temperature_tint(double temperature, double *r, double *g, double *b)
 {
@@ -162,7 +177,7 @@ static inline void temperature_tint(double temperature, double *r, double *g, do
         switch (_style) {
             case GBSliderStyleTemperature:
             case GBSliderStyleTicks: {
-                UISliderTrackConfiguration *conf = [UISliderTrackConfiguration configurationWithNumberOfTicks:3];
+                UISliderTrackConfiguration *conf = [objc_getClass("UISliderTrackConfiguration") configurationWithNumberOfTicks:3];
                 conf.allowsTickValuesOnly = false;
                 conf.neutralValue = 0.5;
                 self.trackConfiguration = conf;
@@ -171,7 +186,7 @@ static inline void temperature_tint(double temperature, double *r, double *g, do
                 break;
             }
             case GBSliderStyleHue: {
-                UISliderTrackConfiguration *conf = [UISliderTrackConfiguration configurationWithNumberOfTicks:0];
+                UISliderTrackConfiguration *conf = [objc_getClass("UISliderTrackConfiguration") configurationWithNumberOfTicks:0];
                 conf.allowsTickValuesOnly = false;
                 self.trackConfiguration = conf;
                 self.minimumTrackTintColor = [UIColor clearColor];
