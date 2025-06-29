@@ -156,8 +156,12 @@ static NSString *const tips[] = {
                         limitedToNumberOfLines:3].size;
     size.width = ceil(size.width);
     _tipLabel.frame = (CGRect){{8, 8}, size};
+    unsigned topInset = view.window.safeAreaInsets.top;
+    if (!topInset && [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
+        topInset = 32; // iPadOS is buggy af
+    }
     _effectView.frame = (CGRect) {
-        {round((outerSize.width - size.width - 16) / 2), view.window.safeAreaInsets.top + 12},
+        {round((outerSize.width - size.width - 16) / 2), topInset + 12},
         {size.width + 16, size.height + 16}
     };
 }
