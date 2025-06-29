@@ -99,6 +99,8 @@ static uint32_t color_to_int(NSColor *color)
                                                               @"GBDebuggerFont": hasSFMono? @"SF Mono" : @"Menlo",
                                                               @"GBDebuggerFontSize": @12,
                                                               
+                                                              @"GBColorPalette": @1,
+                                                              
                                                               // Default themes
                                                               @"GBThemes": @{
                                                                       @"Canyon": @{
