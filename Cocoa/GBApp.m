@@ -100,6 +100,7 @@ static uint32_t color_to_int(NSColor *color)
                                                               @"GBDebuggerFontSize": @12,
                                                               
                                                               @"GBColorPalette": @1,
+                                                              @"GBTurboCap": @0,
                                                               
                                                               // Default themes
                                                               @"GBThemes": @{

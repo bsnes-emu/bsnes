@@ -267,6 +267,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         GB_set_rewind_length(gb, [newValue unsignedIntValue]);
     } forKey:@"GBRewindLength"];
     [self addDefaultObserver:^(id newValue) {
+        GB_set_turbo_cap(gb, [newValue doubleValue]);
+    } forKey:@"GBTurboCap"];
+    [self addDefaultObserver:^(id newValue) {
         [[AVAudioSession sharedInstance] setCategory:[newValue isEqual:@"on"]? AVAudioSessionCategoryPlayback :  AVAudioSessionCategorySoloAmbient
                                                 mode:AVAudioSessionModeDefault
                                   routeSharingPolicy:AVAudioSessionRouteSharingPolicyDefault
@@ -1803,9 +1806,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     
     if (_runMode == GBRunModeNormal  || _runMode == GBRunModeUnderclock || !([[NSUserDefaults standardUserDefaults] boolForKey:@"GBDynamicSpeed"] && !ignoreDynamicSpeed)) {
         if (_runMode == GBRunModeTurbo) {
-            double multiplier = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBTurboSpeed"];
-            GB_set_turbo_mode(&_gb, multiplier == 1, false);
-            GB_set_clock_multiplier(&_gb, multiplier);
+            GB_set_turbo_mode(&_gb, true, false);
         }
         else if (_runMode == GBRunModeUnderclock) {
             GB_set_clock_multiplier(&_gb, 0.5);
