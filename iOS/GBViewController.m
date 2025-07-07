@@ -1390,7 +1390,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 - (UIImage *)imageFromData:(NSData *)data width:(unsigned)width height:(unsigned)height
 {
     /* Convert the screenshot to a CGImageRef */
-    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data.bytes, data.length, NULL);
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)data);
     CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
     CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaNoneSkipLast;
     CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
