@@ -2125,8 +2125,9 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 
 /* +[UIColor labelColor] is broken in some contexts in iOS 26 and despite being such a critical method
    Apple isn't going to fix this in time. */
+API_AVAILABLE(ios(19.0))
 @implementation UIColor(SolariumBugs)
-+ (UIColor *)labelColor
++ (UIColor *)_labelColor
 {
     return [UIColor colorWithDynamicProvider:^UIColor *(UITraitCollection *traitCollection) {
         switch (traitCollection.userInterfaceStyle) {
@@ -2139,4 +2140,13 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
         }
     }];
 }
+
++ (void)load
+{
+    if (@available(iOS 19.0, *)) {
+        method_setImplementation(class_getClassMethod(self, @selector(labelColor)),
+                                 [self methodForSelector:@selector(_labelColor)]);
+    }
+}
+
 @end
