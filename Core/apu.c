@@ -6,46 +6,51 @@
 #include <stdlib.h>
 #include "gb.h"
 
-/* Band limited synthesis based on: http://www.slack.net/~ant/bl-synth/ */
+/* Band limited synthesis loosely based on: http://www.slack.net/~ant/bl-synth/ */
 static int32_t band_limited_steps[GB_BAND_LIMITED_PHASES][GB_BAND_LIMITED_WIDTH];
 
 static void __attribute__((constructor)) band_limited_init(void)
 {
-    const unsigned master_size = GB_BAND_LIMITED_WIDTH * GB_BAND_LIMITED_PHASES + 1;
+    const unsigned master_size = GB_BAND_LIMITED_WIDTH * GB_BAND_LIMITED_PHASES;
     double *master = malloc(master_size  * sizeof(*master));
     memset(master, 0, master_size  * sizeof(*master));
     
-    const unsigned sine_size = (master_size - 1) * 2;
-    const unsigned max_harmonic = sine_size / 2 / GB_BAND_LIMITED_PHASES;
-    nounroll for (unsigned harmonic = 1; harmonic <= max_harmonic; harmonic += 2) {
-        double amplitude = 1.0 / harmonic / 2;
-        double to_angle = M_PI * 2 / sine_size * harmonic;
-        nounroll for (unsigned i = 0; i < master_size; i++) {
-            master[i] += sin(((signed)(i + 1) - (signed)sine_size / 4) * to_angle) * amplitude;
-        }
+    const double lowpass = 15.0 / 16.0; // 1.0 means using Nyquist as the exact cutoff
+    const double to_angle = M_PI / GB_BAND_LIMITED_PHASES * lowpass;
+    double sum = 0;
+    nounroll for (signed i = 0; i < master_size; i++) {
+        // Exact Blackman window
+        const double a0 = 7938 / 18608.0;
+        const double a1 = 9240 / 18608.0;
+        const double a2 = 1430 / 18608.0;
+        double window_angle = (2.0 * M_PI * i) / (master_size);
+        double window = a0 - a1 * cos(window_angle) + a2 * cos(2 * window_angle);
+        
+        double angle = (i - (signed)master_size / 2) * to_angle;
+        sum += master[i] = (angle == 0? 1 : sin(angle) / angle) * window;
     }
     
-    // Normalize master waveform
-    nounroll for (unsigned i = 0; i < master_size - 1; i++) {
-        master[i] += master[master_size - 1];
-        master[i] /= master[master_size - 1] * 2;
+    nounroll for (signed i = 0; i < master_size; i++) {
+        master[i] /= sum;
     }
-    master[master_size - 1] = 1;
     
-    nounroll for (unsigned phase = 0; phase < GB_BAND_LIMITED_PHASES; phase++) {
+    nounroll for (signed phase = 0; phase < GB_BAND_LIMITED_PHASES; phase++) {
         int32_t error = GB_BAND_LIMITED_ONE;
-        int32_t prev = 0;
-        nounroll for (unsigned i = 0; i < GB_BAND_LIMITED_WIDTH; i++) {
-            int32_t cur = master[(GB_BAND_LIMITED_PHASES - 1 - phase) + i * GB_BAND_LIMITED_PHASES] * GB_BAND_LIMITED_ONE;
-            int32_t delta = cur - prev;
-            error = error - delta;
-            prev = cur;
-            band_limited_steps[phase][i] = delta;
+        nounroll for (signed i = 0; i < GB_BAND_LIMITED_WIDTH; i++) {
+            double sum = 0;
+            nounroll for (signed j = 0; j < GB_BAND_LIMITED_PHASES; j++) {
+                signed index = i * GB_BAND_LIMITED_PHASES - phase + j;
+                if (index >= 0) {
+                    sum += master[index];
+                }
+            }
+            int32_t cur = sum * GB_BAND_LIMITED_ONE;
+            error -= cur;
+            band_limited_steps[phase][i] = cur;
         }
         
         // Make sure the deltas sum to 1.0
-        band_limited_steps[phase][GB_BAND_LIMITED_WIDTH / 2 - 1] += error / 2;
-        band_limited_steps[phase][0] += error - (error / 2);
+        band_limited_steps[phase][GB_BAND_LIMITED_WIDTH / 2] += error;
     }
     free(master);
 }
@@ -56,7 +61,9 @@ static void band_limited_update(GB_band_limited_t *band_limited, const GB_sample
     unsigned delay = phase / GB_BAND_LIMITED_PHASES;
     phase = phase & (GB_BAND_LIMITED_PHASES - 1);
     
-    GB_sample_t delta = {
+    struct {
+        signed left, right;
+    } delta = {
         .left = input->left - band_limited->input.left,
         .right = input->right - band_limited->input.right,
     };
@@ -73,7 +80,9 @@ static void band_limited_update_unfiltered(GB_band_limited_t *band_limited, cons
 {
     if (input->packed == band_limited->input.packed) return;
     
-    GB_sample_t delta = {
+    struct {
+        signed left, right;
+    } delta = {
         .left = input->left - band_limited->input.left,
         .right = input->right - band_limited->input.right,
     };
