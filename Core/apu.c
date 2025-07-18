@@ -105,6 +105,15 @@ static void band_limited_read(GB_band_limited_t *band_limited, GB_sample_t *outp
     output->right = band_limited->output.right * multiplier / GB_BAND_LIMITED_ONE;
 }
 
+static inline uint32_t sample_fraction_multiply(GB_gameboy_t *gb, unsigned multiplier)
+{
+    if (unlikely(multiplier == 0)) return 0;
+    if (likely(multiplier < GB_QUICK_MULTIPLY_COUNT + 1)) {
+        return gb->apu_output.quick_fraction_multiply_cache[multiplier - 1];
+    }
+    return gb->apu_output.quick_fraction_multiply_cache[0] * multiplier;
+}
+
 static const uint8_t duties[] = {
     0, 0, 0, 0, 0, 0, 0, 1,
     1, 0, 0, 0, 0, 0, 0, 1,
@@ -196,7 +205,7 @@ static void update_sample(GB_gameboy_t *gb, GB_channel_t index, int8_t value, un
             else {
                 band_limited_update(&gb->apu_output.band_limited[index],
                                     &output,
-                                    (gb->apu_output.cycles_since_render + cycles_offset) * GB_BAND_LIMITED_PHASES / gb->apu_output.max_cycles_per_sample);
+                                    (((gb->apu_output.sample_fraction + sample_fraction_multiply(gb, cycles_offset)) >> 8) * GB_BAND_LIMITED_PHASES) >> 20);
             }
         }
         
@@ -231,7 +240,7 @@ static void update_sample(GB_gameboy_t *gb, GB_channel_t index, int8_t value, un
         else {
             band_limited_update(&gb->apu_output.band_limited[index],
                                 &output,
-                                (gb->apu_output.cycles_since_render + cycles_offset) * GB_BAND_LIMITED_PHASES / gb->apu_output.max_cycles_per_sample);
+                                (((gb->apu_output.sample_fraction + sample_fraction_multiply(gb, cycles_offset)) >> 8) * GB_BAND_LIMITED_PHASES) >> 20);
         }
     }
 }
@@ -316,6 +325,12 @@ static void render(GB_gameboy_t *gb)
         output.right += channel_output.right;
     }
     gb->apu_output.cycles_since_render = 0;
+    if (unlikely(gb->apu_output.sample_fraction < (1 << 28))) {
+        gb->apu_output.sample_fraction = 0;
+    }
+    else {
+        gb->apu_output.sample_fraction -= 1 << 28;
+    }
     
     if (gb->sgb && gb->sgb->intro_animation < GB_SGB_INTRO_ANIMATION_LENGTH) return;
 
@@ -973,6 +988,8 @@ restart:;
 
     if (gb->apu_output.sample_rate) {
         gb->apu_output.cycles_since_render += cycles;
+        gb->apu_output.sample_fraction += sample_fraction_multiply(gb, cycles);
+        assert(gb->apu_output.sample_fraction < (4 << 28));
 
         if (gb->apu_output.sample_cycles >= clock_rate) {
             gb->apu_output.sample_cycles -= clock_rate;
@@ -1769,6 +1786,10 @@ void GB_set_sample_rate(GB_gameboy_t *gb, unsigned sample_rate)
     if (sample_rate) {
         gb->apu_output.highpass_rate = pow(0.999958, GB_get_clock_rate(gb) / (double)sample_rate);
         gb->apu_output.max_cycles_per_sample = ceil(GB_get_clock_rate(gb) / 2.0 / sample_rate);
+        gb->apu_output.quick_fraction_multiply_cache[0] = round(sample_rate * 2.0 / GB_get_clock_rate(gb) * (1 << 28));
+        for (unsigned i = 1; i < GB_QUICK_MULTIPLY_COUNT; i++) {
+            gb->apu_output.quick_fraction_multiply_cache[i] = gb->apu_output.quick_fraction_multiply_cache[0] * (i + 1);
+        }
     }
     else {
         gb->apu_output.max_cycles_per_sample = 0x400;
@@ -1785,6 +1806,11 @@ void GB_set_sample_rate_by_clocks(GB_gameboy_t *gb, double cycles_per_sample)
     gb->apu_output.sample_rate = GB_get_clock_rate(gb) / cycles_per_sample * 2;
     gb->apu_output.highpass_rate = pow(0.999958, cycles_per_sample);
     gb->apu_output.max_cycles_per_sample = ceil(cycles_per_sample / 4);
+    
+    gb->apu_output.quick_fraction_multiply_cache[0] = round(gb->apu_output.sample_rate * 2.0 / GB_get_clock_rate(gb) * (1 << 28));
+    for (unsigned i = 1; i < GB_QUICK_MULTIPLY_COUNT; i++) {
+        gb->apu_output.quick_fraction_multiply_cache[i] = gb->apu_output.quick_fraction_multiply_cache[0] * (i + 1);
+    }
 }
 
 unsigned GB_get_sample_rate(GB_gameboy_t *gb)
