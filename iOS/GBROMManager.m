@@ -34,9 +34,17 @@
     return self;
 }
 
+- (NSArray<NSString *> *)forbiddenNames
+{
+    return @[@"Inbox", @"Boot ROMs"];
+}
+
 - (void)setCurrentROM:(NSString *)currentROM
 {
     _romFile = nil;
+    if ([self.forbiddenNames containsObject:currentROM]) {
+        currentROM = nil;
+    }
     _currentROM = currentROM;
     bool foundROM = self.romFile;
     
@@ -64,6 +72,9 @@
 
 - (NSString *)romDirectoryForROM:(NSString *)romFile
 {
+    if ([self.forbiddenNames containsObject:romFile]) {
+        return nil;
+    }
 
     return [self.localRoot stringByAppendingPathComponent:romFile];
 }
@@ -80,9 +91,10 @@
     if (rom == _currentROM) {
         return self.romFile;
     }
-    if ([rom isEqualToString:@"Inbox"]) return nil;
-    if ([rom isEqualToString:@"Boot ROMs"]) return nil;
     
+    if ([self.forbiddenNames containsObject:rom]) {
+        return nil;
+    }
     
     return [self romFileForDirectory:[self romDirectoryForROM:rom]];
 }
@@ -149,6 +161,9 @@
 
 - (NSString *)makeNameUnique:(NSString *)name
 {
+    if ([self.forbiddenNames containsObject:name]) {
+        name = @"Imported ROM";
+    }
     NSString *root = self.localRoot;
     if (![[NSFileManager defaultManager] fileExistsAtPath:[root stringByAppendingPathComponent:name]]) return name;
     
