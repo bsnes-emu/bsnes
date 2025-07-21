@@ -978,10 +978,23 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)reset
 {
-    [self stop];
-    _skipAutoLoad = true;
-    GB_reset(&_gb);
-    [self start];
+    UIAlertControllerStyle style = [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad?
+    UIAlertControllerStyleAlert : UIAlertControllerStyleActionSheet;
+    UIAlertController *menu = [UIAlertController alertControllerWithTitle:@"Reset Emulation?"
+                                                                  message:@"Unsaved progress will be lost."
+                                                           preferredStyle:style];
+    [menu addAction:[UIAlertAction actionWithTitle:@"Reset"
+                                             style:UIAlertActionStyleDestructive
+                                           handler:^(UIAlertAction *action) {
+        [self stop];
+        _skipAutoLoad = true;
+        GB_reset(&_gb);
+        [self start];
+    }]];
+    [menu addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                             style:UIAlertActionStyleCancel
+                                           handler:nil]];
+    [self presentViewController:menu animated:true completion:nil];
 }
 
 - (void)openLibrary
