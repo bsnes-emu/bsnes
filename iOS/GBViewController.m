@@ -847,15 +847,31 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 - (void)saveStateToFile:(NSString *)file
 {
     NSString *tempPath = [file stringByAppendingPathExtension:@"tmp"];
-    if (!GB_save_state(&_gb, tempPath.UTF8String)) {
+    int error = GB_save_state(&_gb, tempPath.UTF8String);
+    if (!error) {
         rename(tempPath.UTF8String, file.UTF8String);
+        NSData *data = [NSData dataWithBytes:_gbView.previousBuffer
+                                      length:GB_get_screen_width(&_gb) *
+                        GB_get_screen_height(&_gb) *
+                        sizeof(*_gbView.previousBuffer)];
+        UIImage *screenshot = [self imageFromData:data width:GB_get_screen_width(&_gb) height:GB_get_screen_height(&_gb)];
+        [UIImagePNGRepresentation(screenshot) writeToFile:[file stringByAppendingPathExtension:@"png"] atomically:false];
     }
-    NSData *data = [NSData dataWithBytes:_gbView.previousBuffer
-                                  length:GB_get_screen_width(&_gb) *
-                    GB_get_screen_height(&_gb) *
-                    sizeof(*_gbView.previousBuffer)];
-    UIImage *screenshot = [self imageFromData:data width:GB_get_screen_width(&_gb) height:GB_get_screen_height(&_gb)];
-    [UIImagePNGRepresentation(screenshot) writeToFile:[file stringByAppendingPathExtension:@"png"] atomically:false];
+    else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Could not Save State"
+                                                                           message:[NSString stringWithFormat:@"An error occured while attempting to save: %s", strerror(error)]
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:@"Close"
+                                                      style:UIAlertActionStyleCancel
+                                                    handler:nil]];
+            UIViewController *top = self;
+            while (top.presentedViewController) {
+                top = top.presentedViewController;
+            }
+            [top presentViewController:alert animated:true completion:nil];
+        });
+    }
 }
 
 - (bool)loadStateFromFile:(NSString *)file
