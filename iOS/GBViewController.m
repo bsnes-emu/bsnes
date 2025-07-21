@@ -99,6 +99,7 @@ API_AVAILABLE(ios(13.0))
 {
     GB_gameboy_t _gb;
     GBView *_gbView;
+    dispatch_queue_t _runQueue;
     
     volatile bool _running;
     volatile bool _stopping;
@@ -314,6 +315,8 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     _window = [[UIWindow alloc] init];
     _window.rootViewController = self;
     [_window makeKeyAndVisible];
+    
+    _runQueue = dispatch_queue_create("SameBoy Emulation Queue", NULL);
     
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-retain-cycles"
@@ -875,41 +878,62 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     if (romManager.romFile) {
         if (!_skipAutoLoad) {
             // Todo: display errors and warnings
-            if ([romManager.romFile.pathExtension.lowercaseString isEqualToString:@"isx"]) {
-                _romLoaded = GB_load_isx(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
+            bool needsStateLoad = false;
+            if (![_lastSavedROM isEqual:[GBROMManager sharedManager].currentROM]) {
+                if ([romManager.romFile.pathExtension.lowercaseString isEqualToString:@"isx"]) {
+                    _romLoaded = GB_load_isx(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
+                }
+                else {
+                    _romLoaded = GB_load_rom(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
+                }
+                needsStateLoad = true;
             }
-            else {
-                _romLoaded = GB_load_rom(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
+            else if (access(romManager.romFile.fileSystemRepresentation, R_OK)) {
+                _romLoaded = false;
             }
-            if (_romLoaded) {
+            if (!_romLoaded) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    romManager.currentROM = nil;
+                });
+            }
+            
+            if (!needsStateLoad) {
+                NSDate *date = nil;
+                [[NSURL fileURLWithPath:[GBROMManager sharedManager].autosaveStateFile] getResourceValue:&date
+                                                                                                  forKey:NSURLContentModificationDateKey
+                                                                                                   error:nil];
+                if (![_saveDate isEqual:date]) {
+                    needsStateLoad = true;
+                }
+            }
+            
+            if (_romLoaded && needsStateLoad) {
                 GB_reset(&_gb);
                 GB_load_battery(&_gb, [GBROMManager sharedManager].batterySaveFile.fileSystemRepresentation);
                 GB_remove_all_cheats(&_gb);
                 GB_load_cheats(&_gb, [GBROMManager sharedManager].cheatsFile.UTF8String, false);
                 if (![self loadStateFromFile:[GBROMManager sharedManager].autosaveStateFile]) {
-                    // Newly played ROM, pick the best model
-                    uint8_t *rom = GB_get_direct_access(&_gb, GB_DIRECT_ACCESS_ROM, NULL, NULL);
-                    
-                    if ((rom[0x143] & 0x80)) {
-                        if (!GB_is_cgb(&_gb)) {
-                            GB_switch_model_and_reset(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBCGBModel"]);
+                    if ([_lastSavedROM isEqual:[GBROMManager sharedManager].currentROM]) {
+                        /* Something weird just happened: we didn't change a ROM, but we failed to load the
+                           latest save state. Save over the existing file, it's probably corrupt in some
+                           way. */
+                        [self saveStateToFile:[GBROMManager sharedManager].autosaveStateFile];
+                    }
+                    else {
+                        // Newly played ROM, pick the best model
+                        uint8_t *rom = GB_get_direct_access(&_gb, GB_DIRECT_ACCESS_ROM, NULL, NULL);
+                        
+                        if ((rom[0x143] & 0x80)) {
+                            if (!GB_is_cgb(&_gb)) {
+                                GB_switch_model_and_reset(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBCGBModel"]);
+                            }
+                        }
+                        else if ((rom[0x146]  == 3) && !GB_is_sgb(&_gb)) {
+                            GB_switch_model_and_reset(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBSGBModel"]);
                         }
                     }
-                    else if ((rom[0x146] == 3) && !GB_is_sgb(&_gb)) {
-                        GB_switch_model_and_reset(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBSGBModel"]);
-                    }
+                    GB_rewind_reset(&_gb);
                 }
-            }
-            
-            NSDate *date = nil;
-            [[NSURL fileURLWithPath:[GBROMManager sharedManager].autosaveStateFile] getResourceValue:&date
-                                                                                              forKey:NSURLContentModificationDateKey
-                                                                                               error:nil];
-
-            // Reset the rewind buffer only if we switched ROMs or had the save state change externally
-            if (![_lastSavedROM isEqual:[GBROMManager sharedManager].currentROM] ||
-                ![_saveDate isEqual:date]) {
-                GB_rewind_reset(&_gb);
             }
         }
     }
@@ -1480,7 +1504,9 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     if (_running) return;
     if (self.presentedViewController) return;
     _running = true;
-    [[[NSThread alloc] initWithTarget:self selector:@selector(run) object:nil] start];
+    dispatch_async(_runQueue, ^{
+        [self run];
+    });
 }
 
 - (void)stop
@@ -1496,6 +1522,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
         [_audioLock signal];
         [_audioLock unlock];
     }
+    dispatch_sync(_runQueue, ^{});
     dispatch_async(dispatch_get_main_queue(), ^{
         self.runMode = GBRunModeNormal;
         [_backgroundView fadeOverlayOut];
