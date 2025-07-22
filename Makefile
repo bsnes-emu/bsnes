@@ -115,7 +115,7 @@ PKGCONF_DIR := $(LIBDIR)/pkgconfig
 PKGCONF_FILE := $(PKGCONF_DIR)/sameboy.pc
 
 ifneq ($(CORE_FILTER)$(DISABLE_TIMEKEEPING),)
-ifneq ($(filter-out lib $(LIBDIR)/% $(INC)/%,$(MAKECMDGOALS)),)
+ifneq ($(filter-out lib headers $(LIBDIR)/% $(INC)/%,$(MAKECMDGOALS)),)
 $(error SameBoy features can only be disabled when compiling the 'lib' target)
 endif
 endif
@@ -437,7 +437,8 @@ SDL_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(SDL_SOURCES))
 TESTER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(TESTER_SOURCES))
 XDG_THUMBNAILER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(XDG_THUMBNAILER_SOURCES)) $(OBJ)/XdgThumbnailer/resources.c.o
 
-lib: $(PUBLIC_HEADERS)
+lib: headers
+headers: $(PUBLIC_HEADERS)
 
 # Automatic dependency generation
 
