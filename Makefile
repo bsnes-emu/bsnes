@@ -553,6 +553,7 @@ $(BIN)/SameBoy.app: $(BIN)/SameBoy.app/Contents/MacOS/SameBoy \
                     $(shell ls Cocoa/*.icns Cocoa/*.png Cocoa/*.car) \
                     Cocoa/License.html \
                     Cocoa/Info.plist \
+                    Cocoa/SameBoy.entitlements \
                     Misc/registers.sym \
                     $(BIN)/SameBoy.app/Contents/Resources/dmg_boot.bin \
                     $(BIN)/SameBoy.app/Contents/Resources/mgb_boot.bin \
@@ -573,9 +574,7 @@ $(BIN)/SameBoy.app: $(BIN)/SameBoy.app/Contents/MacOS/SameBoy \
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Resources/Shaders
 	cp Shaders/*.fsh Shaders/*.metal $(BIN)/SameBoy.app/Contents/Resources/Shaders
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Library/QuickLook/
-ifeq ($(CONF), release)
-	$(CODESIGN) $@
-endif
+	$(CODESIGN) $@ --entitlements Cocoa/SameBoy.entitlements
 
 # We place the dylib inside the Quick Look plugin, because Quick Look plugins run in a very strict sandbox
 
