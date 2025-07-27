@@ -26,6 +26,7 @@ auto System::runToSave() -> void {
   //these games will periodically deadlock when using "Fast" synchronization
   if(cartridge.headerTitle() == "Star Ocean") method = "Strict";
   if(cartridge.headerTitle() == "TALES OF PHANTASIA") method = "Strict";
+  if(cartridge.has.ICD) method = "Strict";
 
   //fallback in case of unrecognized method specified
   if(method != "Fast" && method != "Strict") method = "Fast";
