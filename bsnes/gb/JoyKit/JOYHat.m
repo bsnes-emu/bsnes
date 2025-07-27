@@ -10,15 +10,15 @@
 
 - (uint64_t)uniqueID
 {
-    return _element.uniqueID;
+    return _element.uniqueID | (uint64_t)self.combinedIndex << 32;
 }
 
 - (NSString *)description
 {
     if (self.isPressed) {
-        return [NSString stringWithFormat:@"<%@: %p (%llu); State: %f degrees>", self.className, self, self.uniqueID, self.angle];
+        return [NSString stringWithFormat:@"<%@: %p (%llx); State: %f degrees>", self.className, self, self.uniqueID, self.angle];
     }
-    return [NSString stringWithFormat:@"<%@: %p (%llu); State: released>", self.className, self, self.uniqueID];
+    return [NSString stringWithFormat:@"<%@: %p (%llx); State: released>", self.className, self, self.uniqueID];
 
 }
 
@@ -51,12 +51,17 @@
 
 - (bool)updateState
 {
-    unsigned state = ([_element value] - _element.min) * 360.0 / self.resolution;
+    signed state = ([_element value] - _element.min) * 360.0 / self.resolution;
     if (_state != state) {
         _state = state;
         return true;
     }
     return false;
+}
+
+- (NSString *)usageString
+{
+    return @"Hat switch";
 }
 
 @end

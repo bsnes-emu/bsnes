@@ -42,10 +42,10 @@ namespace SameBoy {
     icd.apuWrite(left, right);
   }
 
-  static auto vblank(GB_gameboy_t*) -> void {
+  static auto vblank(GB_gameboy_t*, GB_vblank_type_t) -> void {
   }
 
-  static auto log(GB_gameboy_t *gb, const char *string, GB_log_attributes attributes) -> void {
+  static auto log(GB_gameboy_t *gb, const char *string, GB_log_attributes_t attributes) -> void {
   }
 }
 

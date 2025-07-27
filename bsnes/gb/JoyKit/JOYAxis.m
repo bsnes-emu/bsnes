@@ -11,7 +11,7 @@
 + (NSString *)usageToString: (JOYAxisUsage) usage
 {
     if (usage < JOYAxisUsageNonGenericMax) {
-        return (NSString *[]) {
+        return inline_const(NSString *[], {
             @"None",
             @"Analog L1",
             @"Analog L2",
@@ -26,7 +26,7 @@
             @"Throttle",
             @"Accelerator",
             @"Brake",
-        }[usage];
+        })[usage];
     }
     if (usage >= JOYAxisUsageGeneric0) {
         return [NSString stringWithFormat:@"Generic Analog Control %d", usage - JOYAxisUsageGeneric0];
@@ -42,12 +42,12 @@
 
 - (uint64_t)uniqueID
 {
-    return _element.uniqueID;
+    return _element.uniqueID | (uint64_t)self.combinedIndex << 32;
 }
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@: %p, %@ (%llu); State: %f%%>", self.className, self, self.usageString, self.uniqueID, _state * 100];
+    return [NSString stringWithFormat:@"<%@: %p, %@ (%llx); State: %f%%>", self.className, self, self.usageString, self.uniqueID, _state * 100];
 }
 
 - (instancetype)initWithElement:(JOYElement *)element

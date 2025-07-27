@@ -1,10 +1,18 @@
-#ifndef camera_h
-#define camera_h
+#pragma once
 #include <stdint.h>
-#include "gb_struct_def.h"
+#include "defs.h"
 
 typedef uint8_t (*GB_camera_get_pixel_callback_t)(GB_gameboy_t *gb, uint8_t x, uint8_t y);
 typedef void (*GB_camera_update_request_callback_t)(GB_gameboy_t *gb);
+
+void GB_set_camera_get_pixel_callback(GB_gameboy_t *gb, GB_camera_get_pixel_callback_t callback);
+void GB_set_camera_update_request_callback(GB_gameboy_t *gb, GB_camera_update_request_callback_t callback);
+void GB_camera_updated(GB_gameboy_t *gb);
+
+#ifdef GB_INTERNAL
+internal uint8_t GB_camera_read_image(GB_gameboy_t *gb, uint16_t addr);
+internal void GB_camera_write_register(GB_gameboy_t *gb, uint16_t addr, uint8_t value);
+internal uint8_t GB_camera_read_register(GB_gameboy_t *gb, uint16_t addr);
 
 enum {
     GB_CAMERA_SHOOT_AND_1D_FLAGS = 0,
@@ -15,15 +23,4 @@ enum {
     GB_CAMERA_DITHERING_PATTERN_START = 6,
     GB_CAMERA_DITHERING_PATTERN_END = 0x35,
 };
-
-uint8_t GB_camera_read_image(GB_gameboy_t *gb, uint16_t addr);
-
-void GB_set_camera_get_pixel_callback(GB_gameboy_t *gb, GB_camera_get_pixel_callback_t callback);
-void GB_set_camera_update_request_callback(GB_gameboy_t *gb, GB_camera_update_request_callback_t callback);
-
-void GB_camera_updated(GB_gameboy_t *gb);
-
-void GB_camera_write_register(GB_gameboy_t *gb, uint16_t addr, uint8_t value);
-uint8_t GB_camera_read_register(GB_gameboy_t *gb, uint16_t addr);
-
 #endif

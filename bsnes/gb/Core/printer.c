@@ -1,11 +1,12 @@
 #include "gb.h"
+#include <string.h>
 
 /* TODO: Emulation is VERY basic and assumes the ROM correctly uses the printer's interface.
          Incorrect usage is not correctly emulated, as it's not well documented, nor do I
          have my own GB Printer to figure it out myself.
  
          It also does not currently emulate communication timeout, which means that a bug
-         might prevent the printer operation until the GameBoy is restarted.
+         might prevent the printer operation until the Game Boy is restarted.
  
          Also, field mask values are assumed. */
 
@@ -22,13 +23,16 @@ static void handle_command(GB_gameboy_t *gb)
                 gb->printer.status = 6; /* Printing */
                 uint32_t image[gb->printer.image_offset];
                 uint8_t palette = gb->printer.command_data[2];
-                uint32_t colors[4] = {gb->rgb_encode_callback(gb, 0xff, 0xff, 0xff),
-                                      gb->rgb_encode_callback(gb, 0xaa, 0xaa, 0xaa),
+                uint32_t colors[4] = {gb->rgb_encode_callback(gb, 0xFF, 0xFF, 0xFF),
+                                      gb->rgb_encode_callback(gb, 0xAA, 0xAA, 0xAA),
                                       gb->rgb_encode_callback(gb, 0x55, 0x55, 0x55),
                                       gb->rgb_encode_callback(gb, 0x00, 0x00, 0x00)};
                 for (unsigned i = 0; i < gb->printer.image_offset; i++) {
                     image[i] = colors[(palette >> (gb->printer.image[i] * 2)) & 3];
                 }
+                
+                // One second per 8-pixel row
+                gb->printer.time_remaining = gb->printer.image_offset / 160 * GB_get_unmultiplied_clock_rate(gb) / 256 / 8;
                 
                 if (gb->printer_callback) {
                     gb->printer_callback(gb, image, gb->printer.image_offset / 160,
@@ -70,7 +74,7 @@ static void handle_command(GB_gameboy_t *gb)
 }
 
 
-static void byte_recieve_completed(GB_gameboy_t *gb, uint8_t byte_received)
+static void byte_receive_completed(GB_gameboy_t *gb, uint8_t byte_received)
 {
     gb->printer.byte_to_send = 0;
     switch (gb->printer.command_state) {
@@ -156,16 +160,13 @@ static void byte_recieve_completed(GB_gameboy_t *gb, uint8_t byte_received)
                 gb->printer.byte_to_send = 0;
             }
             else {
+                if (gb->printer.status == 6 && gb->printer.time_remaining == 0) {
+                    gb->printer.status = 4; /* Done */
+                }
                 gb->printer.byte_to_send = gb->printer.status;
             }
             break;
         case GB_PRINTER_COMMAND_STATUS:
-            
-            /* Printing is done instantly, but let the game recieve a 6 (Printing) status at least once, for compatibility */
-            if (gb->printer.status == 6) {
-               gb->printer.status = 4; /* Done */
-            }
-            
             gb->printer.command_state = GB_PRINTER_COMMAND_MAGIC1;
             handle_command(gb);
             return;
@@ -197,7 +198,7 @@ static void serial_start(GB_gameboy_t *gb, bool bit_received)
     gb->printer.byte_being_received |= bit_received;
     gb->printer.bits_received++;
     if (gb->printer.bits_received == 8) {
-        byte_recieve_completed(gb, gb->printer.byte_being_received);
+        byte_receive_completed(gb, gb->printer.byte_being_received);
         gb->printer.bits_received = 0;
         gb->printer.byte_being_received = 0;
     }
@@ -211,10 +212,13 @@ static bool serial_end(GB_gameboy_t *gb)
     return ret;
 }
 
-void GB_connect_printer(GB_gameboy_t *gb, GB_print_image_callback_t callback)
+void GB_connect_printer(GB_gameboy_t *gb, GB_print_image_callback_t callback, GB_printer_done_callback_t done_callback)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
     memset(&gb->printer, 0, sizeof(gb->printer));
     GB_set_serial_transfer_bit_start_callback(gb, serial_start);
     GB_set_serial_transfer_bit_end_callback(gb, serial_end);
     gb->printer_callback = callback;
+    gb->printer_done_callback = done_callback;
+    gb->accessory = GB_ACCESSORY_PRINTER;
 }

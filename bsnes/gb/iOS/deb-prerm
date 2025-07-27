@@ -1,0 +1,2 @@
+#!/bin/bash
+/Applications/SameBoy-iOS.app/installer uninstall || /var/jb/Applications/SameBoy-iOS.app/installer uninstall

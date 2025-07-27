@@ -1,5 +1,6 @@
 #include "gb.h"
 #include <time.h>
+#include <string.h>
 
 static inline uint8_t int_to_bcd(uint8_t i)
 {
@@ -139,23 +140,27 @@ static bool serial_end(GB_gameboy_t *gb)
 }
 
 void GB_connect_workboy(GB_gameboy_t *gb,
-                        GB_workboy_set_time_callback set_time_callback,
-                        GB_workboy_get_time_callback get_time_callback)
+                        GB_workboy_set_time_callback_t set_time_callback,
+                        GB_workboy_get_time_callback_t get_time_callback)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
     memset(&gb->workboy, 0, sizeof(gb->workboy));
     GB_set_serial_transfer_bit_start_callback(gb, serial_start);
     GB_set_serial_transfer_bit_end_callback(gb, serial_end);
     gb->workboy_set_time_callback = set_time_callback;
     gb->workboy_get_time_callback = get_time_callback;
+    gb->accessory = GB_ACCESSORY_WORKBOY;
 }
 
 bool GB_workboy_is_enabled(GB_gameboy_t *gb)
 {
-    return gb->workboy.mode;
+    return gb->accessory == GB_ACCESSORY_WORKBOY && gb->workboy.mode;
 }
 
 void GB_workboy_set_key(GB_gameboy_t *gb, uint8_t key)
 {
+    if (gb->accessory != GB_ACCESSORY_WORKBOY) return;
+    
     if (gb->workboy.user_shift_down != gb->workboy.shift_down &&
         (key & (GB_WORKBOY_REQUIRE_SHIFT | GB_WORKBOY_FORBID_SHIFT)) == 0) {
         if (gb->workboy.user_shift_down) {

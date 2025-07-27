@@ -11,6 +11,13 @@ static NSImage * (*imageNamed)(Class self, SEL _cmd, NSString *name);
 
 + (NSImage *)imageNamedWithDark:(NSImageName)name
 {
+    if (@available(macOS 11.0, *)) {
+        if (![name containsString:@"~solid"]) {
+            NSImage *solid = [self imageNamed:[name stringByAppendingString:@"~solid"]];
+            [solid setTemplate:true];
+            if (solid) return solid;
+        }
+    }
     NSImage *light = imageNamed(self, _cmd, name);
     if (@available(macOS 10.14, *)) {
         NSImage *dark = imageNamed(self, _cmd, [name stringByAppendingString:@"~dark"]);

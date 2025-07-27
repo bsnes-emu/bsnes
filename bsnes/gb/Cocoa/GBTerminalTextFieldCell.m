@@ -1,7 +1,11 @@
 #import <Carbon/Carbon.h>
 #import "GBTerminalTextFieldCell.h"
+#import "NSTextFieldCell+Inset.h"
 
 @interface GBTerminalTextView : NSTextView
+{
+    @public __weak NSTextField *_field;
+}
 @property GB_gameboy_t *gb;
 @end
 
@@ -10,7 +14,7 @@
     GBTerminalTextView *field_editor;
 }
 
-- (NSTextView *)fieldEditorForView:(NSView *)controlView
+- (NSTextView *)fieldEditorForView:(NSTextField *)controlView
 {
     if (field_editor) {
         field_editor.gb = self.gb;
@@ -19,6 +23,10 @@
     field_editor = [[GBTerminalTextView alloc] init];
     [field_editor setFieldEditor:true];
     field_editor.gb = self.gb;
+    field_editor->_field = (NSTextField *)controlView;
+    ((NSTextFieldCell *)controlView.cell).textInset =
+        field_editor.textContainerInset =
+        NSMakeSize(0, 2);
     return field_editor;
 }
 
@@ -37,7 +45,7 @@
 {
     self = [super init];
     if (!self) {
-        return NULL;
+        return nil;
     }
     lines = [[NSMutableOrderedSet alloc] init];
     return self;
@@ -185,14 +193,21 @@
     return [super resignFirstResponder];
 }
 
--(void)drawRect:(NSRect)dirtyRect
+- (NSColor *)backgroundColor
 {
-    [super drawRect:dirtyRect];
+    return nil;
+}
+
+- (void)drawRect:(NSRect)dirtyRect
+{
     if (reverse_search_mode && [super string].length == 0) {
         NSMutableDictionary *attributes = [self.typingAttributes mutableCopy];
         NSColor *color = [attributes[NSForegroundColorAttributeName] colorWithAlphaComponent:0.5];
         [attributes setObject:color forKey:NSForegroundColorAttributeName];
-        [[[NSAttributedString alloc] initWithString:@"Reverse search..." attributes:attributes] drawAtPoint:NSMakePoint(2, 0)];
+        [[[NSAttributedString alloc] initWithString:@"Reverse search..." attributes:attributes] drawAtPoint:NSMakePoint(2, 2)];
+    }
+    else {
+        [super drawRect:dirtyRect];
     }
 }
 

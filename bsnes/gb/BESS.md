@@ -89,7 +89,7 @@ The values of memory-mapped registers should be written 'as-is' to memory as if 
 * Unused register bits have Don't-Care values which should be ignored
 * If the model is CGB or newer, the value of KEY0 (FF4C) must be valid as it determines DMG mode
     * Bit 2 determines DMG mode. A value of 0x04 usually denotes DMG mode, while a value of `0x80` usually denotes CGB mode.
-* Sprite priority is derived from KEY0 (FF4C) instead of OPRI (FF6C) because OPRI can be modified after booting, but only the value of OPRI during boot ROM execution takes effect
+* Object priority is derived from KEY0 (FF4C) instead of OPRI (FF6C) because OPRI can be modified after booting, but only the value of OPRI during boot ROM execution takes effect
 * If a register doesn't exist on the emulated model (For example, KEY0 (FF4C) on a DMG), its value should be ignored.
 * BANK (FF50) should be 0 if the boot ROM is still mapped, and 1 otherwise, and must be valid.
 * Implementations should not start a serial transfer when writing the value of SB
@@ -175,6 +175,48 @@ The length of this block is 0x11 bytes long and it follows the following structu
 | 0x0C   | Scheduled alarm time minutes (16-bit)                 |
 | 0x0E   | Scheduled alarm time days (16-bit)                    |
 | 0x10   | Alarm enabled flag (8-bits, either 0 or 1)            |
+
+#### TPP1 block
+The TPP1 block uses the `'TPP1'` identifier, and is an optional block that is used while emulating a TPP1 cartridge to store RTC information. This block can be omitted if the ROM header does not specify the inclusion of a RTC.
+
+The length of this block is 0x11 bytes long and it follows the following structure:
+
+| Offset | Content                                               |
+|--------|-------------------------------------------------------|
+| 0x00   | UNIX timestamp at the time of the save state (64-bit) |
+| 0x08   | The current RTC data (4 bytes)                        |
+| 0x0C   | The latched RTC data (4 bytes)                        |
+| 0x10   | The value of the MR4 register (8-bits)                |
+
+
+#### MBC7 block
+The MBC7 block uses the `'MBC7'` identifier, and is an optional block that is used while emulating an MBC7 cartridge to store the EEPROM communication state and motion control state.
+
+The length of this block is 0xA bytes long and it follows the following structure:
+
+| Offset | Content                                               |
+|--------|-------------------------------------------------------|
+| 0x00   | Flags (8-bits)                                        |
+| 0x01   | Argument bits left (8-bits)                           |
+| 0x02   | Current EEPROM command (16-bits)                      |
+| 0x04   | Pending bits to read (16-bits)                        |
+| 0x06   | Latched gyro X value (16-bits)                        |
+| 0x08   | Latched gyro Y value (16-bits)                        |
+
+The meaning of the individual bits in flags are:
+ * Bit 0: Latch ready; set after writing `0x55` to `0xAX0X` and reset after writing `0xAA` to `0xAX1X`
+ * Bit 1: EEPROM DO line
+ * Bit 2: EEPROM DI line
+ * Bit 3: EEPROM CLK line
+ * Bit 4: EEPROM CS line
+ * Bit 5: EEPROM write enable; set after an `EWEN` command, reset after an `EWDS` command
+ * Bits 6-7: Unused.
+
+The current EEPROM command field has bits pushed to its LSB first, padded with zeros. For example, if the ROM clocked a single `1` bit, this field should contain `0b1`; if the ROM later clocks a `0` bit, this field should contain `0b10`.
+
+If the currently transmitted command has an argument, the "Argument bits left" field should contain the number argument bits remaining. Otherwise, it should contain 0.
+
+The "Pending bits to read" field contains the pending bits waiting to be shifted into the DO signal, MSB first, padded with ones.
 
 #### SGB block
 

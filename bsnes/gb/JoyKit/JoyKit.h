@@ -1,6 +1,3 @@
-#ifndef JoyKit_h
-#define JoyKit_h
+#pragma once
 
-#include "JOYController.h"
-
-#endif
+#import "JOYController.h"

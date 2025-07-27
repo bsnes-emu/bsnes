@@ -1,5 +1,5 @@
 #import "JOYFullReportElement.h"
-#include <IOKit/hid/IOHIDLib.h>
+#import <IOKit/hid/IOHIDLib.h>
 
 @implementation JOYFullReportElement
 {
@@ -46,7 +46,7 @@
 {
 
     [self updateValue:value];
-    return IOHIDDeviceSetReport(_device, kIOHIDReportTypeOutput, _reportID, [_data bytes], [_data length]);;
+    return IOHIDDeviceSetReport(_device, kIOHIDReportTypeOutput, _reportID, [_data bytes], [_data length]);
 }
 
 - (void)updateValue:(NSData *)value
@@ -61,12 +61,13 @@
     return self.uniqueID;
 }
 
-- (BOOL)isEqual:(id)object
+- (BOOL)isEqual:(JOYFullReportElement *)object
 {
-    return self.uniqueID == self.uniqueID;
+    if ([object isKindOfClass:self.class]) return false;
+    return self.uniqueID == object.uniqueID;
 }
 
-- (id)copyWithZone:(nullable NSZone *)zone;
+- (id)copyWithZone:(NSZone *)zone;
 {
     return self;
 }
