@@ -27,6 +27,9 @@ auto System::runToSave() -> void {
   if(cartridge.headerTitle() == "Star Ocean") method = "Strict";
   if(cartridge.headerTitle() == "TALES OF PHANTASIA") method = "Strict";
 
+  //fast serialization corrupts the Super Game Boy implementation
+  if(cartridge.has.ICD) method = "Strict";
+
   //fallback in case of unrecognized method specified
   if(method != "Fast" && method != "Strict") method = "Fast";
 
