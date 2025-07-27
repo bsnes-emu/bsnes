@@ -903,6 +903,11 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
                     _romLoaded = GB_load_rom(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
                 }
                 needsStateLoad = true;
+                if (@available(iOS 16.0, *)) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [super setNeedsUpdateOfSupportedInterfaceOrientations];
+                    });
+                }
             }
             else if (access(romManager.romFile.fileSystemRepresentation, R_OK)) {
                 _romLoaded = false;
@@ -1157,9 +1162,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 - (void)setNeedsUpdateOfSupportedInterfaceOrientations
 {
     /* Hack. Some view controllers dismiss without calling the method above. */
-    [super setNeedsUpdateOfSupportedInterfaceOrientations];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self start];
+        [super setNeedsUpdateOfSupportedInterfaceOrientations];
     });
 }
 
@@ -1191,6 +1196,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)orientation duration:(NSTimeInterval)duration
 {
+    if (_orientation != UIInterfaceOrientationUnknown && !((1 << orientation) & self.supportedInterfaceOrientations)) return;
     GBLayout *layout = nil;
     _orientation = orientation;
     switch (orientation) {
@@ -1249,6 +1255,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations
 {
+    if (!self.shouldAutorotate && _orientation != UIInterfaceOrientationUnknown) {
+        return 1 << _orientation;
+    }
     if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
         return UIInterfaceOrientationMaskAll;
     }
