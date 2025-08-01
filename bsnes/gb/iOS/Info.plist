@@ -58,11 +58,14 @@
     <true/>
     <key>NSCameraUsageDescription</key>
     <string>SameBoy needs to access your device&apos;s camera to emulate the Game Boy Camera</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>SameBoy needs access to save Game Boy Printer images to your photo library</string>
     <key>CFBundleDocumentTypes</key>
     <array>
         <dict>
             <key>CFBundleTypeIconFiles</key>
             <array>
+                <string>Cartridge64.png</string>
                 <string>Cartridge.png</string>
             </array>
             <key>CFBundleTypeExtensions</key>
@@ -81,6 +84,7 @@
         <dict>
             <key>CFBundleTypeIconFiles</key>
             <array>
+                <string>ColorCartridge64.png</string>
                 <string>ColorCartridge.png</string>
             </array>
             <key>CFBundleTypeExtensions</key>
@@ -99,6 +103,7 @@
         <dict>
             <key>CFBundleTypeIconFiles</key>
             <array>
+                <string>ColorCartridge64.png</string>
                 <string>ColorCartridge.png</string>
             </array>
             <key>CFBundleTypeExtensions</key>
@@ -157,6 +162,12 @@
                     <string>gb</string>
                 </array>
             </dict>
+            <key>UTTypeIconFiles</key>
+            <array>
+                <string>Cartridge64</string>
+                <string>Cartridge</string>
+            </array>
+
         </dict>
         <dict>
             <key>UTTypeConformsTo</key>
@@ -174,6 +185,11 @@
                     <string>gbc</string>
                 </array>
             </dict>
+            <key>UTTypeIconFiles</key>
+            <array>
+                <string>ColorCartridge64</string>
+                <string>ColorCartridge</string>
+            </array>
         </dict>
         <dict>
             <key>UTTypeConformsTo</key>
@@ -191,6 +207,11 @@
                     <string>isx</string>
                 </array>
             </dict>
+            <key>UTTypeIconFiles</key>
+            <array>
+                <string>ColorCartridge64</string>
+                <string>ColorCartridge</string>
+            </array>
         </dict>
         <dict>
             <key>UTTypeConformsTo</key>

@@ -8,8 +8,14 @@
 #import <JoyKit/JoyKit.h>
 #import <WebKit/WebKit.h>
 #import <mach-o/dyld.h>
+#include <sys/mount.h>
+#include <sys/xattr.h>
 
 #define UPDATE_SERVER "https://sameboy.github.io"
+
+@interface NSToolbarItem(private)
+- (NSButton *)_view;
+@end
 
 static uint32_t color_to_int(NSColor *color)
 {
@@ -40,7 +46,14 @@ static uint32_t color_to_int(NSColor *color)
 - (void) applicationDidFinishLaunching:(NSNotification *)notification
 {
     // Refresh icon if launched via a software update
-    [NSApplication sharedApplication].applicationIconImage = [NSImage imageNamed:@"AppIcon"];
+    if (@available(macOS 26.0, *)) {
+        // Severely broken on macOS 26
+    }
+    else {
+        NSImage *icon = [[NSWorkspace sharedWorkspace] iconForFile:[[NSBundle mainBundle] bundlePath]];
+        icon.size = [NSApplication sharedApplication].applicationIconImage.size;
+        [NSApplication sharedApplication].applicationIconImage = icon;
+    }
     
     NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
     for (unsigned i = 0; i < GBKeyboardButtonCount; i++) {
@@ -92,6 +105,9 @@ static uint32_t color_to_int(NSColor *color)
                                                               
                                                               @"GBDebuggerFont": hasSFMono? @"SF Mono" : @"Menlo",
                                                               @"GBDebuggerFontSize": @12,
+                                                              
+                                                              @"GBColorPalette": @1,
+                                                              @"GBTurboCap": @0,
                                                               
                                                               // Default themes
                                                               @"GBThemes": @{
@@ -326,9 +342,8 @@ static uint32_t color_to_int(NSColor *color)
 #ifndef UPDATE_SUPPORT
         [_preferencesWindow.toolbar removeItemAtIndex:4];
 #endif
-        if (@available(macOS 11.0, *)) {
-            [_preferencesWindow.toolbar insertItemWithItemIdentifier:NSToolbarFlexibleSpaceItemIdentifier atIndex:0];
-            [_preferencesWindow.toolbar insertItemWithItemIdentifier:NSToolbarFlexibleSpaceItemIdentifier atIndex:_preferencesWindow.toolbar.items.count];
+        for (unsigned i = _preferencesWindow.toolbar.items.count; i--;) {
+            [_preferencesWindow.toolbar.items[i] _view].imageScaling = NSImageScaleNone;
         }
     }
     [_preferencesWindow makeKeyAndOrderFront:self];
@@ -388,7 +403,12 @@ static uint32_t color_to_int(NSColor *color)
                 else {
                     self.updateChanges.preferences.standardFontFamily = @"Lucida Grande";
                 }
-                self.updateChanges.preferences.fixedFontFamily = @"Menlo";
+                if (@available(macOS 10.15, *)) {
+                    self.updateChanges.preferences.fixedFontFamily = [NSFont monospacedSystemFontOfSize:12 weight:NSFontWeightRegular].displayName;
+                }
+                else {
+                    self.updateChanges.preferences.fixedFontFamily = @"Menlo";
+                }
                 self.updateChanges.drawsBackground = false;
                 [self.updateChanges.mainFrame loadHTMLString:html baseURL:nil];
             });
@@ -644,6 +664,14 @@ static uint32_t color_to_int(NSColor *color)
         }
         [[NSFileManager defaultManager] removeItemAtPath:_downloadDirectory error:nil];
         [[NSFileManager defaultManager] removeItemAtPath:contentsTempPath error:nil];
+        
+        // Remove the quarantine flag so we don't have to escape translocation
+        NSString *bundlePath = [NSBundle mainBundle].bundlePath;
+        removexattr(bundlePath.UTF8String, "com.apple.quarantine", 0);
+        for (NSString *path in [[NSFileManager defaultManager] enumeratorAtPath:bundlePath]) {
+            removexattr([bundlePath stringByAppendingPathComponent:path].UTF8String, "com.apple.quarantine", 0);
+        };
+        
         _downloadDirectory = nil;
         atexit_b(^{
             execl(executablePath.UTF8String, executablePath.UTF8String, "--update-launch", NULL);
@@ -762,5 +790,28 @@ static uint32_t color_to_int(NSColor *color)
 
 - (IBAction)nop:(id)sender
 {
+}
+
+/* This runs before C constructors. If we need to escape translocation, we should
+   do it ASAP to minimize our launch time. */
+
++ (void)load
+{
+    if (@available(macOS 10.12, *)) {
+        /* Detect and escape translocation so we can safely update ourselves */
+        if ([[[NSBundle mainBundle] bundlePath] containsString:@"/AppTranslocation/"]) {
+            const char *mountPath = [[[[NSBundle mainBundle] bundlePath] stringByDeletingLastPathComponent] stringByDeletingLastPathComponent].UTF8String;
+            struct statfs *mntbuf;
+            int mntsize = getmntinfo(&mntbuf, MNT_NOWAIT);
+            for (unsigned i = 0; i < mntsize; i++) {
+                if (strcmp(mntbuf[i].f_mntonname, mountPath) == 0) {
+                    NSBundle *origBundle = [NSBundle bundleWithPath:@(mntbuf[i].f_mntfromname)];
+                    
+                    execl(origBundle.executablePath.UTF8String, origBundle.executablePath.UTF8String, NULL);
+                    break;
+                }
+            }
+        }
+    }
 }
 @end

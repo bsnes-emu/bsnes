@@ -36,9 +36,13 @@ else
 DEFAULT := sdl
 endif
 
+
 NULL := /dev/null
 ifeq ($(PLATFORM),windows32)
+ifneq ($(shell echo /dev/null*),/dev/null)
+# Windows shell is not "aware" of /dev/null, use NUL and pray
 NULL := NUL
+endif
 endif
 
 PREFIX ?= /usr/local
@@ -96,14 +100,7 @@ else
 CPPP_FLAGS += -UGB_DISABLE_CHEAT_SEARCH
 endif
 
-ifneq ($(CORE_FILTER)$(DISABLE_TIMEKEEPING),)
-ifneq ($(MAKECMDGOALS),lib)
-$(error SameBoy features can only be disabled when compiling the 'lib' target)
-endif
-endif
-
 CPPP_FLAGS += -UGB_INTERNAL
-
 
 include version.mk
 COPYRIGHT_YEAR := $(shell grep -oE "20[2-9][0-9]" LICENSE)
@@ -116,6 +113,12 @@ INC := build/include/sameboy
 LIBDIR := build/lib
 PKGCONF_DIR := $(LIBDIR)/pkgconfig
 PKGCONF_FILE := $(PKGCONF_DIR)/sameboy.pc
+
+ifneq ($(CORE_FILTER)$(DISABLE_TIMEKEEPING),)
+ifneq ($(filter-out lib headers $(LIBDIR)/% $(INC)/%,$(MAKECMDGOALS)),)
+$(error SameBoy features can only be disabled when compiling the 'lib' target)
+endif
+endif
 
 BOOTROMS_DIR ?= $(BIN)/BootROMs
 
@@ -131,6 +134,8 @@ ifneq (, $(shell which clang 2> $(NULL)))
 CC := clang 
 endif
 endif
+
+IBTOOL ?= ibtool
 
 # Find libraries with pkg-config if available.
 ifneq (, $(shell which pkg-config 2> $(NULL)))
@@ -210,9 +215,10 @@ CFLAGS += -DUPDATE_SUPPORT
 endif
 
 ifeq (,$(PKG_CONFIG))
+ifneq ($(PLATFORM),windows32)
 SDL_CFLAGS := $(shell sdl2-config --cflags)
 SDL_LDFLAGS := $(shell sdl2-config --libs) -lpthread
-
+endif
 ifeq ($(PLATFORM),Darwin)
 SDL_LDFLAGS += -framework AppKit
 endif
@@ -282,9 +288,11 @@ sdl: $(BIN)/SDL/xaudio2_9redist.dll
 endif
 else
 LDFLAGS += -lc -lm
-# libdl is not available as a standalone library in Haiku
+# libdl is not available as a standalone library in Haiku or OpenBSD
 ifneq ($(PLATFORM),Haiku)
+ifneq ($(PLATFORM),OpenBSD)
 LDFLAGS += -ldl
+endif
 endif
 endif
 
@@ -429,7 +437,8 @@ SDL_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(SDL_SOURCES))
 TESTER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(TESTER_SOURCES))
 XDG_THUMBNAILER_OBJECTS := $(patsubst %,$(OBJ)/%.o,$(XDG_THUMBNAILER_SOURCES)) $(OBJ)/XdgThumbnailer/resources.c.o
 
-lib: $(PUBLIC_HEADERS)
+lib: headers
+headers: $(PUBLIC_HEADERS)
 
 # Automatic dependency generation
 
@@ -541,9 +550,10 @@ $(OBJ)/installer: iOS/installer.m
 # Cocoa Port
 
 $(BIN)/SameBoy.app: $(BIN)/SameBoy.app/Contents/MacOS/SameBoy \
-                    $(shell ls Cocoa/*.icns Cocoa/*.png) \
+                    $(shell ls Cocoa/*.icns Cocoa/*.png Cocoa/*.car) \
                     Cocoa/License.html \
                     Cocoa/Info.plist \
+                    Cocoa/SameBoy.entitlements \
                     Misc/registers.sym \
                     $(BIN)/SameBoy.app/Contents/Resources/dmg_boot.bin \
                     $(BIN)/SameBoy.app/Contents/Resources/mgb_boot.bin \
@@ -558,15 +568,13 @@ $(BIN)/SameBoy.app: $(BIN)/SameBoy.app/Contents/MacOS/SameBoy \
 					$(BIN)/SameBoy.app/Contents/PlugIns/Previewer.appex \
                     Shaders
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Resources
-	cp Cocoa/*.icns Cocoa/*.png Misc/registers.sym $(BIN)/SameBoy.app/Contents/Resources/
+	cp Cocoa/*.icns Cocoa/*.png Cocoa/*.car Misc/registers.sym $(BIN)/SameBoy.app/Contents/Resources/
 	sed "s/@VERSION/$(VERSION)/;s/@COPYRIGHT_YEAR/$(COPYRIGHT_YEAR)/" < Cocoa/Info.plist > $(BIN)/SameBoy.app/Contents/Info.plist
 	sed "s/@COPYRIGHT_YEAR/$(COPYRIGHT_YEAR)/" < Cocoa/License.html > $(BIN)/SameBoy.app/Contents/Resources/Credits.html
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Resources/Shaders
 	cp Shaders/*.fsh Shaders/*.metal $(BIN)/SameBoy.app/Contents/Resources/Shaders
 	$(MKDIR) -p $(BIN)/SameBoy.app/Contents/Library/QuickLook/
-ifeq ($(CONF), release)
-	$(CODESIGN) $@
-endif
+	$(CODESIGN) $@ --entitlements Cocoa/SameBoy.entitlements
 
 # We place the dylib inside the Quick Look plugin, because Quick Look plugins run in a very strict sandbox
 
@@ -583,10 +591,10 @@ ifeq ($(CONF), release)
 endif
 
 $(BIN)/SameBoy.app/Contents/Resources/%.nib: Cocoa/%.xib
-	ibtool --target-device mac --minimum-deployment-target 10.9 --compile $@ $^ 2>&1 | cat -
+	$(IBTOOL) --target-device mac --minimum-deployment-target 10.9 --compile $@ $^ 2>&1 | cat -
 	
 $(BIN)/SameBoy-iOS.app/%.storyboardc: iOS/%.storyboard
-	ibtool --target-device iphone --target-device ipad --minimum-deployment-target $(IOS_MIN) --compile $@ $^ 2>&1 | cat -
+	$(IBTOOL) --target-device iphone --target-device ipad --minimum-deployment-target $(IOS_MIN) --compile $@ $^ 2>&1 | cat -
 
 # Quick Look generators
 
@@ -666,11 +674,11 @@ $(BIN)/SDL/sameboy.exe: $(CORE_OBJECTS) $(SDL_OBJECTS) $(OBJ)/Windows/resources.
 	
 $(BIN)/SDL/sameboy_debugger.txt:
 	echo Looking for sameboy_debugger.exe? > $@
-	echo\>> $@
+	echo >> $@
 	echo Starting with SameBoy v1.0.1, sameboy.exe and sameboy_debugger.exe >> $@
 	echo have been merged into a single executable. You can open a debugger >> $@
 	echo console at any time by pressing  Ctrl+C to interrupt the currently >> $@
-	echo open ROM.  Once you're done debugging,  you can close the debugger >> $@
+	echo open ROM.  Once you\'re done debugging,  you can close the debugger >> $@
 	echo console and resume normal execution. >> $@
 
 ifneq ($(USE_WINDRES),)
@@ -683,13 +691,13 @@ $(OBJ)/%.res: %.rc
 	rc /fo $@ /dVERSION=\"$(VERSION)\" /dCOPYRIGHT_YEAR=\"$(COPYRIGHT_YEAR)\" $^ 
 
 %.o: %.res
-	cvtres /OUT:"$@" $^
+	cvtres /MACHINE:X64 /OUT:"$@" $^
 endif
 
 # Copy required DLL files for the Windows port
 $(BIN)/SDL/%.dll:
 	-@$(MKDIR) -p $(dir $@)
-	@$(eval MATCH := $(shell where $$LIB:$(notdir $@)))
+	@$(eval MATCH := $(shell where "$(lib)":$(notdir $@)))
 	cp "$(MATCH)" $@
 
 # Tester
@@ -781,7 +789,7 @@ install: $(BIN)/XdgThumbnailer/sameboy-thumbnailer sdl $(shell find FreeDesktop)
 	install -d $(DESTDIR)$(DATA_DIR)/BootROMs
 	install -d $(DESTDIR)$(PREFIX)/bin
 	install -d $(DESTDIR)$(PREFIX)/share/thumbnailers
-	install -d $(DESTDIR)$(PREFIX)/share/mime
+	install -d $(DESTDIR)$(PREFIX)/share/mime/packages
 	install -d $(DESTDIR)$(PREFIX)/share/applications
 	
 	(cd $(BIN)/SDL && find . \! -name sameboy -type f -exec install -m 644 {} "$(abspath $(DESTDIR))$(DATA_DIR)/{}" \; )
@@ -797,7 +805,7 @@ ifeq ($(DESTDIR),)
 		xdg-icon-resource install --novendor --theme hicolor --size $$size --context mimetypes FreeDesktop/ColorCartridge/$${size}x$${size}.png x-gameboy-color-rom; \
 	done
 else
-	install -m 644 FreeDesktop/sameboy.xml $(DESTDIR)$(PREFIX)/share/mime/sameboy.xml
+	install -m 644 FreeDesktop/sameboy.xml $(DESTDIR)$(PREFIX)/share/mime/packages/sameboy.xml
 	install -m 644 FreeDesktop/sameboy.desktop $(DESTDIR)$(PREFIX)/share/applications/sameboy.desktop
 	for size in 16x16 32x32 64x64 128x128 256x256 512x512; do \
 		install -d $(DESTDIR)$(PREFIX)/share/icons/hicolor/$$size/apps; \

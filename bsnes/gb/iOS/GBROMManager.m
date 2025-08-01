@@ -25,12 +25,26 @@
     if (!self) return nil;
     self.currentROM = [[NSUserDefaults standardUserDefaults] stringForKey:@"GBLastROM"];
     _doneInitializing = true;
+    
+    // Pre 1.0.2 versions might have kept temp files in there incorrectly
+    if (![[NSUserDefaults standardUserDefaults] boolForKey:@"GBDeletedInbox"]) {
+        [[NSFileManager defaultManager] removeItemAtPath:[self.localRoot stringByAppendingPathComponent:@"Inbox"] error:nil];
+        [[NSUserDefaults standardUserDefaults] setBool:true forKey:@"GBDeletedInbox"];
+    }
     return self;
+}
+
+- (NSArray<NSString *> *)forbiddenNames
+{
+    return @[@"Inbox", @"Boot ROMs"];
 }
 
 - (void)setCurrentROM:(NSString *)currentROM
 {
     _romFile = nil;
+    if ([self.forbiddenNames containsObject:currentROM]) {
+        currentROM = nil;
+    }
     _currentROM = currentROM;
     bool foundROM = self.romFile;
     
@@ -58,6 +72,9 @@
 
 - (NSString *)romDirectoryForROM:(NSString *)romFile
 {
+    if ([self.forbiddenNames containsObject:romFile]) {
+        return nil;
+    }
 
     return [self.localRoot stringByAppendingPathComponent:romFile];
 }
@@ -71,12 +88,13 @@
 
 - (NSString *)romFileForROM:(NSString *)rom
 {
-    if ([rom isEqualToString:@"Inbox"]) return nil;
-    if ([rom isEqualToString:@"Boot ROMs"]) return nil;
     if (rom == _currentROM) {
         return self.romFile;
     }
     
+    if ([self.forbiddenNames containsObject:rom]) {
+        return nil;
+    }
     
     return [self romFileForDirectory:[self romDirectoryForROM:rom]];
 }
@@ -143,6 +161,9 @@
 
 - (NSString *)makeNameUnique:(NSString *)name
 {
+    if ([self.forbiddenNames containsObject:name]) {
+        name = @"Imported ROM";
+    }
     NSString *root = self.localRoot;
     if (![[NSFileManager defaultManager] fileExistsAtPath:[root stringByAppendingPathComponent:name]]) return name;
     
@@ -195,8 +216,10 @@
             [[NSFileManager defaultManager] removeItemAtPath:romFolder error:nil];
             return nil;
         }
-        
     }
+    
+    // Remove the Inbox directory if empty after import
+    rmdir([self.localRoot stringByAppendingPathComponent:@"Inbox"].UTF8String);
     
     return friendlyName;
 }

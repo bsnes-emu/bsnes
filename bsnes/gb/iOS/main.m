@@ -3,6 +3,13 @@
 #import "GBViewController.h"
 #import "GBView.h"
 
+static double MigrateTurboSpeed(void)
+{
+    unsigned old = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBTurboSpeed"];
+    if (old == 1) return 0;
+    return old;
+}
+
 int main(int argc, char * argv[])
 {
     @autoreleasepool {
@@ -22,7 +29,7 @@ int main(int argc, char * argv[])
             @"GBRumbleMode": @(GB_RUMBLE_CARTRIDGE_ONLY),
             @"GBButtonHaptics": @YES,
             @"GBHapticsStrength": @0.75,
-            @"GBTurboSpeed": @1,
+            @"GBTurboCap": @(MigrateTurboSpeed()),
             @"GBRewindSpeed": @1,
             @"GBDynamicSpeed": @NO,
             @"GBFauxAnalogInputs": @NO,
@@ -146,6 +153,9 @@ int main(int argc, char * argv[])
                             @"Manual": @NO,
                     },
             },
+            
+            // Forces iOS to use Solarium even when linking against older SDKs
+            @"com.apple.SwiftUI.IgnoreSolariumLinkedOnCheck": @YES,
         }];
         
         if (![[defaults stringForKey:@"GBThemesVersion"] isEqualToString:@(GB_VERSION)]) {

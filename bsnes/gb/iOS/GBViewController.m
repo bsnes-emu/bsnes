@@ -21,11 +21,85 @@
 #import <sys/stat.h>
 #import <CoreMotion/CoreMotion.h>
 #import <dlfcn.h>
+#import <objc/runtime.h>
+
+#if !__has_include(<UIKit/UISliderTrackConfiguration.h>)
+/* Building with older SDKs */
+
+typedef NS_ENUM(NSInteger, UIMenuSystemElementGroupPreference) {
+    UIMenuSystemElementGroupPreferenceAutomatic = 0,
+    UIMenuSystemElementGroupPreferenceRemoved,
+    UIMenuSystemElementGroupPreferenceIncluded,
+};
+
+API_AVAILABLE(ios(19.0))
+@interface UIMainMenuSystemConfiguration : NSObject <NSCopying>
+@property (nonatomic, assign) UIMenuSystemElementGroupPreference newScenePreference;
+@property (nonatomic, assign) UIMenuSystemElementGroupPreference documentPreference;
+@property (nonatomic, assign) UIMenuSystemElementGroupPreference printingPreference;
+@property (nonatomic, assign) UIMenuSystemElementGroupPreference findingPreference;
+@property (nonatomic, assign) UIMenuSystemElementGroupPreference toolbarPreference;
+@property (nonatomic, assign) UIMenuSystemElementGroupPreference sidebarPreference;
+@property (nonatomic, assign) UIMenuSystemElementGroupPreference inspectorPreference;
+@property (nonatomic, assign) UIMenuSystemElementGroupPreference textFormattingPreference;
+@end
+
+API_AVAILABLE(ios(19.0))
+@interface UIMainMenuSystem : UIMenuSystem
+@property (class, nonatomic, readonly) UIMainMenuSystem *sharedSystem;
+- (void)setBuildConfiguration:(UIMainMenuSystemConfiguration *)configuration buildHandler:(void(^)(NSObject<UIMenuBuilder> *builder))buildHandler;
+@end
+
+API_AVAILABLE(ios(19.0))
+@interface NSObject(UIMenuBuilder)
+- (void)insertElements:(NSArray<UIMenuElement *> *)childElements atStartOfMenuForIdentifier:(UIMenuIdentifier)parentIdentifier;
+@end
+
+#endif
+
+
+static UIImage *CreateMenuImage(NSString *name)
+{
+    static const unsigned size = 20;
+    UIGraphicsImageRenderer *renderer = [[UIGraphicsImageRenderer alloc] initWithSize:CGSizeMake(size, size)];
+    CGRect destRect = {0,};
+    UIImage *source = [UIImage imageNamed:name];
+    CGSize sourceSize = source.size;
+    if (sourceSize.width > sourceSize.height) {
+        destRect.size.width = size;
+        destRect.size.height = sourceSize.height * size / sourceSize.width;
+        destRect.origin.y = (size - destRect.size.height) / 2;
+    }
+    else {
+        destRect.size.height = size;
+        destRect.size.width = sourceSize.width * size / sourceSize.height;
+        destRect.origin.x = (size - destRect.size.width) / 2;
+    }
+    UIImage *image = [renderer imageWithActions:^(UIGraphicsImageRendererContext *myContext) {
+        [source drawInRect:destRect];
+    }];
+    return [image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
+
+}
+
+API_AVAILABLE(ios(13.0))
+@implementation UIKeyCommand (KeyCommandWithImage)
+
++ (instancetype)keyCommandWithInput:(NSString *)input modifierFlags:(UIKeyModifierFlags)modifierFlags action:(SEL)action title:(NSString *)title image:(UIImage *)image
+{
+    UIKeyCommand *ret = [self keyCommandWithInput:input modifierFlags:modifierFlags action:action];
+    ret.title = title;
+    ret.image = image;
+    return ret;
+}
+
+@end
 
 @implementation GBViewController
 {
     GB_gameboy_t _gb;
     GBView *_gbView;
+    dispatch_queue_t _runQueue;
     
     volatile bool _running;
     volatile bool _stopping;
@@ -34,6 +108,9 @@
     bool _romLoaded;
     bool _swappingROM;
     bool _skipAutoLoad;
+    
+    bool _rapidA, _rapidB;
+    uint8_t _rapidACount, _rapidBCount;
     
     UIInterfaceOrientation _orientation;
     GBHorizontalLayout *_horizontalLayoutLeft;
@@ -191,6 +268,9 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         GB_set_rewind_length(gb, [newValue unsignedIntValue]);
     } forKey:@"GBRewindLength"];
     [self addDefaultObserver:^(id newValue) {
+        GB_set_turbo_cap(gb, [newValue doubleValue]);
+    } forKey:@"GBTurboCap"];
+    [self addDefaultObserver:^(id newValue) {
         [[AVAudioSession sharedInstance] setCategory:[newValue isEqual:@"on"]? AVAudioSessionCategoryPlayback :  AVAudioSessionCategorySoloAmbient
                                                 mode:AVAudioSessionModeDefault
                                   routeSharingPolicy:AVAudioSessionRouteSharingPolicyDefault
@@ -235,6 +315,8 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     _window = [[UIWindow alloc] init];
     _window.rootViewController = self;
     [_window makeKeyAndVisible];
+    
+    _runQueue = dispatch_queue_create("SameBoy Emulation Queue", NULL);
     
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-retain-cycles"
@@ -431,7 +513,91 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     
     [self updateMirrorWindow];
     
+    if (@available(iOS 26.0, *)) {
+        UIMainMenuSystemConfiguration *conf = [[objc_getClass("UIMainMenuSystemConfiguration") alloc] init];
+        conf.newScenePreference = UIMenuSystemElementGroupPreferenceRemoved;
+        conf.documentPreference = UIMenuSystemElementGroupPreferenceRemoved;
+        conf.printingPreference = UIMenuSystemElementGroupPreferenceRemoved;
+        conf.findingPreference = UIMenuSystemElementGroupPreferenceRemoved;
+        conf.toolbarPreference = UIMenuSystemElementGroupPreferenceRemoved;
+        conf.sidebarPreference = UIMenuSystemElementGroupPreferenceRemoved;
+        conf.inspectorPreference = UIMenuSystemElementGroupPreferenceRemoved;
+        conf.textFormattingPreference =  UIMenuSystemElementGroupPreferenceRemoved;
+        
+        UIMainMenuSystem *system = (id)[objc_getClass("UIMainMenuSystem") sharedSystem];
+        [system setBuildConfiguration:conf
+                         buildHandler:^(id<UIMenuBuilder> builder) {
+            [builder removeMenuForIdentifier:UIMenuView]; // This menu's always empty
+            [builder removeMenuForIdentifier:UIMenuOpenRecent]; // This will list files to re-import, bad
+            
+            [(id)builder insertElements:@[[UICommand commandWithTitle:@"About SameBoy"
+                                                                image:nil
+                                                               action:@selector(showAbout)
+                                                         propertyList:nil]]
+             atStartOfMenuForIdentifier:UIMenuApplication];
+            
+            UIMenu *emulationMenu = [UIMenu menuWithTitle:@"Emulation" children:@[
+                [UIKeyCommand keyCommandWithInput:@"r" modifierFlags:UIKeyModifierCommand action:@selector(reset) title:@"Reset" image:[UIImage systemImageNamed:@"arrow.2.circlepath"]],
+                [UICommand commandWithTitle:@"Change Model…" image:CreateMenuImage(@"ModelTemplate") action:@selector(changeModel) propertyList:nil],
+                [UICommand commandWithTitle:@"Save States…" image:[UIImage systemImageNamed:@"square.stack"] action:@selector(openStates) propertyList:nil],
+                [UIMenu menuWithTitle:@"Cheats" image:CreateMenuImage(@"CheatsTemplate") identifier:nil options:0 children:@[
+                    [UIKeyCommand keyCommandWithInput:@"c" modifierFlags:UIKeyModifierCommand | UIKeyModifierShift action:@selector(toggleCheats) title:@"Enable Cheats" image:nil],
+                    [UICommand commandWithTitle:@"Show Cheats…" image:nil action:@selector(openCheats) propertyList:nil],
+                ]],
+                [UIMenu menuWithTitle:@"Connect" image:CreateMenuImage(@"LinkCableTemplate") identifier:nil options:0 children:@[
+                    [UICommand commandWithTitle:@"None" image:nil action:@selector(disconnectCable) propertyList:nil],
+                    [UICommand commandWithTitle:@"Printer" image:[UIImage systemImageNamed:@"printer"] action:@selector(connectPrinter) propertyList:nil],
+                ]],
+            ]];
+            [builder insertSiblingMenu:emulationMenu beforeMenuForIdentifier:UIMenuWindow];
+        }];
+    }
+    
     return true;
+}
+
+- (BOOL)canPerformAction:(SEL)action withSender:(id)sender
+{
+    if (action == @selector(reset)) {
+        if (self.presentedViewController || ![GBROMManager sharedManager].currentROM) return false;
+    }
+    if (action == @selector(openStates) || action == @selector(changeModel) || action == @selector(openCheats) ||
+        action == @selector(toggleCheats) || action == @selector(disconnectCable) || action == @selector(connectPrinter)) {
+        if (![GBROMManager sharedManager].currentROM) return false;
+    }
+    return [super canPerformAction:action withSender:sender];
+}
+
+- (void)validateCommand:(UICommand *)command
+{
+    if (command.action == @selector(toggleCheats)) {
+        command.state = GB_is_inited(&_gb) && GB_cheats_enabled(&_gb);
+    }
+    
+    if (command.action == @selector(connectPrinter)) {
+        command.state = _printerConnected;
+    }
+    
+    if (command.action == @selector(disconnectCable)) {
+        command.state = !_printerConnected;
+    }
+    
+    [super validateCommand:command];
+}
+
+- (void)toggleCheats
+{
+    GB_set_cheats_enabled(&_gb, !GB_cheats_enabled(&_gb));
+}
+
+- (void)orderFrontPreferencesPanel:(id)sender
+{
+    [self openSettings];
+}
+
+- (void)open:(id)sender
+{
+    [self openLibrary];
 }
 
 - (void)updateMirrorWindow
@@ -526,6 +692,14 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
         case GBStart:
             GB_set_key_state(&_gb, (GB_key_t)gbButton, button.value > 0.25);
             break;
+        case GBRapidA:
+            _rapidA = button.value > 0.25;
+            _rapidACount = 0;
+            break;
+        case GBRapidB:
+            _rapidB = button.value > 0.25;
+            _rapidBCount = 0;
+            break;
         case GBTurbo:
             if (button.value > analogThreshold) {
                 [self setRunMode:GBRunModeTurbo ignoreDynamicSpeed:!button.isAnalog];
@@ -552,7 +726,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
                 [_backgroundView fadeOverlayOut];
             }
             else {
-                if (self.runMode == GBRunModeRewind && _runModeFromController) {
+                if ((self.runMode == GBRunModeRewind || self.runMode == GBRunModePaused) && _runModeFromController) {
                     [self setRunMode:GBRunModeNormal];
                     _runModeFromController = false;
                 }
@@ -673,15 +847,31 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 - (void)saveStateToFile:(NSString *)file
 {
     NSString *tempPath = [file stringByAppendingPathExtension:@"tmp"];
-    if (!GB_save_state(&_gb, tempPath.UTF8String)) {
+    int error = GB_save_state(&_gb, tempPath.UTF8String);
+    if (!error) {
         rename(tempPath.UTF8String, file.UTF8String);
+        NSData *data = [NSData dataWithBytes:_gbView.previousBuffer
+                                      length:GB_get_screen_width(&_gb) *
+                        GB_get_screen_height(&_gb) *
+                        sizeof(*_gbView.previousBuffer)];
+        UIImage *screenshot = [self imageFromData:data width:GB_get_screen_width(&_gb) height:GB_get_screen_height(&_gb)];
+        [UIImagePNGRepresentation(screenshot) writeToFile:[file stringByAppendingPathExtension:@"png"] atomically:false];
     }
-    NSData *data = [NSData dataWithBytes:_gbView.previousBuffer
-                                  length:GB_get_screen_width(&_gb) *
-                    GB_get_screen_height(&_gb) *
-                    sizeof(*_gbView.previousBuffer)];
-    UIImage *screenshot = [self imageFromData:data width:GB_get_screen_width(&_gb) height:GB_get_screen_height(&_gb)];
-    [UIImagePNGRepresentation(screenshot) writeToFile:[file stringByAppendingPathExtension:@"png"] atomically:false];
+    else {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Could not Save State"
+                                                                           message:[NSString stringWithFormat:@"An error occured while attempting to save: %s", strerror(error)]
+                                                                    preferredStyle:UIAlertControllerStyleAlert];
+            [alert addAction:[UIAlertAction actionWithTitle:@"Close"
+                                                      style:UIAlertActionStyleCancel
+                                                    handler:nil]];
+            UIViewController *top = self;
+            while (top.presentedViewController) {
+                top = top.presentedViewController;
+            }
+            [top presentViewController:alert animated:true completion:nil];
+        });
+    }
 }
 
 - (bool)loadStateFromFile:(NSString *)file
@@ -704,48 +894,67 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
     if (romManager.romFile) {
         if (!_skipAutoLoad) {
             // Todo: display errors and warnings
-            if ([romManager.romFile.pathExtension.lowercaseString isEqualToString:@"isx"]) {
-                _romLoaded = GB_load_isx(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
+            bool needsStateLoad = false;
+            if (![_lastSavedROM isEqual:[GBROMManager sharedManager].currentROM]) {
+                if ([romManager.romFile.pathExtension.lowercaseString isEqualToString:@"isx"]) {
+                    _romLoaded = GB_load_isx(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
+                }
+                else {
+                    _romLoaded = GB_load_rom(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
+                }
+                needsStateLoad = true;
+                if (@available(iOS 16.0, *)) {
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [super setNeedsUpdateOfSupportedInterfaceOrientations];
+                    });
+                }
             }
-            else {
-                _romLoaded = GB_load_rom(&_gb, romManager.romFile.fileSystemRepresentation) == 0;
+            else if (access(romManager.romFile.fileSystemRepresentation, R_OK)) {
+                _romLoaded = false;
             }
-            if (_romLoaded) {
+            if (!_romLoaded) {
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    romManager.currentROM = nil;
+                });
+            }
+            
+            if (!needsStateLoad) {
+                NSDate *date = nil;
+                [[NSURL fileURLWithPath:[GBROMManager sharedManager].autosaveStateFile] getResourceValue:&date
+                                                                                                  forKey:NSURLContentModificationDateKey
+                                                                                                   error:nil];
+                if (![_saveDate isEqual:date]) {
+                    needsStateLoad = true;
+                }
+            }
+            
+            if (_romLoaded && needsStateLoad) {
                 GB_reset(&_gb);
                 GB_load_battery(&_gb, [GBROMManager sharedManager].batterySaveFile.fileSystemRepresentation);
                 GB_remove_all_cheats(&_gb);
                 GB_load_cheats(&_gb, [GBROMManager sharedManager].cheatsFile.UTF8String, false);
                 if (![self loadStateFromFile:[GBROMManager sharedManager].autosaveStateFile]) {
-                    // Newly played ROM, pick the best model
-                    uint8_t *rom = GB_get_direct_access(&_gb, GB_DIRECT_ACCESS_ROM, NULL, NULL);
-                    
-                    if ((rom[0x143] & 0x80)) {
-                        if (!GB_is_cgb(&_gb)) {
-                            GB_switch_model_and_reset(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBCGBModel"]);
+                    if ([_lastSavedROM isEqual:[GBROMManager sharedManager].currentROM]) {
+                        /* Something weird just happened: we didn't change a ROM, but we failed to load the
+                           latest save state. Save over the existing file, it's probably corrupt in some
+                           way. */
+                        [self saveStateToFile:[GBROMManager sharedManager].autosaveStateFile];
+                    }
+                    else {
+                        // Newly played ROM, pick the best model
+                        uint8_t *rom = GB_get_direct_access(&_gb, GB_DIRECT_ACCESS_ROM, NULL, NULL);
+                        
+                        if ((rom[0x143] & 0x80)) {
+                            if (!GB_is_cgb(&_gb)) {
+                                GB_switch_model_and_reset(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBCGBModel"]);
+                            }
+                        }
+                        else if ((rom[0x146]  == 3) && !GB_is_sgb(&_gb)) {
+                            GB_switch_model_and_reset(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBSGBModel"]);
                         }
                     }
-                    else if ((rom[0x146]  == 3) && !GB_is_sgb(&_gb)) {
-                        GB_switch_model_and_reset(&_gb, [[NSUserDefaults standardUserDefaults] integerForKey:@"GBSGBModel"]);
-                    }
+                    GB_rewind_reset(&_gb);
                 }
-            }
-            
-            NSDate *date = nil;
-            @try {
-                [[NSURL fileURLWithPath:[GBROMManager sharedManager].autosaveStateFile] getResourceValue:&date
-                                                                                                  forKey:NSURLContentModificationDateKey
-                                                                                                   error:nil];
-            }
-            @catch (NSException *exception) {
-                /* fileURLWithPath: throws an exception on some crash logs. I don't know why or how to reproduce it,
-                   but let's at least not crash. */
-                GB_rewind_reset(&_gb);
-            }
-            
-            // Reset the rewind buffer only if we switched ROMs or had the save state change externally
-            if (![_lastSavedROM isEqual:[GBROMManager sharedManager].currentROM] ||
-                ![_saveDate isEqual:date]) {
-                GB_rewind_reset(&_gb);
             }
         }
     }
@@ -774,23 +983,48 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)reset
 {
-    [self stop];
-    _skipAutoLoad = true;
-    GB_reset(&_gb);
-    [self start];
+    UIAlertControllerStyle style = [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad?
+    UIAlertControllerStyleAlert : UIAlertControllerStyleActionSheet;
+    UIAlertController *menu = [UIAlertController alertControllerWithTitle:@"Reset Emulation?"
+                                                                  message:@"Unsaved progress will be lost."
+                                                           preferredStyle:style];
+    [menu addAction:[UIAlertAction actionWithTitle:@"Reset"
+                                             style:UIAlertActionStyleDestructive
+                                           handler:^(UIAlertAction *action) {
+        [self stop];
+        _skipAutoLoad = true;
+        GB_reset(&_gb);
+        [self start];
+    }]];
+    [menu addAction:[UIAlertAction actionWithTitle:@"Cancel"
+                                             style:UIAlertActionStyleCancel
+                                           handler:nil]];
+    [self presentViewController:menu animated:true completion:nil];
 }
 
 - (void)openLibrary
 {
-    [self presentViewController:[[GBLibraryViewController alloc] init]
+    static __weak UIViewController *presentedController;
+    if (presentedController && self.presentedViewController == presentedController) return;
+    if (![self dismissViewControllerIfSafe]) return;
+    
+    UIViewController *controller = [[GBLibraryViewController alloc] init];
+    presentedController = controller;
+    
+    [self presentViewController:controller
                        animated:true
                      completion:nil];
 }
 
 - (void)changeModel
 {
+    static __weak UIViewController *presentedController;
+    if (presentedController && self.presentedViewController == presentedController) return;
+    if (![self dismissViewControllerIfSafe]) return;
+
     GBOptionViewController *controller = [[GBOptionViewController alloc] initWithHeader:@"Select a model to emulate"];
     controller.footer = @"Changing the emulated model will reset the emulator";
+    presentedController = controller;
     
     GB_model_t currentModel = GB_get_model(&_gb);
     struct {
@@ -845,7 +1079,12 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)openStates
 {
+    static __weak UIViewController *presentedController;
+    if (presentedController && self.presentedViewController == presentedController) return;
+    if (![self dismissViewControllerIfSafe]) return;
+    
     UINavigationController *controller = [[UINavigationController alloc] initWithRootViewController:[[GBStatesViewController alloc] init]];
+    presentedController = controller;
     UIVisualEffect *effect = [UIBlurEffect effectWithStyle:(UIBlurEffectStyle)UIBlurEffectStyleProminent];
     UIVisualEffectView *effectView = [[UIVisualEffectView alloc] initWithEffect:effect];
     effectView.frame = controller.view.bounds;
@@ -863,23 +1102,41 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)openSettings
 {
+    static __weak UIViewController *presentedController;
+    if (presentedController && self.presentedViewController == presentedController) return;
+    if (![self dismissViewControllerIfSafe]) return;
+
     UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:@"Close"
                                                               style:UIBarButtonItemStylePlain
                                                              target:self
                                                              action:@selector(dismissViewController)];
-    [self presentViewController:[GBSettingsViewController settingsViewControllerWithLeftButton:close]
+    UIViewController *controller = [GBSettingsViewController settingsViewControllerWithLeftButton:close];
+    presentedController = controller;
+    [self presentViewController:controller
                        animated:true
                      completion:nil];
 }
 
 - (void)showAbout
 {
-    [self presentViewController:[[GBAboutController alloc] init] animated:true completion:nil];
+    static __weak UIViewController *presentedController;
+    if (presentedController && self.presentedViewController == presentedController) return;
+    if (![self dismissViewControllerIfSafe]) return;
+
+    UIViewController *controller = [[GBAboutController alloc] init];
+    presentedController = controller;
+
+    [self presentViewController:controller animated:true completion:nil];
 }
 
 - (void)openCheats
 {
+    static __weak UIViewController *presentedController;
+    if (presentedController && self.presentedViewController == presentedController) return;
+    if (![self dismissViewControllerIfSafe]) return;
+
     UINavigationController *controller = [[UINavigationController alloc] initWithRootViewController:[[GBCheatsController alloc] initWithGameBoy:&_gb]];
+    presentedController = controller;
     UIBarButtonItem *close = [[UIBarButtonItem alloc] initWithTitle:@"Close"
                                                               style:UIBarButtonItemStylePlain
                                                              target:self
@@ -905,15 +1162,31 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 - (void)setNeedsUpdateOfSupportedInterfaceOrientations
 {
     /* Hack. Some view controllers dismiss without calling the method above. */
-    [super setNeedsUpdateOfSupportedInterfaceOrientations];
     dispatch_async(dispatch_get_main_queue(), ^{
         [self start];
+        [super setNeedsUpdateOfSupportedInterfaceOrientations];
     });
 }
 
 - (void)dismissViewController
 {
     [self dismissViewControllerAnimated:true completion:nil];
+}
+
+- (bool)dismissViewControllerIfSafe
+{
+    if (!self.presentedViewController) return true;
+    
+    if (![self.presentedViewController isKindOfClass:[UIAlertController class]]) {
+        [self dismissViewController];
+        return true;
+    }
+    
+    if ([self.presentedViewController isKindOfClass:[GBMenuViewController class]]) {
+        [self dismissViewController];
+        return true;
+    }
+    return false;
 }
 
 - (void)applicationWillResignActive:(UIApplication *)application
@@ -923,6 +1196,7 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)orientation duration:(NSTimeInterval)duration
 {
+    if (_orientation != UIInterfaceOrientationUnknown && !((1 << orientation) & self.supportedInterfaceOrientations)) return;
     GBLayout *layout = nil;
     _orientation = orientation;
     switch (orientation) {
@@ -977,10 +1251,14 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
                                        32,
                                        32);
 
+    [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
 }
 
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations
 {
+    if (!self.shouldAutorotate && _orientation != UIInterfaceOrientationUnknown) {
+        return 1 << _orientation;
+    }
     if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad) {
         return UIInterfaceOrientationMaskAll;
     }
@@ -1132,14 +1410,22 @@ static void rumbleCallback(GB_gameboy_t *gb, double amp)
             GB_rewind_pop(&_gb);
             if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBDynamicSpeed"]) {
                 if (!GB_rewind_pop(&_gb)) {
-                    self.runMode = GBRunModePaused;
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                        if (_runMode == GBRunModeRewind) {
+                            self.runMode = GBRunModePaused;
+                        }
+                    });
                     _rewindOver = true;
                 }
             }
             else {
                 for (unsigned i = [[NSUserDefaults standardUserDefaults] integerForKey:@"GBRewindSpeed"]; i--;)  {
                     if (!GB_rewind_pop(&_gb)) {
-                        self.runMode = GBRunModePaused;
+                        dispatch_sync(dispatch_get_main_queue(), ^{
+                            if (_runMode == GBRunModeRewind) {
+                                self.runMode = GBRunModePaused;
+                            }
+                        });
                         _rewindOver = true;
                     }
                 }
@@ -1168,7 +1454,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
 - (UIImage *)imageFromData:(NSData *)data width:(unsigned)width height:(unsigned)height
 {
     /* Convert the screenshot to a CGImageRef */
-    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, data.bytes, data.length, NULL);
+    CGDataProviderRef provider = CGDataProviderCreateWithCFData((CFDataRef)data);
     CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
     CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaNoneSkipLast;
     CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
@@ -1257,7 +1543,9 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     if (_running) return;
     if (self.presentedViewController) return;
     _running = true;
-    [[[NSThread alloc] initWithTarget:self selector:@selector(run) object:nil] start];
+    dispatch_async(_runQueue, ^{
+        [self run];
+    });
 }
 
 - (void)stop
@@ -1273,6 +1561,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
         [_audioLock signal];
         [_audioLock unlock];
     }
+    dispatch_sync(_runQueue, ^{});
     dispatch_async(dispatch_get_main_queue(), ^{
         self.runMode = GBRunModeNormal;
         [_backgroundView fadeOverlayOut];
@@ -1330,6 +1619,14 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     if (type != GB_VBLANK_TYPE_REPEAT) {
         [_gbView flip];
         GB_set_pixels_output(&_gb, _gbView.pixels);
+    }
+    if (_rapidA) {
+        _rapidACount++;
+        GB_set_key_state(&_gb, GB_KEY_A, !(_rapidACount & 2));
+    }
+    if (_rapidB) {
+        _rapidBCount++;
+        GB_set_key_state(&_gb, GB_KEY_B, !(_rapidBCount & 2));
     }
     _rewind = _runMode == GBRunModeRewind;
 }
@@ -1452,7 +1749,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
             [url startAccessingSecurityScopedResource];
             [GBROMManager sharedManager].currentROM =
             [[GBROMManager sharedManager] importROM:url.path
-                                       keepOriginal:![url.path hasPrefix:tempDir] && !inPlace];
+                                       keepOriginal:![url.path hasPrefix:tempDir] && inPlace];
             [url stopAccessingSecurityScopedResource];
         }
         return true;
@@ -1465,7 +1762,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
         }
         [url startAccessingSecurityScopedResource];
         [[GBROMManager sharedManager] importROM:url.path
-                                   keepOriginal:![url.path hasPrefix:tempDir] && !inPlace];
+                                   keepOriginal:![url.path hasPrefix:tempDir] && inPlace];
         [url stopAccessingSecurityScopedResource];
     }
     [self openLibrary];
@@ -1576,9 +1873,7 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     
     if (_runMode == GBRunModeNormal  || _runMode == GBRunModeUnderclock || !([[NSUserDefaults standardUserDefaults] boolForKey:@"GBDynamicSpeed"] && !ignoreDynamicSpeed)) {
         if (_runMode == GBRunModeTurbo) {
-            double multiplier = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBTurboSpeed"];
-            GB_set_turbo_mode(&_gb, multiplier == 1, false);
-            GB_set_clock_multiplier(&_gb, multiplier);
+            GB_set_turbo_mode(&_gb, true, false);
         }
         else if (_runMode == GBRunModeUnderclock) {
             GB_set_clock_multiplier(&_gb, 0.5);
@@ -1791,29 +2086,41 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     });
 }
 
+- (void)disconnectCable
+{
+    if (!_printerConnected) return;
+    _printerConnected = false;
+    _currentPrinterImageData = nil;
+    [UIView animateWithDuration:0.25 animations:^{
+        _printerButton.alpha = 0;
+    }];
+    [_printerSpinner stopAnimating];
+    GB_disconnect_serial(&_gb);
+}
+
+- (void)connectPrinter
+{
+    if (_printerConnected) return;
+    _printerConnected = true;
+    GB_connect_printer(&_gb, printImage, printDone);
+}
+
 - (void)openConnectMenu
 {
     UIAlertControllerStyle style = [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad?
     UIAlertControllerStyleAlert : UIAlertControllerStyleActionSheet;
-    GBCheckableAlertController *menu = [GBCheckableAlertController alertControllerWithTitle:@"Connect which accessory?"
-                                                                                    message:nil
+    GBCheckableAlertController *menu = [GBCheckableAlertController alertControllerWithTitle:@"Connect Accessory"
+                                                                                    message:@"Choose an accessory to connect."
                                                                              preferredStyle:style];
     [menu addAction:[UIAlertAction actionWithTitle:@"None"
                                              style:UIAlertActionStyleDefault
                                            handler:^(UIAlertAction *action) {
-        _printerConnected = false;
-        _currentPrinterImageData = nil;
-        [UIView animateWithDuration:0.25 animations:^{
-            _printerButton.alpha = 0;
-        }];
-        [_printerSpinner stopAnimating];
-        GB_disconnect_serial(&_gb);
+        [self disconnectCable];
     }]];
     [menu addAction:[UIAlertAction actionWithTitle:@"Game Boy Printer"
                                              style:UIAlertActionStyleDefault
                                            handler:^(UIAlertAction *action) {
-        _printerConnected = true;
-        GB_connect_printer(&_gb, printImage, printDone);
+        [self connectPrinter];
     }]];
     menu.selectedAction = menu.actions[_printerConnected];
     [menu addAction:[UIAlertAction actionWithTitle:@"Cancel"
@@ -1871,6 +2178,34 @@ didReceiveNotificationResponse:(UNNotificationResponse *)response
     }];
     [_printerSpinner stopAnimating];
     [self dismissViewController];
+}
+
+@end
+
+/* +[UIColor labelColor] is broken in some contexts in iOS 26 and despite being such a critical method
+   Apple isn't going to fix this in time. */
+API_AVAILABLE(ios(19.0))
+@implementation UIColor(SolariumBugs)
++ (UIColor *)_labelColor
+{
+    return [UIColor colorWithDynamicProvider:^UIColor *(UITraitCollection *traitCollection) {
+        switch (traitCollection.userInterfaceStyle) {
+                
+            case UIUserInterfaceStyleUnspecified:
+            case UIUserInterfaceStyleLight:
+                return [UIColor blackColor];
+            case UIUserInterfaceStyleDark:
+                return [UIColor whiteColor];
+        }
+    }];
+}
+
++ (void)load
+{
+    if (@available(iOS 19.0, *)) {
+        method_setImplementation(class_getClassMethod(self, @selector(labelColor)),
+                                 [self methodForSelector:@selector(_labelColor)]);
+    }
 }
 
 @end

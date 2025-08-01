@@ -247,8 +247,19 @@
     
     if ([newName containsString:@"/"]) {
         [self.tableView reloadData];
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"You can't use a name that contains “/”. Please choose another name."
-                                                                       message:nil
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Invalid Name"
+                                                                       message:@"You can't use a name that contains “/”. Please choose another name."
+                                                                preferredStyle:UIAlertControllerStyleAlert];
+        [alert addAction:[UIAlertAction actionWithTitle:@"OK"
+                                                  style:UIAlertActionStyleCancel
+                                                handler:nil]];
+        [self presentViewController:alert animated:true completion:nil];
+        return;
+    }
+    if ([[GBROMManager sharedManager].forbiddenNames containsObject:newName]) {
+        [self.tableView reloadData];
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"Invalid Name"
+                                                                       message:@"This name is reserved by SameBoy or iOS. Please choose another name."
                                                                 preferredStyle:UIAlertControllerStyleAlert];
         [alert addAction:[UIAlertAction actionWithTitle:@"OK"
                                                   style:UIAlertActionStyleCancel
