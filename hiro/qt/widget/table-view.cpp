@@ -8,11 +8,7 @@ auto pTableView::construct() -> void {
   qtTableView->setContextMenuPolicy(Qt::CustomContextMenu);
   qtTableView->setRootIsDecorated(false);
   qtTableView->setHeaderHidden(true);
-  #if HIRO_QT==4
-  qtTableView->header()->setMovable(false);
-  #elif HIRO_QT==5
   qtTableView->header()->setSectionsMovable(false);
-  #endif
 
   qtTableViewDelegate = new QtTableViewDelegate(*this);
   qtTableView->setItemDelegate(qtTableViewDelegate);
@@ -126,11 +122,7 @@ auto pTableView::setHeadered(bool headered) -> void {
 }
 
 auto pTableView::setSortable(bool sortable) -> void {
-  #if HIRO_QT==4
-  qtTableView->header()->setClickable(sortable);
-  #elif HIRO_QT==5
   qtTableView->header()->setSectionsClickable(sortable);
-  #endif
 }
 
 //called on resize/show events

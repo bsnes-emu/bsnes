@@ -57,12 +57,6 @@ ifneq ($(filter $(platform),linux bsd),)
     hiro.options = -L/usr/local/lib -lX11 $(shell pkg-config --libs gtk+-3.0 gtksourceview-3.0)
   endif
 
-  ifeq ($(hiro),qt4)
-    moc = /usr/local/lib/qt4/bin/moc
-    hiro.flags   = $(flags.cpp) -DHIRO_QT=4 $(shell pkg-config --cflags QtCore QtGui)
-    hiro.options = -L/usr/local/lib -lX11 $(shell pkg-config --libs QtCore QtGui)
-  endif
-
   ifeq ($(hiro),qt5)
     moc = $(shell pkg-config --variable=host_bins Qt5Core)/moc
     hiro.flags   = $(flags.cpp) -DHIRO_QT=5 -fPIC $(shell pkg-config --cflags Qt5Core Qt5Gui Qt5Widgets)

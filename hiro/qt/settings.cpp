@@ -2,11 +2,7 @@ namespace hiro {
 
 Settings::Settings() {
   string path = {Path::userSettings(), "hiro/"};
-  #if HIRO_QT==4
-  auto document = BML::unserialize(file::read({path, "qt4.bml"}));
-  #elif HIRO_QT==5
   auto document = BML::unserialize(file::read({path, "qt5.bml"}));
-  #endif
 
   #define get(name, type, value) \
     if(auto node = document[name]) value = node.type()
@@ -39,11 +35,7 @@ Settings::~Settings() {
 
   #undef set
 
-  #if HIRO_QT==4
-  file::write({path, "qt4.bml"}, BML::serialize(document));
-  #elif HIRO_QT==5
   file::write({path, "qt5.bml"}, BML::serialize(document));
-  #endif
 }
 
 }

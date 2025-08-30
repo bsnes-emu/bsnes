@@ -63,11 +63,7 @@ auto pApplication::state() -> State& {
 //obviously, it is used as sparingly as possible
 auto pApplication::synchronize() -> void {
   for(auto n : range(8)) {
-    #if HIRO_QT==4 && defined(DISPLAY_XORG)
-    QApplication::syncX();
-    #elif HIRO_QT==5
     QApplication::sync();
-    #endif
     Application::processEvents();
     usleep(2000);
   }
