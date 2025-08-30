@@ -1,13 +1,13 @@
 include gb/version.mk
 export VERSION
 
-flags += -DGB_INTERNAL -DGB_DISABLE_DEBUGGER -DGB_DISABLE_CHEATS -D_GNU_SOURCE -DGB_VERSION=\"$(VERSION)\" -Wno-multichar
+flags += -DGB_INTERNAL -DGB_DISABLE_DEBUGGER -DGB_DISABLE_CHEATS -D_GNU_SOURCE -DGB_VERSION=\"$(VERSION)\" -DNDEBUG -Wno-multichar
 options += -I../sameboy
 
 objects += gb-apu gb-camera gb-rumble gb-display gb-gb gb-joypad gb-mbc
 objects += gb-memory gb-printer gb-random gb-rewind gb-save_state gb-sgb
-objects += gb-sm83_cpu gb-symbol_hash gb-timing
-#objects+= gb-debugger gb-sm83_disassembler
+objects += gb-sm83_cpu gb-timing
+#objects+= gb-debugger gb-sm83_disassembler gb-symbol_hash
 
 obj/gb-apu.o:               gb/Core/apu.c
 obj/gb-camera.o:            gb/Core/camera.c

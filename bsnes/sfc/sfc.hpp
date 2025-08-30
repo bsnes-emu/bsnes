@@ -3,6 +3,13 @@
 //license: GPLv3
 //started: 2004-10-14
 
+extern "C" {
+  #include <gb/Core/gb.h>
+  #include <gb/Core/random.h>
+  // Avoid conflict between `unreachable()` in SameBoy and `unreachable` in nall
+  #undef unreachable
+}
+
 #include <emulator/emulator.hpp>
 #include <emulator/random.hpp>
 #include <emulator/cheat.hpp>
@@ -13,11 +20,6 @@
 #include <processor/spc700/spc700.hpp>
 #include <processor/upd96050/upd96050.hpp>
 #include <processor/wdc65816/wdc65816.hpp>
-
-extern "C" {
-  #include <gb/Core/gb.h>
-  #include <gb/Core/random.h>
-}
 
 namespace SuperFamicom {
   #define platform Emulator::platform
