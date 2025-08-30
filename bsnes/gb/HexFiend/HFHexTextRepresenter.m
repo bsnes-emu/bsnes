@@ -182,7 +182,7 @@ static inline unsigned char hex2char(NSUInteger c) {
         [[self view] setHidesNullBytes:[[self controller] shouldHideNullBytes]];
     }
     [super controllerDidChange:bits];
-    if (bits & (HFControllerContentValue | HFControllerContentLength | HFControllerSelectedRanges)) {
+    if (bits & (HFControllerSelectedRanges)) {
         [self _clearOmittedNybble];
     }
 }

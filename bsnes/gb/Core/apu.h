@@ -1,24 +1,25 @@
-#ifndef apu_h
-#define apu_h
+#pragma once
 #include <stdbool.h>
 #include <stdint.h>
 #include <stddef.h>
-#include "gb_struct_def.h"
+#include <stdio.h>
+#include "defs.h"
 
+#define GB_BAND_LIMITED_WIDTH 64
+#define GB_BAND_LIMITED_PHASES 256
+
+#define GB_QUICK_MULTIPLY_COUNT 64
 
 #ifdef GB_INTERNAL
+#define GB_BAND_LIMITED_ONE 0x10000 // fixed point value equal to 1
+
 /* Speed = 1 / Length (in seconds) */
 #define DAC_DECAY_SPEED 20000
 #define DAC_ATTACK_SPEED 20000
 
 
 /* Divides nicely and never overflows with 4 channels and 8 (1-8) volume levels */
-#ifdef WIIU
-/* Todo: Remove this hack once https://github.com/libretro/RetroArch/issues/6252 is fixed*/
-#define MAX_CH_AMP (0xFF0 / 2)
-#else
 #define MAX_CH_AMP 0xFF0
-#endif
 #define CH_STEP (MAX_CH_AMP/0xF/8)
 #endif
 
@@ -26,11 +27,22 @@
 
 /* APU ticks are 2MHz, triggered by an internal APU clock. */
 
+#ifdef GB_INTERNAL
+typedef union
+{
+    struct {
+        int16_t left;
+        int16_t right;
+    };
+    uint32_t packed;
+} GB_sample_t;
+#else
 typedef struct
 {
     int16_t left;
     int16_t right;
 } GB_sample_t;
+#endif
 
 typedef struct
 {
@@ -38,19 +50,20 @@ typedef struct
     double right;
 } GB_double_sample_t;
 
-enum GB_CHANNELS {
+typedef enum {
     GB_SQUARE_1,
     GB_SQUARE_2,
     GB_WAVE,
     GB_NOISE,
     GB_N_CHANNELS
-};
+} GB_channel_t;
 
 typedef struct
 {
-    bool locked:1;
+    bool locked:1; // Represents FYNO's output on channel 4
     bool clock:1; // Represents FOSY on channel 4
-    unsigned padding:6;
+    bool should_lock:1;  // Represents FYNO's input on channel 4
+    uint8_t padding:5;
 } GB_envelope_clock_t;
 
 typedef void (*GB_sample_callback_t)(GB_gameboy_t *gb, GB_sample_t *sample);
@@ -58,7 +71,7 @@ typedef void (*GB_sample_callback_t)(GB_gameboy_t *gb, GB_sample_t *sample);
 typedef struct
 {
     bool global_enable;
-    uint8_t apu_cycles;
+    uint16_t apu_cycles;
 
     uint8_t samples[GB_N_CHANNELS];
     bool is_active[GB_N_CHANNELS];
@@ -70,24 +83,30 @@ typedef struct
                     // need to divide the signal.
 
     uint8_t square_sweep_countdown; // In 128Hz
-    uint8_t square_sweep_calculate_countdown; // In 2 MHz
+    uint8_t square_sweep_calculate_countdown; // In 1 MHz
+    uint8_t square_sweep_calculate_countdown_reload_timer; // In 1 Mhz, for glitches related to reloading square_sweep_calculate_countdown
     uint16_t sweep_length_addend;
     uint16_t shadow_sweep_sample_length;
     bool unshifted_sweep;
-    bool enable_zombie_calculate_stepping;
+    bool square_sweep_instant_calculation_done;
 
+    uint8_t channel_1_restart_hold;
+    uint16_t channel1_completed_addend;
     struct {
         uint16_t pulse_length; // Reloaded from NRX1 (xorred), in 256Hz DIV ticks
         uint8_t current_volume; // Reloaded from NRX2
         uint8_t volume_countdown; // Reloaded from NRX2
-        uint8_t current_sample_index; /* For save state compatibility,
-                                         highest bit is reused (See NR14/NR24's
-                                         write code)*/
+        uint8_t current_sample_index;
+        bool sample_surpressed;
 
         uint16_t sample_countdown; // in APU ticks (Reloaded from sample_length, xorred $7FF)
         uint16_t sample_length; // From NRX3, NRX4, in APU ticks
         bool length_enabled; // NRX4
-
+        GB_envelope_clock_t envelope_clock;
+        uint8_t delay; // Hack for CGB D/E phantom step due to how sample_countdown is implemented in SameBoy
+        bool did_tick:1;
+        bool just_reloaded:1;
+        uint8_t padding:6;
     } square_channels[2];
 
     struct {
@@ -100,9 +119,9 @@ typedef struct
         uint16_t sample_countdown; // in APU ticks (Reloaded from sample_length, xorred $7FF)
         uint8_t current_sample_index;
         uint8_t current_sample_byte; // Current sample byte.
-
-        GB_PADDING(int8_t, wave_form)[32];
         bool wave_form_just_read;
+        bool pulsed;
+        uint8_t bugged_read_countdown;
     } wave_channel;
 
     struct {
@@ -113,32 +132,26 @@ typedef struct
         bool narrow;
 
         uint8_t counter_countdown; // Counts from 0-7 to 0 to tick counter (Scaled from 512KHz to 2MHz)
-        uint8_t __padding;
         uint16_t counter; // A bit from this 14-bit register ticks LFSR
         bool length_enabled; // NR44
 
         uint8_t alignment; // If (NR43 & 7) != 0, samples are aligned to 512KHz clock instead of
                            // 1MHz. This variable keeps track of the alignment.
-
+        bool current_lfsr_sample;
+        int8_t delta;
+        bool countdown_reloaded;
+        uint8_t dmg_delayed_start;
+        GB_envelope_clock_t envelope_clock;
     } noise_channel;
 
-    /* Todo: merge these into their structs when breaking save state compatibility */
-#define GB_SKIP_DIV_EVENT_INACTIVE 0
-#define GB_SKIP_DIV_EVENT_SKIPPED 1
-#define GB_SKIP_DIV_EVENT_SKIP 2
-    uint8_t skip_div_event;
-    bool current_lfsr_sample;
+    GB_ENUM(uint8_t, {
+        GB_SKIP_DIV_EVENT_INACTIVE,
+        GB_SKIP_DIV_EVENT_SKIPPED,
+        GB_SKIP_DIV_EVENT_SKIP,
+    }) skip_div_event;
     uint8_t pcm_mask[2]; // For CGB-0 to CGB-C PCM read glitch
-    uint8_t channel_1_restart_hold;
-    int8_t channel_4_delta;
-    bool channel_4_countdown_reloaded;
-    uint8_t channel_4_dmg_delayed_start;
-    uint16_t channel1_completed_addend;
     
-    GB_envelope_clock_t square_envelope_clock[2];
-    GB_envelope_clock_t noise_envelope_clock;
-    bool channel_3_pulsed;
-    bool channel_3_delayed_bugged_read;
+    bool apu_cycles_in_2mhz; // For compatibility with 0.16.x save states
 } GB_apu_t;
 
 typedef enum {
@@ -148,18 +161,34 @@ typedef enum {
     GB_HIGHPASS_MAX
 } GB_highpass_mode_t;
 
+typedef enum {
+    GB_AUDIO_FORMAT_RAW, // Native endian
+    GB_AUDIO_FORMAT_AIFF, // Native endian
+    GB_AUDIO_FORMAT_WAV,
+} GB_audio_format_t;
+
+typedef struct {
+    struct {
+        int32_t left, right;
+    } buffer[GB_BAND_LIMITED_WIDTH * 2], output;
+    uint8_t pos;
+    GB_sample_t input;
+} GB_band_limited_t;
+
 typedef struct {
     unsigned sample_rate;
 
-    double sample_cycles; // In 8 MHz units
-    double cycles_per_sample;
+    unsigned sample_cycles; // Counts by sample_rate until it reaches the clock frequency
+    unsigned max_cycles_per_sample;
 
-    // Samples are NOT normalized to MAX_CH_AMP * 4 at this stage!
-    unsigned cycles_since_render;
-    unsigned last_update[GB_N_CHANNELS];
-    GB_sample_t current_sample[GB_N_CHANNELS];
-    GB_sample_t summed_samples[GB_N_CHANNELS];
+    uint32_t cycles_since_render;
+    uint32_t sample_fraction; // Counter in 1 / sample_rate, in 4.28 fixed format
+    uint32_t quick_fraction_multiply_cache[GB_QUICK_MULTIPLY_COUNT];
+    
+    GB_band_limited_t band_limited[GB_N_CHANNELS];
     double dac_discharge[GB_N_CHANNELS];
+    bool channel_muted[GB_N_CHANNELS];
+    bool edge_triggered[GB_N_CHANNELS];
 
     GB_highpass_mode_t highpass_mode;
     double highpass_rate;
@@ -167,26 +196,38 @@ typedef struct {
     
     GB_sample_callback_t sample_callback;
     
-    bool rate_set_in_clocks;
     double interference_volume;
     double interference_highpass;
+    
+    FILE *output_file;
+    GB_audio_format_t output_format;
+    int output_error;
+    
+    /* Not output related, but it's temp state so I'll put it here */
+    bool square_sweep_disable_stepping;
 } GB_apu_output_t;
 
+void GB_set_channel_muted(GB_gameboy_t *gb, GB_channel_t channel, bool muted);
+bool GB_is_channel_muted(GB_gameboy_t *gb, GB_channel_t channel);
 void GB_set_sample_rate(GB_gameboy_t *gb, unsigned sample_rate);
+unsigned GB_get_sample_rate(GB_gameboy_t *gb);
 void GB_set_sample_rate_by_clocks(GB_gameboy_t *gb, double cycles_per_sample); /* Cycles are in 8MHz units */
 void GB_set_highpass_filter_mode(GB_gameboy_t *gb, GB_highpass_mode_t mode);
 void GB_set_interference_volume(GB_gameboy_t *gb, double volume);
 void GB_apu_set_sample_callback(GB_gameboy_t *gb, GB_sample_callback_t callback);
-
+int GB_start_audio_recording(GB_gameboy_t *gb, const char *path, GB_audio_format_t format);
+int GB_stop_audio_recording(GB_gameboy_t *gb);
+uint8_t GB_get_channel_volume(GB_gameboy_t *gb, GB_channel_t channel);
+uint8_t GB_get_channel_amplitude(GB_gameboy_t *gb, GB_channel_t channel);
+uint16_t GB_get_channel_period(GB_gameboy_t *gb, GB_channel_t channel);
+void GB_get_apu_wave_table(GB_gameboy_t *gb, uint8_t *wave_table);
+bool GB_get_channel_edge_triggered(GB_gameboy_t *gb, GB_channel_t channel);
 #ifdef GB_INTERNAL
-bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, unsigned index);
-void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);
-uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg);
-void GB_apu_div_event(GB_gameboy_t *gb);
-void GB_apu_div_secondary_event(GB_gameboy_t *gb);
-void GB_apu_init(GB_gameboy_t *gb);
-void GB_apu_run(GB_gameboy_t *gb);
-void GB_apu_update_cycles_per_sample(GB_gameboy_t *gb);
+internal bool GB_apu_is_DAC_enabled(GB_gameboy_t *gb, GB_channel_t index);
+internal void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);
+internal uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg);
+internal void GB_apu_div_event(GB_gameboy_t *gb);
+internal void GB_apu_div_secondary_event(GB_gameboy_t *gb);
+internal void GB_apu_init(GB_gameboy_t *gb);
+internal void GB_apu_run(GB_gameboy_t *gb, bool force);
 #endif
-
-#endif /* apu_h */

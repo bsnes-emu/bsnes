@@ -22,7 +22,9 @@ LOCAL_CFLAGS    := -std=c99 $(COREFLAGS) $(CFLAGS)
 LOCAL_LDFLAGS   := -Wl,-version-script=$(CORE_DIR)/libretro/link.T
 include $(BUILD_SHARED_LIBRARY)
 
-$(CORE_DIR)/libretro/%_boot.c: $(CORE_DIR)/build/bin/BootROMs/%_boot.bin
+override BOOTROMS_DIR := $(shell cd ../.. && realpath -m $(BOOTROMS_DIR))
+
+$(CORE_DIR)/libretro/%_boot.c: $(BOOTROMS_DIR)/%_boot.bin
 	echo "/* AUTO-GENERATED */" > $@
 	echo "const unsigned char $(notdir $(@:%.c=%))[] = {" >> $@
 	hexdump -v -e '/1 "0x%02x, "' $< >> $@

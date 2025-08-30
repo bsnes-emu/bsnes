@@ -1,0 +1,28 @@
+name: "libretro branch update"
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  libretro-prebuilt-update:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+        name: Checkout
+        with:
+          repository: LIJI32/SameBoy
+          token: ${{ secrets.WEBSITETOKEN }}
+          submodules: false
+      - name: Install Deps
+        shell: bash
+        run: |
+          ./.github/actions/install_deps.sh ${{ matrix.os }}
+      - name: Build Boot ROMs and Push
+        run: |
+          ./.github/actions/update_libretro.sh

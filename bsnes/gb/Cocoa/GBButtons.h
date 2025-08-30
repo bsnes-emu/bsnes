@@ -1,7 +1,4 @@
-#ifndef GBButtons_h
-#define GBButtons_h
-
-typedef enum : NSUInteger {
+typedef enum {
     GBRight,
     GBLeft,
     GBUp,
@@ -10,14 +7,24 @@ typedef enum : NSUInteger {
     GBB,
     GBSelect,
     GBStart,
+    GBRapidA,
+    GBRapidB,
     GBTurbo,
     GBRewind,
     GBUnderclock,
-    GBButtonCount,
-    GBGameBoyButtonCount = GBStart + 1,
+    GBHotkey1,
+    GBHotkey2,
+    GBTotalButtonCount,
+    GBKeyboardButtonCount =  GBUnderclock + 1,
+    GBPerPlayerButtonCount = GBRapidB + 1,
 } GBButton;
 
-extern NSString const *GBButtonNames[GBButtonCount];
+#define GBJoyKitHotkey1 JOYButtonUsageGeneric0 + 0x100
+#define GBJoyKitHotkey2 JOYButtonUsageGeneric0 + 0x101
+#define GBJoyKitRapidA JOYButtonUsageGeneric0 + 0x102
+#define GBJoyKitRapidB JOYButtonUsageGeneric0 + 0x103
+
+extern NSString const *GBButtonNames[GBTotalButtonCount];
 
 static inline NSString *n2s(uint64_t number)
 {
@@ -31,5 +38,3 @@ static inline NSString *button_to_preference_name(GBButton button, unsigned play
     }
     return [NSString stringWithFormat:@"GB%@", GBButtonNames[button]];
 }
-
-#endif

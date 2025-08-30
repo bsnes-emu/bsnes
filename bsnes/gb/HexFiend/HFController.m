@@ -279,8 +279,13 @@ static inline Class preferredByteArrayClass(void) {
 #if ! NDEBUG
     HFASSERT(range.location >= 0);
     HFASSERT(range.length >= 0);
-    HFASSERT(range.location + range.length <= HFULToFP([self totalLineCount]));
 #endif
+    if (range.location + range.length > HFULToFP([self totalLineCount])) {
+        range.location = [self totalLineCount] - range.length;
+        if (range.location < 0) {
+            return;
+        }
+    }
     if (! HFFPRangeEqualsRange(range, displayedLineRange)) {
         displayedLineRange = range;
         [self _addPropertyChangeBits:HFControllerDisplayedLineRange];
@@ -468,7 +473,7 @@ static inline Class preferredByteArrayClass(void) {
 }
 
 - (void)_setSingleSelectedContentsRange:(HFRange)newSelection {
-    HFASSERT(HFRangeIsSubrangeOfRange(newSelection, HFRangeMake(0, [self contentsLength])));
+    if (!HFRangeIsSubrangeOfRange(newSelection, HFRangeMake(0, [self contentsLength]))) return;
     BOOL selectionChanged;
     if ([selectedContentsRanges count] == 1) {
         selectionChanged = ! HFRangeEqualsRange([selectedContentsRanges[0] HFRange], newSelection);

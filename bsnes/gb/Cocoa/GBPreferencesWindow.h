@@ -1,32 +1,28 @@
 #import <Cocoa/Cocoa.h>
 #import <JoyKit/JoyKit.h>
+#import "GBPaletteEditorController.h"
+#import "GBTitledPopUpButton.h"
 
 @interface GBPreferencesWindow : NSWindow <NSTableViewDelegate, NSTableViewDataSource, JOYListener>
-@property (nonatomic, strong) IBOutlet NSTableView *controlsTableView;
-@property (nonatomic, strong) IBOutlet NSPopUpButton *graphicsFilterPopupButton;
-@property (nonatomic, strong) IBOutlet NSButton *analogControlsCheckbox;
-@property (nonatomic, strong) IBOutlet NSButton *aspectRatioCheckbox;
-@property (nonatomic, strong) IBOutlet NSPopUpButton *highpassFilterPopupButton;
-@property (nonatomic, strong) IBOutlet NSPopUpButton *colorCorrectionPopupButton;
-@property (nonatomic, strong) IBOutlet NSPopUpButton *frameBlendingModePopupButton;
-@property (nonatomic, strong) IBOutlet NSPopUpButton *colorPalettePopupButton;
-@property (nonatomic, strong) IBOutlet NSPopUpButton *displayBorderPopupButton;
-@property (nonatomic, strong) IBOutlet NSPopUpButton *rewindPopupButton;
-@property (nonatomic, strong) IBOutlet NSPopUpButton *rtcPopupButton;
-@property (nonatomic, strong) IBOutlet NSButton *configureJoypadButton;
-@property (nonatomic, strong) IBOutlet NSButton *skipButton;
-@property (nonatomic, strong) IBOutlet NSMenuItem *bootROMsFolderItem;
-@property (nonatomic, strong) IBOutlet NSPopUpButtonCell *bootROMsButton;
-@property (nonatomic, strong) IBOutlet NSPopUpButton *rumbleModePopupButton;
-@property (nonatomic, weak) IBOutlet NSSlider *temperatureSlider;
-@property (nonatomic, weak) IBOutlet NSSlider *interferenceSlider;
-@property (nonatomic, weak) IBOutlet NSPopUpButton *dmgPopupButton;
-@property (nonatomic, weak) IBOutlet NSPopUpButton *sgbPopupButton;
-@property (nonatomic, weak) IBOutlet NSPopUpButton *cgbPopupButton;
-@property (nonatomic, weak) IBOutlet NSPopUpButton *preferredJoypadButton;
-@property (nonatomic, weak) IBOutlet NSPopUpButton *playerListButton;
-@property (nonatomic, weak) IBOutlet NSButton *autoUpdatesCheckbox;
-@property (weak) IBOutlet NSSlider *volumeSlider;
-@property (weak) IBOutlet NSButton *OSDCheckbox;
-@property (weak) IBOutlet NSButton *screenshotFilterCheckbox;
+@property IBOutlet NSTableView *controlsTableView;
+@property IBOutlet NSButton *configureJoypadButton;
+@property IBOutlet NSButton *skipButton;
+@property IBOutlet NSMenuItem *bootROMsFolderItem;
+@property IBOutlet NSPopUpButtonCell *bootROMsButton;
+@property IBOutlet NSPopUpButton *preferredJoypadButton;
+@property IBOutlet NSPopUpButton *playerListButton;
+@property IBOutlet GBPaletteEditorController *paletteEditorController;
+@property IBOutlet NSWindow *paletteEditor;
+@property IBOutlet NSWindow *joyconsSheet;
+@property IBOutlet NSPopUpButton *colorCorrectionPopupButton;
+@property IBOutlet NSPopUpButton *highpassFilterPopupButton;
+@property IBOutlet NSPopUpButton *colorPalettePopupButton;
+@property IBOutlet NSPopUpButton *hotkey1PopupButton;
+@property IBOutlet NSPopUpButton *hotkey2PopupButton;
+@property IBOutlet NSButton *turboCapButton;
+@property IBOutlet NSSlider *turboCapSlider;
+@property IBOutlet NSTextField *turboCapLabel;
+
+@property IBOutlet GBTitledPopUpButton *fontPopupButton;
+@property IBOutlet NSStepper *fontSizeStepper;
 @end

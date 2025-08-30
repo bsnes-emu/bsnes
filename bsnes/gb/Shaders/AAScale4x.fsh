@@ -1,20 +1,15 @@
 STATIC vec4 scale2x(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
-    // o = offset, the width of a pixel
-    vec2 o = 1.0 / input_resolution;
     // texel arrangement
     // A B C
     // D E F
     // G H I
-    // vec4 A = texture(image, position + vec2( -o.x,  o.y));
-    vec4 B = texture(image, position + vec2(    0,  o.y));
-    // vec4 C = texture(image, position + vec2(  o.x,  o.y));
-    vec4 D = texture(image, position + vec2( -o.x,    0));
-    vec4 E = texture(image, position + vec2(    0,    0));
-    vec4 F = texture(image, position + vec2(  o.x,    0));
-    // vec4 G = texture(image, position + vec2( -o.x, -o.y));
-    vec4 H = texture(image, position + vec2(    0, -o.y));
-    // vec4 I = texture(image, position + vec2(  o.x, -o.y));
+    
+    vec4 B = texture_relative(image, position, vec2(  0,  1));
+    vec4 D = texture_relative(image, position, vec2( -1,  0));
+    vec4 E = texture_relative(image, position, vec2(  0,  0));
+    vec4 F = texture_relative(image, position, vec2(  1,  0));
+    vec4 H = texture_relative(image, position, vec2(  0, -1));
     vec2 p = position * input_resolution;
     // p = the position within a pixel [0...1]
     p = fract(p);
@@ -36,30 +31,24 @@ STATIC vec4 scale2x(sampler2D image, vec2 position, vec2 input_resolution, vec2 
         }
     }
 }
-
-STATIC vec4 aaScale2x(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
+STATIC vec4 scale2x_wrapper(sampler2D t, vec2 pos, vec2 offset, vec2 input_resolution, vec2 output_resolution)
 {
-    return mix(texture(image, position), scale2x(image, position, input_resolution, output_resolution), 0.5);
+    vec2 origin = (floor(pos * input_resolution * 2.0)) + vec2(0.5, 0.5);
+    return scale2x(t, (origin + offset) / input_resolution / 2.0, input_resolution, output_resolution);
 }
 
 STATIC vec4 scale(sampler2D image, vec2 position, vec2 input_resolution, vec2 output_resolution)
 {
-    // o = offset, the width of a pixel
-    vec2 o = 1.0 / (input_resolution * 2.);
-    
     // texel arrangement
     // A B C
     // D E F
     // G H I
-    // vec4 A = aaScale2x(image, position + vec2( -o.x,  o.y), input_resolution, output_resolution);
-    vec4 B = aaScale2x(image, position + vec2(    0,  o.y), input_resolution, output_resolution);
-    // vec4 C = aaScale2x(image, position + vec2(  o.x,  o.y), input_resolution, output_resolution);
-    vec4 D = aaScale2x(image, position + vec2( -o.x,    0), input_resolution, output_resolution);
-    vec4 E = aaScale2x(image, position + vec2(    0,    0), input_resolution, output_resolution);
-    vec4 F = aaScale2x(image, position + vec2(  o.x,    0), input_resolution, output_resolution);
-    // vec4 G = aaScale2x(image, position + vec2( -o.x, -o.y), input_resolution, output_resolution);
-    vec4 H = aaScale2x(image, position + vec2(    0, -o.y), input_resolution, output_resolution);
-    // vec4 I = aaScale2x(image, position + vec2(  o.x, -o.y), input_resolution, output_resolution);
+    vec4 B = scale2x_wrapper(image, position, vec2(  0,  1), input_resolution, output_resolution);
+    vec4 D = scale2x_wrapper(image, position, vec2( -1,  0), input_resolution, output_resolution);
+    vec4 E = scale2x_wrapper(image, position, vec2(  0,  0), input_resolution, output_resolution);
+    vec4 F = scale2x_wrapper(image, position, vec2(  1,  0), input_resolution, output_resolution);
+    vec4 H = scale2x_wrapper(image, position, vec2(  0, -1), input_resolution, output_resolution);
+
     vec4 R;
     vec2 p = position * input_resolution * 2.;
     // p = the position within a pixel [0...1]

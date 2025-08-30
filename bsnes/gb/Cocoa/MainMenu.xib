@@ -1,18 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="14868" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
+<document type="com.apple.InterfaceBuilder3.Cocoa.XIB" version="3.0" toolsVersion="24093.9" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES" customObjectInstantitationMethod="direct">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="14868"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="24093.9"/>
     </dependencies>
     <objects>
         <customObject id="-2" userLabel="File's Owner" customClass="NSApplication">
             <connections>
-                <outlet property="delegate" destination="Voe-Tx-rLC" id="GzC-gU-4Uq"/>
+                <outlet property="delegate" destination="-3" id="GzC-gU-4Uq"/>
             </connections>
         </customObject>
         <customObject id="-1" userLabel="First Responder" customClass="FirstResponder"/>
-        <customObject id="-3" userLabel="Application" customClass="NSObject"/>
-        <customObject id="Voe-Tx-rLC" customClass="AppDelegate">
+        <customObject id="-3" userLabel="Application" customClass="GBApp">
             <connections>
                 <outlet property="linkCableMenuItem" destination="V4S-Fo-xJK" id="KL9-3K-64i"/>
             </connections>
@@ -27,13 +26,19 @@
                             <menuItem title="About SameBoy" id="5kV-Vb-QxS">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="orderFrontStandardAboutPanel:" target="-1" id="Exp-CZ-Vem"/>
+                                    <action selector="orderFrontAboutPanel:" target="-1" id="Exp-CZ-Vem"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Sponsor SameBoy" id="nJ0-7j-VJu">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="openSponsor:" target="-3" id="HSd-eg-8JL"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="VOq-y0-SEH"/>
                             <menuItem title="Preferences…" keyEquivalent="," id="BOF-NM-1cW">
                                 <connections>
-                                    <action selector="showPreferences:" target="Voe-Tx-rLC" id="RcX-51-nzq"/>
+                                    <action selector="showPreferences:" target="-3" id="RcX-51-nzq"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="wFC-TO-SCJ"/>
@@ -77,6 +82,12 @@
                                     <action selector="openDocument:" target="-1" id="bVn-NM-KNZ"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Hot Swap Cartridge…" secondaryImage="arrow.down.left.arrow.up.right" catalog="system" keyEquivalent="o" id="Rik-p8-QCf">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                <connections>
+                                    <action selector="cartSwap:" target="-1" id="iXS-Ol-IS0"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Open Recent" id="tXI-mr-wws">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Open Recent" systemMenu="recentDocuments" id="oas-Oc-fiZ">
@@ -91,6 +102,12 @@
                                 </menu>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="m54-Is-iLE"/>
+                            <menuItem title="New Cartridge Instance…" secondaryImage="plus.square.on.square" catalog="system" keyEquivalent="n" id="Vld-be-NZu">
+                                <connections>
+                                    <action selector="newCartridgeInstance:" target="-1" id="GJc-xU-ZEr"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="vQH-Yd-TH4"/>
                             <menuItem title="Close" keyEquivalent="w" id="DVo-aG-piG">
                                 <connections>
                                     <action selector="performClose:" target="-1" id="HmO-Ls-i7Q"/>
@@ -141,7 +158,7 @@
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="Aru-vr-frG"/>
-                            <menuItem title="Find" id="efg-jw-GVP">
+                            <menuItem title="Find" secondaryImage="text.page.badge.magnifyingglass" catalog="system" id="efg-jw-GVP">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Find" id="4R6-IU-Jq6">
                                     <items>
@@ -180,18 +197,73 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Emulation" id="HyV-fh-RgO">
                         <items>
-                            <menuItem title="Reset" keyEquivalent="r" id="p0i-Lt-sTg">
+                            <menuItem title="Reset" secondaryImage="arrow.trianglehead.2.counterclockwise.rotate.90" catalog="system" keyEquivalent="r" id="p0i-Lt-sTg">
                                 <connections>
                                     <action selector="reset:" target="-1" id="DKW-Bd-h3v"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Pause" keyEquivalent="p" id="4K4-hw-R7Q">
+                            <menuItem title="Quick Reset" secondaryImage="arrow.trianglehead.2.counterclockwise.rotate.90" catalog="system" tag="-1" alternate="YES" keyEquivalent="r" id="uPG-01-49E">
+                                <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                <connections>
+                                    <action selector="reset:" target="-1" id="VV1-VP-L7g"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Reload ROM" secondaryImage="arrow.trianglehead.2.counterclockwise.rotate.90" catalog="system" alternate="YES" keyEquivalent="R" id="eQP-Fb-nkz">
+                                <connections>
+                                    <action selector="reloadROM:" target="-1" id="BpN-8V-Csg"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Pause" secondaryImage="pause" catalog="system" keyEquivalent="p" id="4K4-hw-R7Q">
                                 <connections>
                                     <action selector="togglePause:" target="-1" id="osW-wt-QAa"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Emulated Model" id="Cip-1S-4Zp">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="Emulated Model" id="MtH-V4-vUi">
+                                    <items>
+                                        <menuItem title="Pick Automatically" tag="6" id="GXg-yH-3dl">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="reset:" target="-1" id="ao2-FI-kk1"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="Nyl-zW-Uez"/>
+                                        <menuItem title="Game Boy" tag="1" id="g7C-LA-VAr">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="reset:" target="-1" id="rxG-cz-s1S"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Game Boy Pocket/Light" tag="5" id="1bM-CT-hoW">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="reset:" target="-1" id="U7l-BM-kB1"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Super Game Boy" tag="4" id="vc7-yy-ARW">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="reset:" target="-1" id="E4M-QG-ua9"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Game Boy Color" tag="2" id="hdG-Bl-8nJ">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="reset:" target="-1" id="xAz-cr-0u2"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Game Boy Advance" tag="3" id="7jw-B1-tf5">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="reset:" target="-1" id="xQk-4e-kd7"/>
+                                            </connections>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="QIS-av-Byy"/>
-                            <menuItem title="Save State" id="Hdz-ut-okE">
+                            <menuItem title="Save State" secondaryImage="square.and.arrow.down" catalog="system" id="Hdz-ut-okE">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Save State" id="Mxx-u1-M9D">
                                     <items>
@@ -248,7 +320,7 @@
                                     </items>
                                 </menu>
                             </menuItem>
-                            <menuItem title="Load State" id="EXD-SL-cz4">
+                            <menuItem title="Load State" secondaryImage="square.and.arrow.up" catalog="system" id="EXD-SL-cz4">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Load State" id="l9D-Ej-sh2">
                                     <items>
@@ -316,7 +388,7 @@
                                 </menu>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="5GS-tt-E0a"/>
-                            <menuItem title="Save Screenshot" keyEquivalent="s" id="0J3-yf-iXs">
+                            <menuItem title="Save Screenshot" secondaryImage="photo" catalog="system" keyEquivalent="s" id="0J3-yf-iXs">
                                 <connections>
                                     <action selector="saveScreenshot:" target="-1" id="gJd-ml-J8p"/>
                                 </connections>
@@ -332,35 +404,15 @@
                                     <action selector="copyScreenshot:" target="-1" id="XJC-EB-HNl"/>
                                 </connections>
                             </menuItem>
-                            <menuItem isSeparatorItem="YES" id="zk7-gf-LXN"/>
-                            <menuItem title="Game Boy" tag="1" id="g7C-LA-VAr">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="reset:" target="-1" id="rxG-cz-s1S"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Super Game Boy" tag="4" id="vc7-yy-ARW">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="reset:" target="-1" id="E4M-QG-ua9"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Game Boy Color" tag="2" id="hdG-Bl-8nJ">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="reset:" target="-1" id="xAz-cr-0u2"/>
-                                </connections>
-                            </menuItem>
-                            <menuItem title="Game Boy Advance" tag="3" id="7jw-B1-tf5">
-                                <modifierMask key="keyEquivalentModifierMask"/>
-                                <connections>
-                                    <action selector="reset:" target="-1" id="xQk-4e-kd7"/>
-                                </connections>
-                            </menuItem>
                             <menuItem isSeparatorItem="YES" id="DPb-Sh-5tg"/>
-                            <menuItem title="Mute Sound" keyEquivalent="m" id="1UK-8n-QPP">
+                            <menuItem title="Start Audio Recording…" secondaryImage="record.circle" catalog="system" keyEquivalent="A" id="1UK-8n-QPP">
                                 <connections>
-                                    <action selector="mute:" target="-1" id="YE5-mi-Yzd"/>
+                                    <action selector="toggleAudioRecording:" target="-1" id="YE5-mi-Yzd"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Mute Sound" secondaryImage="speaker.slash" catalog="system" keyEquivalent="m" id="zo0-Rh-wTu">
+                                <connections>
+                                    <action selector="mute:" target="-1" id="eK3-ea-ExJ"/>
                                 </connections>
                             </menuItem>
                         </items>
@@ -375,18 +427,24 @@
                                     <action selector="toggleCheats:" target="-1" id="gsw-UY-fhu"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Show Cheats" id="LZV-QK-YXi">
+                            <menuItem title="Show Cheats" id="Nf8-F1-YyD">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="showCheats:" target="-1" id="tfr-qM-q8X"/>
+                                    <action selector="showCheats:" target="-1" id="stn-Ei-aFE"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Search Cheats" secondaryImage="text.page.badge.magnifyingglass" catalog="system" id="LZV-QK-YXi">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="showCheatSearch:" target="-1" id="eI1-x0-ykn"/>
                                 </connections>
                             </menuItem>
                         </items>
                     </menu>
                 </menuItem>
-                <menuItem title="Connectivity" id="IcW-ZC-4wb">
+                <menuItem title="Connect" id="IcW-ZC-4wb">
                     <modifierMask key="keyEquivalentModifierMask"/>
-                    <menu key="submenu" title="Connectivity" id="BDM-Cv-BOm">
+                    <menu key="submenu" title="Connect" id="BDM-Cv-BOm">
                         <items>
                             <menuItem title="None" id="SiH-Q4-OBY">
                                 <modifierMask key="keyEquivalentModifierMask"/>
@@ -394,24 +452,24 @@
                                     <action selector="disconnectAllAccessories:" target="-1" id="5hY-9U-nRn"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Game Link Cable &amp; Infrared" id="V4S-Fo-xJK">
+                            <menuItem title="Game Link Cable &amp; Infrared" secondaryImage="cable.connector.horizontal" catalog="system" id="V4S-Fo-xJK">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="Game Link Cable &amp; Infrared" id="6sJ-Wz-QLj">
                                     <connections>
-                                        <outlet property="delegate" destination="Voe-Tx-rLC" id="PMY-5j-25T"/>
+                                        <outlet property="delegate" destination="-3" id="PMY-5j-25T"/>
                                     </connections>
                                 </menu>
                                 <connections>
-                                    <action selector="nop:" target="Voe-Tx-rLC" id="Bpa-0C-lkN"/>
+                                    <action selector="nop:" target="-3" id="Bpa-0C-lkN"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Game Boy Printer" id="zHR-Ha-pOR">
+                            <menuItem title="Game Boy Printer" secondaryImage="printer" catalog="system" id="zHR-Ha-pOR">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="connectPrinter:" target="-1" id="tl1-CL-tAw"/>
                                 </connections>
                             </menuItem>
-                            <menuItem title="Workboy" id="lo9-CX-BJj">
+                            <menuItem title="Workboy" secondaryImage="keyboard" catalog="system" id="lo9-CX-BJj">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="connectWorkboy:" target="-1" id="6vS-bq-wAX"/>
@@ -424,14 +482,14 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Develop" id="UVb-cc-at0">
                         <items>
-                            <menuItem title="Developer Mode" id="Qx6-Tt-zZR">
+                            <menuItem title="Developer Mode" secondaryImage="wrench.and.screwdriver" catalog="system" id="Qx6-Tt-zZR">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="toggleDeveloperMode:" target="Voe-Tx-rLC" id="PIc-o3-bzb"/>
+                                    <action selector="toggleDeveloperMode:" target="-3" id="PIc-o3-bzb"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="66c-T0-8pW"/>
-                            <menuItem title="Show Console" id="Wse-UY-Y9l">
+                            <menuItem title="Show Console" secondaryImage="apple.terminal" catalog="system" id="Wse-UY-Y9l">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
                                     <action selector="showConsoleWindow:" target="-1" id="mFf-4i-jLG"/>
@@ -443,13 +501,58 @@
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="3If-Yf-U7B"/>
-                            <menuItem title="Break Debugger" keyEquivalent="c" id="uBD-GY-Doi">
+                            <menuItem title="Break Debugger" secondaryImage="pause" catalog="system" keyEquivalent="c" id="uBD-GY-Doi">
                                 <modifierMask key="keyEquivalentModifierMask" control="YES"/>
                                 <connections>
                                     <action selector="interrupt:" target="-1" id="ZmB-wG-fTs"/>
                                 </connections>
                             </menuItem>
                             <menuItem isSeparatorItem="YES" id="M6n-8G-LZS"/>
+                            <menuItem title="Audio Channels" secondaryImage="speaker.wave.3" catalog="system" id="Cib-LN-Y4o">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <menu key="submenu" title="Audio Channels" id="l22-4p-yTK">
+                                    <items>
+                                        <menuItem title="Square Channel 1" state="on" keyEquivalent="1" id="dR3-oK-0N3">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                            <connections>
+                                                <action selector="toggleAudioChannel:" target="-1" id="khX-EA-oWL"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Square Channel 2" state="on" tag="1" keyEquivalent="2" id="59P-Mu-IkN">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                            <connections>
+                                                <action selector="toggleAudioChannel:" target="-1" id="20K-q3-2zV"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Wave Channel" state="on" tag="2" keyEquivalent="3" id="Jli-pT-ab1">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                            <connections>
+                                                <action selector="toggleAudioChannel:" target="-1" id="Vo0-s4-sNw"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Noise Channel" state="on" tag="3" keyEquivalent="4" id="RtM-HJ-88a">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES"/>
+                                            <connections>
+                                                <action selector="toggleAudioChannel:" target="-1" id="HHQ-eV-bX0"/>
+                                            </connections>
+                                        </menuItem>
+                                    </items>
+                                </menu>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="v5c-ri-BoZ"/>
+                            <menuItem title="Show Background and Window" state="on" secondaryImage="mountain.2" catalog="system" id="yfD-Qd-zoz">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="toggleDisplayBackground:" target="-1" id="p5b-1n-SPR"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Show Objects" state="on" secondaryImage="cube" catalog="system" id="OWx-a0-vQk">
+                                <modifierMask key="keyEquivalentModifierMask"/>
+                                <connections>
+                                    <action selector="toggleDisplayObjects:" target="-1" id="8ie-ey-739"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem isSeparatorItem="YES" id="afI-BR-65k"/>
                             <menuItem title="Show Memory" id="UIa-n7-LSa">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
@@ -474,6 +577,16 @@
                                     <action selector="performMiniaturize:" target="-1" id="VwT-WD-YPe"/>
                                 </connections>
                             </menuItem>
+                            <menuItem title="Increase Window Size" keyEquivalent="+" id="jh7-RG-JP7">
+                                <connections>
+                                    <action selector="increaseWindowSize:" target="-1" id="yXg-4S-0VI"/>
+                                </connections>
+                            </menuItem>
+                            <menuItem title="Decrease Window Size" keyEquivalent="-" id="wsI-Is-iNn">
+                                <connections>
+                                    <action selector="decreaseWindowSize:" target="-1" id="sFZ-b4-gIp"/>
+                                </connections>
+                            </menuItem>
                             <menuItem title="Zoom" id="R4o-n2-Eq4">
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
@@ -494,9 +607,10 @@
                     <modifierMask key="keyEquivalentModifierMask"/>
                     <menu key="submenu" title="Help" systemMenu="help" id="F2S-fz-NVQ">
                         <items>
-                            <menuItem title="SameBoy Help" keyEquivalent="?" id="FKE-Sm-Kum">
+                            <menuItem title="Debugger Help" id="FKE-Sm-Kum">
+                                <modifierMask key="keyEquivalentModifierMask"/>
                                 <connections>
-                                    <action selector="showHelp:" target="-1" id="y7X-2Q-9no"/>
+                                    <action selector="openDebuggerHelp:" target="-3" id="8tf-lJ-Tbk"/>
                                 </connections>
                             </menuItem>
                         </items>
@@ -506,4 +620,24 @@
             <point key="canvasLocation" x="140" y="260"/>
         </menu>
     </objects>
+    <resources>
+        <image name="apple.terminal" catalog="system" width="18" height="14"/>
+        <image name="arrow.down.left.arrow.up.right" catalog="system" width="18" height="17"/>
+        <image name="arrow.trianglehead.2.counterclockwise.rotate.90" catalog="system" width="16" height="15"/>
+        <image name="cable.connector.horizontal" catalog="system" width="19" height="7"/>
+        <image name="cube" catalog="system" width="16" height="17"/>
+        <image name="keyboard" catalog="system" width="19" height="13"/>
+        <image name="mountain.2" catalog="system" width="25" height="14"/>
+        <image name="pause" catalog="system" width="9" height="13"/>
+        <image name="photo" catalog="system" width="18" height="14"/>
+        <image name="plus.square.on.square" catalog="system" width="17" height="16"/>
+        <image name="printer" catalog="system" width="18" height="16"/>
+        <image name="record.circle" catalog="system" width="15" height="15"/>
+        <image name="speaker.slash" catalog="system" width="14" height="16"/>
+        <image name="speaker.wave.3" catalog="system" width="22" height="15"/>
+        <image name="square.and.arrow.down" catalog="system" width="15" height="17"/>
+        <image name="square.and.arrow.up" catalog="system" width="15" height="18"/>
+        <image name="text.page.badge.magnifyingglass" catalog="system" width="15" height="18"/>
+        <image name="wrench.and.screwdriver" catalog="system" width="19" height="18"/>
+    </resources>
 </document>

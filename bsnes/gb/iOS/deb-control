@@ -1,0 +1,10 @@
+Package: com.github.liji32.sameboy.ios
+Name: SameBoy
+Depends: firmware (>= 11.0)
+Architecture: all
+Description: A Game Boy emulator for iOS
+Maintainer: Lior Halphon
+Author: Lior Halphon
+Section: Games
+Icon: file:///Applications/SameBoy-iOS.app/AppIcon60x60@2x.png
+Version: @VERSION

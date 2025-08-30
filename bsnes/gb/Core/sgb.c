@@ -2,6 +2,7 @@
 #include "random.h"
 #include <math.h>
 #include <assert.h>
+#include <string.h>
 
 #ifndef M_PI
   #define M_PI 3.14159265358979323846
@@ -165,10 +166,10 @@ static void command_ready(GB_gameboy_t *gb)
             return;
         }
         memcpy(&gb->sgb->received_header[index * 14], &gb->sgb->command[2], 14);
-        if (gb->sgb->command[0] == 0xfb) {
+        if (gb->sgb->command[0] == 0xFB) {
             if (gb->sgb->received_header[0x42] != 3 || gb->sgb->received_header[0x47] != 0x33) {
                 gb->sgb->disable_commands = true;
-                for (unsigned i = 0; i < sizeof(palette_assignments) / sizeof(palette_assignments[0]); i++) {
+                nounroll for (unsigned i = 0; i < sizeof(palette_assignments) / sizeof(palette_assignments[0]); i++) {
                     if (memcmp(palette_assignments[i].name, &gb->sgb->received_header[0x30], sizeof(palette_assignments[i].name)) == 0) {
                         gb->sgb->effective_palettes[0] = LE16(built_in_palettes[palette_assignments[i].palette_index * 4 - 4]);
                         gb->sgb->effective_palettes[1] = LE16(built_in_palettes[palette_assignments[i].palette_index * 4 + 1 - 4]);
@@ -262,9 +263,7 @@ static void command_ready(GB_gameboy_t *gb)
             } *command = (void *)(gb->sgb->command + 1);
             
             uint16_t count = command->length;
-#ifdef GB_BIG_ENDIAN
-            count = __builtin_bswap16(count);
-#endif
+            count = LE16(count);
             uint8_t x = command->x;
             uint8_t y = command->y;
             if (x >= 20 || y >= 18) {
@@ -641,9 +640,9 @@ void GB_sgb_render(GB_gameboy_t *gb)
                     for (unsigned x = 0; x < 8; x++) {
                         *data |= pixel_to_bits[gb->sgb->screen_buffer[(tile_x + x) + (tile_y + y) * 160] & 3] >> x;
                     }
-#ifdef GB_BIG_ENDIAN
-                    *data = __builtin_bswap16(*data);
-#endif
+                    if (gb->sgb->transfer_dest == TRANSFER_PALETTES || gb->sgb->transfer_dest == TRANSFER_BORDER_DATA) {
+                        *data = LE16(*data);
+                    }
                     data++;
                 }
             }
@@ -832,19 +831,46 @@ void GB_sgb_load_default_data(GB_gameboy_t *gb)
     gb->sgb->effective_palettes[3] = LE16(built_in_palettes[3]);
 }
 
+static double fm_sin(double phase)
+{
+#define SIN_TABLE_LENGTH 128
+    phase /= 2 * M_PI;
+    phase = fabs(phase);
+    phase -= floor(phase);
+    if (phase > 0.5) {
+        return -(fm_sin(1 - phase));
+    }
+    if (phase > 0.25) {
+        return fm_sin(0.5 - phase);
+    }
+    
+    static bool once = false;
+    static double table[SIN_TABLE_LENGTH + 1];
+    if (!once) {
+        for (unsigned i = 0; i < SIN_TABLE_LENGTH + 1; i++) {
+            table[i] = sin(i * M_PI / 2 / SIN_TABLE_LENGTH);
+        }
+        once = true;
+    }
+    
+    phase *= 4 * SIN_TABLE_LENGTH;
+    double fraction = phase - floor(phase);
+    return table[(unsigned)floor(phase)] * (1 - fraction) + table[(unsigned)ceil(phase)] * (fraction);
+}
+
 static double fm_synth(double phase)
 {
-    return (sin(phase * M_PI * 2) +
-           sin(phase * M_PI * 2 + sin(phase * M_PI * 2)) +
-           sin(phase * M_PI * 2 + sin(phase * M_PI * 3)) +
-           sin(phase * M_PI * 2 + sin(phase * M_PI * 4))) / 4;
+    return (fm_sin(phase * M_PI * 2) +
+            fm_sin(phase * M_PI * 2 + fm_sin(phase * M_PI * 2)) +
+            fm_sin(phase * M_PI * 2 + fm_sin(phase * M_PI * 3)) +
+            fm_sin(phase * M_PI * 2 + fm_sin(phase * M_PI * 4))) / 4;
 }
 
 static double fm_sweep(double phase)
 {
     double ret = 0;
     for (unsigned i = 0; i < 8; i++) {
-        ret += sin((phase * M_PI * 2 + sin(phase * M_PI * 8) / 4) * pow(1.25, i)) * (8 - i) / 36;
+        ret += fm_sin((phase * M_PI * 2 + fm_sin(phase * M_PI * 8) / 4) * pow(1.25, i)) * (8 - i) / 36;
     }
     return ret;
 }
@@ -883,14 +909,29 @@ static void render_jingle(GB_gameboy_t *gb, size_t count)
     if (sweep_cutoff_ratio > 1) {
         sweep_cutoff_ratio = 1;
     }
+
+    // Render at a lower resolution if our sample rate is too high
+    uint8_t downsample_mask = 0;
+    size_t temp_count = count;
+    while (temp_count > 2048) {
+        temp_count /= 2;
+        downsample_mask <<= 1;
+        downsample_mask |= 1;
+        sweep_phase_shift *= 2;
+        sweep_cutoff_ratio *= 2;
+    }
     
-    GB_sample_t stereo;
+    GB_sample_t stereo = {0, 0};
     for (unsigned i = 0; i < count; i++) {
+        if ((i & downsample_mask)) {
+            gb->apu_output.sample_callback(gb, &stereo);
+            continue;
+        }
         double sample = 0;
         for (signed f = 0; f < 7 && f < jingle_stage; f++) {
             sample += fm_synth(gb->sgb_intro_jingle_phases[f]) *
                       (0.75 * pow(0.5, jingle_stage - f) + 0.25) / 5.0;
-            gb->sgb_intro_jingle_phases[f] += frequencies[f] / gb->apu_output.sample_rate;
+            gb->sgb_intro_jingle_phases[f] += (frequencies[f] / gb->apu_output.sample_rate) * (downsample_mask + 1);
         }
         if (gb->sgb->intro_animation > 100) {
             sample *= pow((GB_SGB_INTRO_ANIMATION_LENGTH - gb->sgb->intro_animation) / (GB_SGB_INTRO_ANIMATION_LENGTH - 100.0), 3);
@@ -912,3 +953,7 @@ static void render_jingle(GB_gameboy_t *gb, size_t count)
     return;
 }
 
+unsigned GB_get_player_count(GB_gameboy_t *gb)
+{
+    return GB_is_hle_sgb(gb)? gb->sgb->player_count : 1;
+}

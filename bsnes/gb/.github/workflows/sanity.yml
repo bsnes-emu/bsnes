@@ -1,36 +1,44 @@
 name: "Bulidability and Sanity"
-on: push
+on:
+  push:
+    branches:
+      - master
+      - '*'
+      - '!libretro'
 
 jobs:
   sanity:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest, ubuntu-18.04]
+        os: [macos-latest, ubuntu-latest, ubuntu-22.04]
         cc: [gcc, clang]
         include:
         - os: macos-latest
           cc: clang
-          extra_target: cocoa
+          extra_targets: cocoa ios-ipa ios-deb
         exclude:
         - os: macos-latest
           cc: gcc
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install deps
         shell: bash
         run: |
           ./.github/actions/install_deps.sh ${{ matrix.os }}
       - name: Build
         run: |
-          ${{ matrix.cc }} -v; (make -j sdl tester libretro ${{ matrix.extra_target }} CONF=release CC=${{ matrix.cc }} || (echo "==== Build Failed ==="; make sdl tester libretro ${{ matrix.extra_target }} CONF=release CC=${{ matrix.cc }}))
+          ${{ matrix.cc }} -v; (make -j all CONF=release CC=${{ matrix.cc }} || (echo "==== Build Failed ==="; make all CONF=release CC=${{ matrix.cc }}))
       - name: Sanity tests
         shell: bash
         run: |
           ./.github/actions/sanity_tests.sh
       - name: Upload binaries
-        uses: actions/upload-artifact@v1
+        uses: actions/upload-artifact@v4
         with:
           name: sameboy-canary-${{ matrix.os }}-${{ matrix.cc }}
-          path: build/bin
+          path: |
+            build/bin
+            build/lib
+            build/include

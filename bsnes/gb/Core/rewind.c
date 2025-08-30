@@ -3,6 +3,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <math.h>
+#include <assert.h>
+#include <string.h>
 
 static uint8_t *state_compress(const uint8_t *prev, const uint8_t *data, size_t uncompressed_size)
 {
@@ -17,7 +19,7 @@ static uint8_t *state_compress(const uint8_t *prev, const uint8_t *data, size_t 
     
     while (uncompressed_size) {
         if (prev_mode) {
-            if (*data == *prev && COUNTER != 0xffff) {
+            if (*data == *prev && COUNTER != 0xFFFF) {
                 COUNTER++;
                 data++;
                 prev++;
@@ -35,7 +37,7 @@ static uint8_t *state_compress(const uint8_t *prev, const uint8_t *data, size_t 
             }
         }
         else {
-            if (*data != *prev && COUNTER != 0xffff) {
+            if (*data != *prev && COUNTER != 0xFFFF) {
                 COUNTER++;
                 DATA = *data;
                 data_pos++;
@@ -109,6 +111,10 @@ static void state_decompress(const uint8_t *prev, uint8_t *data, uint8_t *dest, 
 void GB_rewind_push(GB_gameboy_t *gb)
 {
     const size_t save_size = GB_get_save_state_size_no_bess(gb);
+    if (gb->rewind_state_size != save_size) {
+        GB_rewind_reset(gb);
+        gb->rewind_state_size = save_size;
+    }
     if (!gb->rewind_sequences) {
         if (gb->rewind_buffer_length) {
             gb->rewind_sequences = malloc(sizeof(*gb->rewind_sequences) * gb->rewind_buffer_length);
@@ -132,7 +138,7 @@ void GB_rewind_push(GB_gameboy_t *gb)
         for (unsigned i = 0; i < GB_REWIND_FRAMES_PER_KEY; i++) {
             if (gb->rewind_sequences[gb->rewind_pos].compressed_states[i]) {
                 free(gb->rewind_sequences[gb->rewind_pos].compressed_states[i]);
-                gb->rewind_sequences[gb->rewind_pos].compressed_states[i] = 0;
+                gb->rewind_sequences[gb->rewind_pos].compressed_states[i] = NULL;
             }
         }
         gb->rewind_sequences[gb->rewind_pos].pos = 0;
@@ -140,13 +146,16 @@ void GB_rewind_push(GB_gameboy_t *gb)
     
     if (!gb->rewind_sequences[gb->rewind_pos].key_state) {
         gb->rewind_sequences[gb->rewind_pos].key_state = malloc(save_size);
+        gb->rewind_sequences[gb->rewind_pos].instruction_count[0] = 0;
         GB_save_state_to_buffer_no_bess(gb, gb->rewind_sequences[gb->rewind_pos].key_state);
     }
     else {
         uint8_t *save_state = malloc(save_size);
+        assert(gb->rewind_sequences[gb->rewind_pos].key_state);
         GB_save_state_to_buffer_no_bess(gb, save_state);
         gb->rewind_sequences[gb->rewind_pos].compressed_states[gb->rewind_sequences[gb->rewind_pos].pos++] =
             state_compress(gb->rewind_sequences[gb->rewind_pos].key_state, save_state, save_size);
+        gb->rewind_sequences[gb->rewind_pos].instruction_count[gb->rewind_sequences[gb->rewind_pos].pos] = 0;
         free(save_state);
     }
     
@@ -154,13 +163,17 @@ void GB_rewind_push(GB_gameboy_t *gb)
 
 bool GB_rewind_pop(GB_gameboy_t *gb)
 {
+    GB_ASSERT_NOT_RUNNING(gb)
+    
     if (!gb->rewind_sequences || !gb->rewind_sequences[gb->rewind_pos].key_state) {
         return false;
     }
     
     const size_t save_size = GB_get_save_state_size_no_bess(gb);
     if (gb->rewind_sequences[gb->rewind_pos].pos == 0) {
+        gb->rewind_disable_invalidation = true;
         GB_load_state_from_buffer(gb, gb->rewind_sequences[gb->rewind_pos].key_state, save_size);
+        gb->rewind_disable_invalidation = false;
         free(gb->rewind_sequences[gb->rewind_pos].key_state);
         gb->rewind_sequences[gb->rewind_pos].key_state = NULL;
         gb->rewind_pos = gb->rewind_pos == 0? gb->rewind_buffer_length - 1 : gb->rewind_pos - 1;
@@ -174,13 +187,17 @@ bool GB_rewind_pop(GB_gameboy_t *gb)
                      save_size);
     free(gb->rewind_sequences[gb->rewind_pos].compressed_states[gb->rewind_sequences[gb->rewind_pos].pos]);
     gb->rewind_sequences[gb->rewind_pos].compressed_states[gb->rewind_sequences[gb->rewind_pos].pos] = NULL;
+    gb->rewind_disable_invalidation = true;
     GB_load_state_from_buffer(gb, save_state, save_size);
+    gb->rewind_disable_invalidation = false;
     free(save_state);
     return true;
 }
 
-void GB_rewind_free(GB_gameboy_t *gb)
+void GB_rewind_reset(GB_gameboy_t *gb)
 {
+    GB_ASSERT_NOT_RUNNING_OTHER_THREAD(gb)
+    
     if (!gb->rewind_sequences) return;
     for (unsigned i = 0; i < gb->rewind_buffer_length; i++) {
         if (gb->rewind_sequences[i].key_state) {
@@ -198,11 +215,20 @@ void GB_rewind_free(GB_gameboy_t *gb)
 
 void GB_set_rewind_length(GB_gameboy_t *gb, double seconds)
 {
-    GB_rewind_free(gb);
+    GB_rewind_reset(gb);
     if (seconds == 0) {
         gb->rewind_buffer_length = 0;
     }
     else {
         gb->rewind_buffer_length = (size_t) ceil(seconds * CPU_FREQUENCY / LCDC_PERIOD / GB_REWIND_FRAMES_PER_KEY);
+    }
+}
+
+void GB_rewind_invalidate_for_backstepping(GB_gameboy_t *gb)
+{
+    if (gb->rewind_disable_invalidation) return;
+    if (gb->rewind_sequences && gb->rewind_sequences[gb->rewind_pos].key_state) {
+        typeof(gb->rewind_sequences[0]) *sequence = &gb->rewind_sequences[gb->rewind_pos];
+        sequence->instruction_count[sequence->pos] |= 0x80000000;
     }
 }

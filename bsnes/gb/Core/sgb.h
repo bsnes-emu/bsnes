@@ -1,15 +1,13 @@
-#ifndef sgb_h
-#define sgb_h
-#include "gb_struct_def.h"
+#pragma once
+
+#include "defs.h"
 #include <stdint.h>
 #include <stdbool.h>
 
 typedef struct GB_sgb_s GB_sgb_t;
 typedef struct {
-    union {
-        uint8_t tiles[0x100 * 8 * 4];
-        uint8_t tiles_legacy[0x100 * 8 * 8]; /* High nibble not used; TODO: Remove when breaking save-state compatibility! */
-    };
+    uint8_t tiles[0x100 * 8 * 4];
+#ifdef GB_INTERNAL
     union {
         struct {
             uint16_t map[32 * 32];
@@ -17,6 +15,9 @@ typedef struct {
         };
         uint16_t raw_data[0x440];
     };
+#else
+    uint16_t raw_data[0x440];
+#endif
 } GB_sgb_border_t;
 
 #ifdef GB_INTERNAL
@@ -59,17 +60,11 @@ struct GB_sgb_s {
     
     /* GB Header */
     uint8_t received_header[0x54];
-    
-    /* Multiplayer (cont) */
-    GB_PADDING(bool, mlt_lock);
-    
-    bool v14_3; // True on save states created on 0.14.3 or newer; Remove when breaking save state compatibility!
 };
 
-void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
-void GB_sgb_render(GB_gameboy_t *gb);
-void GB_sgb_load_default_data(GB_gameboy_t *gb);
+internal void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
+internal void GB_sgb_render(GB_gameboy_t *gb);
+internal void GB_sgb_load_default_data(GB_gameboy_t *gb);
 
 #endif
-
-#endif
+unsigned GB_get_player_count(GB_gameboy_t *gb);

@@ -9,7 +9,6 @@ SOURCES_C   := $(CORE_DIR)/Core/gb.c \
                $(CORE_DIR)/Core/mbc.c \
                $(CORE_DIR)/Core/timing.c \
                $(CORE_DIR)/Core/display.c \
-               $(CORE_DIR)/Core/symbol_hash.c \
                $(CORE_DIR)/Core/camera.c \
                $(CORE_DIR)/Core/sm83_cpu.c \
                $(CORE_DIR)/Core/joypad.c \
@@ -18,6 +17,8 @@ SOURCES_C   := $(CORE_DIR)/Core/gb.c \
                $(CORE_DIR)/Core/rumble.c \
                $(CORE_DIR)/libretro/agb_boot.c \
                $(CORE_DIR)/libretro/cgb_boot.c \
+               $(CORE_DIR)/libretro/cgb0_boot.c \
+               $(CORE_DIR)/libretro/mgb_boot.c \
                $(CORE_DIR)/libretro/dmg_boot.c \
                $(CORE_DIR)/libretro/sgb_boot.c \
                $(CORE_DIR)/libretro/sgb2_boot.c \

@@ -19,6 +19,12 @@
     return [super dividerColor];
 }
 
+- (void)drawDividerInRect:(NSRect)rect
+{
+    [self.dividerColor set];
+    NSRectFill(rect);
+}
+
 /* Mavericks comaptibility */
 - (NSArray<NSView *> *)arrangedSubviews
 {

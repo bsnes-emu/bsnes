@@ -163,7 +163,7 @@ void main(void) {\n\
 
     /* OpenGL is black magic. Closing one view causes others to be completely black unless we reload their shaders */
     /* We're probably not freeing thing in the right place. */
-    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBFilterChanged" object:nil];
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"GBFilterChanged$DefaultsObserver" object:nil];
 }
 
 + (GLuint)shaderWithContents:(NSString*)contents type:(GLenum)type
