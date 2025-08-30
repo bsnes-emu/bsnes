@@ -102,11 +102,7 @@ auto pTableViewColumn::_parent() -> maybe<pTableView&> {
 auto pTableViewColumn::_setState() -> void {
   if(auto parent = _parent()) {
     auto lock = parent->acquire();
-    #if HIRO_QT==4
-    parent->qtTableView->header()->setResizeMode(self().offset(), state().resizable ? QHeaderView::Interactive : QHeaderView::Fixed);
-    #elif HIRO_QT==5
     parent->qtTableView->header()->setSectionResizeMode(self().offset(), state().resizable ? QHeaderView::Interactive : QHeaderView::Fixed);
-    #endif
     parent->qtTableView->setColumnHidden(self().offset(), !self().visible());
 
     for(auto& item : parent->state().items) {
