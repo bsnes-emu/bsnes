@@ -43,7 +43,7 @@ auto pLabel::setText(const string& text) -> void {
 auto QtLabel::mousePressEvent(QMouseEvent* event) -> void {
   switch(event->button()) {
   case Qt::LeftButton: p.self().doMousePress(Mouse::Button::Left); break;
-  case Qt::MidButton: p.self().doMousePress(Mouse::Button::Middle); break;
+  case Qt::MiddleButton: p.self().doMousePress(Mouse::Button::Middle); break;
   case Qt::RightButton: p.self().doMousePress(Mouse::Button::Right); break;
   }
 }
@@ -51,7 +51,7 @@ auto QtLabel::mousePressEvent(QMouseEvent* event) -> void {
 auto QtLabel::mouseReleaseEvent(QMouseEvent* event) -> void {
   switch(event->button()) {
   case Qt::LeftButton: p.self().doMouseRelease(Mouse::Button::Left); break;
-  case Qt::MidButton: p.self().doMouseRelease(Mouse::Button::Middle); break;
+  case Qt::MiddleButton: p.self().doMouseRelease(Mouse::Button::Middle); break;
   case Qt::RightButton: p.self().doMouseRelease(Mouse::Button::Right); break;
   }
 }
