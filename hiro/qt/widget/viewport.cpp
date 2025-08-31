@@ -54,7 +54,7 @@ auto QtViewport::mouseMoveEvent(QMouseEvent* event) -> void {
 auto QtViewport::mousePressEvent(QMouseEvent* event) -> void {
   switch(event->button()) {
   case Qt::LeftButton: p.self().doMousePress(Mouse::Button::Left); break;
-  case Qt::MidButton: p.self().doMousePress(Mouse::Button::Middle); break;
+  case Qt::MiddleButton: p.self().doMousePress(Mouse::Button::Middle); break;
   case Qt::RightButton: p.self().doMousePress(Mouse::Button::Right); break;
   }
 }
@@ -62,7 +62,7 @@ auto QtViewport::mousePressEvent(QMouseEvent* event) -> void {
 auto QtViewport::mouseReleaseEvent(QMouseEvent* event) -> void {
   switch(event->button()) {
   case Qt::LeftButton: p.self().doMouseRelease(Mouse::Button::Left); break;
-  case Qt::MidButton: p.self().doMouseRelease(Mouse::Button::Middle); break;
+  case Qt::MiddleButton: p.self().doMouseRelease(Mouse::Button::Middle); break;
   case Qt::RightButton: p.self().doMouseRelease(Mouse::Button::Right); break;
   }
 }
