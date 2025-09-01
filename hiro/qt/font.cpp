@@ -11,7 +11,7 @@ auto pFont::size(const QFont& qtFont, const string& text) -> Size {
   signed maxWidth = 0;
   auto lines = text.split("\n");
   for(auto& line : lines) {
-    maxWidth = max(maxWidth, metrics.horizontalAdvance(QString::fromUtf8(line)));
+    maxWidth = max(maxWidth, metrics.boundingRect(QString::fromUtf8(line)).width());
   }
   return {maxWidth, metrics.height() * (signed)lines.size()};
 }
