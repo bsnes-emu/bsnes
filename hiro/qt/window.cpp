@@ -101,10 +101,10 @@ auto pWindow::remove(sStatusBar statusBar) -> void {
 }
 
 auto pWindow::setBackgroundColor(Color color) -> void {
-  static auto defaultColor = qtContainer->palette().color(QPalette::Background);
+  static auto defaultColor = qtContainer->palette().color(QPalette::Window);
 
   auto palette = qtContainer->palette();
-  palette.setColor(QPalette::Background, CreateColor(color, defaultColor));
+  palette.setColor(QPalette::Window, CreateColor(color, defaultColor));
   qtContainer->setPalette(palette);
   qtContainer->setAutoFillBackground((bool)color);
   //translucency results are very unpleasant without a compositor; so disable for now
