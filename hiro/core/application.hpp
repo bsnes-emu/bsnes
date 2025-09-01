@@ -13,7 +13,6 @@ struct Application {
   static auto run() -> void;
   static auto scale() -> float;
   static auto scale(float value) -> float;
-  static auto pendingEvents() -> bool;
   static auto processEvents() -> void;
   static auto quit() -> void;
   static auto screenSaver() -> bool;

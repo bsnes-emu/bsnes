@@ -38,10 +38,6 @@ auto Application::run() -> void {
   return pApplication::run();
 }
 
-auto Application::pendingEvents() -> bool {
-  return pApplication::pendingEvents();
-}
-
 auto Application::processEvents() -> void {
   return pApplication::processEvents();
 }
