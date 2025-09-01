@@ -1,5 +1,12 @@
+#if defined(COMPILER_CLANG)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Winconsistent-missing-override"
+#endif
 #include "qt.hpp"
 #include "qt.moc"
+#if defined(COMPILER_CLANG)
+#pragma clang diagnostic pop
+#endif
 #include "platform.hpp"
 
 #include "utility.cpp"
