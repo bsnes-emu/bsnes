@@ -90,6 +90,7 @@ auto pApplication::initialize() -> void {
   #endif
 
   #if defined(DISPLAY_XORG)
+  XInitThreads();
   state().display = XOpenDisplay(nullptr);
   state().screenSaverXDG = (bool)execute("xdg-screensaver", "--version").output.find("xdg-screensaver");
 
@@ -105,7 +106,7 @@ auto pApplication::initialize() -> void {
       InputOutput, DefaultVisual(state().display, screen),
       CWBackPixel | CWBorderPixel | CWOverrideRedirect, &attributes
     );
-    XStoreName(state().display, state().screenSaverWindow, "hiro screensaver-prevention window");
+    XStoreName(state().display, state().screenSaverWindow, "hiro-screen-saver-window");
     XFlush(state().display);
   }
   #endif
@@ -118,6 +119,11 @@ auto pApplication::initialize() -> void {
   static char* argv[] = {name.get(), nullptr};
   static char** argvp = argv;
   qtApplication = new QApplication(argc, argvp);
+
+  // Creating the QApplication causes Qt to set the locale from the environment.
+  // Set the locale for LC_NUMERIC back to "C". It is expected to be "C" for
+  // the purpose of various string formatting and parsing operations.
+  setlocale(LC_NUMERIC, "C");
 
   pKeyboard::initialize();
 }
