@@ -34,16 +34,12 @@ auto pApplication::run() -> void {
   }
 }
 
-auto pApplication::pendingEvents() -> bool {
-  return gtk_events_pending();
-}
-
 auto pApplication::processEvents() -> void {
   //GTK can sometimes return gtk_pending_events() == true forever,
   //no matter how many times gtk_main_iteration_do() is called.
   //implement a timeout to prevent hiro from hanging forever in this case.
   auto time = chrono::millisecond();
-  while(pendingEvents() && chrono::millisecond() - time < 50) {
+  while(gtk_events_pending() && chrono::millisecond() - time < 50) {
     gtk_main_iteration_do(false);
   }
   for(auto& window : state().windows) window->_synchronizeGeometry();
