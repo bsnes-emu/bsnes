@@ -22,12 +22,12 @@ auto pApplication::run() -> void {
   }
 }
 
-auto pApplication::pendingEvents() -> bool {
-  return QApplication::hasPendingEvents();
-}
-
 auto pApplication::processEvents() -> void {
-  while(pendingEvents()) QApplication::processEvents();
+  //qt6 has no means to spin the event loop indefinitely
+  //this is likely to prevent bugs where events produced during the loop spin forever
+  //lets match hiro gtk and spin for a max of 50ms
+  //note that this overload of processEvents *will* spin, but it does exit if the queue is empty
+  QApplication::processEvents(QEventLoop::AllEvents, 50);
 }
 
 auto pApplication::quit() -> void {
