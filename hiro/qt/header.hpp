@@ -3,6 +3,7 @@
 #include <QtWidgets>
 #undef foreach
 
+#if defined(DISPLAY_XORG)
 #include <nall/xorg/guard.hpp>
 #define XK_MISCELLANY
 #define XK_LATIN1
@@ -11,3 +12,4 @@
 #undef XK_MISCELLANY
 #undef XK_LATIN1
 #include <nall/xorg/guard.hpp>
+#endif

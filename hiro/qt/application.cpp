@@ -34,6 +34,7 @@ auto pApplication::quit() -> void {
   QApplication::quit();
   qtApplication = nullptr;  //note: deleting QApplication will crash libQtGui
 
+  #if defined(DISPLAY_XORG)
   if(state().display) {
     if(state().screenSaverXDG && state().screenSaverWindow) {
       //this needs to run synchronously, so that XUnmapWindow() won't happen before xdg-screensaver is finished
@@ -44,6 +45,7 @@ auto pApplication::quit() -> void {
     XCloseDisplay(state().display);
     state().display = nullptr;
   }
+  #endif
 }
 
 auto pApplication::setScreenSaver(bool screenSaver) -> void {
