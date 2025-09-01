@@ -21,7 +21,7 @@ auto pButton::destruct() -> void {
 }
 
 auto pButton::minimumSize() const -> Size {
-  auto size = pFont::size(qtWidget->font(), state().text ? state().text : " ");
+  auto size = pFont::size(qtWidget->font(), state().text ? state().text : " "_s);
 
   if(state().orientation == Orientation::Horizontal) {
     size.setWidth(size.width() + state().icon.width());
