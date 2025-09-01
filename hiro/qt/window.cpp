@@ -85,7 +85,7 @@ auto pWindow::handle() const -> uintptr_t {
 auto pWindow::monitor() const -> uint {
   auto screen = qtWindow->window()->windowHandle()->screen();
   if(screen == nullptr) return Monitor::primary();
-  return QApplication::screens().indexOf(screen);
+  return max(QApplication::screens().indexOf(screen), 0);
 }
 
 auto pWindow::remove(sMenuBar menuBar) -> void {
