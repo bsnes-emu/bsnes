@@ -11,7 +11,7 @@ auto pHexEdit::construct() -> void {
 
   qtLayout = new QHBoxLayout;
   qtLayout->setAlignment(Qt::AlignRight);
-  qtLayout->setMargin(0);
+  qtLayout->setContentsMargins(0, 0, 0, 0);
   qtLayout->setSpacing(0);
   qtHexEdit->setLayout(qtLayout);
 

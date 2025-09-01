@@ -18,7 +18,7 @@ auto pWindow::construct() -> void {
   }
 
   qtLayout = new QVBoxLayout(qtWindow);
-  qtLayout->setMargin(0);
+  qtLayout->setContentsMargins(0, 0, 0, 0);
   qtLayout->setSpacing(0);
   qtWindow->setLayout(qtLayout);
 
