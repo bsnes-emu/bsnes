@@ -186,11 +186,7 @@ auto pTabFrame::_append() -> void {
   lock();
   Tab tab;
   tab.child = gtk_fixed_new();
-  #if HIRO_GTK==2
-  tab.container = gtk_hbox_new(false, 0);
-  #elif HIRO_GTK==3
   tab.container = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-  #endif
   tab.image = gtk_image_new();
   tab.title = gtk_label_new("");
   gtk_misc_set_alignment(GTK_MISC(tab.title), 0.0, 0.5);

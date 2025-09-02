@@ -8,11 +8,6 @@ ifeq ($(platform),windows)
     hiro.options = -lkernel32 -luser32 -lgdi32 -ladvapi32 -lole32 -lcomctl32 -lcomdlg32 -luxtheme -lmsimg32 -lshlwapi -ldwmapi
   endif
 
-  ifeq ($(hiro),gtk2)
-    hiro.flags   = $(flags.cpp) -DHIRO_GTK=2 $(shell pkg-config --cflags gtk+-2.0) -Wno-deprecated-declarations
-    hiro.options = $(shell pkg-config --libs gtk+-2.0)
-  endif
-
   ifeq ($(hiro),gtk3)
     hiro.flags   = $(flags.cpp) -DHIRO_GTK=3 $(shell pkg-config --cflags gtk+-3.0) -Wno-deprecated-declarations
     hiro.options = $(shell pkg-config --libs gtk+-3.0)
@@ -33,17 +28,6 @@ endif
 ifneq ($(filter $(platform),linux bsd),)
   ifeq ($(hiro),)
     hiro := gtk3
-  endif
-
-  ifeq ($(hiro),gtk2)
-    hiro.flags   = $(flags.cpp) -DHIRO_GTK=2 $(shell pkg-config --cflags gtk+-2.0) -Wno-deprecated-declarations
-    hiro.options = -L/usr/local/lib -lX11 $(shell pkg-config --libs gtk+-2.0)
-  endif
-
-  ifeq ($(hiro),gtk2-se)
-    flags       += -DHiro_SourceEdit
-    hiro.flags   = $(flags.cpp) -DHIRO_GTK=2 $(shell pkg-config --cflags gtk+-2.0 gtksourceview-2.0) -Wno-deprecated-declarations
-    hiro.options = -L/usr/local/lib -lX11 $(shell pkg-config --libs gtk+-2.0 gtksourceview-2.0)
   endif
 
   ifeq ($(hiro),gtk3)

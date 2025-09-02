@@ -31,12 +31,10 @@ static auto Window_draw(GtkWidget* widget, cairo_t* context, pWindow* p) -> sign
     cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
     cairo_paint(context);
   } else {
-    #if HIRO_GTK==3
     auto style = gtk_widget_get_style_context(widget);
     GtkAllocation allocation;
     gtk_widget_get_allocation(widget, &allocation);
     gtk_render_background(style, context, 0, 0, allocation.width, allocation.height);
-    #endif
   }
 
   return false;
@@ -148,11 +146,7 @@ auto pWindow::construct() -> void {
   gtk_widget_set_app_paintable(widget, true);
   gtk_widget_add_events(widget, GDK_CONFIGURE);
 
-  #if HIRO_GTK==2
-  menuContainer = gtk_vbox_new(false, 0);
-  #elif HIRO_GTK==3
   menuContainer = gtk_box_new(GTK_ORIENTATION_VERTICAL, 0);
-  #endif
   gtk_container_add(GTK_CONTAINER(widget), menuContainer);
   gtk_widget_show(menuContainer);
 
@@ -165,11 +159,7 @@ auto pWindow::construct() -> void {
 
   statusContainer = gtk_event_box_new();
   gtkStatus = gtk_statusbar_new();
-  #if HIRO_GTK==2
-  gtk_statusbar_set_has_resize_grip(GTK_STATUSBAR(gtkStatus), true);
-  #elif HIRO_GTK==3
   gtk_window_set_has_resize_grip(GTK_WINDOW(widget), true);
-  #endif
   gtk_container_add(GTK_CONTAINER(statusContainer), gtkStatus);
   gtk_box_pack_start(GTK_BOX(menuContainer), statusContainer, false, false, 0);
   gtk_widget_show(statusContainer);
@@ -183,24 +173,16 @@ auto pWindow::construct() -> void {
   setTitle(state().title);
 
   g_signal_connect(G_OBJECT(widget), "delete-event", G_CALLBACK(Window_close), (gpointer)this);
-  #if HIRO_GTK==2
-  g_signal_connect(G_OBJECT(widget), "expose-event", G_CALLBACK(Window_expose), (gpointer)this);
-  #elif HIRO_GTK==3
   g_signal_connect(G_OBJECT(widget), "draw", G_CALLBACK(Window_draw), (gpointer)this);
-  #endif
   g_signal_connect(G_OBJECT(widget), "configure-event", G_CALLBACK(Window_configure), (gpointer)this);
   g_signal_connect(G_OBJECT(widget), "drag-data-received", G_CALLBACK(Window_drop), (gpointer)this);
   g_signal_connect(G_OBJECT(widget), "key-press-event", G_CALLBACK(Window_keyPress), (gpointer)this);
   g_signal_connect(G_OBJECT(widget), "key-release-event", G_CALLBACK(Window_keyRelease), (gpointer)this);
   g_signal_connect(G_OBJECT(widget), "realize", G_CALLBACK(Window_realize), (gpointer)this);
   g_signal_connect(G_OBJECT(formContainer), "size-allocate", G_CALLBACK(Window_sizeAllocate), (gpointer)this);
-  #if HIRO_GTK==2
-  g_signal_connect(G_OBJECT(formContainer), "size-request", G_CALLBACK(Window_sizeRequest), (gpointer)this);
-  #elif HIRO_GTK==3
   auto widgetClass = GTK_WIDGET_GET_CLASS(formContainer);
   widgetClass->get_preferred_width  = Window_getPreferredWidth;
   widgetClass->get_preferred_height = Window_getPreferredHeight;
-  #endif
   g_signal_connect(G_OBJECT(widget), "unrealize", G_CALLBACK(Window_unrealize), (gpointer)this);
   g_signal_connect(G_OBJECT(widget), "window-state-event", G_CALLBACK(Window_stateEvent), (gpointer)this);
 
@@ -404,13 +386,9 @@ auto pWindow::setModal(bool modal) -> void {
 
 auto pWindow::setResizable(bool resizable) -> void {
   gtk_window_set_resizable(GTK_WINDOW(widget), resizable);
-  #if HIRO_GTK==2
-  gtk_statusbar_set_has_resize_grip(GTK_STATUSBAR(gtkStatus), resizable);
-  #elif HIRO_GTK==3
   bool statusBarVisible = false;
   if(auto statusBar = state().statusBar) statusBarVisible = statusBar->visible();
   gtk_window_set_has_resize_grip(GTK_WINDOW(widget), resizable && statusBarVisible);
-  #endif
 
   setMaximumSize(state().maximumSize);
   setMinimumSize(state().minimumSize);
@@ -591,11 +569,7 @@ auto pWindow::_synchronizeMargin() -> void {
   GdkRectangle border, client;
   gdk_window_get_frame_extents(window, &border);
   gdk_window_get_origin(window, &client.x, &client.y);
-  #if HIRO_GTK==2
-  gdk_window_get_geometry(window, nullptr, nullptr, &client.width, &client.height, nullptr);
-  #elif HIRO_GTK==3
   gdk_window_get_geometry(window, nullptr, nullptr, &client.width, &client.height);
-  #endif
 
   settings.geometry.frameX = client.x - border.x;
   settings.geometry.frameY = client.y - border.y;

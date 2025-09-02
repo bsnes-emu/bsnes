@@ -26,11 +26,7 @@ static auto HexEdit_scroll(GtkRange* range, GtkScrollType scroll, double value, 
 }
 
 auto pHexEdit::construct() -> void {
-  #if HIRO_GTK==2
-  gtkWidget = gtk_hbox_new(false, 0);
-  #elif HIRO_GTK==3
   gtkWidget = gtk_box_new(GTK_ORIENTATION_HORIZONTAL, 0);
-  #endif
 
   container = gtk_scrolled_window_new(0, 0);
   gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(container), GTK_POLICY_AUTOMATIC, GTK_POLICY_NEVER);
@@ -41,11 +37,7 @@ auto pHexEdit::construct() -> void {
   gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(subWidget), GTK_WRAP_NONE);
   gtk_container_add(GTK_CONTAINER(container), subWidget);
 
-  #if HIRO_GTK==2
-  scrollBar = gtk_vscrollbar_new(nullptr);
-  #elif HIRO_GTK==3
   scrollBar = gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, nullptr);
-  #endif
   gtk_range_set_range(GTK_RANGE(scrollBar), 0, 255);
   gtk_range_set_increments(GTK_RANGE(scrollBar), 1, 16);
   gtk_widget_set_sensitive(scrollBar, false);

@@ -141,32 +141,6 @@ auto pApplication::initialize() -> void {
   g_object_set(gtkSettings, "gtk-im-module", "gtk-im-context-simple", nullptr);
   #endif
 
-  #if HIRO_GTK==2
-  gtk_rc_parse_string(R"(
-    style "HiroWindow"
-    {
-      GtkWindow::resize-grip-width = 0
-      GtkWindow::resize-grip-height = 0
-    }
-    class "GtkWindow" style "HiroWindow"
-
-    style "HiroTreeView"
-    {
-      GtkTreeView::vertical-separator = 0
-    }
-    class "GtkTreeView" style "HiroTreeView"
-
-    style "HiroTabFrameCloseButton"
-    {
-      GtkWidget::focus-line-width = 0
-      GtkWidget::focus-padding = 0
-      GtkButton::default-border = {0, 0, 0, 0}
-      GtkButton::default-outer-border = {0, 0, 0, 0}
-      GtkButton::inner-border = {0, 1, 0, 0}
-    }
-    widget_class "*.<GtkNotebook>.<GtkHBox>.<GtkButton>" style "HiroTabFrameCloseButton"
-  )");
-  #elif HIRO_GTK==3
   GtkCssProvider *provider;
   GdkScreen *screen;
 
@@ -179,7 +153,6 @@ auto pApplication::initialize() -> void {
 
   screen = gdk_screen_get_default();
   gtk_style_context_add_provider_for_screen(screen, GTK_STYLE_PROVIDER (provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-  #endif
 
   pKeyboard::initialize();
 }

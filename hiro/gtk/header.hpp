@@ -15,13 +15,7 @@
   #include <gdk/gdkkeysyms.h>
   #include <gtk/gtk.h>
   #if defined(Hiro_SourceEdit)
-    #if HIRO_GTK==2
-      #include <gtksourceview/gtksourceview.h>
-      #include <gtksourceview/gtksourcelanguagemanager.h>
-      #include <gtksourceview/gtksourcestyleschememanager.h>
-    #elif HIRO_GTK==3
-      #include <gtksourceview/gtksource.h>
-    #endif
+    #include <gtksourceview/gtksource.h>
   #endif
   #include <nall/windows/guard.hpp>
   #include <nall/windows/registry.hpp>
@@ -37,13 +31,7 @@
   #include <gdk/gdkkeysyms.h>
   #include <gtk/gtk.h>
   #if defined(Hiro_SourceEdit)
-    #if HIRO_GTK==2
-      #include <gtksourceview/gtksourceview.h>
-      #include <gtksourceview/gtksourcelanguagemanager.h>
-      #include <gtksourceview/gtksourcestyleschememanager.h>
-    #elif HIRO_GTK==3
-      #include <gtksourceview/gtksource.h>
-    #endif
+    #include <gtksourceview/gtksource.h>
   #endif
   #include <nall/xorg/guard.hpp>
 #endif
