@@ -18,7 +18,7 @@ struct pTableViewColumn : pObject {
   auto setSorting(Sort sorting) -> void;
   auto setText(const string& text) -> void;
   auto setVerticalAlignment(double alignment) -> void;
-  auto setVisible(bool visible) -> void;
+  auto setVisible(bool visible) -> void override;
   auto setWidth(signed width) -> void;
 
   auto _parent() -> maybe<pTableView&>;
