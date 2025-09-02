@@ -137,6 +137,8 @@ inline auto sharedData() -> string {
   result.transform("\\", "/");
   #elif defined(PLATFORM_MACOS)
   string result = "/Library/Application Support/";
+  #elif defined(DATADIR)
+  string result = DATADIR;
   #else
   string result = "/usr/share/";
   #endif
