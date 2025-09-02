@@ -10,11 +10,7 @@ static auto HorizontalScrollBar_change(GtkRange* gtkRange, pHorizontalScrollBar*
 }
 
 auto pHorizontalScrollBar::construct() -> void {
-  #if HIRO_GTK==2
-  gtkWidget = gtk_hscrollbar_new(nullptr);
-  #elif HIRO_GTK==3
   gtkWidget = gtk_scrollbar_new(GTK_ORIENTATION_HORIZONTAL, nullptr);
-  #endif
 
   setLength(state().length);
   setPosition(state().position);

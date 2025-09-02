@@ -10,11 +10,7 @@ static auto VerticalScrollBar_change(GtkRange* gtkRange, pVerticalScrollBar* p) 
 }
 
 auto pVerticalScrollBar::construct() -> void {
-  #if HIRO_GTK==2
-  gtkWidget = gtk_vscrollbar_new(nullptr);
-  #elif HIRO_GTK==3
   gtkWidget = gtk_scrollbar_new(GTK_ORIENTATION_VERTICAL, nullptr);
-  #endif
 
   setLength(state().length);
   setPosition(state().position);

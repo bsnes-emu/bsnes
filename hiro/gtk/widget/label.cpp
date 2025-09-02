@@ -25,7 +25,6 @@ static auto Label_draw(GtkWidget* widget, cairo_t* context, pLabel* p) -> int {
     cairo_set_operator(context, CAIRO_OPERATOR_SOURCE);
     cairo_paint(context);
   } else {
-    #if HIRO_GTK==3
     auto style = gtk_widget_get_style_context(widget);
     if(auto tabFrame = p->self().parentTabFrame(true)) {
       if(auto self = tabFrame->self()) style = gtk_widget_get_style_context(self->gtkWidget);
@@ -33,7 +32,6 @@ static auto Label_draw(GtkWidget* widget, cairo_t* context, pLabel* p) -> int {
     GtkAllocation allocation;
     gtk_widget_get_allocation(widget, &allocation);
     gtk_render_background(style, context, 0, 0, allocation.width, allocation.height);
-    #endif
   }
 
   return false;
@@ -87,11 +85,7 @@ auto pLabel::construct() -> void {
 
   g_signal_connect(G_OBJECT(gtkWidget), "button-press-event", G_CALLBACK(Label_mousePress), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "button-release-event", G_CALLBACK(Label_mouseRelease), (gpointer)this);
-  #if HIRO_GTK==2
-  g_signal_connect(G_OBJECT(subWidget), "expose-event", G_CALLBACK(Label_expose), (gpointer)this);
-  #elif HIRO_GTK==3
   g_signal_connect(G_OBJECT(subWidget), "draw", G_CALLBACK(Label_draw), (gpointer)this);
-  #endif
   g_signal_connect(G_OBJECT(gtkWidget), "enter-notify-event", G_CALLBACK(Label_mouseEnter), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "leave-notify-event", G_CALLBACK(Label_mouseLeave), (gpointer)this);
 

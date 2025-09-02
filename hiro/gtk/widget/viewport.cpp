@@ -39,11 +39,7 @@ auto pViewport::construct() -> void {
   g_signal_connect(G_OBJECT(gtkWidget), "button-press-event", G_CALLBACK(Viewport_mousePress), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "button-release-event", G_CALLBACK(Widget_mouseRelease), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "drag-data-received", G_CALLBACK(Widget_drop), (gpointer)this);
-  #if HIRO_GTK==2
-  g_signal_connect(G_OBJECT(gtkWidget), "expose-event", G_CALLBACK(Viewport_expose), (gpointer)this);
-  #elif HIRO_GTK==3
   g_signal_connect(G_OBJECT(gtkWidget), "draw", G_CALLBACK(Viewport_draw), (gpointer)this);
-  #endif
   g_signal_connect(G_OBJECT(gtkWidget), "key-press-event", G_CALLBACK(Viewport_keyPress), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "enter-notify-event", G_CALLBACK(Widget_mouseEnter), (gpointer)this);
   g_signal_connect(G_OBJECT(gtkWidget), "leave-notify-event", G_CALLBACK(Widget_mouseLeave), (gpointer)this);
