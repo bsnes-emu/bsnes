@@ -40,12 +40,14 @@ you'll need these packages:
 
 On Windows,
 you should install [MSYS2][],
-and from there install `mingw-w64-gcc`
+and from there install `make` and `mingw-w64-ucrt-x86_64-gcc`:
+
+    pacman -S make mingw-w64-ucrt-x86_64-gcc
+
+[MSYS2]: https://www.msys2.org/
 
 On macOS,
 installing the Xcode command-line tools should be enough.
-
-[MSYS2]: https://www.msys2.org/
 
 Building
 --------
