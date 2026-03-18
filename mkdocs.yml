@@ -11,6 +11,8 @@ nav:
     - Introduction: README.md
     #- Tutorial:
     - How-To Guides:
+         - Build from source: how-to/build-from-source.md
          - Override a memory map: how-to/manifest.md
     #- Concepts:
-    #- Reference:
+    - Reference:
+         - Build configuration: reference/build-config.md
