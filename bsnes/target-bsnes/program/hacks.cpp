@@ -15,6 +15,12 @@ auto Program::hackCompatibility() -> void {
   //the dialogue text is blurry due to an issue in the scanline-based renderer's color math support
   if(title == "マーヴェラス") fastPPU = false;
 
+  //the character sprites are incorrect due to an issue in the scanline-based renderer's color math support
+  if(title == "SUUCHIIPAI") fastPPU = false;
+  
+  //the pause menu text is blurry due to an issue in the scanline-based renderer's color math support
+  if(title == "DRAGON KNIGHT 4") fastPPU = false;
+  
   //stage 2 uses pseudo-hires in a way that's not compatible with the scanline-based renderer
   if(title == "SFC クレヨンシンチャン") fastPPU = false;
 
