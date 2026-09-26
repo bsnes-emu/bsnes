@@ -5,7 +5,7 @@ namespace nall::Encode {
 template<uint S = 1, uint M = 4 / S>  //S = word size; M = match length
 inline auto RLE(array_view<uint8_t> input) -> vector<uint8_t> {
   vector<uint8_t> output;
-  for(uint byte : range(8)) output.append(input.size() >> byte * 8);
+  for(uint byte : range(8)) output.append((uint64_t)input.size() >> byte * 8);
 
   uint base = 0;
   uint skip = 0;
