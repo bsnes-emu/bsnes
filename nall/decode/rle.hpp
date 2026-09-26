@@ -12,12 +12,12 @@ inline auto RLE(array_view<uint8_t> input) -> vector<uint8_t> {
 
   uint base = 0;
   uint64_t size = 0;
-  for(uint byte : range(8)) size |= load() << byte * 8;
+  for(uint byte : range(8)) size |= (uint64_t)load() << byte * 8;
   output.resize(size);
 
   auto read = [&]() -> uint64_t {
     uint64_t value = 0;
-    for(uint byte : range(S)) value |= load() << byte * 8;
+    for(uint byte : range(S)) value |= (uint64_t)load() << byte * 8;
     return value;
   };
 
