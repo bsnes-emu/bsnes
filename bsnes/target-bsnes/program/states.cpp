@@ -54,6 +54,11 @@ auto Program::loadStateData(string filename) -> vector<uint8_t> {
 
   if(memory.size() < 3 * sizeof(uint)) return {};  //too small to be a valid state file
   if(memory::readl<sizeof(uint)>(memory.data()) != State::Signature) return {};  //wrong format or version
+  uint serializerSize = memory::readl<sizeof(uint)>(memory.data() + sizeof(uint));
+  uint previewSize = memory::readl<sizeof(uint)>(memory.data() + 2 * sizeof(uint));
+  uint64_t remaining = memory.size() - 3 * sizeof(uint);
+  if(serializerSize < 8 || serializerSize > remaining) return {};
+  if(previewSize != remaining - serializerSize) return {};
   return memory;
 }
 
@@ -62,7 +67,8 @@ auto Program::loadState(string filename) -> bool {
   if(auto memory = loadStateData(filename)) {
     if(filename != "Quick/Undo") saveUndoState();
     if(filename == "Quick/Undo") saveRedoState();
-    auto serializerRLE = Decode::RLE<1>({memory.data() + 3 * sizeof(uint), memory.size() - 3 * sizeof(uint)});
+    uint serializerSize = memory::readl<sizeof(uint)>(memory.data() + sizeof(uint));
+    auto serializerRLE = Decode::RLE<1>({memory.data() + 3 * sizeof(uint), serializerSize});
     serializer s{serializerRLE.data(), (uint)serializerRLE.size()};
     if(!emulator->unserialize(s)) return showMessage({"[", prefix, "] is in incompatible format"}), false;
     rewindReset();  //do not allow rewinding past a state load event
