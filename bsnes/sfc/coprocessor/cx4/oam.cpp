@@ -24,7 +24,7 @@ void Cx4::op00_00() {
   uint8 offset = (ram[0x626] & 3) * 2;
   uint32 srcptr = 0x220;
 
-  for(int i = ram[0x620]; i > 0 && sprcount > 0; i--, srcptr += 16) {
+  for(int i = ram[0x620]; i > 0 && sprcount > 0 && srcptr + 6 < sizeof ram; i--, srcptr += 16) {
     sprx = readw(srcptr)     - globalx;
     spry = readw(srcptr + 2) - globaly;
     sprname = ram[srcptr + 5];
@@ -150,9 +150,12 @@ void Cx4::op00_0b() {
 
   scalex = (int16)readw(0x1f86);
   scaley = (int16)readw(0x1f8f);
-  startx = -cx * scalex + (cx << 8);
-  starty = -cy * scaley + (cy << 8);
+  startx = (uint32)(-(int64)cx * scalex + (int64)cx * 256);
+  starty = (uint32)(-(int64)cy * scaley + (int64)cy * 256);
   srcptr = 0x600;
+
+  uint32 sourceSize = ((uint32)width * height + 1) >> 1;
+  if(sourceSize > sizeof ram - srcptr) return;
 
   for(i = 0; i < (width * height) >> 1; i++) {
     write(i, 0);
@@ -162,8 +165,10 @@ void Cx4::op00_0b() {
     for(x = startx, j = 0;j < width; j++, x += scalex) {
       if((x >> 8) < width && (y >> 8) < height && (y >> 8) * width + (x >> 8) < 0x2000) {
         uint8 pixel = (j & 1) ? (uint8)(ram[srcptr] >> 4) : (ram[srcptr]);
-        int32 index = (y >> 11) * width * 4 + (x >> 11) * 32 + ((y >> 8) & 7) * 2;
+        uint32 index = (y >> 11) * width * 4 + (x >> 11) * 32 + ((y >> 8) & 7) * 2;
         uint8 mask = 0x80 >> ((x >> 8) & 7);
+
+        if(index + 17 >= sizeof ram) continue;
 
         if(pixel & 1) ram[index     ] |= mask;
         if(pixel & 2) ram[index +  1] |= mask;
