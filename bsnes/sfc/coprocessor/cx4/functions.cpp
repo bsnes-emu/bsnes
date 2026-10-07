@@ -192,7 +192,9 @@ void Cx4::C4DoScaleRotate(int row_padding) {
   uint8 h = read(0x1f8c) & ~7;
 
   //Clear the output RAM
-  memset(ram, 0, (w + row_padding / 4) * h / 2);
+  uint32 outputSize = (w + row_padding / 4) * h / 2;
+  if(outputSize > sizeof ram) return;
+  memset(ram, 0, outputSize);
 
   int32 Cx = (int16)readw(0x1f83);
   int32 Cy = (int16)readw(0x1f86);
@@ -201,8 +203,8 @@ void Cx4::C4DoScaleRotate(int row_padding) {
   //The low 12 bits are fractional, so (Cx<<12) gives us the Cx we want in
   //the function. We do Cx*A etc normally because the matrix parameters
   //already have the fractional parts.
-  int32 LineX = (Cx << 12) - Cx * A - Cx * B;
-  int32 LineY = (Cy << 12) - Cy * C - Cy * D;
+  int32 LineX = (int32)((int64)Cx * 4096 - (int64)Cx * A - (int64)Cx * B);
+  int32 LineY = (int32)((int64)Cy * 4096 - (int64)Cy * C - (int64)Cy * D);
 
   //Start loop
   uint32 X, Y;
