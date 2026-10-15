@@ -157,10 +157,13 @@ auto StateManager::updateSelection() -> void {
       if(saveState.size() >= 3 * sizeof(uint)) {
         uint signature  = memory::readl<sizeof(uint)>(saveState.data() + 0 * sizeof(uint));
         uint serializer = memory::readl<sizeof(uint)>(saveState.data() + 1 * sizeof(uint));
-        uint preview    = memory::readl<sizeof(uint)>(saveState.data() + 2 * sizeof(uint));
-        if(signature == Program::State::Signature && preview) {
-          uint offset = 3 * sizeof(uint) + serializer;
-          auto preview = Decode::RLE<2>({saveState.data() + offset, max(offset, saveState.size()) - offset});
+        uint previewSize = memory::readl<sizeof(uint)>(saveState.data() + 2 * sizeof(uint));
+        if(signature == Program::State::Signature && previewSize >= 8) {
+          uint64_t offset = 3 * sizeof(uint) + (uint64_t)serializer;
+          const uint previewPixels = 256 * 240 * sizeof(uint16_t);
+          if(memory::readl<8>(saveState.data() + offset) != previewPixels) return;
+          auto preview = Decode::RLE<2>({saveState.data() + offset, previewSize});
+          if(preview.size() != previewPixels) return;
           image icon{0, 16, 0x8000, 0x7c00, 0x03e0, 0x001f};
           icon.copy(preview.data(), 256 * sizeof(uint16_t), 256, 240);
           icon.transform();
