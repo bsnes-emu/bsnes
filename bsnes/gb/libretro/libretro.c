@@ -19,6 +19,7 @@
 #include <Core/gb.h>
 #include "libretro.h"
 #include "libretro_core_options.inc"
+#include "iretro_extensions.h"
 
 #ifdef _WIN32
 static const char slash = '\\';
@@ -33,7 +34,7 @@ static const char slash = '/';
 #define RETRO_MEMORY_GAMEBOY_1_SRAM ((1 << 8) | RETRO_MEMORY_SAVE_RAM)
 #define RETRO_MEMORY_GAMEBOY_1_RTC ((2 << 8) | RETRO_MEMORY_RTC)
 #define RETRO_MEMORY_GAMEBOY_2_SRAM ((3 << 8) | RETRO_MEMORY_SAVE_RAM)
-#define RETRO_MEMORY_GAMEBOY_2_RTC ((3 << 8) | RETRO_MEMORY_RTC)
+#define RETRO_MEMORY_GAMEBOY_2_RTC ((4 << 8) | RETRO_MEMORY_RTC)
 
 #define RETRO_GAME_TYPE_GAMEBOY_LINK_2P 0x101
 
@@ -80,6 +81,8 @@ static uint32_t retained_frame_1[256 * 224];
 static uint32_t retained_frame_2[256 * 224];
 static struct retro_log_callback logging;
 static retro_log_printf_t log_cb;
+static char *gb_log_buffer;
+static size_t gb_log_buffer_length;
 
 static retro_video_refresh_t video_cb;
 static retro_audio_sample_batch_t audio_batch_cb;
@@ -111,6 +114,8 @@ extern const unsigned char dmg_boot[], mgb_boot[], cgb0_boot[], cgb_boot[], agb_
 extern const unsigned dmg_boot_length, mgb_boot_length, cgb0_boot_length, cgb_boot_length, agb_boot_length, sgb_boot_length, sgb2_boot_length;
 bool vblank1_occurred = false, vblank2_occurred = false;
 
+struct retro_vfs_interface *vfs_interface;
+
 static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 {
     (void)level;
@@ -118,6 +123,37 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
     va_start(va, fmt);
     vfprintf(stderr, fmt, va);
     va_end(va);
+}
+
+static void gb_log_callback(GB_gameboy_t *gb, const char *string, GB_log_attributes_t attributes)
+{
+    size_t length = strlen(string);
+    gb_log_buffer = realloc(gb_log_buffer, gb_log_buffer_length + length + 1);
+    memcpy(gb_log_buffer + gb_log_buffer_length, string, length + 1);
+    gb_log_buffer_length += length;
+
+    enum retro_log_level level = RETRO_LOG_INFO;
+    if (attributes & GB_LOG_ERROR) {
+        level = RETRO_LOG_ERROR;
+    }
+    else if (attributes & GB_LOG_WARNING) {
+        level = RETRO_LOG_WARN;
+    }
+    
+    if (length && string[length - 1] == '\n') {
+        if (emulated_devices == 1) {
+            log_cb(level, "%s", gb_log_buffer);
+        }
+        else if (gb == &gameboy[0]) {
+            log_cb(level, "[Game Boy 1] %s", gb_log_buffer);
+        }
+        else {
+            log_cb(level, "[Game Boy 2] %s", gb_log_buffer);
+        }
+        gb_log_buffer_length = 0;
+        free(gb_log_buffer);
+        gb_log_buffer = NULL;
+    }
 }
 
 static struct retro_rumble_interface rumble;
@@ -369,7 +405,6 @@ static void set_variable_visibility(void)
         const char *key  = option_defs_us[i].key;
         if ((strcmp(key, "sameboy_model")                   == 0) ||
             (strcmp(key, "sameboy_auto_sgb_model")          == 0) ||
-            (strcmp(key, "sameboy_rtc")                     == 0) ||
             (strcmp(key, "sameboy_scaling_filter")          == 0) ||
             (strcmp(key, "sameboy_mono_palette")            == 0) ||
             (strcmp(key, "sameboy_color_correction_mode")   == 0) ||
@@ -523,6 +558,26 @@ static void set_link_cable_state(bool state)
     }
 }
 
+static void *vfs_read_boot_rom(const char *path)
+{
+    if (!vfs_interface) return NULL;
+
+    struct retro_vfs_file_handle *file = vfs_interface->open(path, RETRO_VFS_FILE_ACCESS_READ, RETRO_VFS_FILE_ACCESS_HINT_NONE);
+    if (!file) return NULL;
+    
+    void *buffer = malloc(0x900);
+    memset(buffer, 0xFF, 0x900);
+    ssize_t read = vfs_interface->read(file, buffer, 0x900);
+    vfs_interface->close(file);
+    
+    if (read < 0) {
+        free(buffer);
+        return NULL;
+    }
+    
+    return buffer;
+}
+
 static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
 {
     const char *model_name = (char *[]) {
@@ -565,6 +620,13 @@ static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
     log_cb(RETRO_LOG_INFO, "Initializing as model: %s\n", model_name);
     log_cb(RETRO_LOG_INFO, "Loading boot image: %s\n", buf);
 
+    void *boot_rom = vfs_read_boot_rom(buf);
+    if (boot_rom) {
+        GB_load_boot_rom_from_buffer(gb, boot_rom, 0x900);
+        free(boot_rom);
+        return;
+    }
+    
     if (GB_load_boot_rom(gb, buf)) {
         if (type == GB_BOOT_ROM_CGB_E) {
             boot_rom_load(gb, GB_BOOT_ROM_CGB);
@@ -662,6 +724,7 @@ static void init_for_current_model(unsigned id)
     else {
         GB_init(&gameboy[i], effective_model);
     }
+    GB_set_log_callback(&gameboy[i], gb_log_callback);
     geometry_updated = true;
 
     GB_set_boot_rom_load_callback(&gameboy[i], boot_rom_load);
@@ -671,11 +734,19 @@ static void init_for_current_model(unsigned id)
     GB_set_pixels_output(&gameboy[i],
                          (uint32_t *)(frame_buf + GB_get_screen_width(&gameboy[0]) * GB_get_screen_height(&gameboy[0]) * i));
     GB_set_rgb_encode_callback(&gameboy[i], rgb_encode);
+    
+    unsigned frontend_sample_rate = 0;
+    if (environ_cb(RETRO_ENVIRONMENT_GET_TARGET_SAMPLE_RATE, &frontend_sample_rate)
+        && frontend_sample_rate > 8000 && frontend_sample_rate < 1024 * 1024) {
+        GB_set_sample_rate(&gameboy[i], frontend_sample_rate);
+    }
+    else {
 #ifdef WIIU
-    GB_set_sample_rate(&gameboy[i], WIIU_SAMPLE_RATE);
+        GB_set_sample_rate(&gameboy[i], WIIU_SAMPLE_RATE);
 #else
-    GB_set_sample_rate(&gameboy[i], GB_get_clock_rate(&gameboy[i]) / 2);
+        GB_set_sample_rate(&gameboy[i], GB_get_clock_rate(&gameboy[i]) / 2);
 #endif
+    }
     GB_apu_set_sample_callback(&gameboy[i], audio_callback);
     GB_set_rumble_callback(&gameboy[i], rumble_callback);
 
@@ -1032,6 +1103,19 @@ static void check_variables()
 
             auto_sgb_model[1] = new_model;
         }
+        
+        var.key = "sameboy_rtc";
+        var.value = NULL;
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value) {
+            if (strcmp(var.value, "sync to system clock") == 0) {
+                GB_set_rtc_mode(&gameboy[0], GB_RTC_MODE_SYNC_TO_HOST);
+                GB_set_rtc_mode(&gameboy[1], GB_RTC_MODE_SYNC_TO_HOST);
+            }
+            else if (strcmp(var.value, "accurate") == 0) {
+                GB_set_rtc_mode(&gameboy[0], GB_RTC_MODE_ACCURATE);
+                GB_set_rtc_mode(&gameboy[1], GB_RTC_MODE_ACCURATE);
+            }
+        }
 
         var.key = "sameboy_mono_palette_1";
         var.value = NULL;
@@ -1224,6 +1308,15 @@ void retro_init(void)
     if (environ_cb(RETRO_ENVIRONMENT_GET_INPUT_BITMASKS, NULL)) {
         libretro_supports_bitmasks = true;
     }
+    
+    struct retro_vfs_interface_info vfs_info = {
+        .required_interface_version = 1,
+        .iface = NULL,
+    };
+    
+    if (environ_cb(RETRO_ENVIRONMENT_GET_VFS_INTERFACE, &vfs_info)) {
+        vfs_interface = vfs_info.iface;
+    }
 
     init_output_audio_buffer(16384);
 }
@@ -1390,7 +1483,7 @@ void retro_run(void)
     vblank1_occurred = vblank2_occurred = false;
     signed delta = 0;
     if (emulated_devices == 2) {
-    while (!vblank1_occurred || !vblank2_occurred) {
+        while (!vblank1_occurred || !vblank2_occurred) {
             if (delta >= 0) {
                 delta -= GB_run(&gameboy[0]);
             }
@@ -1688,7 +1781,7 @@ void *retro_get_memory_data(unsigned type)
                 data = gameboy[0].vram;
                 break;
             case RETRO_MEMORY_RTC:
-                if (gameboy[0].cartridge_type->has_battery) {
+                if (gameboy[0].cartridge_type->has_rtc) {
                     data = GB_GET_SECTION(&gameboy[0], rtc);
                 }
                 else {
@@ -1718,7 +1811,7 @@ void *retro_get_memory_data(unsigned type)
                 }
                 break;
             case RETRO_MEMORY_GAMEBOY_1_RTC:
-                if (gameboy[0].cartridge_type->has_battery) {
+                if (gameboy[0].cartridge_type->has_rtc) {
                     data = GB_GET_SECTION(&gameboy[0], rtc);
                 }
                 else {
@@ -1726,7 +1819,7 @@ void *retro_get_memory_data(unsigned type)
                 }
                 break;
             case RETRO_MEMORY_GAMEBOY_2_RTC:
-                if (gameboy[1].cartridge_type->has_battery) {
+                if (gameboy[1].cartridge_type->has_rtc) {
                     data = GB_GET_SECTION(&gameboy[1], rtc);
                 }
                 else {
@@ -1816,4 +1909,54 @@ void retro_cheat_set(unsigned index, bool enabled, const char *code)
     (void)index;
     (void)enabled;
     (void)code;
+}
+
+
+size_t iretro_persistent_serialize_size(void)
+{
+    return GB_save_battery_size(&gameboy[0]) + (emulated_devices == 2? GB_save_battery_size(&gameboy[1]) : 0);
+}
+
+bool iretro_persistent_serialize(void *data, size_t len)
+{
+    if (len < iretro_persistent_serialize_size()) return false;
+    GB_save_battery_to_buffer(&gameboy[0], data, len);
+    if (emulated_devices == 1) return true;
+
+    size_t pos = GB_save_battery_size(&gameboy[0]);
+    len -= pos;
+    data = (uint8_t *)data + pos;
+    GB_save_battery_to_buffer(&gameboy[1], data, len);
+    return true;
+}
+
+bool iretro_persistent_unserialize(const void *data, size_t len)
+{
+    if (len < iretro_persistent_serialize_size()) return false;
+    GB_load_battery_from_buffer(&gameboy[0], data, len);
+    if (emulated_devices == 1) return true;
+    
+    size_t pos = GB_save_battery_size(&gameboy[0]);
+    len -= pos;
+    data = (uint8_t *)data + pos;
+    GB_load_battery_from_buffer(&gameboy[1], data, len);
+    return true;
+}
+
+
+const char *iretro_query_metadata(const char *key)
+{
+    if (strcmp(key, IRETRO_METADATA_KEY_COPYRIGHT) == 0) {
+        return "Copyright © 2015-" GB_COPYRIGHT_YEAR "\n";
+    }
+    if (strcmp(key, IRETRO_METADATA_KEY_CONSOLES) == 0) {
+        return "Nintendo;Game Boy,Nintendo;Super Game Boy,Nintendo;Game Boy Color";
+    }
+    if (strcmp(key, IRETRO_METADATA_KEY_LICENSE_NAME) == 0) {
+        return "Expat License";
+    }
+    if (strcmp(key, IRETRO_METADATA_KEY_DESCRIPTION) == 0) {
+        return "SameBoy is an extremely accurate open source Game Boy (DMG) and Game Boy Color (CGB) emulator, written in portable C.";
+    }
+    return NULL;
 }

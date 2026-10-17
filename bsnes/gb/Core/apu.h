@@ -138,7 +138,7 @@ typedef struct
         uint8_t alignment; // If (NR43 & 7) != 0, samples are aligned to 512KHz clock instead of
                            // 1MHz. This variable keeps track of the alignment.
         bool current_lfsr_sample;
-        int8_t delta;
+        bool did_step_counter;
         bool countdown_reloaded;
         uint8_t dmg_delayed_start;
         GB_envelope_clock_t envelope_clock;
@@ -152,6 +152,14 @@ typedef struct
     uint8_t pcm_mask[2]; // For CGB-0 to CGB-C PCM read glitch
     
     bool apu_cycles_in_2mhz; // For compatibility with 0.16.x save states
+    bool pending_envelope_tick;
+    
+    // Move to noise struct when breaking compat
+    bool noise_counter_active;
+    bool noise_background_counter_active;
+    bool lfsr_stepped_in_narrow;
+    bool lfsr_bit_7_before_step; // Used by some corruptions?
+    bool noise_started_with_dac_disabled; // TODO: Background counting behaves slightly different this way?
 } GB_apu_t;
 
 typedef enum {
@@ -165,6 +173,7 @@ typedef enum {
     GB_AUDIO_FORMAT_RAW, // Native endian
     GB_AUDIO_FORMAT_AIFF, // Native endian
     GB_AUDIO_FORMAT_WAV,
+    GB_AUDIO_FORMAT_VGM,
 } GB_audio_format_t;
 
 typedef struct {
@@ -173,6 +182,8 @@ typedef struct {
     } buffer[GB_BAND_LIMITED_WIDTH * 2], output;
     uint8_t pos;
     GB_sample_t input;
+    GB_sample_t last_output;
+    unsigned silence_detection;
 } GB_band_limited_t;
 
 typedef struct {
@@ -202,6 +213,10 @@ typedef struct {
     FILE *output_file;
     GB_audio_format_t output_format;
     int output_error;
+    uint32_t vgm_pending_samples;
+    uint32_t vgm_total_samples;
+    uint64_t vgm_sample_fraction;
+    uint32_t vgm_clock_rate;
     
     /* Not output related, but it's temp state so I'll put it here */
     bool square_sweep_disable_stepping;
@@ -228,6 +243,9 @@ internal void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);
 internal uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg);
 internal void GB_apu_div_event(GB_gameboy_t *gb);
 internal void GB_apu_div_secondary_event(GB_gameboy_t *gb);
+internal void GB_apu_delayed_envelope_tick(GB_gameboy_t *gb);
 internal void GB_apu_init(GB_gameboy_t *gb);
 internal void GB_apu_run(GB_gameboy_t *gb, bool force);
+internal void GB_apu_vgm_advance(GB_gameboy_t *gb, uint8_t cycles);
+internal void GB_apu_vgm_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value);
 #endif

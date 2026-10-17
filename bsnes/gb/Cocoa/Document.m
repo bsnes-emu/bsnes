@@ -16,6 +16,7 @@
 #import "GBPaletteView.h"
 #import "GBHexStatusBarRepresenter.h"
 #import "NSObject+DefaultsObserver.h"
+#import <pthread/sched.h>
 
 #define likely(x)   GB_likely(x)
 #define unlikely(x) GB_unlikely(x)
@@ -66,6 +67,9 @@
     NSRecursiveLock *_consoleOutputLock;
     NSTimer *_consoleOutputTimer;
     NSTimer *_hexTimer;
+    
+    NSTimer *_batterySaveTimer;
+    bool _dirtyBattery;
     
     bool _fullScreen;
     bool _inSyncInput;
@@ -120,6 +124,8 @@
     __weak NSThread *_emulationThread;
     
     GBCheatSearchController *_cheatSearchController;
+    
+    bool _romModified;
 }
 
 static void boot_rom_load(GB_gameboy_t *gb, GB_boot_rom_t type)
@@ -348,7 +354,7 @@ static void debuggerReloadCallback(GB_gameboy_t *gb)
     }];
     
     [self observeStandardDefaultsKey:@"GBTurboCap" withBlock:^(NSNumber *value) {
-        if (!_master) {
+        if (!weakSelf->_master) {
             GB_set_turbo_cap(gb, value.doubleValue);
         }
     }];
@@ -407,10 +413,12 @@ static void debuggerReloadCallback(GB_gameboy_t *gb)
     
     if (self.vramWindow.isVisible) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.view.mouseHidingEnabled = (self.mainWindow.styleMask & NSWindowStyleMaskFullScreen) != 0;
             [self reloadVRAMData: nil];
         });
     }
+    
+    self.view.mouseHidingEnabled = (_mainWindow.styleMask & NSWindowStyleMaskFullScreen) && !_consoleWindow.visible && !_memoryWindow.visible && !_vramWindow.visible && !_printerFeedWindow.visible && !_cheatsWindow.visible;
+
     if (self.view.isRewinding) {
         _rewind = true;
         [self.osdView displayText:@"Rewinding…"];
@@ -499,6 +507,9 @@ static void debuggerReloadCallback(GB_gameboy_t *gb)
     _hexTimer = [NSTimer timerWithTimeInterval:0.25 target:self selector:@selector(reloadMemoryView) userInfo:nil repeats:true];
     [[NSRunLoop mainRunLoop] addTimer:_hexTimer forMode:NSDefaultRunLoopMode];
     
+    _batterySaveTimer = [NSTimer timerWithTimeInterval:0.25 target:self selector:@selector(batteryTimerExpired) userInfo:nil repeats:true];
+    [[NSRunLoop mainRunLoop] addTimer:_batterySaveTimer forMode:NSDefaultRunLoopMode];
+    
     /* Clear pending alarms, don't play alarms while playing */
     if ([[NSUserDefaults standardUserDefaults] boolForKey:@"GBNotificationsUsed"]) {
         NSUserNotificationCenter *center = [NSUserNotificationCenter defaultUserNotificationCenter];
@@ -576,6 +587,7 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 - (void)postRun
 {
     [_hexTimer invalidate];
+    [_batterySaveTimer invalidate];
     [_audioLock lock];
     _audioBufferPosition = _audioBufferNeeded = 0;
     [_audioLock signal];
@@ -608,6 +620,10 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
 
 - (void) start
 {
+    if (!self.mainWindow) {
+        NSLog(@"Bug, reference leak to Document %@", self);
+        return;
+    }
     dispatch_async(dispatch_get_main_queue(), ^{
         [self updateDebuggerButtons];
         [_slave updateDebuggerButtons];
@@ -800,6 +816,18 @@ static unsigned *multiplication_table_for_frequency(unsigned frequency)
     }
 }
 
+- (void)batteryTimerExpired
+{
+    [self performAtomicBlock:^{
+        if (_dirtyBattery && !GB_get_battery_dirty(&_gb)) {
+            GB_save_battery(&_gb, self.savPath.UTF8String);
+        }
+        
+        _dirtyBattery = GB_get_battery_dirty(&_gb);
+        GB_clear_battery_dirty(&_gb);
+    }];
+}
+
 - (NSFont *)debuggerFontOfSize:(unsigned)size
 {
     if (!size) {
@@ -826,7 +854,6 @@ again:;
     retry = true;
     goto again;
 }
-
 
 - (void)updateFonts
 {
@@ -1089,11 +1116,6 @@ again:;
     self.memoryBankItem.enabled = false;
 }
 
-+ (BOOL)autosavesInPlace 
-{
-    return true;
-}
-
 - (NSString *)windowNibName 
 {
     // Override returning the nib file name of the document
@@ -1289,20 +1311,22 @@ static bool is_path_writeable(const char *path)
     }
     
     NSString *rom_warnings = [self captureOutputForBlock:^{
-        GB_debugger_clear_symbols(&_gb);
-        if ([[[fileName pathExtension] lowercaseString] isEqualToString:@"isx"]) {
-            ret = GB_load_isx(&_gb, fileName.UTF8String);
-            if (!self.isCartContainer) {
-                GB_load_battery(&_gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"ram"].path.UTF8String);
+        if (!_romModified) {
+            GB_debugger_clear_symbols(&_gb);
+            if ([[[fileName pathExtension] lowercaseString] isEqualToString:@"isx"]) {
+                ret = GB_load_isx(&_gb, fileName.UTF8String);
+                if (!self.isCartContainer) {
+                    GB_load_battery(&_gb, [[self.fileURL URLByDeletingPathExtension] URLByAppendingPathExtension:@"ram"].path.UTF8String);
+                }
             }
-        }
-        else if ([[[fileName pathExtension] lowercaseString] isEqualToString:@"gbs"]) {
-            __block GB_gbs_info_t info;
-            ret = GB_load_gbs(&_gb, fileName.UTF8String, &info);
-            [self prepareGBSInterface:&info];
-        }
-        else {
-            ret = GB_load_rom(&_gb, [fileName UTF8String]);
+            else if ([[[fileName pathExtension] lowercaseString] isEqualToString:@"gbs"]) {
+                __block GB_gbs_info_t info;
+                ret = GB_load_gbs(&_gb, fileName.UTF8String, &info);
+                [self prepareGBSInterface:&info];
+            }
+            else {
+                ret = GB_load_rom(&_gb, [fileName UTF8String]);
+            }
         }
         if (GB_save_battery_size(&_gb)) {
             if (!is_path_writeable(self.savPath.UTF8String)) {
@@ -1355,12 +1379,18 @@ static bool is_path_writeable(const char *path)
     [_consoleOutputLock lock];
     [_consoleOutputTimer invalidate];
     [_consoleOutputLock unlock];
-    [self.consoleWindow close];
-    [self.memoryWindow close];
-    [self.vramWindow close];
-    [self.printerFeedWindow close];
-    [self.cheatsWindow close];
+    [_consoleWindow close];
+    _consoleWindow = nil;
+    [_memoryWindow close];
+    _memoryWindow = nil;
+    [_vramWindow close];
+    _vramWindow = nil;
+    [_printerFeedWindow close];
+    _printerFeedWindow = nil;
+    [_cheatsWindow close];
+    _cheatsWindow = nil;
     [_cheatSearchController.window close];
+    _cheatSearchController.window = nil;
     [super close];
 }
 
@@ -1455,6 +1485,12 @@ static bool is_path_writeable(const char *path)
     }
     else if ([anItem action] == @selector(reloadROM:)) {
         return !_gbsTracks;
+    }
+    else if ([anItem action] == @selector(saveDocument:)) {
+        return _romModified;
+    }
+    else if ([anItem action] == @selector(saveDocumentAs:)) {
+        return _romModified && !self.isCartContainer;
     }
     
     return [super validateUserInterfaceItem:anItem];
@@ -1583,7 +1619,7 @@ enum GBWindowResizeAction
     }
 }
 
-- (void) appendPendingOutput
+- (void)appendPendingOutput
 {
     [_consoleOutputLock lock];
     if (_shouldClearSideView) {
@@ -1602,6 +1638,8 @@ enum GBWindowResizeAction
         }
         if ([[NSUserDefaults standardUserDefaults] boolForKey:@"DeveloperMode"]) {
             [self.consoleWindow orderFront:nil];
+            /* Make sure mouse is not hidden while debugging */
+            self.view.mouseHidingEnabled = false;
         }
         _pendingConsoleOutput = nil;
     }
@@ -1650,9 +1688,6 @@ enum GBWindowResizeAction
     }
     
     [_consoleOutputLock unlock];
-
-    /* Make sure mouse is not hidden while debugging */
-    self.view.mouseHidingEnabled = false;
 }
 
 - (IBAction)showConsoleWindow:(id)sender
@@ -1862,7 +1897,7 @@ enum GBWindowResizeAction
 
 - (void)performAtomicBlock: (void (^)())block
 {
-    while (!GB_is_inited(&_gb));
+    while (!GB_is_inited(&_gb)) sched_yield();
     bool isRunning = _running && !GB_debugger_is_stopped(&_gb);
     if (_master) {
         isRunning |= _master->_running;
@@ -1883,7 +1918,7 @@ enum GBWindowResizeAction
     }
     
     _pendingAtomicBlock = block;
-    while (_pendingAtomicBlock);
+    while (_pendingAtomicBlock) sched_yield();
 }
 
 - (NSString *)captureOutputForBlock: (void (^)())block
@@ -2856,6 +2891,9 @@ enum GBWindowResizeAction
         case GB_AUDIO_FORMAT_WAV:
             _audioSavePanel.allowedFileTypes = @[@"wav"];
             break;
+        case GB_AUDIO_FORMAT_VGM:
+            _audioSavePanel.allowedFileTypes = @[@"vgm"];
+            break;
     }
 }
 
@@ -2904,6 +2942,8 @@ enum GBWindowResizeAction
         [self stop];
     }
     
+    _romModified = false;
+    [self updateChangeCount:NSChangeCleared];
     [self loadROM];
 
     if (wasRunning) {
@@ -2956,6 +2996,24 @@ enum GBWindowResizeAction
 - (IBAction)debuggerButtonPressed:(NSButton *)sender
 {
     [self queueDebuggerCommand:sender.alternateTitle];
+}
+
+- (void)setROMModified
+{
+    _romModified = true;
+    [self updateChangeCount:NSChangeDone];
+}
+
+- (BOOL)writeToFile:(NSString *)path ofType:(NSString *)type
+{
+    if ([type isEqualToString:@"Game Boy Cartridge"]) {
+        if (![[NSFileManager defaultManager] copyItemAtPath:self.fileName toPath:path error:nil]) return false;
+        path = self.romPath;
+        if (!path) return false;
+    }
+    size_t size;
+    uint8_t *data = GB_get_direct_access(&_gb, GB_DIRECT_ACCESS_ROM, &size, NULL);
+    return [[NSData dataWithBytesNoCopy:data length:size freeWhenDone:false] writeToFile:path atomically:true];
 }
 
 + (NSArray<NSString *> *)readableTypes
