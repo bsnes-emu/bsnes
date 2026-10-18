@@ -7,6 +7,7 @@ auto pMenuBar::construct() -> void {
 }
 
 auto pMenuBar::destruct() -> void {
+  pApplication::state().staleMenus.removeByValue(this);
   if(hmenu) { DestroyMenu(hmenu); hmenu = nullptr; }
   if(auto parent = _parent()) {
     SetMenu(parent->hwnd, nullptr);
@@ -44,6 +45,20 @@ auto pMenuBar::_parent() -> maybe<pWindow&> {
 }
 
 auto pMenuBar::_update() -> void {
+  bool updateNow = false;
+  if(auto parent = _parent()) {
+    updateNow = GetMenu(parent->hwnd) == nullptr;
+  }
+
+  if (updateNow) {
+    _updateDeferred();
+  } else {
+    pApplication::state().staleMenus.removeByValue(this);
+    pApplication::state().staleMenus.append(this);
+  }
+}
+
+auto pMenuBar::_updateDeferred() -> void {
   if(hmenu) DestroyMenu(hmenu);
   hmenu = CreateMenu();
 
