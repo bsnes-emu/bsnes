@@ -5,16 +5,19 @@ auto SuperFX::read(uint addr, uint8 data) -> uint8 {
       synchronizeCPU();
       if(synchronizing()) break;
     }
-    return rom.read((((addr & 0x3f0000) >> 1) | (addr & 0x7fff)) & romMask);
+    addr = (((addr & 0x3f0000) >> 1) | (addr & 0x7fff));
+    addr = Bus::mirror(addr, rom.size());
+    return rom.read(addr);
   }
 
   if((addr & 0xe00000) == 0x400000) {  //$40-5f:0000-ffff
+    addr =  Bus::mirror(addr, rom.size());
     while(!regs.scmr.ron) {
       step(6);
       synchronizeCPU();
       if(synchronizing()) break;
     }
-    return rom.read(addr & romMask);
+    return rom.read(addr);
   }
 
   if((addr & 0xe00000) == 0x600000) {  //$60-7f:0000-ffff
