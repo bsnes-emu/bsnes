@@ -24,10 +24,17 @@ auto CPU::irqPoll() -> void {
   }
 
   //IRQ test
+  //the IRQ unit's V counter is cleared at H=2 on the first scanline of a field,
+  //rather than advancing at H=6 as on all other scanlines
+  //(V=last,H=339 can never match: that H only exists at H=2, after V is cleared)
+  uint vtime = vcounter(10);
+  if(vcounter() == 0 && hcounter() == 6) vtime = 0;
+  //the IRQ unit's H counter is cleared at H=6 and held at 0 until H=10,
+  //so HTIME=0 (stored as 4) matches one poll earlier than HTIME>=1
+  uint htime = hcounter(io.htime == 4 ? 6 : 10);
   if(status.irqValid.raise(io.irqEnable
-  && (!io.virqEnable || vcounter(10) == io.vtime)
-  && (!io.hirqEnable || hcounter(10) == io.htime)
-  && (vcounter(6) || hcounter(6))  //IRQs cannot trigger on last dot of fields
+  && (!io.virqEnable || vtime == io.vtime)
+  && (!io.hirqEnable || htime == io.htime)
   )) status.irqLine = status.irqHold = 1;  //hold /IRQ for four cycles
 }
 
