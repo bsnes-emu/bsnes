@@ -1,0 +1,13 @@
+input
+  format: rgba8
+  filter: nearest
+  wrap: edge
+
+program
+  format: rgba8
+  filter: nearest
+  wrap: edge
+  fragment: bilinear-precise.fs
+
+output
+  filter: nearest
