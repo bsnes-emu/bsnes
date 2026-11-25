@@ -40,12 +40,12 @@ jobs:
     - uses: actions/checkout@v4
     - uses: vmactions/freebsd-vm@v1
       with:
-        release: "14.3"
+        release: "14.5"
         usesh: true
         prepare: |
           pkg install --yes gmake gdb gcc14 pkgconf sdl2 openal-soft gtk3 gtksourceview3 libXv zip
         run: |
-          gmake -j4 -C bsnes local=false
+          gmake -j4 -C bsnes hiro.verbose all local=false
     - name: Upload
       uses: actions/upload-artifact@v4
       with:
