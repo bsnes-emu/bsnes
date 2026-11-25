@@ -676,7 +676,7 @@ board: EVENT-CC92
       memory type=ROM content=Level-3
     dip
   processor manufacturer=NEC architecture=uPD7725
-    map address=20-3f,a0-bf:8000-ffff mask=0x7fff
+    map address=20-3f,a0-bf:8000-ffff mask=0x3fff
     memory type=ROM content=Program architecture=uPD7725
     memory type=ROM content=Data architecture=uPD7725
     memory type=RAM content=Data architecture=uPD7725
