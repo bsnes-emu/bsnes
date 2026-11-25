@@ -44,32 +44,39 @@ void ST0010::writed(uint16 addr, uint32 data) {
 //bsnes port - Copyright (C) 2007 byuu
 
 void ST0010::op_01(int16 x0, int16 y0, int16 &x1, int16 &y1, int16 &quadrant, int16 &theta) {
+  int32 x;
+  int32 y;
+  int32 q;
+
   if((x0 < 0) && (y0 < 0)) {
-    x1 = -x0;
-    y1 = -y0;
-    quadrant = -0x8000;
+    x = -(int32)x0;
+    y = -(int32)y0;
+    q = -0x8000;
   } else if(x0 < 0) {
-    x1 = y0;
-    y1 = -x0;
-    quadrant = -0x4000;
+    x = y0;
+    y = -(int32)x0;
+    q = -0x4000;
   } else if(y0 < 0) {
-    x1 = -y0;
-    y1 = x0;
-    quadrant = 0x4000;
+    x = -(int32)y0;
+    y = x0;
+    q = 0x4000;
   } else {
-    x1 = x0;
-    y1 = y0;
-    quadrant = 0x0000;
+    x = x0;
+    y = y0;
+    q = 0x0000;
   }
 
-  while((x1 > 0x1f) || (y1 > 0x1f)) {
-    if(x1 > 1) { x1 >>= 1; }
-    if(y1 > 1) { y1 >>= 1; }
+  while((x > 0x1f) || (y > 0x1f)) {
+    if(x > 1) { x >>= 1; }
+    if(y > 1) { y >>= 1; }
   }
 
-  if(y1 == 0) { quadrant += 0x4000; }
+  if(y == 0) { q += 0x4000; }
 
-  theta = (arctan[y1][x1] << 8) ^ quadrant;
+  x1 = x;
+  y1 = y;
+  quadrant = q;
+  theta = (arctan[y][x] << 8) ^ (uint16)q;
 }
 
 //
@@ -92,6 +99,8 @@ void ST0010::op_02() {
   int16 positions = readw(0x0024);
   uint16 *places  = (uint16*)(ram + 0x0040);
   uint16 *drivers = (uint16*)(ram + 0x0080);
+
+  if(positions > 32) return;
 
   bool sorted;
   uint16 temp;
