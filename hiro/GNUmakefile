@@ -75,3 +75,7 @@ $(object.path)/hiro-resource.o: $(hiro.resource)
 hiro.verbose:
 	$(info hiro Target:)
 	$(info $([space]) $(hiro))
+	$(info hiro flags:)
+	$(info $(hiro.flags))
+	$(info hiro options:)
+	$(info $(hiro.options))
