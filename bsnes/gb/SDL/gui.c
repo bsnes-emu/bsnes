@@ -1,4 +1,3 @@
-#include <OpenDialog/open_dialog.h>
 #include <SDL.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -7,6 +6,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <ctype.h>
+#include "open_dialog/open_dialog.h"
 #include "utils.h"
 #include "gui.h"
 #include "font.h"
@@ -58,10 +58,6 @@ void render_texture(void *pixels,  void *previous)
         SDL_RenderPresent(renderer);
     }
     else {
-        static void *_pixels = NULL;
-        if (pixels) {
-            _pixels = pixels;
-        }
         glClearColor(0, 0, 0, 1);
         glClear(GL_COLOR_BUFFER_BIT);
         GB_frame_blending_mode_t mode = configuration.blending_mode;
@@ -76,7 +72,7 @@ void render_texture(void *pixels,  void *previous)
                 mode = GB_is_odd_frame(&gb)? GB_FRAME_BLENDING_MODE_ACCURATE_ODD : GB_FRAME_BLENDING_MODE_ACCURATE_EVEN;
             }
         }
-        render_bitmap_with_shader(&shader, _pixels, previous,
+        render_bitmap_with_shader(&shader, pixels, previous,
                                   GB_get_screen_width(&gb), GB_get_screen_height(&gb),
                                   rect.x, rect.y, rect.w, rect.h,
                                   mode);
@@ -85,21 +81,26 @@ void render_texture(void *pixels,  void *previous)
 }
 
 static const char *help[] = {
+// Shortcuts
 "Keyboard Shortcuts:\n"
-" Open Menu:        Escape\n"
+" Open menu:        Escape\n"
 " Open ROM:          " MODIFIER_NAME "+O\n"
 " Reset:             " MODIFIER_NAME "+R\n"
 " Pause:             " MODIFIER_NAME "+P\n"
 " Save state:    " MODIFIER_NAME "+(0-9)\n"
 " Load state:  " MODIFIER_NAME "+" SHIFT_STRING "+(0-9)\n"
-" Toggle Fullscreen  " MODIFIER_NAME "+F\n"
+" Toggle fullscreen  " MODIFIER_NAME "+F\n"
 #ifdef __APPLE__
 " Mute/Unmute:     " MODIFIER_NAME "+" SHIFT_STRING "+M\n"
+" Save screenshot:   " MODIFIER_NAME "+S\n"
 #else
 " Mute/Unmute:       " MODIFIER_NAME "+M\n"
+" Save screenshot:   F12\n"
 #endif
 " Toggle channel: " ALT_STRING "+(1-4)\n"
-" Break Debugger:    " CTRL_STRING "+C",
+" Break debugger:    " CTRL_STRING "+C",
+
+// About
 "\n"
 "SameBoy\n"
 "Version " GB_VERSION "\n\n"
@@ -336,6 +337,9 @@ static void nop(unsigned index){}
 
 static void open_rom(unsigned index)
 {
+#ifdef _WIN32
+    SDL_SetWindowFullscreen(window, 0);
+#endif
     char *filename = do_open_rom_dialog();
     if (filename) {
         set_filename(filename, free);
@@ -345,6 +349,9 @@ static void open_rom(unsigned index)
 
 static void cart_swap(unsigned index)
 {
+#ifdef _WIN32
+    SDL_SetWindowFullscreen(window, 0);
+#endif
     char *filename = do_open_rom_dialog();
     if (filename) {
         set_filename(filename, free);
@@ -1135,6 +1142,9 @@ static void toggle_bootrom(unsigned index)
         configuration.bootrom_path[0] = 0;
     }
     else {
+#ifdef _WIN32
+        SDL_SetWindowFullscreen(window, 0);
+#endif
         char *folder = do_open_folder_dialog();
         if (!folder) return;
         if (strlen(folder) < sizeof(configuration.bootrom_path) - 1) {
@@ -1443,8 +1453,10 @@ static void cycle_palette(unsigned index)
         }
     }
     else if (configuration.dmg_palette == 4) {
+        bool found = false;
         for (unsigned i = 0; i < n_custom_palettes; i++) {
             if (strcmp(custom_palettes[i], configuration.dmg_palette_name) == 0) {
+                found = true;
                 if (i == n_custom_palettes - 1) {
                     configuration.dmg_palette = 0;
                 }
@@ -1453,6 +1465,9 @@ static void cycle_palette(unsigned index)
                 }
                 break;
             }
+        }
+        if (!found) {
+            configuration.dmg_palette = 0;
         }
     }
     else {
@@ -1475,7 +1490,9 @@ static void cycle_palette_backwards(unsigned index)
     }
     else if (configuration.dmg_palette == 4) {
         for (unsigned i = 0; i < n_custom_palettes; i++) {
+            bool found = false;
             if (strcmp(custom_palettes[i], configuration.dmg_palette_name) == 0) {
+                found = true;
                 if (i == 0) {
                     configuration.dmg_palette = 3;
                 }
@@ -1483,6 +1500,9 @@ static void cycle_palette_backwards(unsigned index)
                     strcpy(configuration.dmg_palette_name, custom_palettes[i - 1]);
                 }
                 break;
+            }
+            if (!found) {
+                configuration.dmg_palette = 3;
             }
         }
     }
@@ -1520,6 +1540,7 @@ struct shader_name {
 } shaders[] =
 {
     {"NearestNeighbor", "Nearest Neighbor"},
+    {"Pixelated", "Pixelated"},
     {"Bilinear", "Bilinear"},
     {"SmoothBilinear", "Smooth Bilinear"},
     {"MonoLCD", "Monochrome LCD"},
@@ -1546,7 +1567,6 @@ static void cycle_filter(unsigned index)
         }
     }
     
-
     i += 1;
     if (i >= sizeof(shaders) / sizeof(shaders[0])) {
         i -= sizeof(shaders) / sizeof(shaders[0]);
@@ -1555,7 +1575,7 @@ static void cycle_filter(unsigned index)
     strcpy(configuration.filter, shaders[i].file_name);
     free_shader(&shader);
     if (!init_shader_with_name(&shader, configuration.filter)) {
-        init_shader_with_name(&shader, "NearestNeighbor");
+        init_shader_with_name(&shader, "Pixelated");
     }
 }
 
@@ -1577,7 +1597,7 @@ static void cycle_filter_backwards(unsigned index)
     strcpy(configuration.filter, shaders[i].file_name);
     free_shader(&shader);
     if (!init_shader_with_name(&shader, configuration.filter)) {
-        init_shader_with_name(&shader, "NearestNeighbor");
+        init_shader_with_name(&shader, "Pixelated");
     }
 
 }
@@ -1592,7 +1612,7 @@ static const char *current_filter_name(unsigned index)
     }
     
     if (i == sizeof(shaders) / sizeof(shaders[0])) {
-        i = 0;
+        i = 1; // Pixelated
     }
     
     return shaders[i].display_name;
@@ -2138,12 +2158,36 @@ static const char *current_hotkey(unsigned index)
     }) [configuration.hotkey_actions[index - 2]];
 }
 
+static void increase_rumble_strength(unsigned index)
+{
+    if (configuration.rumble_strength < 8) {
+        configuration.rumble_strength++;
+    }
+}
+
+static void decrease_rumble_strength(unsigned index)
+{
+    if (configuration.rumble_strength > 1) {
+        configuration.rumble_strength--;
+    }
+}
+
+const char *current_rumble_strength(unsigned index)
+{
+    static char ret[22];
+    strcpy(ret, TICKLESS_SLIDER_STRING);
+    unsigned pos = ((configuration.rumble_strength - 1) * (strlen(TICKLESS_SLIDER_STRING) - 1) + 3) / 7;
+    ret[pos] = SELECTED_SLIDER_STRING[pos];
+    return ret;
+}
+
 static const struct menu_item joypad_menu[] = {
     {"Joypad:", cycle_joypads, current_joypad_name, cycle_joypads_backwards},
     {"Configure layout", detect_joypad_layout},
     {"Hotkey 1 Action:", cycle_hotkey, current_hotkey, cycle_hotkey_backwards},
     {"Hotkey 2 Action:", cycle_hotkey, current_hotkey, cycle_hotkey_backwards},
     {"Rumble Mode:", cycle_rumble_mode, current_rumble_mode, cycle_rumble_mode_backwards},
+    {"Rumble Strength:", increase_rumble_strength, current_rumble_strength, decrease_rumble_strength},
     {"Analog Stick Behavior:", toggle_use_faux_analog_inputs, current_faux_analog_inputs, toggle_use_faux_analog_inputs},
     {"Enable Control:", toggle_allow_background_controllers, current_background_control_mode, toggle_allow_background_controllers},
     {"Back", enter_controls_menu},
@@ -2252,6 +2296,9 @@ static void toggle_audio_recording(unsigned index)
         memcpy(audio_recording_menu_item, item_string, sizeof(item_string));
         return;
     }
+#ifdef _WIN32
+    SDL_SetWindowFullscreen(window, 0);
+#endif
     char *filename = do_save_recording_dialog(GB_get_sample_rate(&gb));
     
     /* Drop events as it SDL seems to catch several in-dialog events */
@@ -2275,6 +2322,9 @@ static void toggle_audio_recording(unsigned index)
                 else if (strcasecmp(".wav", filename + length - 4) == 0) {
                     format = GB_AUDIO_FORMAT_WAV;
                 }
+                else if (strcasecmp(".vgm", filename + length - 4) == 0) {
+                    format = GB_AUDIO_FORMAT_VGM;
+                }
             }
         }
         
@@ -2282,7 +2332,7 @@ static void toggle_audio_recording(unsigned index)
         free(filename);
         if (error) {
             char *message = NULL;
-            asprintf(&message, "Could not finalize recording: %s", strerror(error));
+            asprintf(&message, "Could not start recording: %s", strerror(error));
             SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Error", message, window);
             free(message);
             return;
@@ -2304,11 +2354,6 @@ void convert_mouse_coordinates(signed *x, signed *y)
 
     *x = (signed)(*x - rect.x / factor) * width / (signed)(rect.w / factor) - x_offset;
     *y = (signed)(*y - rect.y / factor) * height / (signed)(rect.h / factor) - y_offset;
-
-    if (strcmp("CRT", configuration.filter) == 0) {
-        *y = *y * 8 / 7;
-        *y -= 144 / 16;
-    }
 }
 
 void update_swap_interval(void)
@@ -2728,6 +2773,9 @@ void run_gui(bool is_running)
                 }
                 else if (event_hotkey_code(&event) == SDL_SCANCODE_O) {
                     if (event.key.keysym.mod & MODIFIER) {
+#ifdef _WIN32
+                        SDL_SetWindowFullscreen(window, 0);
+#endif
                         char *filename = do_open_rom_dialog();
                         if (filename) {
                             set_filename(filename, free);

@@ -310,33 +310,33 @@ static bool verify_and_update_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t
     *attempt_bess = false;
     
     if (gb->version != save->version) {
-        GB_log(gb, "The save state is for a different version of SameBoy.\n");
+        GB_attributed_log(gb, GB_LOG_ERROR, "The save state is for a different version of SameBoy.\n");
         *attempt_bess = true;
         return false;
     }
     
     if (GB_is_cgb(gb) != GB_is_cgb(save) || GB_is_hle_sgb(gb) != GB_is_hle_sgb(save)) {
-        GB_log(gb, "The save state is for a different Game Boy model. Try changing the emulated model.\n");
+        GB_attributed_log(gb, GB_LOG_ERROR, "The save state is for a different Game Boy model. Try changing the emulated model.\n");
         return false;
     }
     
     if (gb->mbc_ram_size < save->mbc_ram_size) {
-        GB_log(gb, "The save state has non-matching MBC RAM size.\n");
+        GB_attributed_log(gb, GB_LOG_ERROR, "The save state has non-matching MBC RAM size.\n");
         return false;
     }
     
     if (gb->vram_size != save->vram_size) {
-        GB_log(gb, "The save state has non-matching VRAM size. Try changing the emulated model.\n");
+        GB_attributed_log(gb, GB_LOG_ERROR, "The save state has non-matching VRAM size. Try changing the emulated model.\n");
         return false;
     }
     
     if (GB_is_hle_sgb(gb) != GB_is_hle_sgb(save)) {
-        GB_log(gb, "The save state is %sfor a Super Game Boy. Try changing the emulated model.\n", GB_is_hle_sgb(save)? "" : "not ");
+        GB_attributed_log(gb, GB_LOG_ERROR, "The save state is %sfor a Super Game Boy. Try changing the emulated model.\n", GB_is_hle_sgb(save)? "" : "not ");
         return false;
     }
     
     if (gb->ram_size != save->ram_size) {
-        GB_log(gb, "The save state has non-matching RAM size. Try changing the emulated model.\n");
+        GB_attributed_log(gb, GB_LOG_ERROR, "The save state has non-matching RAM size. Try changing the emulated model.\n");
         return false;
     }
     
@@ -367,8 +367,16 @@ static bool verify_and_update_state_compatibility(GB_gameboy_t *gb, GB_gameboy_t
         return true;
     }
     
-    GB_log(gb, "This save state is for an unknown Game Boy model\n");
+    GB_attributed_log(gb, GB_LOG_ERROR, "This save state is for an unknown Game Boy model\n");
     return false;
+}
+
+static void sanitize_bool(bool *b)
+{
+    _Atomic volatile bool *vb = (typeof(vb))b;
+    if (*vb) {
+        *vb = true;
+    }
 }
 
 static void sanitize_state(GB_gameboy_t *gb)
@@ -409,7 +417,7 @@ static void sanitize_state(GB_gameboy_t *gb)
         gb->current_tile_attributes = 0;
     }
 
-    gb->object_low_line_address &= gb->vram_size & ~1;
+    gb->object_low_line_address &= (gb->vram_size - 1) & ~1;
     if (gb->lcd_x > gb->position_in_line) {
         gb->lcd_x = gb->position_in_line;
     }
@@ -433,6 +441,13 @@ static void sanitize_state(GB_gameboy_t *gb)
     
     if (gb->n_visible_objs > 10) {
         gb->n_visible_objs = 10;
+    }
+    
+    sanitize_bool(&gb->cgb_vram_bank);
+    if (gb->accessory == GB_ACCESSORY_PRINTER) {
+        gb->printer.image_offset %= sizeof(gb->printer.image);
+        gb->printer.image_offset /= 160 * 8;
+        gb->printer.image_offset *= 160 * 8;
     }
 }
 
@@ -850,7 +865,7 @@ int GB_save_state(GB_gameboy_t *gb, const char *path)
     GB_ASSERT_NOT_RUNNING(gb)
     FILE *f = fopen(path, "wb");
     if (!f) {
-        GB_log(gb, "Could not open save state: %s.\n", strerror(errno));
+        GB_attributed_log(gb, GB_LOG_ERROR, "Could not open save state: %s.\n", strerror(errno));
         return errno;
     }
     virtual_file_t file = {
@@ -893,19 +908,11 @@ void GB_save_state_to_buffer_no_bess(GB_gameboy_t *gb, uint8_t *buffer)
     assert(file.position == GB_get_save_state_size_no_bess(gb));
 }
 
-static bool read_section(virtual_file_t *file, void *dest, uint32_t size, bool fix_broken_windows_saves)
+static bool read_section(virtual_file_t *file, void *dest, uint32_t size)
 {
     uint32_t saved_size = 0;
     if (file->read(file, &saved_size, sizeof(size)) != sizeof(size)) {
         return false;
-    }
-    
-    if (fix_broken_windows_saves) {
-        if (saved_size < 4) {
-            return false;
-        }
-        saved_size -= 4;
-        file->seek(file, 4, SEEK_CUR);
     }
     
     if (saved_size <= size) {
@@ -944,7 +951,7 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
     if (footer.magic != BE32('BESS')) {
         // Not a BESS file
         if (!is_sameboy) {
-            GB_log(gb, "The file is not a save state, or is from an incompatible operating system.\n");
+            GB_attributed_log(gb, GB_LOG_ERROR, "The file is not a save state, or is from an incompatible operating system.\n");
         }
         return -1;
     }
@@ -974,7 +981,7 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                 }
                 
                 if (core.major != LE16(1)) {
-                    GB_log(gb, "This save state uses an incompatible version of the BESS specification");
+                    GB_attributed_log(gb, GB_LOG_ERROR, "This save state uses an incompatible version of the BESS specification");
                     GB_free(&save);
                     return -1;
                 }
@@ -991,7 +998,7 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                         break;
                     default:
                     wrong_model:
-                        GB_log(gb, "The save state is for a different model. Try changing the emulated model.\n");
+                        GB_attributed_log(gb, GB_LOG_ERROR, "The save state is for a different model. Try changing the emulated model.\n");
                         GB_free(&save);
                         return -1;
                 }
@@ -1101,10 +1108,10 @@ static int load_bess_save(GB_gameboy_t *gb, virtual_file_t *file, bool is_samebo
                         if (bess_info.title[i] < 0x20 || bess_info.title[i] > 0x7E) break;
                         ascii_title[i] = bess_info.title[i];
                     }
-                    GB_log(gb, "Save state was made on another ROM: '%s'\n", ascii_title);
+                    GB_attributed_log(gb, GB_LOG_ERROR, "Save state was made on another ROM: '%s'\n", ascii_title);
                 }
                 else if (memcmp(bess_info.checksum, bank + 0x14E, 2)) {
-                    GB_log(gb, "Save state was potentially made on another revision of the same ROM.\n");
+                    GB_attributed_log(gb, GB_LOG_WARNING, "Save state was potentially made on another revision of the same ROM.\n");
                 }
                 break;
             }
@@ -1281,15 +1288,16 @@ done:
         GB_palette_changed(gb, false, i * 2);
         GB_palette_changed(gb, true, i * 2);
     }
+    gb->apu_output.sample_fraction = 0;
     return 0;
 parse_error:
     errno = -1;
 error:
     if (emulator_name[0]) {
-        GB_log(gb, "Attempted to import a save state from %s, but the save state is invalid.\n", emulator_name);
+        GB_attributed_log(gb, GB_LOG_ERROR, "Attempted to import a save state from %s, but the save state is invalid.\n", emulator_name);
     }
     else {
-        GB_log(gb, "Attempted to import a save state from a different emulator or incompatible version, but the save state is invalid.\n");
+        GB_attributed_log(gb, GB_LOG_ERROR, "Attempted to import a save state from a different emulator or incompatible version, but the save state is invalid.\n");
     }
     GB_free(&save);
     sanitize_state(gb);
@@ -1305,20 +1313,12 @@ static int load_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
     /* ...Except ram size, we use it to detect old saves with incorrect ram sizes */
     save.ram_size = 0;
     
-    bool fix_broken_windows_saves = false;
     
     if (file->read(file, GB_GET_SECTION(&save, header), GB_SECTION_SIZE(header)) != GB_SECTION_SIZE(header)) return errno;
-    if (save.magic == 0) {
-        /* Potentially legacy, broken Windows save state*/
-        
-        file->seek(file, 4, SEEK_SET);
-        if (file->read(file, GB_GET_SECTION(&save, header), GB_SECTION_SIZE(header)) != GB_SECTION_SIZE(header)) return errno;
-        fix_broken_windows_saves = true;
-    }
     if (gb->magic != save.magic) {
         return load_bess_save(gb, file, false);
     }
-#define READ_SECTION(gb, file, section) read_section(file, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section), fix_broken_windows_saves)
+#define READ_SECTION(gb, file, section) read_section(file, GB_GET_SECTION(gb, section), GB_SECTION_SIZE(section))
     if (!READ_SECTION(&save, file, core_state)) return errno ?: EIO;
     if (!READ_SECTION(&save, file, dma       )) return errno ?: EIO;
     if (!READ_SECTION(&save, file, mbc       )) return errno ?: EIO;
@@ -1339,7 +1339,7 @@ static int load_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
     }
     
     if (GB_is_hle_sgb(gb)) {
-        if (!read_section(file, gb->sgb, sizeof(*gb->sgb), false)) return errno ?: EIO;
+        if (!read_section(file, gb->sgb, sizeof(*gb->sgb))) return errno ?: EIO;
     }
     
     memset(gb->mbc_ram + save.mbc_ram_size, 0xFF, gb->mbc_ram_size - save.mbc_ram_size);
@@ -1366,6 +1366,7 @@ static int load_state_internal(GB_gameboy_t *gb, virtual_file_t *file)
 
     sanitize_state(gb);
     GB_rewind_invalidate_for_backstepping(gb);
+    gb->apu_output.sample_fraction = 0;
     return 0;
 }
 
@@ -1374,7 +1375,7 @@ int GB_load_state(GB_gameboy_t *gb, const char *path)
     GB_ASSERT_NOT_RUNNING(gb)
     FILE *f = fopen(path, "rb");
     if (!f) {
-        GB_log(gb, "Could not open save state: %s.\n", strerror(errno));
+        GB_attributed_log(gb, GB_LOG_ERROR, "Could not open save state: %s.\n", strerror(errno));
         return errno;
     }
     virtual_file_t file = {
@@ -1457,16 +1458,8 @@ static int get_state_model_internal(virtual_file_t *file, GB_model_t *model)
 {
     GB_gameboy_t save;
     
-    bool fix_broken_windows_saves = false;
     
     if (file->read(file, GB_GET_SECTION(&save, header), GB_SECTION_SIZE(header)) != GB_SECTION_SIZE(header)) return errno;
-    if (save.magic == 0) {
-        /* Potentially legacy, broken Windows save state*/
-        
-        file->seek(file, 4, SEEK_SET);
-        if (file->read(file, GB_GET_SECTION(&save, header), GB_SECTION_SIZE(header)) != GB_SECTION_SIZE(header)) return errno;
-        fix_broken_windows_saves = true;
-    }
     if (save.magic != GB_state_magic()) {
         return get_state_model_bess(file, model);
     }
@@ -1517,15 +1510,6 @@ bool GB_is_save_state(const char *path)
     if (magic == GB_state_magic()) {
         ret = true;
         goto exit;
-    }
-    
-    // Legacy corrupted Windows save state
-    if (magic == 0) {
-        fread(&magic, sizeof(magic), 1, f);
-        if (magic == GB_state_magic()) {
-            ret = true;
-            goto exit;
-        }
     }
     
     fseek(f, -sizeof(magic), SEEK_END);

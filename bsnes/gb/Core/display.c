@@ -193,7 +193,7 @@ void GB_display_vblank(GB_gameboy_t *gb, GB_vblank_type_t type)
     
     /* TODO: Slow in turbo mode! */
     if (GB_is_hle_sgb(gb)) {
-        GB_sgb_render(gb);
+        GB_sgb_render(gb, type != GB_VBLANK_TYPE_NORMAL_FRAME);
     }
     
     if (gb->turbo) {
@@ -1717,7 +1717,7 @@ void GB_display_run(GB_gameboy_t *gb, unsigned cycles, bool force)
     display9: {
         // TODO: Timing of things in this scenario is almost completely untested
         if (gb->current_line < LINES && !GB_is_sgb(gb) && !gb->disable_rendering) {
-            GB_log(gb, "The ROM is preventing line %d from fully rendering, this could damage a real device's LCD display.\n", gb->current_line);
+            GB_attributed_log(gb, GB_LOG_WARNING,  "The ROM is preventing line %d from fully rendering, this could damage a real device's LCD display.\n", gb->current_line);
             uint32_t *dest = NULL;
             if (gb->border_mode != GB_BORDER_ALWAYS) {
                 dest = gb->screen + gb->lcd_x + gb->current_line * WIDTH;
@@ -2186,7 +2186,7 @@ skip_slow_mode_3:
                         gb->frame_skip_state = GB_FRAMESKIP_FIRST_FRAME_RENDERED;
                     }
                     else {
-                        if (!GB_is_sgb(gb) || gb->current_lcd_line < LINES) {
+                        if (!GB_is_sgb(gb)) {
                             update_frame_parity(gb); // TODO: test actual timing
                             GB_display_vblank(gb, GB_VBLANK_TYPE_NORMAL_FRAME);
                         }
@@ -2194,7 +2194,7 @@ skip_slow_mode_3:
                     }
                 }
                 else {
-                    if (!GB_is_sgb(gb) || gb->current_lcd_line < LINES) {
+                    if (!GB_is_sgb(gb)) {
                         update_frame_parity(gb); // TODO: test actual timing
                         GB_display_vblank(gb, GB_VBLANK_TYPE_NORMAL_FRAME);
                     }

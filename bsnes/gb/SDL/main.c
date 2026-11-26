@@ -5,15 +5,16 @@
 #include <unistd.h>
 #include <errno.h>
 #include <limits.h>
-#include <OpenDialog/open_dialog.h>
+#include <fcntl.h>
 #include <SDL.h>
 #include <Core/gb.h>
+#include "open_dialog/open_dialog.h"
 #include "utils.h"
 #include "gui.h"
 #include "shader.h"
 #include "audio/audio.h"
 #include "console.h"
-#include <fcntl.h>
+#include "save_png/save_png.h"
 
 #ifdef _WIN32
 #include <Windows.h>
@@ -29,12 +30,15 @@ static bool underclock_down = false, rewind_down = false, do_rewind = false, rew
 static bool rapid_a = false, rapid_b = false;
 static uint8_t rapid_a_count = 0, rapid_b_count = 0;
 static double clock_mutliplier = 1.0;
+static bool pending_screenshot = false;
 
 char *filename = NULL;
 static typeof(free) *free_function = NULL;
 static char *battery_save_path_ptr = NULL;
 static SDL_GLContext gl_context = NULL;
 static bool console_supported = false;
+static bool battery_dirty = false;
+static unsigned battery_timer = 0;
 
 bool uses_gl(void)
 {
@@ -305,6 +309,32 @@ static void configure_console(void)
     GB_set_async_input_callback(&gb, async_input_callback);
 }
 
+static void save_screenshot(void)
+{
+    static char png_path[PATH_MAX] = {0,};
+    time_t now = time(NULL);
+    struct tm *local = localtime(&now);
+    char timestring[20];
+    strftime(timestring, sizeof(timestring), "%Y-%m-%d %H.%M.%S", local);
+    
+    replace_extension(filename, strlen(filename), png_path, "");
+    snprintf(png_path + strlen(png_path), sizeof(png_path) - 1 - strlen(png_path), " %s.png", timestring);
+    
+    unsigned i = 2;
+    while (access(png_path, F_OK) == 0) {
+        replace_extension(filename, strlen(filename), png_path, "");
+        snprintf(png_path + strlen(png_path), sizeof(png_path) - 1 - strlen(png_path), " %s %u.png", timestring, i);
+        i++;
+    }
+    
+    if (save_png(png_path, GB_get_screen_width(&gb), GB_get_screen_height(&gb), active_pixel_buffer, pixel_format)) {
+        show_osd_text("Screenshot saved");
+    }
+    else {
+        show_osd_text("Failed to save screenshot");
+    }
+}
+
 static void handle_events(GB_gameboy_t *gb)
 {
     SDL_Event event;
@@ -405,6 +435,9 @@ static void handle_events(GB_gameboy_t *gb)
                             break;
                         case HOTKEY_PAUSE:
                             paused = !paused;
+                            if (paused) {
+                                GB_save_battery(gb, battery_save_path_ptr);
+                            }
                             break;
                         case HOTKEY_MUTE:
                             GB_audio_set_paused(GB_audio_is_playing());
@@ -542,6 +575,9 @@ static void handle_events(GB_gameboy_t *gb)
                         
                     case SDL_SCANCODE_O: {
                         if (event.key.keysym.mod & MODIFIER) {
+#ifdef _WIN32
+                            SDL_SetWindowFullscreen(window, 0);
+#endif
                             char *filename = do_open_rom_dialog();
                             if (filename) {
                                 set_filename(filename, free);
@@ -554,6 +590,9 @@ static void handle_events(GB_gameboy_t *gb)
                     case SDL_SCANCODE_P:
                         if (event.key.keysym.mod & MODIFIER) {
                             paused = !paused;
+                            if (paused) {
+                                GB_save_battery(gb, battery_save_path_ptr);
+                            }
                         }
                         break;
                     case SDL_SCANCODE_M:
@@ -566,6 +605,19 @@ static void handle_events(GB_gameboy_t *gb)
 #endif
                             GB_audio_set_paused(GB_audio_is_playing());
                         }
+                        break;
+#ifdef __APPLE__
+                    case SDL_SCANCODE_S:
+                        if (!(event.key.keysym.mod & MODIFIER)) break;
+#else
+                    case SDL_SCANCODE_F12:
+#endif
+                        if (osd_countdown && configuration.osd) {
+                            pending_screenshot = true;
+                            break;
+                        }
+                        
+                        save_screenshot();
                         break;
                         
                     case SDL_SCANCODE_F:
@@ -688,13 +740,20 @@ static void vblank(GB_gameboy_t *gb, GB_vblank_type_t type)
         show_osd_text("Rewinding...");
     }
     
+    if (pending_screenshot) {
+        pending_screenshot = false;
+        save_screenshot();
+    }
+    
     if (osd_countdown && configuration.osd) {
-        unsigned width = GB_get_screen_width(gb);
-        unsigned height = GB_get_screen_height(gb);
-        draw_text(active_pixel_buffer,
-                  width, height, 8, height - 8 - osd_text_lines * 12, osd_text,
-                  rgb_encode(gb, 255, 255, 255), rgb_encode(gb, 0, 0, 0),
-                  true);
+        if (osd_countdown != 1) {
+            unsigned width = GB_get_screen_width(gb);
+            unsigned height = GB_get_screen_height(gb);
+            draw_text(active_pixel_buffer,
+                      width, height, 8, height - 8 - osd_text_lines * 12, osd_text,
+                      rgb_encode(gb, 255, 255, 255), rgb_encode(gb, 0, 0, 0),
+                      true);
+        }
         osd_countdown--;
     }
     if (type != GB_VBLANK_TYPE_REPEAT) {
@@ -710,11 +769,28 @@ static void vblank(GB_gameboy_t *gb, GB_vblank_type_t type)
         }
     }
     do_rewind = rewind_down;
+    
+    battery_timer++;
+    if (battery_timer == 15) {
+        battery_timer = 0;
+        
+        if (battery_dirty && !GB_get_battery_dirty(gb)) {
+            GB_save_battery(gb, battery_save_path_ptr);
+        }
+        
+        battery_dirty = GB_get_battery_dirty(gb);
+        GB_clear_battery_dirty(gb);
+    }
+    
     handle_events(gb);
 }
 
 static void rumble(GB_gameboy_t *gb, double amp)
 {
+    if (configuration.rumble_strength != 8) {
+        double strength = configuration.rumble_strength / 8.0;
+        amp = pow(amp, strength) * strength;
+    }
     SDL_HapticRumblePlay(haptic, amp, 250);
 }
 
@@ -1441,12 +1517,16 @@ int main(int argc, char **argv)
         configuration.cgb_revision %= GB_MODEL_CGB_E - GB_MODEL_CGB_0 + 1;
         configuration.audio_driver[15] = 0;
         configuration.dmg_palette_name[24] = 0;
-        // Fix broken defaults, should keys 12-31 should be unmapped by default
+        // Fix broken defaults, keys 12-31 should be unmapped by default
         if (configuration.joypad_configuration[31] == 0) {
             memset(configuration.joypad_configuration + 12 , -1, 32 - 12);
         }
         if ((configuration.agb_revision & ~GB_MODEL_GBP_BIT) != GB_MODEL_AGB_A) {
             configuration.agb_revision = GB_MODEL_AGB_A;
+        }
+        
+        if (configuration.rumble_strength > 8 || configuration.rumble_strength == 0) {
+            configuration.rumble_strength = 8;
         }
     }
     
@@ -1518,7 +1598,7 @@ int main(int argc, char **argv)
     SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
     
     if (!init_shader_with_name(&shader, configuration.filter)) {
-        init_shader_with_name(&shader, "NearestNeighbor");
+        init_shader_with_name(&shader, "Pixelated");
     }
     update_viewport();
     

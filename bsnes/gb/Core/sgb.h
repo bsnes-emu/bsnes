@@ -26,7 +26,7 @@ typedef struct {
 struct GB_sgb_s {
     uint8_t command[16 * 7];
     uint16_t command_write_index;
-    bool ready_for_pulse;
+    GB_PADDING(uint8_t, ready_for_pulse);
     bool ready_for_write;
     bool ready_for_stop;
     bool disable_commands;
@@ -63,7 +63,7 @@ struct GB_sgb_s {
 };
 
 internal void GB_sgb_write(GB_gameboy_t *gb, uint8_t value);
-internal void GB_sgb_render(GB_gameboy_t *gb);
+internal void GB_sgb_render(GB_gameboy_t *gb, bool incomplete);
 internal void GB_sgb_load_default_data(GB_gameboy_t *gb);
 
 #endif

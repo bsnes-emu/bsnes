@@ -41,7 +41,7 @@ static void serial_start(GB_gameboy_t *gb, bool bit_received)
             gb->workboy.buffer[3] = int_to_bcd(tm.tm_min); // Minutes, BCD
             gb->workboy.buffer[4] = int_to_bcd(tm.tm_hour); // Hours, BCD
             gb->workboy.buffer[5] = int_to_bcd(tm.tm_mday); // Days, BCD. Upper most 2 bits are added to Year for some reason
-            gb->workboy.buffer[6] = int_to_bcd(tm.tm_mon + 1); // Months, BCD
+            gb->workboy.buffer[6] = int_to_bcd(tm.tm_mon + 1) | (tm.tm_wday << 5); // Months, BCD and weekday
             gb->workboy.buffer[0xF] = tm.tm_year; // Years, plain number, since 1900
 
         }

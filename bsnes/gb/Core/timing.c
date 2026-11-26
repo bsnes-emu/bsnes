@@ -279,6 +279,9 @@ static void timers_run(GB_gameboy_t *gb, uint8_t cycles)
         gb->apu.apu_cycles += 1 << !gb->cgb_double_speed;
         gb->apu_output.sample_cycles += (gb->apu_output.sample_rate << !gb->cgb_double_speed) << 1;
         GB_SLEEP(gb, div, 2, 4);
+        if (unlikely(gb->apu.pending_envelope_tick)) {
+            GB_apu_delayed_envelope_tick(gb);
+        }
     }
 }
 
@@ -491,6 +494,7 @@ void GB_advance_cycles(GB_gameboy_t *gb, uint8_t cycles)
     }
     gb->cycles_since_last_sync += cycles;
     gb->cycles_since_run += cycles;
+    GB_apu_vgm_advance(gb, cycles);
     
     gb->rumble_on_cycles += gb->rumble_strength & 3;
     gb->rumble_off_cycles += (gb->rumble_strength & 3) ^ 3;

@@ -558,6 +558,10 @@ static const uint8_t workboy_vk_to_key[] = {
 
 - (void)setRumble:(double)amp
 {
+    double strength = [[NSUserDefaults standardUserDefaults] doubleForKey:@"GBRumbleStrength"];
+    if (strength != 1) {
+        amp = pow(amp, strength) * strength;
+    }
     [lastController setRumbleAmplitude:amp];
 }
 
@@ -894,6 +898,12 @@ static const uint8_t workboy_vk_to_key[] = {
 - (void)setMouseHidingEnabled:(bool)mouseHidingEnabled
 {
     if (mouseHidingEnabled == _mouseHidingEnabled) return;
+    if (![NSThread isMainThread]) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self setMouseHidingEnabled:mouseHidingEnabled];
+        });
+        return;
+    }
 
     _mouseHidingEnabled = mouseHidingEnabled;
     

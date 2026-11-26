@@ -103,6 +103,30 @@ static void band_limited_read(GB_band_limited_t *band_limited, GB_sample_t *outp
     
     output->left = band_limited->output.left * multiplier / GB_BAND_LIMITED_ONE;
     output->right = band_limited->output.right * multiplier / GB_BAND_LIMITED_ONE;
+    
+    /* This hueristic will mute the channel if it's only playing an amplitude of 1 or 2 units, usually
+       caused by rounding errors when the channel is playing a single frequency above Nyquist. */
+    
+    unsigned diff = abs(output->left - band_limited->last_output.left);
+    if (diff > 4) {
+        band_limited->silence_detection = 0;
+        band_limited->last_output.packed = output->packed;
+        return;
+    }
+    
+    diff = abs(output->right - band_limited->last_output.right);
+    if (diff > 4) {
+        band_limited->silence_detection = 0;
+        band_limited->last_output.packed = output->packed;
+        return;
+    }
+    
+    if (band_limited->silence_detection == 4000) {
+        output->packed = band_limited->last_output.packed;
+    }
+    else {
+        band_limited->silence_detection++;
+    }
 }
 
 static inline uint32_t sample_fraction_multiply(GB_gameboy_t *gb, unsigned multiplier)
@@ -387,7 +411,7 @@ static void render(GB_gameboy_t *gb)
     }
     assert(gb->apu_output.sample_callback);
     gb->apu_output.sample_callback(gb, &filtered_output);
-    if (unlikely(gb->apu_output.output_file)) {
+    if (unlikely(gb->apu_output.output_file && gb->apu_output.output_format != GB_AUDIO_FORMAT_VGM)) {
 #ifdef GB_BIG_ENDIAN
         if (gb->apu_output.output_format == GB_AUDIO_FORMAT_WAV) {
             filtered_output.left = LE16(filtered_output.left);
@@ -517,7 +541,21 @@ static void tick_square_envelope(GB_gameboy_t *gb, GB_channel_t index)
             gb->apu.pcm_mask[0] &= gb->apu.square_channels[GB_SQUARE_1].current_volume | 0xF1;
         }
         else {
-            gb->apu.pcm_mask[0] &= (gb->apu.square_channels[GB_SQUARE_2].current_volume << 2) | 0x1F;
+            /* Note: CGB-0 behavior is instance specific and non-deterministic. Emulated behavior follows my CGB-0,
+                     except that my CGB-0 sometimes yields "1" for 8->7 and 4->3 transitions. */
+            uint8_t mask;
+            if (unlikely(gb->model == GB_MODEL_CGB_0)) {
+                if (gb->apu.square_channels[GB_SQUARE_2].current_volume == 1 && (gb->io_registers[GB_IO_NR22] & 8)) {
+                    mask = 0x1F;
+                }
+                else {
+                    mask = 0x3F;
+                }
+            }
+            else {
+                mask = 0x3F;
+            }
+            gb->apu.pcm_mask[0] &= (gb->apu.square_channels[GB_SQUARE_2].current_volume << 4) | mask;
         }
     }
     
@@ -544,7 +582,7 @@ static void tick_noise_envelope(GB_gameboy_t *gb)
     if (!(nr42 & 7)) return;
 
     if (gb->cgb_double_speed) {
-        gb->apu.pcm_mask[0] &= (gb->apu.noise_channel.current_volume << 2) | 0x1F;
+        gb->apu.pcm_mask[1] &= (gb->apu.noise_channel.current_volume << 4) | 0x1F;
     }
     
     if (nr42 & 8) {
@@ -606,9 +644,31 @@ static void trigger_sweep_calculation(GB_gameboy_t *gb)
     }
 }
 
-void GB_apu_div_event(GB_gameboy_t *gb)
+noinline void GB_apu_delayed_envelope_tick(GB_gameboy_t *gb)
+{
+    gb->apu.pending_envelope_tick = false;
+    if (!gb->apu.global_enable) return;
+    
+    GB_apu_run(gb, true);
+    gb->apu.pcm_mask[0] = gb->apu.pcm_mask[1] = 0xFF;
+
+
+    unrolled for (unsigned i = GB_SQUARE_1; i <= GB_SQUARE_2; i++) {
+        if (gb->apu.square_channels[i].envelope_clock.clock) {
+            tick_square_envelope(gb, i);
+        }
+    }
+    
+    if (gb->apu.noise_channel.envelope_clock.clock) {
+        tick_noise_envelope(gb);
+    }
+}
+
+noinline void GB_apu_div_event(GB_gameboy_t *gb)
 {
     GB_apu_run(gb, true);
+    gb->apu.pcm_mask[0] = gb->apu.pcm_mask[1] = 0xFF;
+
     if (!gb->apu.global_enable) return;
     if (gb->apu.skip_div_event == GB_SKIP_DIV_EVENT_SKIP) {
         gb->apu.skip_div_event = GB_SKIP_DIV_EVENT_SKIPPED;
@@ -622,7 +682,7 @@ void GB_apu_div_event(GB_gameboy_t *gb)
     }
 
     if ((gb->apu.div_divider & 7) == 7) {
-        unrolled for (unsigned i = GB_SQUARE_2 + 1; i--;) {
+        unrolled for (unsigned i = GB_SQUARE_1; i <= GB_SQUARE_2; i++) {
             if (!gb->apu.square_channels[i].envelope_clock.clock) {
                 gb->apu.square_channels[i].volume_countdown--;
                 gb->apu.square_channels[i].volume_countdown &= 7;
@@ -634,18 +694,23 @@ void GB_apu_div_event(GB_gameboy_t *gb)
         }
     }
 
-    unrolled for (unsigned i = GB_SQUARE_2 + 1; i--;) {
-        if (gb->apu.square_channels[i].envelope_clock.clock) {
-            tick_square_envelope(gb, i);
+    if (gb->cgb_double_speed && (gb->model == GB_MODEL_CGB_D || gb->model == GB_MODEL_CGB_E)) {
+        gb->apu.pending_envelope_tick = true;
+    }
+    else {
+        unrolled for (unsigned i = GB_SQUARE_1; i <= GB_SQUARE_2; i++) {
+            if (gb->apu.square_channels[i].envelope_clock.clock) {
+                tick_square_envelope(gb, i);
+            }
+        }
+        
+        if (gb->apu.noise_channel.envelope_clock.clock) {
+            tick_noise_envelope(gb);
         }
     }
     
-    if (gb->apu.noise_channel.envelope_clock.clock) {
-        tick_noise_envelope(gb);
-    }
-    
     if ((gb->apu.div_divider & 1) == 1) {
-        unrolled for (unsigned i = GB_SQUARE_2 + 1; i--;) {
+        unrolled for (unsigned i = GB_SQUARE_1; i <= GB_SQUARE_2; i++) {
             if (gb->apu.square_channels[i].length_enabled) {
                 if (gb->apu.square_channels[i].pulse_length) {
                     if (!--gb->apu.square_channels[i].pulse_length) {
@@ -692,11 +757,13 @@ void GB_apu_div_event(GB_gameboy_t *gb)
     }
 }
 
-void GB_apu_div_secondary_event(GB_gameboy_t *gb)
+noinline void GB_apu_div_secondary_event(GB_gameboy_t *gb)
 {
     GB_apu_run(gb, true);
+    gb->apu.pcm_mask[0] = gb->apu.pcm_mask[1] = 0xFF;
+
     if (!gb->apu.global_enable) return;
-    unrolled for (unsigned i = GB_SQUARE_2 + 1; i--;) {
+    unrolled for (unsigned i = GB_SQUARE_1; i <= GB_SQUARE_2; i++) {
         uint8_t nrx2 = gb->io_registers[i == GB_SQUARE_1? GB_IO_NR12 : GB_IO_NR22];
         if (gb->apu.is_active[i] && gb->apu.square_channels[i].volume_countdown == 0) {
             set_envelope_clock(&gb->apu.square_channels[i].envelope_clock,
@@ -715,8 +782,20 @@ void GB_apu_div_secondary_event(GB_gameboy_t *gb)
     }
 }
 
+static void update_lfsr(GB_gameboy_t *gb, unsigned cycles_offset)
+{
+    gb->apu.noise_channel.current_lfsr_sample = gb->apu.noise_channel.lfsr & 1;
+    if (gb->apu.is_active[GB_NOISE]) {
+        update_sample(gb, GB_NOISE,
+                      gb->apu.noise_channel.current_lfsr_sample ?
+                      gb->apu.noise_channel.current_volume : 0,
+                      cycles_offset);
+    }
+}
+
 static void step_lfsr(GB_gameboy_t *gb, unsigned cycles_offset)
 {
+    gb->apu.lfsr_bit_7_before_step = gb->apu.noise_channel.lfsr & 0x80;
     unsigned high_bit_mask = gb->apu.noise_channel.narrow ? 0x4040 : 0x4000;
     bool new_high_bit = (gb->apu.noise_channel.lfsr ^ (gb->apu.noise_channel.lfsr >> 1) ^ 1) & 1;
     gb->apu.noise_channel.lfsr >>= 1;
@@ -729,13 +808,8 @@ static void step_lfsr(GB_gameboy_t *gb, unsigned cycles_offset)
         gb->apu.noise_channel.lfsr &= ~high_bit_mask;
     }
     
-    gb->apu.noise_channel.current_lfsr_sample = gb->apu.noise_channel.lfsr & 1;
-    if (gb->apu.is_active[GB_NOISE]) {
-        update_sample(gb, GB_NOISE,
-                      gb->apu.noise_channel.current_lfsr_sample ?
-                      gb->apu.noise_channel.current_volume : 0,
-                      cycles_offset);
-    }
+    update_lfsr(gb, cycles_offset);
+    gb->apu.lfsr_stepped_in_narrow = gb->apu.noise_channel.narrow;
 }
 
 void GB_apu_run(GB_gameboy_t *gb, bool force)
@@ -949,8 +1023,8 @@ restart:;
             }
         }
         
-        // The noise channel can step even if inactive on the DMG
-        if (gb->apu.is_active[GB_NOISE] || !GB_is_cgb(gb)) {
+        // TODO: verify these conditions one a DMG somehow
+        if (gb->apu.noise_counter_active || gb->apu.noise_background_counter_active) {
             uint16_t cycles_left = cycles;
             unsigned divisor = (gb->io_registers[GB_IO_NR43] & 0x07) << 2;
             if (!divisor) divisor = 2;
@@ -960,24 +1034,27 @@ restart:;
             // This while doesn't get an unlikely because the noise channel steps frequently enough
             while (cycles_left >= gb->apu.noise_channel.counter_countdown) {
                 cycles_left -= gb->apu.noise_channel.counter_countdown;
-                gb->apu.noise_channel.counter_countdown = divisor + gb->apu.noise_channel.delta;
-                gb->apu.noise_channel.delta = 0;
-                bool old_bit = (gb->apu.noise_channel.counter >> (gb->io_registers[GB_IO_NR43] >> 4)) & 1;
+                gb->apu.noise_channel.counter_countdown = divisor;
+                uint16_t mask = 1 << (gb->io_registers[GB_IO_NR43] >> 4);
+                bool old_bit = gb->apu.noise_channel.counter & mask;
                 gb->apu.noise_channel.counter++;
                 gb->apu.noise_channel.counter &= 0x3FFF;
-                bool new_bit = (gb->apu.noise_channel.counter >> (gb->io_registers[GB_IO_NR43] >> 4)) & 1;
+                gb->apu.noise_channel.did_step_counter = true;
+                bool new_bit = gb->apu.noise_channel.counter & mask;
 
                 /* Step LFSR */
-                if (new_bit && !old_bit) {
-                    if (cycles_left == 0 && gb->apu.samples[GB_NOISE] == 0) {
+                if (new_bit && !old_bit && gb->apu.is_active[GB_NOISE]) {
+                    if (cycles_left == 0 && gb->apu.samples[GB_NOISE] == 0 && !gb->cgb_double_speed) {
                         gb->apu.pcm_mask[1] &= 0x0F;
                     }
                     step_lfsr(gb, cycles - cycles_left);
                 }
             }
             if (cycles_left) {
-                gb->apu.noise_channel.counter_countdown -= cycles_left;
-                gb->apu.noise_channel.countdown_reloaded = false;
+                if (likely(gb->apu.noise_counter_active || gb->apu.noise_background_counter_active)) {
+                    gb->apu.noise_channel.counter_countdown -= cycles_left;
+                    gb->apu.noise_channel.countdown_reloaded = false;
+                }
             }
             else {
                 gb->apu.noise_channel.countdown_reloaded = true;
@@ -1061,126 +1138,6 @@ uint8_t GB_apu_read(GB_gameboy_t *gb, uint8_t reg)
     return gb->io_registers[reg] | read_mask[reg - GB_IO_NR10];
 }
 
-static inline uint16_t effective_channel4_counter(GB_gameboy_t *gb)
-{
-    /*
-       TODO: On revisions  older than the CGB-D,  this behaves differently  when
-             the counter advanced this exact T-cycle.  Also, in these revisions,
-             it seems that "passive" changes (due to the temporary FF value NR43
-             has during writes) behave slightly different from non-passive ones.
-    */
-    uint16_t effective_counter = gb->apu.noise_channel.counter;
-    /* Ladies and gentlemen, I present you the holy grail glitch of revision detection! */
-    switch (gb->model) {
-            /* Pre CGB revisions are assumed to be like CGB-C, A and 0 for the lack of a better guess.
-             TODO: It could be verified with audio based test ROMs. */
-        case GB_MODEL_CGB_B:
-            if (effective_counter & 8) {
-                effective_counter |= 0xE; // Seems to me F under some circumstances?
-            }
-            if (effective_counter & 0x80) {
-                effective_counter |= 0xFF;
-            }
-            if (effective_counter & 0x100) {
-                effective_counter |= 0x1;
-            }
-            if (effective_counter & 0x200) {
-                effective_counter |= 0x2;
-            }
-            if (effective_counter & 0x400) {
-                effective_counter |= 0x4;
-            }
-            if (effective_counter & 0x800) {
-                effective_counter |= 0x408; // TODO: Only my CGB-B does that! Others behave like C!
-            }
-            if (effective_counter & 0x1000) {
-                effective_counter |= 0x10;
-            }
-            if (effective_counter & 0x2000) {
-                effective_counter |= 0x20;
-            }
-            break;
-        case GB_MODEL_DMG_B:
-        case GB_MODEL_MGB:
-        case GB_MODEL_SGB_NTSC:
-        case GB_MODEL_SGB_PAL:
-        case GB_MODEL_SGB_NTSC_NO_SFC:
-        case GB_MODEL_SGB_PAL_NO_SFC:
-        case GB_MODEL_SGB2:
-        case GB_MODEL_SGB2_NO_SFC:
-        case GB_MODEL_CGB_0:
-        case GB_MODEL_CGB_A:
-        case GB_MODEL_CGB_C:
-            if (effective_counter & 8) {
-                effective_counter |= 0xE; // Sometimes F on some instances
-            }
-            if (effective_counter & 0x80) {
-                effective_counter |= 0xFF;
-            }
-            if (effective_counter & 0x100) {
-                effective_counter |= 0x1;
-            }
-            if (effective_counter & 0x200) {
-                effective_counter |= 0x2;
-            }
-            if (effective_counter & 0x400) {
-                effective_counter |= 0x4;
-            }
-            if (effective_counter & 0x800) {
-                if ((gb->io_registers[GB_IO_NR43] & 8)) {
-                    effective_counter |= 0x400;
-                }
-                effective_counter |= 0x8;
-            }
-            if (effective_counter & 0x1000) {
-                effective_counter |= 0x10;
-            }
-            if (effective_counter & 0x2000) {
-                effective_counter |= 0x20;
-            }
-            break;
-        case GB_MODEL_CGB_D:
-            if (effective_counter & ((gb->io_registers[GB_IO_NR43] & 8)? 0x40 : 0x80)) { // This is so weird
-                effective_counter |= 0xFF;
-            }
-            if (effective_counter & 0x100) {
-                effective_counter |= 0x1;
-            }
-            if (effective_counter & 0x200) {
-                effective_counter |= 0x2;
-            }
-            if (effective_counter & 0x400) {
-                effective_counter |= 0x4;
-            }
-            if (effective_counter & 0x800) {
-                effective_counter |= 0x8;
-            }
-            if (effective_counter & 0x1000) {
-                effective_counter |= 0x10;
-            }
-            break;
-        case GB_MODEL_CGB_E:
-            if (effective_counter & ((gb->io_registers[GB_IO_NR43] & 8)? 0x40 : 0x80)) { // This is so weird
-                effective_counter |= 0xFF;
-            }
-            if (effective_counter & 0x1000) {
-                effective_counter |= 0x10;
-            }
-            break;
-        case GB_MODEL_AGB_A:
-        case GB_MODEL_GBP_A:
-            /* TODO: AGBs are not affected, but AGSes are. They don't seem to follow a simple
-               pattern like the other revisions. */
-            /* For the most part, AGS seems to do:
-               0x20   -> 0xA0
-               0x200  -> 0xA00
-               0x1000 -> 0x1010, but only if wide
-             */
-            break;
-    }
-    return effective_counter;
-}
-
 static noinline void nr10_write_glitch(GB_gameboy_t *gb, uint8_t value)
 {
     // TODO: Check all of these in APU odd mode
@@ -1249,6 +1206,477 @@ static noinline void nr10_write_glitch(GB_gameboy_t *gb, uint8_t value)
         }
     }
 
+}
+
+static void prepare_noise_start(GB_gameboy_t *gb)
+{
+    /*
+     TODO: When restarting a channel right after starting it, before it has the chance to tick the counter, things
+     behave differently. Only certain behaviors of this edge case are emulated.
+    */
+    
+    /*
+     TODO: Restarting a channel in double speed mode under CGB-C and older is not accurate if the divisor is 0 or 1.
+           Specifically in the 0 case, the initial LFSR value seems to be deterministic, but dependant on various
+           parameters. It is neither 0 or the equaly unexplained 0x0055.
+    */
+    gb->apu.noise_counter_active = gb->io_registers[GB_IO_NR42] & 0xF8; // Resets on APU off and DAC disable
+    bool was_started_with_dac_disabled = gb->apu.noise_started_with_dac_disabled;
+    gb->apu.noise_started_with_dac_disabled = !gb->apu.noise_counter_active;
+    unsigned divisor = (gb->io_registers[GB_IO_NR43] & 0x07);
+    bool was_background_counting = gb->apu.noise_background_counter_active;
+    gb->apu.noise_background_counter_active = true;
+    bool instant_step = false;
+    bool div_1_glitch = false;
+    
+    if (divisor > 1 && gb->apu.noise_channel.counter_countdown == 1) {
+        gb->apu.noise_channel.counter++;
+        gb->apu.noise_channel.counter &= 0x3FFF;
+    }
+    else if (divisor > 1 && gb->apu.noise_channel.counter_countdown == 2 && gb->apu.is_active[GB_NOISE] && gb->model <= GB_MODEL_CGB_C && gb->cgb_double_speed) {
+        gb->apu.noise_channel.counter++;
+        gb->apu.noise_channel.counter &= 0x3FFF;
+    }
+    else if (gb->apu.noise_channel.counter_countdown == 2 &&
+        (gb->apu.noise_channel.alignment & 3) == 0 &&
+        gb->apu.is_active[GB_NOISE]) {
+        if (divisor == 0) {
+            divisor = 8;
+        }
+        else if (divisor == 1) {
+            if (!gb->apu.noise_channel.did_step_counter) {
+                div_1_glitch = true;
+            }
+            
+            uint16_t mask = 1 << (gb->io_registers[GB_IO_NR43] >> 4);
+            bool old_bit = gb->apu.noise_channel.counter & mask;
+            gb->apu.noise_channel.counter++;
+            gb->apu.noise_channel.counter &= 0x3FFF;
+            bool new_bit = gb->apu.noise_channel.counter & mask;
+            
+            if ((new_bit && !old_bit)) {
+                instant_step = true;
+            }
+        }
+    }
+    gb->apu.noise_channel.counter_countdown = divisor == 0? 6 : divisor * 4 + 6;
+    if  (gb->apu.noise_channel.alignment & 1) {
+        if (!divisor) {
+            if (gb->model <= GB_MODEL_CGB_C) {
+                gb->apu.noise_channel.counter_countdown++;
+            }
+            else if (was_background_counting) {
+                gb->apu.noise_channel.counter_countdown--;
+            }
+            else {
+                gb->apu.noise_channel.counter_countdown++;
+            }
+        }
+        else {
+            if (gb->apu.noise_channel.alignment & 2) {
+                if (divisor == 1 && !gb->apu.is_active[GB_NOISE]) {
+                    gb->apu.noise_channel.counter_countdown++;
+                }
+                else {
+                    gb->apu.noise_channel.counter_countdown -= 3;
+                }
+            }
+            else {
+                gb->apu.noise_channel.counter_countdown--;
+                if (divisor == 1 && gb->apu.is_active[GB_NOISE]) {
+                    gb->apu.noise_channel.counter_countdown -= 4;
+                }
+            }
+        }
+    }
+    else {
+        if (divisor) {
+            if (gb->apu.noise_channel.alignment & 2) {
+                if (gb->cgb_double_speed && gb->model <= GB_MODEL_CGB_C && divisor == 1) {
+                    gb->apu.noise_channel.counter_countdown += 2;
+                }
+                else {
+                    gb->apu.noise_channel.counter_countdown -= 2;
+                }
+            }
+            else if (divisor > 1 && (!gb->cgb_double_speed || gb->model > GB_MODEL_CGB_C)) {
+                gb->apu.noise_channel.counter_countdown -= 4;
+            }
+            /* TODO: This quirk seems way too specific */
+            else if (divisor == 1 && gb->apu.is_active[GB_NOISE] && !(gb->io_registers[GB_IO_NR43] & 0xf0)) {
+                gb->apu.noise_channel.counter_countdown -= 4;
+            }
+        }
+        else if (gb->cgb_double_speed && gb->model <= GB_MODEL_CGB_C) {
+            gb->apu.noise_channel.counter_countdown += 2;
+        }
+    }
+    
+    /* Background counting glitches */
+    /* TODO: Double speed mode not tested */
+    if (divisor > 1) {
+        if (!gb->apu.noise_counter_active && !(gb->apu.noise_channel.alignment & 3)) {
+            gb->apu.noise_channel.counter_countdown += 4;
+        }
+    }
+    else {
+        if (was_background_counting && !gb->apu.is_active[GB_NOISE] && !(gb->apu.noise_channel.alignment & 3)) {
+            if (divisor == 0) {
+                if (was_started_with_dac_disabled) { // TODO: Why is it different?
+                    gb->apu.noise_channel.counter_countdown += 28;
+                }
+            }
+            else {
+                gb->apu.noise_channel.counter_countdown -= 4;
+            }
+        }
+    }
+    
+    /* TODO: This is weird, is the clock going out of sync? */
+    if (!divisor && gb->model <= GB_MODEL_CGB_C && was_background_counting && !gb->apu.is_active[GB_NOISE] && gb->cgb_double_speed) {
+        gb->apu.noise_channel.counter_countdown--;
+    }
+    if (div_1_glitch) {
+        gb->apu.noise_channel.counter_countdown -= 4;
+    }
+    
+    if (!divisor && gb->apu.is_active[GB_NOISE] && (gb->apu.noise_channel.alignment & 3) == 3) {
+        /* TODO: I have no clue where this number comes from, but this number is confirmed for this edge case even for
+                 side LFSR, despite being seemingly arbitrary. */
+        gb->apu.noise_channel.lfsr = 0x0055;
+    }
+    else {
+        gb->apu.noise_channel.lfsr = 0;
+    }
+    if (instant_step) {
+        step_lfsr(gb, 0);
+    }
+}
+
+static void nr43_write(GB_gameboy_t *gb, uint8_t new)
+{
+    /*
+        NR43 writes cause glitch signals to the LFSR. They are often non-deterministic, and
+        they're revision and instance specific.  This implementation is trying to emulate a
+        simplified and deterministic "variant" of specific instances of revisions I own.
+     
+        For more details:
+        https://github.com/LIJI32/SameBoy/issues/397#issuecomment-3733625631
+    */
+    
+    /*
+        TODO: Non-determinism aside, this is currently only 100% accurate in CGB-E mode, where
+        my specific CGB-E is currently emulated.  My CGB-D, under rare cases, samples a second
+        intermediate value,  and this is not  currently emulated.  AGB revisions are extremely
+        glitchy, and are hard to research.
+     
+        Due to FF-write glitches in pre-CGB-D revisions, all writes (even no-change writes) go
+        through 3 intermediate values by definition. Also, the effective counter value used is
+        ORed with the next (or previous, timing needs to be verified) value.
+    */
+    bool old_narrow = gb->apu.noise_channel.narrow;
+    gb->apu.noise_channel.narrow = new & 8;
+    uint8_t old = gb->io_registers[GB_IO_NR43];
+    gb->io_registers[GB_IO_NR43] = new;
+    
+    if ((old & 0xF0) == (new & 0xF0)) return;
+    
+    uint16_t effective_counter = gb->apu.noise_channel.counter;
+    if (gb->model <= GB_MODEL_CGB_C && gb->apu.noise_channel.countdown_reloaded) {
+        effective_counter |= (effective_counter - 1) & 0x3FFF;
+    }
+    bool old_bit = (effective_counter >> (old >> 4)) & 1;
+
+    uint8_t glitch_value = (old & 0x7F) | (new & 0x80);
+    bool glitch_bit = (effective_counter >> (glitch_value >> 4)) & 1;
+    bool new_bit = (effective_counter >> (new >> 4)) & 1;
+    bool force_glitch = false;
+
+    if (gb->model == GB_MODEL_CGB_D) {
+        if (new_bit && glitch_bit && old_bit) {
+            if ((old ^ new) & 0x70) {
+                force_glitch = true;
+            }
+        }
+    }
+    
+    if (gb->model > GB_MODEL_CGB_E) {
+        /* AGB behavior is very glitchy and incosistent. It can have 2 intermediate values for
+           NR43, and sometimes even 3, and the pattern isn't very consistent. This is a *very*
+           rough approximation of the behavior.
+         
+           Due to having so up to 3 intermediate value, glitch behavior is complicated to look
+           into, so currently CGB-E behavior is arbitrarily used if a glitch occurs. */
+        
+        uint8_t glitch_value2 = 0;
+        if (new >= 0x80 && old >= 0x80) {
+            glitch_value  = (old & 0xCF) | (new & 0x30);
+            glitch_value2 = (old & 0x8F) | (new & 0x70);
+        }
+        else {
+            glitch_value = (old & 0xDF) | (new & 0x20);
+            glitch_value2 = (old & 0xCF) | (new & 0x30);
+        }
+        glitch_bit = (gb->apu.noise_channel.counter >> (glitch_value >> 4)) & 1;
+        uint8_t glitch_bit2 = (gb->apu.noise_channel.counter >> (glitch_value2 >> 4)) & 1;
+        if (glitch_bit != glitch_bit2) {
+            if (new_bit == old_bit) {
+                glitch_bit = !new_bit;
+            }
+            else if (!glitch_bit && old_bit) {
+                force_glitch = true;
+            }
+        }
+    }
+    
+    /* Step LFSR */
+    
+    if ((old_bit == new_bit && new_bit != glitch_bit) || force_glitch) {
+        /* Glitching write.  Has two categories,  both have  non-deterministic
+           variants. These are the most common variants of the two categories,
+           which are deterministic. */
+        if (new_bit) {
+            /* Category 1 */
+            if (gb->model >= GB_MODEL_CGB_E) {
+                if (!(new & 0x80)) {
+                    step_lfsr(gb, 0);
+                }
+                else {
+                    /* Only happens under this odd condition */
+                    uint8_t t1 = (old >> 4) & 7;
+                    uint8_t t2 = (new >> 4) & 7;
+                    
+                    if ((t1 ^ 7) + t2 > 7 || ((t1 ^ 7) & t2)) {
+                        /* Copy bit 8 to bit 7 */
+                        gb->apu.noise_channel.lfsr &= ~0x80;
+                        gb->apu.noise_channel.lfsr |= (gb->apu.noise_channel.lfsr >> 1) & 0x80;
+                        
+                        /* All specific cases have non-deterministic behaviors involved */
+                        if ((t1 == 0 || t1 == 4) && t2 == 3) {
+                            gb->apu.noise_channel.lfsr &= (gb->apu.noise_channel.lfsr >> 1) | 0x545;
+                            update_lfsr(gb, 0);
+                        }
+                        else if (t1 == 2 && t2 == 3) {
+                            uint16_t mask = 0x555;
+                            if ((gb->apu.noise_channel.lfsr & 0xC) == 0xC) {
+                                mask |= 8;
+                            }
+                            if ((gb->apu.noise_channel.lfsr & 0xC00) == 0xC00) {
+                                mask |= 0x800;
+                            }
+                            
+                            gb->apu.noise_channel.lfsr &= (gb->apu.noise_channel.lfsr >> 1) | mask;
+                            update_lfsr(gb, 0);
+                        }
+                        if (!gb->apu.noise_channel.narrow && old_narrow && gb->apu.lfsr_stepped_in_narrow) {
+                            /* TODO: Behaves weirder in non-deterministic t1 == 0/4 scenarios? */
+                            if (gb->apu.lfsr_bit_7_before_step) {
+                                gb->apu.noise_channel.lfsr |= 0x40;
+                            }
+                            else {
+                                gb->apu.noise_channel.lfsr &= ~0x40;
+                            }
+                        }
+                        gb->apu.noise_channel.lfsr |= gb->apu.noise_channel.narrow ? 0x4040 : 0x4000;
+                        /* TODO: verify */
+                        gb->apu.lfsr_stepped_in_narrow = gb->apu.noise_channel.narrow;
+                    }
+                }
+            }
+            else if (gb->model == GB_MODEL_CGB_D) {
+                static const uint8_t glitch_map_l2h[8 * 8] = {
+                    [000] = 0x00, 0x01, 0x01, 0x21, 0x02, 0x21,
+                    [010] = 0x03, 0x00, 0x21, 0x01, 0x04, 0x04,
+                    [020] = 0x05, 0x01, 0x00, 0x01, 0x04, 0x21,
+                    [030] = 0x03, 0x05, 0x05, 0x00, 0x01, 0x01,
+                    [040] = 0x05, 0x01, 0x01, 0x21, 0x00, 0x01,
+                    [050] = 0x05, 0x05, 0x21, 0x01, 0x05, 0x00,
+                    [060] = 0x05, 0x01, 0x05, 0x01, 0x05, 0x01,
+                    [070] = 0x03, 0x05, 0x05, 0x05, 0x05, 0x05,
+                };
+                
+                /* The following transitions are a bit non-deterministic (except under forced glitched):
+                   1 -> c, 2 -> c, 3 -> c, 3 -> d */
+                
+                static const uint8_t glitch_map_h2l[8 * 8] = {
+                    [000] = 0x00, 0x27, 0x26, 0x37, 0x21, 0x38, 0x01, 0x01,
+                    [010] = 0x01, 0x00, 0x38, 0x21, 0x21, 0x21, 0x01, 0x01,
+                    [020] = 0x01, 0x27, 0x00, 0x28, 0x21, 0x38, 0x01, 0x01,
+                    [030] = 0x01, 0x02, 0x01, 0x00, 0x31, 0x21, 0x01, 0x01,
+                    [040] = 0x06, 0x28, 0x28, 0x38, 0x00, 0x27, 0x01, 0x01,
+                    [050] = 0x01, 0x03, 0x38, 0x21, 0x01, 0x00, 0x01, 0x01,
+                };
+                /* The following transitions are a bit non-deterministic (except under forced glitched):
+                   8 -> 5, 2 -> 9, a -> 3, c -> 3 */
+                
+                const uint8_t *glitch_map = old & 0x80? &glitch_map_h2l[0] : &glitch_map_l2h[0];
+            
+                
+                unsigned glitch = glitch_map[((old & 0x70) >> 1) | ((new & 0x70) >> 4)];
+                if (force_glitch) {
+                    if (!((new ^ old) & 0x80)) {
+                        glitch = glitch & 0x20? 5 : 0;
+                    }
+                    else if (!(new & 0x80)) {
+                        glitch = glitch & 0x10? 5 : 0;
+                    }
+                    else if ((glitch & 0xF) == 1 || (glitch & 0xF) == 4) {
+                        glitch = 5;
+                    }
+                    else {
+                        glitch = 0;
+                    }
+                }
+                else {
+                    glitch &= 0xF;
+                }
+                uint16_t old_lfsr = gb->apu.noise_channel.lfsr;
+                uint16_t lfsr_mask = gb->apu.noise_channel.narrow ? 0x4040 : 0x4000;
+                switch (glitch) {
+                    case 6: // Like 2, but conditional
+                    case 4: // Like 2, but conditional
+                        if ((gb->apu.noise_channel.lfsr & (glitch == 4? 0x60 : 0x40)) != 0x40) { // Todo check wide mode
+                        case 2: // And bit 1 with bit 0 before doing glitch 1
+                            if (!(gb->apu.noise_channel.lfsr & 1)) {
+                                gb->apu.noise_channel.lfsr &= ~2;
+                            }
+                        }
+                    case 1: // Step and set the LFSR bit
+                    case 8: // Step and set the LFSR bit conditionally
+                        step_lfsr(gb, 0);
+                    case 5: // Just set LFSR
+                        if ((glitch != 8) || (old_lfsr & 3) != 2) {
+                            gb->apu.noise_channel.lfsr |= lfsr_mask;
+                        }
+                        else {
+                            gb->apu.noise_channel.lfsr |= old_lfsr & lfsr_mask;
+                        }
+                        break;
+                    
+                    case 7: // Step and OR the LFSR bit with its old value
+                        step_lfsr(gb, 0);
+                        gb->apu.noise_channel.lfsr |= old_lfsr & lfsr_mask;
+                        break;
+                        
+                    case 3: // A bit of a mess
+                        step_lfsr(gb, 0);
+                        gb->apu.noise_channel.lfsr &= old_lfsr;
+                        gb->apu.noise_channel.lfsr |= old_lfsr & 1;
+                        gb->apu.noise_channel.lfsr |= lfsr_mask;
+                        update_lfsr(gb, 0);
+                        break;
+                        
+                        
+                    default: break;
+                }
+            }
+        }
+        else {
+            /* Category 2 */
+            if (gb->model >= GB_MODEL_CGB_E) {
+                static const uint8_t glitch_map[8 * 8] = {
+                /*    8          9          A          B          C          D         */
+                                          [002] = 4, [003] = 2, [004] = 2, [005] = 2, // 0
+                                          [012] = 2, [013] = 4, [014] = 2, [015] = 2, // 1
+                    [020] = 1, [021] = 2,            [023] = 1, [024] = 5, [025] = 3, // 2
+                                                                [034] = 2, [035] = 2, // 3
+                               [041] = 2, [042] = 2, [043] = 2,                       // 4
+                    [050] = 6,            [052] = 2, [053] = 2,                       // 5
+                };
+                
+                /* The following transitions are a bit non-deterministic:
+                 2 -> 8, 0 -> A, 2 -> C */
+                
+                unsigned glitch = new & 0x80? glitch_map[((old & 0x70) >> 1) | ((new & 0x70) >> 4)] : 0;
+                switch (glitch) {
+                    case 1: /* Step, followed by bit 1 &= bit 0 */
+                    case 6: /* Variant of type 1: LFSR bit - 1 glitched by LFSR bit, LFSR bit - 2, and bit 0 */
+                        step_lfsr(gb, 0);
+                        if (glitch == 6) {
+                            /* TODO: Verify wide mode */
+                            if ((gb->apu.noise_channel.narrow &&
+                                ((gb->apu.noise_channel.lfsr & 0x71) == 0x20)) ||
+                                (gb->apu.noise_channel.lfsr & 0x71) == 0x61) {
+                                gb->apu.noise_channel.lfsr &= ~0x20;
+                            }
+                            if ((gb->apu.noise_channel.lfsr & 0x7001) == 0x2000 ||
+                                (gb->apu.noise_channel.lfsr & 0x7001) == 0x6001) {
+                                gb->apu.noise_channel.lfsr &= ~0x2000;
+                            }
+                        }
+                        if ((gb->apu.noise_channel.lfsr & 0x3) == 2) {
+                            gb->apu.noise_channel.lfsr &= ~2;
+                        }
+                        break;
+                    case 2: { /* Step, bitwise AND with previous, except for bit 0 */
+                        uint16_t prev = gb->apu.noise_channel.lfsr;
+                        step_lfsr(gb, 0);
+                        gb->apu.noise_channel.lfsr &= prev | 1;
+                        break;
+                    }
+                        
+                    case 5:; /* Non deterministic variant of type 3:
+                              The LFSR is unset if bit 0 & 1 are 0b10.
+                              Bit 3 is complex and non-deterministic (TODO: wide mode) */
+                        if ((gb->apu.noise_channel.lfsr & 0x3) == 2) {
+                            gb->apu.noise_channel.lfsr &= gb->apu.noise_channel.narrow? ~0x4040 : ~0x4000;
+                        }
+                        
+                        if ((gb->apu.noise_channel.lfsr & 0x19) == 8) {
+                            gb->apu.noise_channel.lfsr &= ~8;
+                        }
+                        
+                    case 3: /* No step, bit 0 = bit 1, some other bits have AND glitches with next*/
+                        gb->apu.noise_channel.lfsr &= ~1;
+                        gb->apu.noise_channel.lfsr |= (gb->apu.noise_channel.lfsr >> 1) & 1;
+                        
+                        update_lfsr(gb, 0);
+                        /* TODO: verify */
+                        gb->apu.lfsr_stepped_in_narrow = gb->apu.noise_channel.narrow;
+                        break;
+                        
+                    case 4: { /* Step, bit 1 &= bit 0, LFSR bit -1 &= LFSR bit */
+                        uint16_t prev = gb->apu.noise_channel.lfsr;
+                        step_lfsr(gb, 0);
+                        gb->apu.noise_channel.lfsr &= prev | (gb->apu.noise_channel.narrow? ~0x2022 : ~0x2002);
+                        break;
+                    }
+                        
+                    default: /* No glitch, plain step*/
+                        step_lfsr(gb, 0);
+                        break;
+                        
+                }
+            }
+            else {
+                step_lfsr(gb, 0);
+            }
+        }
+    }
+    else if (!old_bit && new_bit) {
+        if (gb->model <= GB_MODEL_CGB_C) {
+            bool previous_narrow = gb->apu.noise_channel.narrow;
+            gb->apu.noise_channel.narrow = true;
+            step_lfsr(gb, 0);
+            gb->apu.noise_channel.narrow = previous_narrow;
+            if ((new & 0xf0) <= 0x20 && glitch_bit && !(effective_counter & 8)) { // No clue why that specific bit is tested
+                // Non-deterministic, not fully tested for revision differences and wide mode
+                // Step twice?
+                step_lfsr(gb, 0);
+                gb->apu.noise_channel.lfsr &= ~(gb->apu.noise_channel.narrow? 0x4040 : 0x4000);
+                gb->apu.noise_channel.lfsr |= (gb->apu.noise_channel.lfsr & (gb->apu.noise_channel.narrow? 0x2020 : 0x2000)) << 1;
+            }
+        }
+        else {
+            step_lfsr(gb, 0);
+        }
+    }
+    else if (gb->model <= GB_MODEL_CGB_C) {
+        if ((new & 0xf0) <= 0x20 && !glitch_bit && !new_bit && !old_bit && (effective_counter & 8)) { // No clue why that specific bit is tested
+            // Step twice?
+            step_lfsr(gb, 0);
+        }
+    }
 }
 
 void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
@@ -1417,7 +1845,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                             force_unsurpressed = true;
                         }
                     }
-                    gb->apu.square_channels[index].delay = 6 - gb->apu.lf_div;
+                    gb->apu.square_channels[index].delay = 6 + gb->apu.lf_div * (gb->model < GB_MODEL_CGB_D && gb->cgb_double_speed? 1 : -1);
                     gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + gb->apu.square_channels[index].delay;
                 }
                 else {
@@ -1440,7 +1868,7 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     gb->apu.square_channels[index].sample_countdown = (gb->apu.square_channels[index].sample_length ^ 0x7FF) * 2 + gb->apu.square_channels[index].delay;
                 }
                 gb->apu.square_channels[index].current_volume = gb->io_registers[index == GB_SQUARE_1 ? GB_IO_NR12 : GB_IO_NR22] >> 4;
-                /* The volume changes caused by NRX4 sound start take effect instantly (i.e. the effect the previously
+                /* The volume changes caused by NRx4 sound start takes effect instantly (i.e. the effect the previously
                    started sound). The playback itself is not instant which is why we don't update the sample for other
                    cases. */
                 if (gb->apu.is_active[index]) {
@@ -1621,9 +2049,17 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         case GB_IO_NR42: {
             if ((value & 0xF8) == 0) {
                 /* This disables the DAC */
+                if (gb->apu.is_active[GB_NOISE] && gb->io_registers[GB_IO_NR43] & 7) {
+                    if (gb->apu.noise_channel.counter_countdown <= 2) {
+                        gb->apu.noise_channel.counter++;
+                    }
+                    gb->apu.noise_background_counter_active = false;
+                }
+
                 gb->io_registers[reg] = value;
                 gb->apu.is_active[GB_NOISE] = false;
                 update_sample(gb, GB_NOISE, 0, 0);
+                gb->apu.noise_counter_active = false;
             }
             else if (gb->apu.is_active[GB_NOISE]) {
                 nrx2_glitch(gb, &gb->apu.noise_channel.current_volume,
@@ -1638,13 +2074,8 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
         }
 
         case GB_IO_NR43: {
-            gb->apu.noise_channel.narrow = value & 8;
-            uint16_t effective_counter = effective_channel4_counter(gb);
-            bool old_bit = (effective_counter >> (gb->io_registers[GB_IO_NR43] >> 4)) & 1;
-            gb->io_registers[GB_IO_NR43] = value;
-            bool new_bit = (effective_counter >> (gb->io_registers[GB_IO_NR43] >> 4)) & 1;
             if (gb->apu.noise_channel.countdown_reloaded) {
-                unsigned divisor = (gb->io_registers[GB_IO_NR43] & 0x07) << 2;
+                unsigned divisor = (value & 0x07) << 2;
                 if (!divisor) divisor = 2;
                 if (gb->model > GB_MODEL_CGB_C) {
                     gb->apu.noise_channel.counter_countdown =
@@ -1654,20 +2085,28 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     gb->apu.noise_channel.counter_countdown =
                     divisor + (divisor == 2? 0 : inline_const(uint8_t[], {2, 1, 4, 3})[(gb->apu.noise_channel.alignment) & 3]);
                 }
-                gb->apu.noise_channel.delta = 0;
             }
-            /* Step LFSR */
-            if (new_bit && (!old_bit || gb->model <= GB_MODEL_CGB_C)) {
-                if (gb->model <= GB_MODEL_CGB_C) {
-                    bool previous_narrow = gb->apu.noise_channel.narrow;
-                    gb->apu.noise_channel.narrow = true;
-                    step_lfsr(gb, 0);
-                    gb->apu.noise_channel.narrow = previous_narrow;
+            if (gb->model <= GB_MODEL_CGB_C) {
+                /* TODO: CGB≤C (and DMG) have various unemulated quirks when you write to NR43 just as the counter reloads */
+                if (gb->apu.noise_channel.countdown_reloaded) {
+                    bool old_bit = (gb->apu.noise_channel.counter >> (gb->io_registers[GB_IO_NR43] >> 4)) & 1;
+                    bool glitch_bit = (gb->apu.noise_channel.counter >> 7) & 1;
+                    bool new_bit = (gb->apu.noise_channel.counter >> (value >> 4)) & 1;
+                    
+                    if (!old_bit && new_bit && glitch_bit) {
+                        uint16_t previous_counter = (gb->apu.noise_channel.counter - 1) & 0x3FFF;
+                        bool old_bit = (previous_counter >> (gb->io_registers[GB_IO_NR43] >> 4)) & 1;
+                        bool glitch_bit = (previous_counter >> 7) & 1;
+                        bool new_bit = (previous_counter >> (value >> 4)) & 1;
+                        if (old_bit && !new_bit && glitch_bit) {
+                            step_lfsr(gb, 0);
+                        }
+                    }
                 }
-                else {
-                    step_lfsr(gb, 0);
-                }
+                nr43_write(gb, 0xff);
             }
+            nr43_write(gb, value);
+            
             break;
         }
 
@@ -1679,70 +2118,15 @@ void GB_apu_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
                     gb->apu.noise_channel.dmg_delayed_start = 6;
                 }
                 else {
-                    unsigned divisor = (gb->io_registers[GB_IO_NR43] & 0x07) << 2;
-                    if (!divisor) divisor = 2;
-                    gb->apu.noise_channel.delta = 0;
-                    gb->apu.noise_channel.counter_countdown = divisor + 4;
-                    if (divisor == 2) {
-                        if (gb->model <= GB_MODEL_CGB_C) {
-                            gb->apu.noise_channel.counter_countdown += gb->apu.lf_div;
-                            if (!gb->cgb_double_speed) {
-                                gb->apu.noise_channel.counter_countdown -= 1;
-                            }
-                        }
-                        else {
-                            gb->apu.noise_channel.counter_countdown += 1 - gb->apu.lf_div;
-                        }
-                    }
-                    else {
-                        if (gb->model <= GB_MODEL_CGB_C) {
-                            gb->apu.noise_channel.counter_countdown += inline_const(uint8_t[], {2, 1, 4, 3})[gb->apu.noise_channel.alignment & 3];
-                        }
-                        else {
-                            gb->apu.noise_channel.counter_countdown += inline_const(uint8_t[], {2, 1, 0, 3})[gb->apu.noise_channel.alignment & 3];
-                        }
-                        if (((gb->apu.noise_channel.alignment + 1) & 3) < 2) {
-                            if ((gb->io_registers[GB_IO_NR43] & 0x07) == 1) {
-                                gb->apu.noise_channel.counter_countdown -= 2;
-                                gb->apu.noise_channel.delta = 2;
-                            }
-                            else {
-                                gb->apu.noise_channel.counter_countdown -= 4;
-                            }
-                        }
-                    }
-                    
-                    /* TODO: These are quite weird. Verify further */
-                    if (gb->model <= GB_MODEL_CGB_C) {
-                        if (gb->cgb_double_speed) {
-                            if (!(gb->io_registers[GB_IO_NR43] & 0xF0) && (gb->io_registers[GB_IO_NR43] & 0x07)) {
-                                 gb->apu.noise_channel.counter_countdown -= 1;
-                            }
-                            else if ((gb->io_registers[GB_IO_NR43] & 0xF0) && !(gb->io_registers[GB_IO_NR43] & 0x07)) {
-                                gb->apu.noise_channel.counter_countdown += 1;
-                            }
-                        }
-                        else {
-                            gb->apu.noise_channel.counter_countdown -= 2;
-                        }
-                    }
-   
-                    gb->apu.noise_channel.current_volume = gb->io_registers[GB_IO_NR42] >> 4;
-
-                    /* The volume changes caused by NRX4 sound start take effect instantly (i.e. the effect the previously
-                     started sound). The playback itself is not instant which is why we don't update the sample for other
-                     cases. */
-                    if (gb->apu.is_active[GB_NOISE]) {
-                        update_sample(gb, GB_NOISE,
-                                      gb->apu.noise_channel.current_lfsr_sample ?
-                                      gb->apu.noise_channel.current_volume : 0,
-                                      0);
-                    }
                     gb->apu.noise_channel.lfsr = 0;
+                    prepare_noise_start(gb);
+                    
+                    gb->apu.noise_channel.current_volume = gb->io_registers[GB_IO_NR42] >> 4;
                     gb->apu.noise_channel.current_lfsr_sample = false;
                     gb->apu.noise_channel.volume_countdown = gb->io_registers[GB_IO_NR42] & 7;
+                    gb->apu.noise_channel.did_step_counter = (gb->apu.noise_channel.alignment & 3) == 2;
 
-                    if (!gb->apu.is_active[GB_NOISE] && (gb->io_registers[GB_IO_NR42] & 0xF8) != 0) {
+                    if (gb->io_registers[GB_IO_NR42] & 0xF8) {
                         gb->apu.is_active[GB_NOISE] = true;
                         update_sample(gb, GB_NOISE, 0, 0);
                     }
@@ -1877,10 +2261,140 @@ typedef struct __attribute__((packed)) {
     uint32_t data_size; // = LE32(length of samples)
 } wav_header_t;
 
+#define VGM_HEADER_SIZE 0xC0
+#define VGM_DATA_OFFSET (VGM_HEADER_SIZE - 0x34)
+#define VGM_SAMPLE_RATE 44100
+
+static void vgm_set_le32(uint8_t *header, size_t offset, uint32_t value)
+{
+    value = LE32(value);
+    memcpy(header + offset, &value, sizeof(value));
+}
+
+static void vgm_get_header(GB_gameboy_t *gb, uint8_t header[VGM_HEADER_SIZE], uint32_t eof_offset)
+{
+    memset(header, 0, VGM_HEADER_SIZE);
+    header[0] = 'V';
+    header[1] = 'g';
+    header[2] = 'm';
+    header[3] = ' ';
+    vgm_set_le32(header, 0x04, eof_offset);
+    vgm_set_le32(header, 0x08, 0x00000161);
+    vgm_set_le32(header, 0x18, gb->apu_output.vgm_total_samples);
+    vgm_set_le32(header, 0x34, VGM_DATA_OFFSET);
+    vgm_set_le32(header, 0x80, gb->apu_output.vgm_clock_rate | (GB_is_cgb(gb) ? 0x80000000u : 0));
+}
+
+static bool vgm_write_data(GB_gameboy_t *gb, const void *data, size_t size)
+{
+    if (!gb->apu_output.output_file) return false;
+    if (fwrite(data, size, 1, gb->apu_output.output_file) != 1) {
+        gb->apu_output.output_error = errno ?: EIO;
+        fclose(gb->apu_output.output_file);
+        gb->apu_output.output_file = NULL;
+        return false;
+    }
+    return true;
+}
+
+static bool vgm_flush_wait(GB_gameboy_t *gb)
+{
+    while (gb->apu_output.vgm_pending_samples) {
+        if (gb->apu_output.vgm_pending_samples <= 16) {
+            uint8_t command = 0x70 + gb->apu_output.vgm_pending_samples - 1;
+            gb->apu_output.vgm_pending_samples = 0;
+            if (!vgm_write_data(gb, &command, sizeof(command))) return false;
+        }
+        else {
+            uint16_t samples = MIN(gb->apu_output.vgm_pending_samples, 0xFFFF);
+            uint8_t command[] = {0x61, samples & 0xFF, samples >> 8};
+            gb->apu_output.vgm_pending_samples -= samples;
+            if (!vgm_write_data(gb, command, sizeof(command))) return false;
+        }
+    }
+    return true;
+}
+
+static bool vgm_write_register(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
+{
+    if (!vgm_flush_wait(gb)) return false;
+    uint8_t command[] = {0xB3, reg - GB_IO_NR10, value};
+    return vgm_write_data(gb, command, sizeof(command));
+}
+
+static uint8_t vgm_get_trigger_register(GB_gameboy_t *gb, uint8_t reg, GB_channel_t channel)
+{
+    uint8_t value = gb->io_registers[reg] & 0x7F;
+    if (gb->apu.is_active[channel]) {
+        value |= 0x80;
+    }
+    return value;
+}
+
+static bool vgm_write_apu_snapshot(GB_gameboy_t *gb)
+{
+    if (!vgm_write_register(gb, GB_IO_NR52, gb->apu.global_enable ? 0x80 : 0)) return false;
+
+    /* Wave RAM is preserved even when the APU is disabled. */
+    for (unsigned i = GB_IO_WAV_START; i <= GB_IO_WAV_END; i++) {
+        if (!vgm_write_register(gb, i, gb->io_registers[i])) return false;
+    }
+
+    if (!gb->apu.global_enable) return true;
+
+    static const uint8_t registers[] = {
+        GB_IO_NR50, GB_IO_NR51,
+        GB_IO_NR10, GB_IO_NR11, GB_IO_NR12, GB_IO_NR13,
+        GB_IO_NR21, GB_IO_NR22, GB_IO_NR23,
+        GB_IO_NR30, GB_IO_NR31, GB_IO_NR32, GB_IO_NR33,
+        GB_IO_NR41, GB_IO_NR42, GB_IO_NR43,
+    };
+
+    for (unsigned i = 0; i < sizeof(registers) / sizeof(registers[0]); i++) {
+        if (!vgm_write_register(gb, registers[i], gb->io_registers[registers[i]])) return false;
+    }
+
+    if (!vgm_write_register(gb, GB_IO_NR14,
+                            vgm_get_trigger_register(gb, GB_IO_NR14, GB_SQUARE_1))) return false;
+    if (!vgm_write_register(gb, GB_IO_NR24,
+                            vgm_get_trigger_register(gb, GB_IO_NR24, GB_SQUARE_2))) return false;
+    if (!vgm_write_register(gb, GB_IO_NR34,
+                            vgm_get_trigger_register(gb, GB_IO_NR34, GB_WAVE))) return false;
+    if (!vgm_write_register(gb, GB_IO_NR44,
+                            vgm_get_trigger_register(gb, GB_IO_NR44, GB_NOISE))) return false;
+
+    return true;
+}
+
+static void noinline vgm_advance(GB_gameboy_t *gb, uint8_t cycles)
+{
+    uint64_t clock_rate = (uint64_t)gb->apu_output.vgm_clock_rate * 2;
+    if (!clock_rate) return;
+    uint64_t sample_fraction = gb->apu_output.vgm_sample_fraction + (uint64_t)cycles * VGM_SAMPLE_RATE;
+    uint32_t samples = sample_fraction / clock_rate;
+    gb->apu_output.vgm_sample_fraction = sample_fraction % clock_rate;
+    gb->apu_output.vgm_pending_samples += samples;
+    gb->apu_output.vgm_total_samples += samples;
+}
+
+void GB_apu_vgm_advance(GB_gameboy_t *gb, uint8_t cycles)
+{
+    if (likely(!gb->apu_output.output_file)) return;
+    if (likely(gb->apu_output.output_format != GB_AUDIO_FORMAT_VGM)) return;
+    vgm_advance(gb, cycles);
+}
+
+void GB_apu_vgm_write(GB_gameboy_t *gb, uint8_t reg, uint8_t value)
+{
+    if (unlikely(gb->apu_output.output_file && gb->apu_output.output_format == GB_AUDIO_FORMAT_VGM)) {
+        vgm_write_register(gb, reg, value);
+    }
+}
+
 
 int GB_start_audio_recording(GB_gameboy_t *gb, const char *path, GB_audio_format_t format)
 {
-    if (gb->apu_output.sample_rate == 0) {
+    if (format != GB_AUDIO_FORMAT_VGM && gb->apu_output.sample_rate == 0) {
         return EINVAL;
     }
     
@@ -1894,6 +2408,30 @@ int GB_start_audio_recording(GB_gameboy_t *gb, const char *path, GB_audio_format
     switch (format) {
         case GB_AUDIO_FORMAT_RAW:
             return 0;
+        case GB_AUDIO_FORMAT_VGM: {
+            gb->apu_output.vgm_pending_samples = 0;
+            gb->apu_output.vgm_total_samples = 0;
+            gb->apu_output.vgm_sample_fraction = 0;
+            gb->apu_output.vgm_clock_rate = GB_get_clock_rate(gb) ?: CPU_FREQUENCY;
+            uint8_t header[VGM_HEADER_SIZE];
+            vgm_get_header(gb, header, 0);
+            if (fwrite(header, sizeof(header), 1, gb->apu_output.output_file) != 1) {
+                int ret = errno ?: EIO;
+                fclose(gb->apu_output.output_file);
+                gb->apu_output.output_file = NULL;
+                return ret;
+            }
+            if (!vgm_write_apu_snapshot(gb)) {
+                int ret = gb->apu_output.output_error ?: EIO;
+                if (gb->apu_output.output_file) {
+                    fclose(gb->apu_output.output_file);
+                    gb->apu_output.output_file = NULL;
+                }
+                gb->apu_output.output_error = 0;
+                return ret;
+            }
+            return 0;
+        }
         case GB_AUDIO_FORMAT_AIFF: {
             aiff_header_t header = {0,};
             if (fwrite(&header, sizeof(header), 1, gb->apu_output.output_file) != 1) {
@@ -1931,6 +2469,23 @@ int GB_stop_audio_recording(GB_gameboy_t *gb)
     switch (gb->apu_output.output_format) {
         case GB_AUDIO_FORMAT_RAW:
             break;
+        case GB_AUDIO_FORMAT_VGM: {
+            if (!vgm_flush_wait(gb)) break;
+            uint8_t end_command = 0x66;
+            if (!vgm_write_data(gb, &end_command, sizeof(end_command))) break;
+            long file_size = ftell(gb->apu_output.output_file);
+            if (file_size < 0) {
+                gb->apu_output.output_error = errno ?: EIO;
+                break;
+            }
+            uint8_t header[VGM_HEADER_SIZE];
+            vgm_get_header(gb, header, file_size - 4);
+            if (fseek(gb->apu_output.output_file, 0, SEEK_SET) != 0 ||
+                fwrite(header, sizeof(header), 1, gb->apu_output.output_file) != 1) {
+                gb->apu_output.output_error = errno ?: EIO;
+            }
+            break;
+        }
         case GB_AUDIO_FORMAT_AIFF: {
             size_t file_size = ftell(gb->apu_output.output_file);
             size_t frames = (file_size - sizeof(aiff_header_t)) / sizeof(GB_sample_t);
@@ -2003,8 +2558,12 @@ int GB_stop_audio_recording(GB_gameboy_t *gb)
             break;
         }
     }
-    fclose(gb->apu_output.output_file);
-    gb->apu_output.output_file = NULL;
+    if (gb->apu_output.output_file) {
+        if (fclose(gb->apu_output.output_file) != 0 && !gb->apu_output.output_error) {
+            gb->apu_output.output_error = errno ?: EIO;
+        }
+        gb->apu_output.output_file = NULL;
+    }
     
     int ret  = gb->apu_output.output_error;
     gb->apu_output.output_error = 0;

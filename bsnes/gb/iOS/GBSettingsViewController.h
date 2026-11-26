@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 #import <Core/gb.h>
-#import "GCExtendedGamepad+AllElements.h"
+#import "GCControllerGetElements.h"
 #import "GBTheme.h"
 
 typedef enum {
@@ -17,10 +17,19 @@ typedef enum {
     GBUnderclock,
     GBRapidA,
     GBRapidB,
-    // GBHotkey1, // Todo
-    // GBHotkey2, // Todo
+    GBSaveState1,
+    GBLoadState1,
+    GBOpenMenu,
+    GBReset,
     GBUnusedButton = 0xFF,
 } GBButton;
+
+typedef enum {
+    GBControllerFocusOff,
+    GBControllerFocusOn,
+    GBControllerFocusDoNotCenter,
+    GBControllerFocusForcedViaSplitView,
+} GBControllerFocus;
 
 @interface GBSettingsViewController : UITableViewController
 + (UIViewController *)settingsViewControllerWithLeftButton:(UIBarButtonItem *)button;

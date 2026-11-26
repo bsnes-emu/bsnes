@@ -1,7 +1,6 @@
 #import <AppKit/AppKit.h>
 #include "open_dialog.h"
 
-
 char *do_open_rom_dialog(void)
 {
     @autoreleasepool {
@@ -53,7 +52,7 @@ char *do_save_recording_dialog(unsigned frequency)
         NSWindow *key = [NSApp keyWindow];
         NSSavePanel *dialog = [NSSavePanel savePanel];
         dialog.title = @"Audio recording save location";
-        dialog.allowedFileTypes = @[@"aiff", @"aif", @"aifc", @"wav", @"raw", @"pcm"];
+        dialog.allowedFileTypes = @[@"aiff", @"aif", @"aifc", @"wav", @"vgm", @"raw", @"pcm"];
         if ([dialog runModal] != NSModalResponseOK) return nil;
         [key makeKeyAndOrderFront:nil];
         NSString *ret = [[dialog URL] path];

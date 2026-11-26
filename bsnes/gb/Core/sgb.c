@@ -157,7 +157,7 @@ static void command_ready(GB_gameboy_t *gb)
             checksum += gb->sgb->command[i];
         }
         if (checksum != gb->sgb->command[1]) {
-            GB_log(gb, "Failed checksum for SGB header command, disabling SGB features\n");
+            GB_attributed_log(gb, GB_LOG_WARNING, "Failed checksum for SGB header command, disabling SGB features\n");
             gb->sgb->disable_commands = true;
             return;
         }
@@ -438,66 +438,54 @@ void GB_sgb_write(GB_gameboy_t *gb, uint8_t value)
     if ((gb->sgb->command[0] & 0xF1) == 0xF1) {
         command_size = SGB_PACKET_SIZE * 8;
     }
+    uint8_t old = (gb->io_registers[GB_IO_JOYP] >> 4) & 3;
     
-    if ((value & 0x20) != 0 && (gb->io_registers[GB_IO_JOYP] & 0x20) == 0) {
+    if ((value & 0x20) != 0 && (old & 2) == 0) {
         if ((gb->sgb->player_count & 1) == 0) {
             gb->sgb->current_player++;
             gb->sgb->current_player &= (gb->sgb->player_count - 1);
         }
     }
-    
     switch ((value >> 4) & 3) {
         case 3:
-            gb->sgb->ready_for_pulse = true;
+            if (old == 0) {
+                gb->sgb->ready_for_write = true;
+                break;
+            }
+            if (old == 1 || old == 2) {
+                if (!gb->sgb->ready_for_write) break;
+                if (gb->sgb->ready_for_stop) {
+                    if (gb->sgb->command_write_index == command_size) {
+                        command_ready(gb);
+                        gb->sgb->command_write_index = 0;
+                        memset(gb->sgb->command, 0, sizeof(gb->sgb->command));
+                    }
+                    gb->sgb->ready_for_write = false;
+                    gb->sgb->ready_for_stop = false;
+                }
+                else {
+                    if (gb->sgb->command_write_index < sizeof(gb->sgb->command) * 8) {
+                        if (old == 1) {
+                            gb->sgb->command[gb->sgb->command_write_index / 8] |= 1 << (gb->sgb->command_write_index & 7);
+                        }
+                        gb->sgb->command_write_index++;
+                        if (((gb->sgb->command_write_index) & (SGB_PACKET_SIZE * 8 - 1)) == 0) {
+                            gb->sgb->ready_for_stop = true;
+                        }
+                    }
+                }
+                break;
+
+            }
             break;
             
         case 2: // Zero
-            if (!gb->sgb->ready_for_pulse || !gb->sgb->ready_for_write) return;
-            if (gb->sgb->ready_for_stop) {
-                if (gb->sgb->command_write_index == command_size) {
-                    command_ready(gb);
-                    gb->sgb->command_write_index = 0;
-                    memset(gb->sgb->command, 0, sizeof(gb->sgb->command));
-                }
-                gb->sgb->ready_for_pulse = false;
-                gb->sgb->ready_for_write = false;
-                gb->sgb->ready_for_stop = false;
-            }
-            else {
-                if (gb->sgb->command_write_index < sizeof(gb->sgb->command) * 8) {
-                    gb->sgb->command_write_index++;
-                    gb->sgb->ready_for_pulse = false;
-                    if (((gb->sgb->command_write_index) & (SGB_PACKET_SIZE * 8 - 1)) == 0) {
-                        gb->sgb->ready_for_stop = true;
-                    }
-                }
-            }
-            break;
         case 1: // One
-            if (!gb->sgb->ready_for_pulse || !gb->sgb->ready_for_write) return;
-            if (gb->sgb->ready_for_stop) {
-                GB_log(gb, "Corrupt SGB command.\n");
-                gb->sgb->ready_for_pulse = false;
-                gb->sgb->ready_for_write = false;
-                gb->sgb->command_write_index = 0;
-                memset(gb->sgb->command, 0, sizeof(gb->sgb->command));
-            }
-            else {
-                if (gb->sgb->command_write_index < sizeof(gb->sgb->command) * 8) {
-                    gb->sgb->command[gb->sgb->command_write_index / 8] |= 1 << (gb->sgb->command_write_index & 7);
-                    gb->sgb->command_write_index++;
-                    gb->sgb->ready_for_pulse = false;
-                    if (((gb->sgb->command_write_index) & (SGB_PACKET_SIZE * 8 - 1)) == 0) {
-                        gb->sgb->ready_for_stop = true;
-                    }
-                }
-            }
+            // Only committed after a 3 write
             break;
         
         case 0:
-            if (!gb->sgb->ready_for_pulse) return;
-            gb->sgb->ready_for_write = true;
-            gb->sgb->ready_for_pulse = false;
+            gb->sgb->ready_for_write = false;
             if (((gb->sgb->command_write_index) & (SGB_PACKET_SIZE * 8 - 1)) != 0 ||
                 gb->sgb->command_write_index == 0 ||
                 gb->sgb->ready_for_stop) {
@@ -593,7 +581,7 @@ static void render_boot_animation (GB_gameboy_t *gb)
 }
 
 static void render_jingle(GB_gameboy_t *gb, size_t count);
-void GB_sgb_render(GB_gameboy_t *gb)
+void GB_sgb_render(GB_gameboy_t *gb, bool incomplete)
 {
     if (gb->apu_output.sample_rate) {
         render_jingle(gb, gb->apu_output.sample_rate / GB_get_usual_frame_rate(gb));
@@ -670,7 +658,7 @@ void GB_sgb_render(GB_gameboy_t *gb)
         colors[i] = convert_rgb15(gb, LE16(gb->sgb->effective_palettes[i]));
     }
     
-    if (gb->sgb->mask_mode != MASK_FREEZE) {
+    if (gb->sgb->mask_mode != MASK_FREEZE && !incomplete) {
         memcpy(gb->sgb->effective_screen_buffer,
                gb->sgb->screen_buffer,
                sizeof(gb->sgb->effective_screen_buffer));
