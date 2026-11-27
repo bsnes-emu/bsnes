@@ -40,8 +40,6 @@ verbose: hiro.verbose ruby.verbose nall.verbose all;
 
 install: all
 ifeq ($(platform),windows)
-else ifeq ($(shell id -un),root)
-	$(error "make install should not be run as root")
 else ifeq ($(platform),macos)
 	mkdir -p ~/Library/Application\ Support/$(name)/
 	mkdir -p ~/Library/Application\ Support/$(name)/Database/
@@ -49,32 +47,29 @@ else ifeq ($(platform),macos)
 	mkdir -p ~/Library/Application\ Support/$(name)/Shaders/
 	cp -R out/$(name).app /Applications/$(name).app
 else ifneq ($(filter $(platform),linux bsd),)
-	mkdir -p $(prefix)/bin/
-	mkdir -p $(prefix)/share/applications/
-	mkdir -p $(prefix)/share/icons/hicolor/256x256/apps/
-	mkdir -p $(prefix)/share/icons/hicolor/scalable/apps/
-	mkdir -p $(prefix)/share/$(name)/
-	mkdir -p $(prefix)/share/$(name)/Database/
-	mkdir -p $(prefix)/share/$(name)/Firmware/
-	mkdir -p $(prefix)/share/$(name)/Shaders/
-	cp out/$(name) $(prefix)/bin/$(name)
-	cp $(ui)/resource/$(name).desktop $(prefix)/share/applications/$(name).desktop
-	cp $(ui)/resource/$(name).png $(prefix)/share/icons/hicolor/256x256/apps/$(name).png
-	cp $(ui)/resource/$(name).svg $(prefix)/share/icons/hicolor/scalable/apps/$(name).svg
-	cp Database/* $(prefix)/share/$(name)/Database/
-	cp -r ../shaders/* $(prefix)/share/$(name)/Shaders/
+	mkdir -p $(DESTDIR)$(bindir)
+	mkdir -p $(DESTDIR)$(datarootdir)/applications
+	mkdir -p $(DESTDIR)$(datarootdir)/icons/hicolor/256x256/apps
+	mkdir -p $(DESTDIR)$(datarootdir)/icons/hicolor/scalable/apps
+	mkdir -p $(DESTDIR)$(datadir)/$(name)/Database
+	mkdir -p $(DESTDIR)$(datadir)/$(name)/Firmware
+	mkdir -p $(DESTDIR)$(datadir)/$(name)/Shaders
+	cp out/$(name) $(DESTDIR)$(bindir)/$(name)
+	cp $(ui)/resource/$(name).desktop $(DESTDIR)$(datarootdir)/applications/$(name).desktop
+	cp $(ui)/resource/$(name).png $(DESTDIR)$(datarootdir)/icons/hicolor/256x256/apps/$(name).png
+	cp $(ui)/resource/$(name).svg $(DESTDIR)$(datarootdir)/icons/hicolor/scalable/apps/$(name).svg
+	cp Database/* $(DESTDIR)$(datadir)/$(name)/Database/
+	cp -r ../shaders/* $(DESTDIR)$(datadir)/$(name)/Shaders/
 endif
 
 uninstall:
 ifeq ($(platform),windows)
-else ifeq ($(shell id -un),root)
-	$(error "make uninstall should not be run as root")
 else ifeq ($(platform),macos)
 	rm -rf /Applications/$(name).app
 else ifneq ($(filter $(platform),linux bsd),)
-	rm -f $(prefix)/bin/$(name)
-	rm -f $(prefix)/share/applications/$(name).desktop
-	rm -f $(prefix)/share/icons/hicolor/256x256/apps/$(name).png
-	rm -f $(prefix)/share/icons/hicolor/scalable/apps/$(name).svg
-	rm -rf $(prefix)/share/$(name)
+	rm -f $(DESTDIR)$(bindir)/$(name)
+	rm -f $(DESTDIR)$(datarootdir)/applications/$(name).desktop
+	rm -f $(DESTDIR)$(datarootdir)/icons/hicolor/256x256/apps/$(name).png
+	rm -f $(DESTDIR)$(datarootdir)/icons/hicolor/scalable/apps/$(name).svg
+	rm -rf $(DESTDIR)$(datadir)/$(name)
 endif
