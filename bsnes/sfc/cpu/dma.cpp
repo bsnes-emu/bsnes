@@ -17,7 +17,9 @@ auto CPU::dmaRun() -> void {
   counter.dma += 8;
   step<8,0>();
   dmaEdge();
+  status.dmaTransferring = true;
   for(auto& channel : channels) channel.dmaRun();
+  status.dmaTransferring = false;
   status.irqLock = true;
 }
 
