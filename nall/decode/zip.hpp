@@ -25,6 +25,7 @@ struct ZIP {
   auto open(const string& filename) -> bool {
     close();
     if(fm.open(filename, file::mode::read) == false) return false;
+    if(fm.size() > ~uint{0}) { fm.close(); return false; }  //ZIP64 is unsupported
     if(open(fm.data(), fm.size()) == false) {
       fm.close();
       return false;
@@ -40,20 +41,31 @@ struct ZIP {
 
     file.reset();
 
-    const uint8_t* footer = data + size - 22;
+    uint footerOffset = size - 22;
     while(true) {
-      if(footer <= data + 22) return false;
+      const uint8_t* footer = data + footerOffset;
       if(read(footer, 4) == 0x06054b50) {
         uint commentlength = read(footer + 20, 2);
-        if(footer + 22 + commentlength == data + size) break;
+        if(commentlength == size - (footerOffset + 22)) break;
       }
-      footer--;
+      if(footerOffset == 0) return false;
+      footerOffset--;
     }
-    const uint8_t* directory = data + read(footer + 16, 4);
+    const uint8_t* footer = data + footerOffset;
+    if(read(footer + 4, 2) != 0 || read(footer + 6, 2) != 0) return false;  //multi-disk archives
+    uint entries = read(footer + 10, 2);
+    if(read(footer + 8, 2) != entries) return false;
+    uint directorySize = read(footer + 12, 4);
+    uint directoryOffset = read(footer + 16, 4);
+    if(directoryOffset > footerOffset || directorySize > footerOffset - directoryOffset) return false;
+    uint directoryStart = directoryOffset;
+    uint directoryEnd = directoryOffset + directorySize;
 
-    while(true) {
+    for(uint entry = 0; entry < entries; entry++) {
+      if(directoryEnd - directoryOffset < 46) return false;
+      const uint8_t* directory = data + directoryOffset;
       uint signature = read(directory + 0, 4);
-      if(signature != 0x02014b50) break;
+      if(signature != 0x02014b50) return false;
 
       File file;
       file.cmode = read(directory + 10, 2);
@@ -76,6 +88,20 @@ struct ZIP {
       uint namelength = read(directory + 28, 2);
       uint extralength = read(directory + 30, 2);
       uint commentlength = read(directory + 32, 2);
+      uint entrySize = 46 + namelength + extralength + commentlength;
+      if(entrySize > directoryEnd - directoryOffset) return false;
+
+      uint offset = read(directory + 42, 4);
+      if(offset > directoryStart || directoryStart - offset < 30) return false;
+      const uint8_t* local = data + offset;
+      if(read(local, 4) != 0x04034b50) return false;
+      uint offsetNL = read(local + 26, 2);
+      uint offsetEL = read(local + 28, 2);
+      uint headerSize = 30 + offsetNL + offsetEL;
+      if(headerSize > directoryStart - offset) return false;
+      uint dataOffset = offset + headerSize;
+      if(file.csize > directoryStart - dataOffset) return false;
+      if(file.cmode == 0 && file.size != file.csize) return false;
 
       char* filename = new char[namelength + 1];
       memcpy(filename, directory + 46, namelength);
@@ -83,12 +109,9 @@ struct ZIP {
       file.name = filename;
       delete[] filename;
 
-      uint offset = read(directory + 42, 4);
-      uint offsetNL = read(data + offset + 26, 2);
-      uint offsetEL = read(data + offset + 28, 2);
-      file.data = data + offset + 30 + offsetNL + offsetEL;
+      file.data = data + dataOffset;
 
-      directory += 46 + namelength + extralength + commentlength;
+      directoryOffset += entrySize;
 
       this->file.append(file);
     }
@@ -125,7 +148,7 @@ protected:
 
   auto read(const uint8_t* data, uint size) -> uint {
     uint result = 0, shift = 0;
-    while(size--) { result |= *data++ << shift; shift += 8; }
+    while(size--) { result |= (uint)*data++ << shift; shift += 8; }
     return result;
   }
 

@@ -23,6 +23,9 @@ auto System::serialize(bool synchronize) -> serializer {
 }
 
 auto System::unserialize(serializer& s) -> bool {
+  //Read the fixed header only when the input contains it.
+  if(s.capacity() < 2 * sizeof(uint) + 16 + 512 + 2) return false;
+
   uint signature = 0;
   uint serializeSize = 0;
   char version[16] = {};
@@ -39,6 +42,7 @@ auto System::unserialize(serializer& s) -> bool {
 
   if(signature != 0x31545342) return false;
   if(serializeSize != information.serializeSize[synchronize]) return false;
+  if(s.capacity() != serializeSize) return false;
   if(string{version} != Emulator::SerializerVersion) return false;
   if(fastPPU != hacks.fastPPU) return false;
 
