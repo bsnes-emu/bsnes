@@ -168,17 +168,24 @@ auto CPU::dmaEdge() -> void {
   //.. CPU sync
 
   if(status.dmaActive) {
-    if(status.hdmaPending) {
+    if(hdmaRequested()) {
       status.hdmaPending = false;
       if(hdmaEnable()) {
+        //sync to the DMA clock, also when pausing a DMA already in progress
         if(!dmaEnable()) {
           step(counter.dma = 8 - dmaCounter());
+        } else {
+          step(8 - dmaCounter());
         }
         status.hdmaMode == 0 ? hdmaSetup() : hdmaRun();
         if(!dmaEnable()) {
           step(status.clockCount - counter.dma % status.clockCount);
           status.dmaActive = false;
         }
+      } else if(!dmaEnable()) {
+        //HDMA was disabled after the request was accepted: nothing runs, so the
+        //next request must wait a full CPU cycle again
+        status.dmaActive = false;
       }
     }
 
@@ -194,10 +201,19 @@ auto CPU::dmaEdge() -> void {
   }
 
   if(!status.dmaActive) {
-    if(status.dmaPending || status.hdmaPending) {
+    if(status.dmaPending || hdmaRequested()) {
       status.dmaActive = true;
     }
   }
+}
+
+//an HDMA request raised on the very clock a bus cycle begins is not seen until
+//the next cycle; a DMA already transferring only yields to it at the second
+//slot boundary after the slot in which it was raised
+auto CPU::hdmaRequested() -> bool {
+  if(!status.hdmaPending) return false;
+  uint age = hcounter() - (status.hdmaMode == 0 ? status.hdmaSetupPosition : status.hdmaPosition);
+  return status.dmaTransferring ? age >= 16 : age != 0;
 }
 
 //called every 128 clocks from inside the CPU::stepOnce() function
