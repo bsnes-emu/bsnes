@@ -41,6 +41,15 @@ struct Window {
 
   struct {
     uint x;
+
+    //each window opens when the dot counter reaches its left edge and stays
+    //closed for the rest of the line once it has passed its right edge
+    //cleared at the start of every scanline, which is where the PPU thread
+    //synchronizes for save states, so not serialized
+    bool oneActive;
+    bool oneStopped;
+    bool twoActive;
+    bool twoStopped;
   };
 
   friend class PPU;

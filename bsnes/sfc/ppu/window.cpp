@@ -1,10 +1,20 @@
 auto PPU::Window::scanline() -> void {
   x = 0;
+  oneActive = oneStopped = false;
+  twoActive = twoStopped = false;
 }
 
 auto PPU::Window::run() -> void {
-  bool one = (x >= io.oneLeft && x <= io.oneRight);
-  bool two = (x >= io.twoLeft && x <= io.twoRight);
+  //the edges are matched against the dot counter, not compared with it, so
+  //moving an edge behind the dot counter can neither reopen a window that has
+  //closed nor close one that is open
+  if(x == io.oneLeft) oneActive = true;
+  if(x == io.twoLeft) twoActive = true;
+  bool one = oneActive && !oneStopped;
+  bool two = twoActive && !twoStopped;
+
+  if(x == io.oneRight) oneStopped = true;
+  if(x == io.twoRight) twoStopped = true;
   x++;
 
   if(test(io.bg1.oneEnable, one ^ io.bg1.oneInvert, io.bg1.twoEnable, two ^ io.bg1.twoInvert, io.bg1.mask)) {
@@ -104,4 +114,5 @@ auto PPU::Window::power() -> void {
   output.below.colorEnable = 0;
 
   x = 0;
+  scanline();
 }
